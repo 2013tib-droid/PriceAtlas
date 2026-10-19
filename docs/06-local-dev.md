@@ -200,12 +200,12 @@ Test L1 `60_public_share.sql` dan `70_capture_pipeline.sql` membuka sesi kedua l
 
 ## 3. Mode B — Supabase CLI
 
-> Belum dijalankan di lingkungan pembuatan Tahap 4b (tanpa Docker). Langkah di bawah mengikuti dokumentasi Supabase CLI; perbedaan yang ditemukan saat dijalankan dicatat sebagai pertanyaan baru (lihat Q-42 di `docs/05-backend-design.md`).
+> Diverifikasi otomatis oleh job CI `supabase-e2e` (D-78, Tahap 5b M0): `supabase start`, test L4, `supabase gen types` + cek drift, dan e2e Playwright. Lingkungan cloud pembuatan M0 tidak bisa menarik image Docker (CDN registry diblokir), jadi langkah ini belum pernah dijalankan di sana; temuan dari CI dicatat sebagai F-25 dst. di `docs/07-frontend-design.md` §1.4.
 
 ### 3.1 Menyalakan Supabase lokal
 
 ```bash
-supabase start          # menerapkan supabase/migrations/* lalu supabase/seed.sql
+supabase start          # PostgreSQL 17 (D-78); menerapkan supabase/migrations/* lalu supabase/seed.sql
 supabase status -o env  # API_URL, ANON_KEY, SERVICE_ROLE_KEY, DB_URL
 ```
 
@@ -213,7 +213,8 @@ Perbedaan dengan mode A:
 - Stub **tidak** dipakai: `auth`, `storage`, role, dan default privileges asli dari Supabase.
 - `pg_cron` tersedia, jadi migration 0900 membuat jadwal. Worker **tidak** perlu `--dev-scheduler`.
 - Bucket `captures` didefinisikan di `supabase/config.toml` dan di migration 0150 (idempoten).
-- Login: email OTP lewat Inbucket (`http://localhost:54324`), Google lewat `GOOGLE_OAUTH_CLIENT_ID/SECRET` di env.
+- Login: email OTP berisi **kode 6 digit saja** (template Indonesia `supabase/templates/otp.html`, F-20, D-83). Email lokal ditangkap **Mailpit** (`[local_smtp]`, F-18): UI di `http://127.0.0.1:54324`, API `GET /api/v1/messages`.
+- Google **mati** secara default (F-21). Untuk mencobanya: isi `GOOGLE_OAUTH_CLIENT_ID/SECRET`, lalu `SUPABASE_AUTH_EXTERNAL_GOOGLE_ENABLED=true supabase start`. Jangan memakai `env(...)` untuk nilai boolean di `config.toml`: nilai kosong membuat CLI gagal membaca config.
 
 ### 3.2 `.env` untuk mode B
 
@@ -222,9 +223,12 @@ NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<ANON_KEY>
 SUPABASE_SERVICE_ROLE_KEY=<SERVICE_ROLE_KEY>      # server-only
 DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres   # koneksi sesi (LISTEN)
+WORKER_DB_ROLE=service_role                        # F-22: hak worker sama dengan mode A dan produksi
 STORAGE_BACKEND=supabase
 EXTRACTOR=stub
 ```
+
+`WORKER_DB_ROLE=service_role` membuat worker terhubung sebagai `postgres` lalu berganti role lewat parameter startup `-c role=service_role` (`apps/worker/src/db.ts`). Tanpa itu worker berjalan sebagai pemilik objek dan bug hak akses worker bisa lolos (F-22). Test L4 memeriksa bahwa `postgres` bisa memakai `service_role` di database Supabase. Apakah pooler produksi (Supavisor) meneruskan parameter startup itu diperiksa di Tahap 7; jika tidak, ganti ke `SET ROLE` setelah connect.
 
 ### 3.3 Alur manual
 
