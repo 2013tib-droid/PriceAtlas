@@ -96,8 +96,8 @@ Karena tidak bisa dijalankan, setiap butir L4 diperiksa dari kode dan dokumentas
 | F-20 template OTP | `supabase/templates/otp.html` untuk `magic_link` dan `confirmation`; L4 + e2e memeriksa isi email lewat API Mailpit. |
 | F-21 Google tanpa env | Diverifikasi dengan CLI 2.121: `enabled = true` + env kosong **tidak** membuat CLI gagal (provider rusak diam-diam); `enabled = "env(X)"` gagal parse jika env kosong (F-25). Jadi `enabled = false` + override env. |
 | F-22 role worker | `.env` mode B mengisi `WORKER_DB_ROLE=service_role`; L4 memeriksa keanggotaan role dan menjalankan worker terhadap Supabase sampai `needs_confirmation`. |
-| Storage, `PTnnn`, OTP, inventaris hak | Diotomasi di `packages/l4` (docs/06 §3.6). |
-| `db-types` (F-19) | Dibangkitkan dan dicek drift di job `supabase-e2e`. |
+| Storage, `PTnnn`, OTP, inventaris hak | Diotomasi di `packages/l4` (docs/06 §3.6). **Lulus di CI** (Supabase CLI 2.121, PostgreSQL 17): inventaris hak 6 ok dan cek lingkungan 10 ok terhadap DB Supabase asli (default privileges asli tidak menambah hak di luar whitelist); 10 test HTTP: OTP Mailpit, `PT404/409/422` → HTTP, policy Storage, worker `service_role` sampai `needs_confirmation`. Butir "belum terverifikasi" di §1.2 kini terverifikasi. |
+| `db-types` (F-19) | Dibangkitkan di CI dan di-commit (28 tabel/view + semua RPC). Hasil `gen` dinormalkan Prettier sebelum dicek drift. |
 | Serwist (Q-50/D-81) | **Spike berhasil** dengan `@serwist/turbopack` 9.5.13 di Next 16.4 (Turbopack, tanpa `--webpack`). Cadangan tidak dipakai. |
 
 | # | Temuan | Dampak | Penanganan / usulan | Ke |
