@@ -96,13 +96,15 @@ jobs:
         uses: actions/cache@v4
         with:
           path: /tmp/supabase-images.tar
-          key: supabase-images-${{ runner.os }}-${{ env.SUPABASE_CLI_VERSION }}-${{ hashFiles('supabase/config.toml') }}-${{ env.SUPABASE_EXCLUDE }}
+          # Key tidak boleh memuat koma; ganti v1 jika SUPABASE_EXCLUDE diubah.
+          key: supabase-images-v1-${{ runner.os }}-${{ env.SUPABASE_CLI_VERSION }}-${{ hashFiles('supabase/config.toml') }}
 
       - name: Muat image dari cache
         if: steps.images.outputs.cache-hit == 'true'
         run: docker load -i /tmp/supabase-images.tar
 
       - name: supabase start (PostgreSQL 17, migration + seed)
+        id: start
         run: supabase start -x "$SUPABASE_EXCLUDE"
 
       - name: Env dari supabase status
@@ -139,7 +141,7 @@ jobs:
           fi
 
       - name: Simpan image untuk cache
-        if: always() && steps.images.outputs.cache-hit != 'true'
+        if: always() && steps.start.outcome == 'success' && steps.images.outputs.cache-hit != 'true'
         run: docker save $(docker images --format '{{.Repository}}:{{.Tag}}' | grep -v '<none>') -o /tmp/supabase-images.tar
 
       - name: Build apps/web terhadap Supabase lokal
