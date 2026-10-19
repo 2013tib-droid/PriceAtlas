@@ -1,6 +1,6 @@
 # Tahap 2b — Desain Fisik Database
 
-> Status: **Draft untuk direview.**
+> Status: **Disetujui (2026-10-19).** Pertanyaan R-01 s/d R-06 diterima dengan default dan dicatat sebagai D-41 s/d D-46.
 > Dasar: `docs/02-domain-model.md` (disetujui) dan Decision Log D-01 sampai D-40 di `PROJECT.md`.
 > Skema lengkap: [`db/schema.sql`](../db/schema.sql). Smoke test: [`db/tests/`](../db/tests/).
 

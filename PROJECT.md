@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | Nama sementara | Price Intelligence (repo: PriceAtlas) |
-| Status | Tahap 2a (Domain Model) disetujui. Tahap 2b (Desain Fisik) draft, menunggu review. Lihat [`docs/03-database-design.md`](docs/03-database-design.md) |
+| Status | Tahap 2 (Database Design) selesai, siap masuk Tahap 3 (Wireframe) |
 | Terakhir diperbarui | 2026-10-19 |
 
 ---
@@ -247,6 +247,12 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 | D-38 | Override kategori | Household tidak bisa mengubah kategori produk global di MVP. |
 | D-39 | "Lebih hemat di mana" | MVP per produk dan per Product Group. Perbandingan per keranjang ditunda setelah MVP. |
 | D-40 | Brand | Entity sendiri (hybrid), bukan teks bebas di Product. |
+| D-41 | Keanggotaan member baru | Bergabung ke program member tidak menghitung ulang harga efektif observasi lama (berlaku "pada tanggal observasi", D-26). |
+| D-42 | Jumlah data di ringkasan | Hanya record yang ikut perhitungan (aktif, bukan bundle), konsisten dengan harga terbaik. |
+| D-43 | Sesi belanja | Kedaluwarsa otomatis setelah 4 jam. |
+| D-44 | Parameter tren | Rata-rata harga per satuan 30 hari terakhir vs 30 hari sebelumnya; minimal 2 data per jendela; perubahan < 2% = stabil. Dapat diubah di `app.config`. |
+| D-45 | Partisi `price_record` | Ditunda. Ditinjau ulang di ~50 juta baris atau p95 query > 50 ms; kandidat `HASH (household_id)`. |
+| D-46 | Granularitas data publik | Fakta publik menyimpan tanggal transaksi harian dan cabang. |
 
 ---
 
@@ -281,8 +287,8 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 | Tahap | Nama | Status |
 |---|---|---|
 | 1 | Requirement | ✅ Selesai |
-| 2 | Database Design | 🔄 2a Domain Model: ✅ disetujui ([docs/02-domain-model.md](docs/02-domain-model.md)) · 2b Desain Fisik: draft ([docs/03-database-design.md](docs/03-database-design.md)) |
-| 3 | Wireframe | — |
+| 2 | Database Design | ✅ Selesai ([domain model](docs/02-domain-model.md), [desain fisik](docs/03-database-design.md), [skema](db/schema.sql)) |
+| 3 | Wireframe | ⏭️ Berikutnya |
 | 4 | Backend | — |
 | 5 | Frontend | — |
 | 6 | AI Integration (termasuk uji OCR, D-16) | — |
