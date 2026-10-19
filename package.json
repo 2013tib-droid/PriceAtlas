@@ -1,0 +1,13 @@
+{
+  "name": "priceatlas",
+  "private": true,
+  "packageManager": "pnpm@10.28.0",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "test:db": "bash db/tests/run.sh",
+    "test": "pnpm -r --workspace-concurrency=1 test",
+    "typecheck": "pnpm -r typecheck",
+    "db:snapshot": "bash db/scripts/snapshot.sh",
+    "db:check-snapshot": "bash db/scripts/snapshot.sh --check"
+  }
+}
