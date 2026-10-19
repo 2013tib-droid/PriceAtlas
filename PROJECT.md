@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | Nama sementara | Price Intelligence (repo: PriceAtlas) |
-| Status | Tahap 4b (implementasi backend) draft, menunggu review |
+| Status | Tahap 5a (desain frontend) draft, menunggu review |
 | Terakhir diperbarui | 2026-10-19 |
 
 ---
@@ -279,6 +279,11 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 | D-70 | Job dan konfigurasi | Jenis job baru: `delete_household`, `share_existing_prices`, `purge_storage_paths`. Kunci config operasional §5.6 (percobaan maks 3, timeout 300 dtk, backoff 30/120/600 dtk, fuzzy 0,5, unggahan yatim 24 jam, redaksi OCR 7 hari, perpanjang sesi 2 jam). Nilai confidence per tier adalah placeholder sampai uji OCR (D-16). |
 | D-71 | Aturan pipeline | Auto-save struk juga mensyaratkan confidence header toko dan tanggal ≥ ambang. Observasi tanpa harga yang berlaku ditolak (`NO_APPLICABLE_PRICE`); seri diurutkan normal → promo → member. Tambah `capture.error_code` dan `capture.captured_at`. Konfirmasi struk wajib memutuskan semua baris, dengan opsi "lewati". Duplikat hash tetap dicurigai di konfirmasi walaupun user memilih "Tetap unggah". |
 | D-72 | Lain-lain Tahap 4 | Merge global oleh sistem tetap satu transaksi di MVP. Satu sesi belanja aktif per household, ditegakkan oleh RPC. `db/schema.sql` menjadi snapshot hasil generate dari migration, dicek CI. |
+| D-73 | Hak akses tambahan 4b | `receipt` tetap bisa di-`INSERT` oleh `authenticated` (tanpa `pii`) di MVP; klien tidak punya alur yang menyisipkan struk. Hapus akun dari Route Handler memanggil `public.begin_account_deletion` yang hanya bisa dijalankan `service_role`. Kode error baru `FORBIDDEN` (403) dan `INVALID_INPUT` (400). Penyimpangan lain di `docs/05-backend-design.md` §10.3 diterima. |
+| D-74 | Aturan struk 4b | Void ikut dihitung pada baris timbang. `member_hint` dideteksi dari teks baris diskon yang memuat "member" (kolom baru ditinjau di uji OCR, Tahap 6). Duplikat hash ke capture tanpa struk hanya mencegah auto-save, tidak tampil di banner S-10. |
+| D-75 | Aturan pipeline 4b | `retry_capture` oleh user memulai putaran baru 3 percobaan. Tier 4 (AI) hanya untuk item tanpa kandidat dari tier 1–3, sampai uji OCR (D-16). |
+| D-76 | Hapus akun | Teks konfirmasi `"HAPUS AKUN"` dan login ulang = `last_sign_in_at` ≤ 15 menit. Teks UI final di Tahap 5. |
+| D-77 | Tooling dan awal Tahap 5 | `db/schema.sql` = snapshot `public` + `app` + data referensi. `packages/db-types` dibangkitkan di awal Tahap 5. Mode B (Supabase CLI) dan test L4 manual dijalankan di awal Tahap 5; temuan dicatat sebagai F-xx baru. |
 
 ---
 
@@ -315,8 +320,8 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 | 1 | Requirement | ✅ Selesai |
 | 2 | Database Design | ✅ Selesai ([domain model](docs/02-domain-model.md), [desain fisik](docs/03-database-design.md), [skema](db/schema.sql)) |
 | 3 | Wireframe | ✅ Selesai ([spesifikasi](docs/04-wireframe.md), [prototipe](docs/wireframes/index.html)) |
-| 4 | Backend | 🔄 4b draft ([desain backend](docs/05-backend-design.md), [pertanyaan 4b](docs/05-backend-design.md#10-tahap-4b--implementasi-penyimpangan-dan-pertanyaan), [menjalankan lokal](docs/06-local-dev.md)) |
-| 5 | Frontend | — |
+| 4 | Backend | ✅ Selesai ([desain backend](docs/05-backend-design.md), [menjalankan lokal](docs/06-local-dev.md)) |
+| 5 | Frontend | 🔄 5a draft ([desain frontend](docs/07-frontend-design.md), [pertanyaan Q-43 s/d Q-64](docs/07-frontend-design.md#13-pertanyaan-untuk-didiskusikan)) |
 | 6 | AI Integration (termasuk uji OCR, D-16) | — |
 | 7 | Production | — |
 
