@@ -7,7 +7,7 @@ keputusan: [`PROJECT.md`](PROJECT.md).
 |---|---|
 | 2 Database | [`docs/02-domain-model.md`](docs/02-domain-model.md), [`docs/03-database-design.md`](docs/03-database-design.md) |
 | 3 Wireframe | [`docs/04-wireframe.md`](docs/04-wireframe.md) |
-| 4 Backend | [`docs/05-backend-design.md`](docs/05-backend-design.md) (desain + pertanyaan 4b), [`docs/06-local-dev.md`](docs/06-local-dev.md) (menjalankan lokal) |
+| 4 Backend | [`docs/05-backend-design.md`](docs/05-backend-design.md) (desain + implementasi 4b), [`docs/06-local-dev.md`](docs/06-local-dev.md) (menjalankan lokal) |
 
 ## Isi repo (Tahap 4b)
 

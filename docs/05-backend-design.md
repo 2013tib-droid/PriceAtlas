@@ -1,7 +1,7 @@
 # Tahap 4a — Desain Backend
 
 > Status: **Disetujui (2026-10-19).** Semua default Q-01 s/d Q-30 diterima dan dicatat di Decision Log `PROJECT.md` sebagai D-61 s/d D-72.
-> **Tahap 4b: draft (2026-10-19), menunggu review.** Ringkasan implementasi, hasil test, penyimpangan, dan pertanyaan Q-31 s/d Q-42 di [bagian 10](#10-tahap-4b--implementasi-penyimpangan-dan-pertanyaan).
+> **Tahap 4b: disetujui (2026-10-19).** Semua default Q-31 s/d Q-42 diterima (D-73 s/d D-77). Ringkasan implementasi, hasil test, penyimpangan, dan pertanyaan Q-31 s/d Q-42 di [bagian 10](#10-tahap-4b--implementasi-penyimpangan-dan-pertanyaan).
 > Dasar: `PROJECT.md` (D-01 s/d D-60), `docs/02-domain-model.md`, `docs/03-database-design.md`, `db/schema.sql`, `db/tests/`, `docs/04-wireframe.md`.
 > Rujukan `§` tanpa nama dokumen mengacu ke `PROJECT.md`. "Desain fisik §n" mengacu ke `docs/03-database-design.md`. "Wireframe §n" mengacu ke `docs/04-wireframe.md`.
 
@@ -1311,7 +1311,7 @@ Setiap pertanyaan punya usulan default. Jawab "setuju semua" jika semua default 
 
 ## 10. Tahap 4b — Implementasi, Penyimpangan, dan Pertanyaan
 
-> Status: **4b draft (2026-10-19), menunggu review.** Tidak mengubah keputusan D-01 s/d D-72. Cara menjalankan: `docs/06-local-dev.md`.
+> Status: **Disetujui (2026-10-19).** Tidak mengubah keputusan D-01 s/d D-72. Cara menjalankan: `docs/06-local-dev.md`.
 
 ### 10.1 Yang dibangun
 
@@ -1382,3 +1382,13 @@ Setiap pertanyaan punya usulan default. Tidak ada yang menghalangi milestone 4b;
 | Q-40 | Teks konfirmasi hapus akun `"HAPUS AKUN"` dan "login ulang" = `user.last_sign_in_at` ≤ 15 menit? | **Ya.** Teks UI final di Tahap 5 (konstanta `ACCOUNT_DELETE_CONFIRMATION`). |
 | Q-41 | Kecurigaan duplikat hash ke capture lain yang **tidak** punya struk (mis. capture gagal): hanya mencegah auto-save, tidak ikut ke banner S-10. Cukup? | **Cukup** di MVP. `duplicate_of_receipt_id` butuh struk yang dirujuk; dialog unggah (U-10) sudah memperingatkan user. |
 | Q-42 | Mode B (Supabase CLI) belum dijalankan di lingkungan 4b. Risiko yang perlu dicek saat pertama dijalankan: hak membuat policy di `storage.objects`, `ALTER DATABASE … SET timezone` di migration, dan `WORKER_DB_ROLE` untuk role `postgres` Supabase. Jalankan sebagai bagian review 4b atau awal Tahap 5? | **Awal Tahap 5** (saat Supabase lokal dipakai untuk frontend), bersama test L4 manual (§8.1). Temuan dicatat sebagai F-xx baru. |
+
+**Hasil review 4b (2026-10-19):** semua default dan penyimpangan §10.3 disetujui.
+
+| Pertanyaan | Keputusan |
+|---|---|
+| Q-31, Q-32, Q-37 | D-73 |
+| Q-33, Q-34, Q-41 | D-74 |
+| Q-35, Q-36 | D-75 |
+| Q-40 | D-76 |
+| Q-38, Q-39, Q-42 | D-77 |
