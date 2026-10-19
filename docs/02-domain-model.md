@@ -1,7 +1,6 @@
 # Tahap 2a — Domain Model
 
-> Status: **Draft untuk didiskusikan.** Belum ada keputusan yang final.
-> Usulan keputusan diberi kode **U-xx**. Setelah disetujui, usulan dipindahkan ke Decision Log di `PROJECT.md` sebagai D-22 dan seterusnya.
+> Status: **Disetujui (2026-10-19).** Semua usulan U-xx dan default Q-01 s/d Q-16 diterima dan sudah dicatat di Decision Log `PROJECT.md` sebagai D-22 s/d D-40.
 > Rujukan `§` dan `D-xx` mengacu ke `PROJECT.md`.
 
 Dokumen ini hanya membahas desain domain. Belum ada SQL, tipe data, index, foreign key, atau ERD fisik. Semua itu masuk Tahap 2b, setelah pertanyaan di bagian 8 terjawab.
