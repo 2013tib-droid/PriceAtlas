@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | Nama sementara | Price Intelligence (repo: PriceAtlas) |
-| Status | Tahap 1 (Requirement) selesai, siap masuk Tahap 2 (Database Design) |
+| Status | Tahap 2 (Database Design) selesai, siap masuk Tahap 3 (Wireframe) |
 | Terakhir diperbarui | 2026-10-19 |
 
 ---
@@ -228,6 +228,31 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 | D-19 | Struk | Entitas header + item. Label harga dan screenshot = observasi tanpa struk. |
 | D-20 | Struk duplikat | Deteksi lewat hash + sidik jari, user diberi peringatan dan memilih. |
 | D-21 | Merge produk & koreksi | Produk yang di-merge menjadi rujukan ke produk pengganti; audit log; ringkasan dihitung ulang. *(Default yang diusulkan, belum ada keberatan.)* |
+| D-22 | Histori harga | Purchase dan Observation disatukan menjadi satu entity **Price Record** dengan jenis sumber (`receipt` / `price_label` / `marketplace`). |
+| D-23 | Baris struk | **Receipt Line** (baris apa adanya, termasuk diskon/non-produk/void) terpisah dari Price Record. Price Record pembelian diturunkan dari Receipt Line, satu arah. |
+| D-24 | Kepemilikan vs visibilitas | Dipisah. Owner: System / Household / Hybrid. Visibilitas: privat / publik opt-in. |
+| D-25 | Berbagi publik | Lewat proyeksi anonim terpisah (Public Price Fact), bukan membuka baris Price Record lewat RLS. Hanya produk dan toko global. |
+| D-26 | Harga efektif observasi | Harga terendah yang berlaku untuk household pada tanggal observasi (promo jika aktif, member jika household ikut programnya). |
+| D-27 | Harga member di harga terbaik | Hanya dihitung jika household menandai keanggotaan program tersebut. Selain itu tetap tampil di histori dengan label member. |
+| D-28 | Cabang tidak diketahui | Store wajib, Branch opsional. Record tanpa cabang tetap ikut harga terbaik dengan label "cabang tidak diketahui". |
+| D-29 | Data baru dari user | Produk, Store, Branch, Brand, Category baru dari user selalu privat. Masuk katalog global hanya lewat kurasi (MVP: pemilik proyek). |
+| D-30 | Merge data global | Operasi sistem (service role), bukan operasi user. User hanya boleh merge data privat miliknya. |
+| D-31 | Ringkasan 90 hari | Disimpan di Price Summary; dihitung ulang saat data berubah dan oleh job harian untuk pergeseran jendela waktu. |
+| D-32 | Retensi gambar | Gambar disimpan 12 bulan lalu dihapus. Teks OCR mentah disimpan setelah PII disamarkan. Hapus akun = hapus gambar. |
+| D-33 | Dasar tren | Harga efektif per satuan, dengan opsi tampilan "hanya harga normal". Ambang data minimal adalah parameter konfigurasi. |
+| D-34 | Promo kuantitas vs bundle | Promo kuantitas dicatat sebagai harga promo dengan kuantitas syarat dan ikut harga terbaik. Bundle campuran diberi flag dan tidak ikut (D-08). |
+| D-35 | Promosi alias | Alias menjadi global jika 3 household berbeda memetakan teks + Store yang sama ke produk global yang sama, tanpa pemetaan tandingan. Alias household menang atas alias global untuk household itu. |
+| D-36 | Ongkir marketplace | Disimpan sebagai info, tidak mengubah harga efektif. |
+| D-37 | Split produk | Buat produk baru, lalu record dipindahkan manual oleh user. Tidak ada pemindahan otomatis. |
+| D-38 | Override kategori | Household tidak bisa mengubah kategori produk global di MVP. |
+| D-39 | "Lebih hemat di mana" | MVP per produk dan per Product Group. Perbandingan per keranjang ditunda setelah MVP. |
+| D-40 | Brand | Entity sendiri (hybrid), bukan teks bebas di Product. |
+| D-41 | Keanggotaan member baru | Bergabung ke program member tidak menghitung ulang harga efektif observasi lama (berlaku "pada tanggal observasi", D-26). |
+| D-42 | Jumlah data di ringkasan | Hanya record yang ikut perhitungan (aktif, bukan bundle), konsisten dengan harga terbaik. |
+| D-43 | Sesi belanja | Kedaluwarsa otomatis setelah 4 jam. |
+| D-44 | Parameter tren | Rata-rata harga per satuan 30 hari terakhir vs 30 hari sebelumnya; minimal 2 data per jendela; perubahan < 2% = stabil. Dapat diubah di `app.config`. |
+| D-45 | Partisi `price_record` | Ditunda. Ditinjau ulang di ~50 juta baris atau p95 query > 50 ms; kandidat `HASH (household_id)`. |
+| D-46 | Granularitas data publik | Fakta publik menyimpan tanggal transaksi harian dan cabang. |
 
 ---
 
@@ -262,8 +287,8 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 | Tahap | Nama | Status |
 |---|---|---|
 | 1 | Requirement | ✅ Selesai |
-| 2 | Database Design | ⏭️ Berikutnya |
-| 3 | Wireframe | — |
+| 2 | Database Design | ✅ Selesai ([domain model](docs/02-domain-model.md), [desain fisik](docs/03-database-design.md), [skema](db/schema.sql)) |
+| 3 | Wireframe | ⏭️ Berikutnya |
 | 4 | Backend | — |
 | 5 | Frontend | — |
 | 6 | AI Integration (termasuk uji OCR, D-16) | — |
