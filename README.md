@@ -8,15 +8,17 @@ keputusan: [`PROJECT.md`](PROJECT.md).
 | 2 Database | [`docs/02-domain-model.md`](docs/02-domain-model.md), [`docs/03-database-design.md`](docs/03-database-design.md) |
 | 3 Wireframe | [`docs/04-wireframe.md`](docs/04-wireframe.md) |
 | 4 Backend | [`docs/05-backend-design.md`](docs/05-backend-design.md) (desain + implementasi 4b), [`docs/06-local-dev.md`](docs/06-local-dev.md) (menjalankan lokal) |
-| 5 Frontend | [`docs/07-frontend-design.md`](docs/07-frontend-design.md) (desain 5a, disetujui) |
+| 5 Frontend | [`docs/07-frontend-design.md`](docs/07-frontend-design.md) (desain 5a disetujui; 5b M0 selesai, §1.4), [`docs/06-local-dev.md`](docs/06-local-dev.md) §4 (menjalankan frontend) |
 
-## Isi repo (Tahap 4b)
+## Isi repo (Tahap 5b M0)
 
 - `supabase/migrations/` — sumber kebenaran skema; `db/schema.sql` adalah snapshot hasil generate (D-72).
 - `db/tests/` — harness SQL: `smoke.sql` (43 test Tahap 2, tidak diubah) + `flows/*` per alur.
 - `apps/worker` — worker pipeline capture dan job (stub OCR/AI berbasis fixture).
-- `apps/web` — scaffold Next.js, hanya `POST /api/account/delete`.
-- `packages/contracts` (zod), `packages/ai-tools` (6 tool AI), `packages/testkit` (utilitas test).
+- `apps/web` — PWA Next.js 16: login OTP (`/masuk`), layout tab, service worker Serwist, `rpcCall`, formatter, pesan error; `POST /api/account/delete`.
+- `packages/contracts` (zod), `packages/ai-tools` (6 tool AI), `packages/testkit` (utilitas test),
+  `packages/l4` (test terhadap Supabase CLI), `packages/db-types` (hasil `supabase gen types`).
+- CI: job `test` (L1–L3, lint, unit/komponen web, build) dan `supabase-e2e` (Supabase CLI: L4, cek drift `db-types`, e2e Playwright).
 
 ## Mulai cepat (mode A: PostgreSQL 17 lokal, tanpa Supabase)
 
@@ -28,4 +30,12 @@ pnpm -r --workspace-concurrency=1 test       # test TypeScript
 db/scripts/dev-db.sh                         # database dev + user uji + katalog contoh
 ```
 
-Langkah lengkap (worker, fixture, mode B Supabase CLI): [`docs/06-local-dev.md`](docs/06-local-dev.md).
+Frontend (butuh Supabase CLI, mode B):
+
+```bash
+supabase start                               # PostgreSQL 17, Mailpit di http://127.0.0.1:54324
+# isi apps/web/.env.local dari `supabase status` (docs/06 §4.1)
+pnpm --filter @priceatlas/web dev            # http://localhost:3000/masuk
+```
+
+Langkah lengkap (worker, fixture, mode B, frontend, L4, e2e): [`docs/06-local-dev.md`](docs/06-local-dev.md).

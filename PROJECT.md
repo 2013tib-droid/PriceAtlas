@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | Nama sementara | Price Intelligence (repo: PriceAtlas) |
-| Status | Tahap 5a (desain frontend) disetujui, siap masuk Tahap 5b (M0) |
+| Status | Tahap 5b M0 selesai, menunggu review |
 | Terakhir diperbarui | 2026-10-19 |
 
 ---
@@ -327,7 +327,7 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 | 2 | Database Design | ✅ Selesai ([domain model](docs/02-domain-model.md), [desain fisik](docs/03-database-design.md), [skema](db/schema.sql)) |
 | 3 | Wireframe | ✅ Selesai ([spesifikasi](docs/04-wireframe.md), [prototipe](docs/wireframes/index.html)) |
 | 4 | Backend | ✅ Selesai ([desain backend](docs/05-backend-design.md), [menjalankan lokal](docs/06-local-dev.md)) |
-| 5 | Frontend | 🔄 5a disetujui ([desain frontend](docs/07-frontend-design.md)), 5b berikutnya (M0–M7) |
+| 5 | Frontend | 🔄 5a disetujui ([desain frontend](docs/07-frontend-design.md)); 5b M0 selesai, menunggu review (temuan F-25–F-30, pertanyaan Q-65–Q-67 di §1.4 dan §13.4); M1–M7 berikutnya |
 | 6 | AI Integration (termasuk uji OCR, D-16) | — |
 | 7 | Production | — |
 

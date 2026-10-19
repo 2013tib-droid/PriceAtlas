@@ -1,6 +1,6 @@
 # Tahap 5a — Desain Frontend
 
-> **Status: disetujui (2026-10-19).** Semua default Q-43 s/d Q-64 diterima dan dicatat sebagai D-78 s/d D-83. Kode dimulai di Tahap 5b (M0).
+> **Status: disetujui (2026-10-19).** Semua default Q-43 s/d Q-64 diterima dan dicatat sebagai D-78 s/d D-83. **Tahap 5b M0 selesai, menunggu review** (hasil dan temuan F-25 s/d F-30: §1.4; pertanyaan Q-65 s/d Q-67: §13.4).
 > Dasar: `PROJECT.md` (D-01 s/d D-77, terutama D-57–D-61 dan D-73–D-77), `docs/04-wireframe.md` + `docs/wireframes/index.html` (S-00a s/d S-20, alur 1–8, W-xx), `docs/05-backend-design.md` (R1–R21, W1–W18, §3.1, §4, §5, §7, §10), `docs/06-local-dev.md`, `packages/contracts`, `apps/web`.
 
 Dokumen ini tidak mengubah requirement, keputusan, skema, maupun RPC. Temuan baru ditulis sebagai **F-xx** (melanjutkan F-16 di `docs/05` §0.2), potensi masalah sebagai **P-xx**, dan pertanyaan sebagai **Q-43** dst. Setiap pertanyaan punya usulan default.
@@ -84,6 +84,40 @@ Karena tidak bisa dijalankan, setiap butir L4 diperiksa dari kode dan dokumentas
 | F-22 | **Worker mode B berjalan sebagai `postgres`**, bukan `service_role` (§1.2). Selain itu, belum terbukti bahwa `postgres` di Supabase bisa `SET ROLE service_role` dan bahwa Supavisor meneruskan `options=-c role=…`. | Hak yang diuji di mode A (service_role) berbeda dengan yang dipakai di mode B/produksi. Bug hak akses worker bisa lolos. | Isi `WORKER_DB_ROLE=service_role` di `.env` mode B. Jika startup parameter tidak diteruskan pooler, ganti ke `SET ROLE` setelah connect. Verifikasi di M0. | M0 |
 | F-23 | **Stub extractor memetakan fixture lewat sha256 gambar.** Frontend mengompres gambar di klien (§6), sehingga byte yang diunggah berbeda dari file fixture dan stub mengembalikan `unsupported`. | e2e unggah → konfirmasi tidak bisa memakai fixture yang ada. | Aturan "lewati kompresi" (§6.3): file JPEG ≤ 1,5 MB, sisi panjang ≤ batas, tanpa EXIF GPS diunggah apa adanya. Fixture memenuhi aturan itu. | §6.3 |
 | F-24 | **Sapuan unggahan yatim (24 jam) bisa menghapus gambar milik antrean offline yang belum selesai.** Contoh: bagian 1 dari 3 terunggah, HP mati, dibuka lagi 2 hari kemudian. `submit_capture` lalu gagal `CAPTURE_IMAGES_MISSING`. | Foto bisa "hilang" di server walaupun antrean klien masih memegangnya. | Klien menyimpan semua byte sampai `submit_capture` sukses. Saat `CAPTURE_IMAGES_MISSING`, unggah ulang semua bagian lalu ulangi submit (§5.4). Tidak perlu perubahan backend. | §5.4 |
+
+### 1.4 Tahap 5b M0: hasil dan temuan baru (F-25 dst.)
+
+**Lingkungan pembuatan M0.** `supabase start` dicoba lagi dan tetap gagal: layer image dari `production.cloudfront.docker.com` ditolak proxy (403) dan Docker Hub membalas 429. Mode B, L4, `db-types`, dan e2e login karena itu **diverifikasi di job CI `supabase-e2e`**. PostgreSQL 17 lokal untuk L1–L3 diambil dari paket npm `@embedded-postgres/linux-x64` 17.10 (server) dan `pg_dump` 17.11 dibangun dari sumber, karena `apt.postgresql.org` juga diblokir. Ini hanya soal lingkungan, bukan repo.
+
+| Butir §1.2 | Hasil M0 |
+|---|---|
+| PostgreSQL 17 (F-17) | L1 569 pengecekan, L2+L3, `snapshot.sh --check`, dan whitelist hak akses **tanpa perubahan** di 17 (lokal). CI `test` memakai `postgres:17`. |
+| F-18 Mailpit | `[local_smtp]`; CLI 2.121 tidak lagi memberi peringatan. |
+| F-20 template OTP | `supabase/templates/otp.html` untuk `magic_link` dan `confirmation`; L4 + e2e memeriksa isi email lewat API Mailpit. |
+| F-21 Google tanpa env | Diverifikasi dengan CLI 2.121: `enabled = true` + env kosong **tidak** membuat CLI gagal (provider rusak diam-diam); `enabled = "env(X)"` gagal parse jika env kosong (F-25). Jadi `enabled = false` + override env. |
+| F-22 role worker | `.env` mode B mengisi `WORKER_DB_ROLE=service_role`; L4 memeriksa keanggotaan role dan menjalankan worker terhadap Supabase sampai `needs_confirmation`. |
+| Storage, `PTnnn`, OTP, inventaris hak | Diotomasi di `packages/l4` (docs/06 §3.6). |
+| `db-types` (F-19) | Dibangkitkan dan dicek drift di job `supabase-e2e`. |
+| Serwist (Q-50/D-81) | **Spike berhasil** dengan `@serwist/turbopack` 9.5.13 di Next 16.4 (Turbopack, tanpa `--webpack`). Cadangan tidak dipakai. |
+
+| # | Temuan | Dampak | Penanganan / usulan | Ke |
+|---|---|---|---|---|
+| F-25 | `env(...)` di `config.toml` tidak bisa dipakai untuk nilai boolean: env kosong → `CliConfigParseError`. Override `SUPABASE_<SECTION>_<KEY>` (mis. `SUPABASE_AUTH_EXTERNAL_GOOGLE_ENABLED=true`) bekerja. | Usulan F-21 (`enabled = "env(GOOGLE_OAUTH_ENABLED)"`) tidak bisa dipakai. | `enabled = false` + override env, dicatat di `config.toml` dan `docs/06` §3.1. | selesai |
+| F-26 | **Emulasi offline Playwright (`context.setOffline`) tidak berlaku untuk service worker yang dimulai ulang browser** (juga setelah `reload()`): request SW tetap sampai ke server dan mendapat redirect `proxy.ts`. | Test "shell terbuka offline" bisa lulus/gagal palsu. | e2e memakai proxy TCP kecil yang diputus (`e2e/support/cut-proxy.ts`) + `setOffline` (untuk `navigator.onLine`). | selesai |
+| F-27 | **JS halaman `/` ≈ 335 KiB gzip**, di atas anggaran 200 kB (§11.4). Terbesar: zod v4 penuh (semua skema `RPC_INPUTS` dari `packages/contracts`) + supabase-js. | Muat pertama lebih lambat di sinyal lemah (hanya sekali; aset di-precache SW). | CI memberi peringatan, tidak gagal. Lihat **Q-65**. | Q-65 |
+| F-28 | GoTrue mengembalikan `otp_expired` untuk kode **salah** maupun **kedaluwarsa** (dicek L4). | Pesan §8.2 "Kode salah" vs "Kode sudah kedaluwarsa" tidak bisa dibedakan dari kode error. | Klien membedakan dari waktu kirim: < `otp_expiry` (10 mnt) → "Kode salah", selain itu "kedaluwarsa" (`lib/auth/otp-errors.ts`). | selesai |
+| F-29 | `onAuthStateChange('SIGNED_OUT')` juga terjadi saat refresh token gagal, bukan hanya saat user menekan Keluar. §3.5 menulis "SIGNED_OUT → bersihkan cache query + data lokal". | Menghapus IndexedDB pada event ini bisa membuang antrean foto offline (D-59) tanpa peringatan Q-61. | Event `SIGNED_OUT` hanya membersihkan cache query di memori; data lokal dihapus hanya lewat aksi Keluar/hapus akun (`signOutAndClear`). Lihat **Q-66**. | Q-66 |
+| F-30 | Precache SW mengambil HTML shell lewat `fetch` saat install. Jika `proxy.ts` mengalihkan semua permintaan tanpa sesi, shell `/`, `/unggahan`, … tersimpan sebagai halaman `/masuk`. | Shell offline salah isi untuk user yang memasang PWA sebelum login. | `proxy.ts` hanya mengalihkan **navigasi dokumen** (`Sec-Fetch-Mode: navigate`); fetch lain mendapat shell statis (tanpa data user). Penjaga sesi di klien menangani navigasi klien dan offline. | selesai |
+
+**Penyimpangan kecil dari dokumen ini (implementasi M0):**
+
+| Bagian | Dokumen | Implementasi | Alasan |
+|---|---|---|---|
+| §7.3 S-00a `OtpForm` | "6 kotak, tempel otomatis" | Satu kolom `inputmode="numeric"`, `autocomplete="one-time-code"`, maks 6 angka, huruf diberi jarak | Satu kolom bekerja dengan autofill iOS/Android dan pembaca layar tanpa logika fokus antar kotak. Tampilan bisa diganti tanpa mengubah alur. Lihat Q-67. |
+| §5.2 navigasi shell | Precache HTML shell; network-first | Aset `/_next/static` + ikon di precache; HTML shell diisi ke cache `shell-<versi>` saat install lalu network-first (3 dtk) → cache → `/offline` | Precache Serwist selalu *cache-first*; cara ini menjaga network-first sesuai tabel. |
+| §11.6 CSP | Header CSP | Belum. `Referrer-Policy`, `Permissions-Policy`, `nosniff` sudah | CSP butuh daftar domain Storage dan nonce skrip Next; dibuat bersama unggahan di M2. |
+| §11.4 job `browser` (L5c) | Job baru | Belum dibuat | Belum ada kode browser-only (kompresi, EXIF) sampai M2. |
+| §4.3 kunci query | `['rpc', name, input]` | Sama; `RPC_INPUTS` (skema input semua RPC) ditambahkan ke `packages/contracts` dan dicek terhadap argumen fungsi SQL di L2 | Satu pintu validasi input untuk `rpcCall`. |
 
 ---
 
@@ -760,6 +794,14 @@ Setiap pertanyaan punya usulan default. Jawab "setuju semua" jika semua default 
 | Q-62 | Ajakan "Pasang ke layar utama" di iOS setelah foto pertama + `navigator.storage.persist()` (P-04)? | **Ya**, sekali, bisa ditutup. Di Android memakai prompt bawaan browser. |
 | Q-63 | Lint dan format: ESLint (flat config + `eslint-plugin-jsx-a11y`) + Prettier, atau Biome? | **ESLint + jsx-a11y + Prettier.** Aturan a11y JSX lebih lengkap. `next lint` sudah tidak ada di Next 16, jadi ESLint dijalankan langsung. |
 | Q-64 | Batas UI 10 bagian per struk dan peringatan antrean > 50 MB (§5.3, §6.5)? | **Ya**, sebagai default UI (bukan aturan data). |
+
+### 13.4 Pertanyaan baru dari M0
+
+| ID | Pertanyaan | Usulan default |
+|---|---|---|
+| Q-65 | Anggaran JS 200 kB (F-27): halaman `/` 335 KiB gzip. Tindak lanjut? | **Tetap peringatan sampai M7** (anggaran performa ada di M7). Di M7 diukur ulang; kandidat: validasi input `rpcCall` memakai `zod/mini` atau skema dimuat per layar. Tidak mengubah kontrak. |
+| Q-66 | Data lokal saat sesi berakhir tanpa aksi Keluar (F-29). | **Hanya aksi Keluar/hapus akun yang menghapus IndexedDB** (dengan peringatan antrean, Q-61). Sesi kedaluwarsa: cache di memori dibersihkan, antrean foto tetap, user diminta login lagi. |
+| Q-67 | Input kode OTP: satu kolom (implementasi M0) atau 6 kotak (§7.3)? | **Satu kolom** (autofill + a11y lebih andal). |
 
 ### 13.3 Bagian yang belum bisa dirancang penuh
 
