@@ -1,0 +1,10 @@
+{
+  "name": "@priceatlas/db-types",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/database.ts" },
+  "scripts": {
+    "gen": "supabase gen types typescript --local --schema public > src/database.ts"
+  }
+}

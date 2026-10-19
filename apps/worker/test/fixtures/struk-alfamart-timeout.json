@@ -1,0 +1,16 @@
+{
+  "images": ["struk-alfamart-timeout.jpg"],
+  "raw_text": "ALFAMART SERPONG\nINDOMIE GRG 85G 2 x 3.400 6.800\nTOTAL 6.800",
+  "output": {
+    "kind": "receipt",
+    "store_hint": { "name": "Alfamart", "branch_name": "Serpong" },
+    "header": {
+      "transaction_date": "2026-10-14", "total_amount": 6800,
+      "field_confidence": { "store": 0.99, "date": 0.99, "total": 0.99 }
+    },
+    "lines": [
+      { "line_no": 1, "line_type": "product", "raw_text": "INDOMIE GRG 85G", "quantity": 2, "unit_amount": 3400, "line_amount": 6800, "parse_confidence": 0.99 }
+    ]
+  },
+  "failures": [{ "type": "transient", "message": "stub: server OCR 503" }, { "type": "transient" }]
+}

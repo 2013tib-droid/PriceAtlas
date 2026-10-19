@@ -245,22 +245,58 @@ returns table (store_id uuid, branch_id uuid)
 language plpgsql stable security definer
 set search_path = ''
 as $$
+declare
+  v_store  uuid;
+  v_branch uuid;
 begin
-  select s.id into store_id
+  select s.id into v_store
     from public.store s
    where s.normalized_name = app.normalize_text(p_store_name) and s.status = 'active'
      and (s.household_id is null or s.household_id = p_household)
    order by (s.household_id is null)
    limit 1;
-  if store_id is not null and app.normalize_text(p_branch_name) is not null then
-    select b.id into branch_id
+  if v_store is not null and app.normalize_text(p_branch_name) is not null then
+    select b.id into v_branch
       from public.branch b
-     where b.store_id = store_id and (b.household_id is null or b.household_id = p_household)
+     where b.store_id = v_store and (b.household_id is null or b.household_id = p_household)
        and (app.normalize_text(b.name) = app.normalize_text(p_branch_name)
             or app.normalize_text(b.name) = app.normalize_text(p_store_name || ' ' || p_branch_name))
      order by (b.status = 'open') desc, (b.household_id is null)
      limit 1;
   end if;
+  store_id := v_store;
+  branch_id := v_branch;
+  return next;
+end $$;
+
+-- Lokasi capture (§5.5): struk → pilihan manual capture → nama terbaca;
+-- label/screenshot → sesi → pilihan manual capture → store_hint. Dipakai worker
+-- (toko untuk matching alias) dan apply_extraction, sehingga keduanya selalu sama.
+create function app.capture_location(p_capture_id uuid, p_store_name text, p_branch_name text default null)
+returns table (store_id uuid, branch_id uuid)
+language plpgsql stable security definer
+set search_path = ''
+as $$
+declare
+  v_c public.capture;
+  v_store uuid;
+  v_branch uuid;
+begin
+  select * into v_c from public.capture where id = p_capture_id;
+  if v_c.kind <> 'receipt' and v_c.shopping_session_id is not null then
+    select b.store_id, b.id into v_store, v_branch
+      from public.shopping_session s join public.branch b on b.id = s.branch_id
+     where s.id = v_c.shopping_session_id;
+  end if;
+  if v_store is null and v_c.store_id is not null then
+    v_store := v_c.store_id; v_branch := v_c.branch_id;
+  end if;
+  if v_store is null then
+    select r.store_id, r.branch_id into v_store, v_branch
+      from app.resolve_store(v_c.household_id, p_store_name, p_branch_name) r;
+  end if;
+  store_id := v_store;
+  branch_id := v_branch;
   return next;
 end $$;
 
@@ -411,14 +447,10 @@ begin
   v_hashdup := coalesce(v_hashdup, false);
 
   if v_c.kind = 'receipt' then
-    -- 1. Toko: pilihan manual/sesi capture → nama terbaca. Tidak dikenali → NULL (D-49).
-    if v_c.store_id is not null then
-      v_store := v_c.store_id; v_branch := v_c.branch_id;
-    else
-      select * into v_loc from app.resolve_store(v_c.household_id, p_payload #>> '{store_hint,name}',
-                                                 p_payload #>> '{store_hint,branch_name}');
-      v_store := v_loc.store_id; v_branch := v_loc.branch_id;
-    end if;
+    -- 1. Toko: pilihan manual capture → nama terbaca. Tidak dikenali → NULL (D-49).
+    select * into v_loc from app.capture_location(v_c.id, p_payload #>> '{store_hint,name}',
+                                                  p_payload #>> '{store_hint,branch_name}');
+    v_store := v_loc.store_id; v_branch := v_loc.branch_id;
 
     -- 2. Header + baris + penyesuaian.
     select coalesce(jsonb_object_agg(e.key, e.value), '{}') into v_fc
@@ -511,19 +543,9 @@ begin
 
   else
     -- Label / screenshot. 1. Lokasi: sesi → pilihan manual capture → store_hint.
-    if v_c.shopping_session_id is not null then
-      select b.store_id, b.id into v_store, v_branch
-        from public.shopping_session s join public.branch b on b.id = s.branch_id
-       where s.id = v_c.shopping_session_id;
-    end if;
-    if v_store is null and v_c.store_id is not null then
-      v_store := v_c.store_id; v_branch := v_c.branch_id;
-    end if;
-    if v_store is null then
-      select * into v_loc from app.resolve_store(v_c.household_id, p_payload #>> '{store_hint,name}',
-                                                 p_payload #>> '{store_hint,branch_name}');
-      v_store := v_loc.store_id; v_branch := v_loc.branch_id;
-    end if;
+    select * into v_loc from app.capture_location(v_c.id, p_payload #>> '{store_hint,name}',
+                                                  p_payload #>> '{store_hint,branch_name}');
+    v_store := v_loc.store_id; v_branch := v_loc.branch_id;
 
     -- 2. capture_item per item.
     for v_item in select * from jsonb_array_elements(coalesce(p_payload -> 'items', '[]')) loop
@@ -816,7 +838,7 @@ begin
             where p.pronamespace = 'app'::regnamespace
               and p.proname in ('claim_job', 'complete_job', 'requeue_job', 'fail_job', 'run_sql_jobs',
                                 'capture_round_runs', 'claim_next_capture', 'record_run_output', 'fail_run',
-                                'reap_stale_runs', 'resolve_store', 'match_products', 'apply_extraction',
+                                'reap_stale_runs', 'resolve_store', 'capture_location', 'match_products', 'apply_extraction',
                                 'enqueue_retention', 'images_to_purge', 'mark_images_purged', 'runs_to_redact',
                                 'apply_redaction', 'orphan_storage_objects', 'begin_account_deletion',
                                 'prepare_household_deletion', 'finish_household_deletion') loop

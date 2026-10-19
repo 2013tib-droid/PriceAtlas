@@ -1,0 +1,20 @@
+{
+  "images": ["label-milo.jpg"],
+  "raw_text": "MILO ORIGINAL 200G Rp19.500 PROMO Rp17.500 s/d 31 Des\nMILO 3IN1 10X35G Rp23.000 MEMBER Rp21.000",
+  "output": {
+    "kind": "price_label",
+    "items": [
+      {
+        "raw_text": "MILO ORIGINAL 200G", "barcode": "8992696404442",
+        "normal_price": 19500, "promo_price": 17500, "promo_valid_until": "2099-12-31",
+        "image_position": 1, "region": { "x": 0.05, "y": 0.1, "w": 0.4, "h": 0.3 },
+        "field_confidence": { "product": 0.99, "price": 0.97 }
+      },
+      {
+        "raw_text": "MILO 3IN1 10X35G", "normal_price": 23000, "member_price": 21000, "member_program_name": "AEON Member",
+        "image_position": 1, "region": { "x": 0.5, "y": 0.1, "w": 0.4, "h": 0.3 },
+        "field_confidence": { "price": 0.95 }
+      }
+    ]
+  }
+}

@@ -15,7 +15,7 @@ set search_path = ''
 as $$
   select case when jsonb_typeof(p) <> 'object' then false else not exists (
        select 1 from jsonb_each(p) e
-        where not case e.key
+        where not coalesce(case e.key
           when 'shipping_fee'    then case when jsonb_typeof(e.value) = 'number' then (e.value #>> '{}')::numeric >= 0 else false end
           when 'shop_voucher'    then case when jsonb_typeof(e.value) = 'number' then (e.value #>> '{}')::numeric >= 0 else false end
           when 'cashback'        then case when jsonb_typeof(e.value) = 'number' then (e.value #>> '{}')::numeric >= 0 else false end
@@ -34,7 +34,7 @@ as $$
                   or (jsonb_typeof(e.value -> 'program_id') = 'string'
                       and (e.value ->> 'program_id') ~* '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'))
           else false
-        end) end
+        end, false)) end
 $$;
 revoke all on function app.valid_price_extra(jsonb) from public, anon, authenticated;
 grant execute on function app.valid_price_extra(jsonb) to authenticated, service_role;

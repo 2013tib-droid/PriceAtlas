@@ -1,0 +1,26 @@
+{
+  "name": "@priceatlas/worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/main.ts",
+    "dev": "tsx src/main.ts --dev-scheduler",
+    "dev:submit": "tsx scripts/dev-submit.ts",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@priceatlas/contracts": "workspace:*",
+    "@supabase/supabase-js": "^2.118.0",
+    "pg": "^8.16.0",
+    "tsx": "^4.20.0"
+  },
+  "devDependencies": {
+    "@priceatlas/testkit": "workspace:*",
+    "@types/node": "^22.20.0",
+    "@types/pg": "^8.15.0",
+    "typescript": "5.9.3",
+    "vitest": "^4.1.12"
+  }
+}

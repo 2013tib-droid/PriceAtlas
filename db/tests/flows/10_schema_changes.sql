@@ -155,6 +155,8 @@ select test.ok(not app.valid_price_extra(jsonb_build_object('member_note', repea
 select test.ok(not app.valid_price_extra('{"member_hint": {"text": "x", "lain": 1}}'), 'X-10: member_hint kunci lain ditolak');
 select test.ok(not app.valid_price_extra('{"member_hint": {"program_id": "bukan-uuid", "text": "x"}}'), 'X-10: member_hint program_id wajib uuid');
 select test.ok(not app.valid_price_extra('{"member_eligible": "ya"}'), 'X-10: member_eligible wajib boolean');
+select test.ok(not app.valid_price_extra('{"member_hint": {"program_id": "40000000-0000-0000-0000-000000000001"}}'),
+               'X-10: member_hint wajib text');
 select test.ok(not app.valid_price_extra('[]'), 'X-10: extra wajib objek');
 
 select test.login(test.uid('a'));
