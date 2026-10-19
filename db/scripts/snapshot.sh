@@ -3,7 +3,7 @@
 #   db/scripts/snapshot.sh          tulis ulang db/schema.sql
 #   db/scripts/snapshot.sh --check  gagal jika db/schema.sql berbeda (drift), dipakai CI
 # Isi: pg_dump --schema-only schema public + app, lalu data referensi (app.config,
-# public.unit, kategori sistem). Butuh pg_dump versi mayor yang sama dengan CI (16).
+# public.unit, kategori sistem). Butuh pg_dump versi mayor yang sama dengan CI (17, D-78).
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 DB="${TEST_DB:-priceatlas_snapshot}"

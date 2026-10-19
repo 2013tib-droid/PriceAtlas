@@ -18,7 +18,7 @@ keputusan: [`PROJECT.md`](PROJECT.md).
 - `apps/web` — scaffold Next.js, hanya `POST /api/account/delete`.
 - `packages/contracts` (zod), `packages/ai-tools` (6 tool AI), `packages/testkit` (utilitas test).
 
-## Mulai cepat (mode A: PostgreSQL 16 lokal, tanpa Supabase)
+## Mulai cepat (mode A: PostgreSQL 17 lokal, tanpa Supabase)
 
 ```bash
 pnpm install

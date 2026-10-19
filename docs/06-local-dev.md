@@ -10,7 +10,7 @@
 
 | Alat | Versi | Mode |
 |---|---|---|
-| PostgreSQL server + klien (`psql`, `pg_dump`) | 16 (paket contrib, untuk `pg_trgm`, `btree_gist`, `dblink`) | A |
+| PostgreSQL server + klien (`psql`, `pg_dump`) | **17** (D-78; paket contrib, untuk `pg_trgm`, `btree_gist`, `dblink`). `pg_dump` harus versi mayor yang sama dengan server (snapshot dan `00_baseline_equivalence`). | A |
 | Node.js | ≥ 22 | A, B |
 | pnpm | 10 (`corepack enable`) | A, B |
 | Supabase CLI + Docker | terbaru | B |
