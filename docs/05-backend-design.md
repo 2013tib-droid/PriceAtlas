@@ -1,6 +1,7 @@
 # Tahap 4a — Desain Backend
 
-> Status: **Disetujui (2026-10-19).** Semua default Q-01 s/d Q-30 diterima dan dicatat di Decision Log `PROJECT.md` sebagai D-61 s/d D-72. Tahap 4b (implementasi) berikutnya.
+> Status: **Disetujui (2026-10-19).** Semua default Q-01 s/d Q-30 diterima dan dicatat di Decision Log `PROJECT.md` sebagai D-61 s/d D-72.
+> **Tahap 4b: draft (2026-10-19), menunggu review.** Ringkasan implementasi, hasil test, penyimpangan, dan pertanyaan Q-31 s/d Q-42 di [bagian 10](#10-tahap-4b--implementasi-penyimpangan-dan-pertanyaan).
 > Dasar: `PROJECT.md` (D-01 s/d D-60), `docs/02-domain-model.md`, `docs/03-database-design.md`, `db/schema.sql`, `db/tests/`, `docs/04-wireframe.md`.
 > Rujukan `§` tanpa nama dokumen mengacu ke `PROJECT.md`. "Desain fisik §n" mengacu ke `docs/03-database-design.md`. "Wireframe §n" mengacu ke `docs/04-wireframe.md`.
 
@@ -20,6 +21,7 @@ Dokumen ini tidak mengubah requirement atau keputusan. Setiap celah, bug di skem
 7. [Keamanan dan PII](#7-keamanan-dan-pii)
 8. [Strategi Test](#8-strategi-test)
 9. [Pertanyaan untuk Didiskusikan](#9-pertanyaan-untuk-didiskusikan)
+10. [Tahap 4b — Implementasi, Penyimpangan, dan Pertanyaan](#10-tahap-4b--implementasi-penyimpangan-dan-pertanyaan)
 
 ---
 
@@ -1304,3 +1306,79 @@ Setiap pertanyaan punya usulan default. Jawab "setuju semua" jika semua default 
 | Q-22, Q-24, Q-25 | D-72 |
 
 **Tambahan pada rencana migration (bagian 2.1)** karena Q-20 dan Q-27 disetujui: kolom `capture.error_code` (`blurry`, `not_a_receipt`, `unsupported`, `timeout`, `other`) dan `capture.captured_at timestamptz` (jam perangkat, dipakai sebagai dasar tanggal default label/screenshot). Keduanya masuk ke migration `…0230_hardening.sql`. Q-16: migration yang sama mengatur zona waktu database ke `Asia/Jakarta`.
+
+---
+
+## 10. Tahap 4b — Implementasi, Penyimpangan, dan Pertanyaan
+
+> Status: **4b draft (2026-10-19), menunggu review.** Tidak mengubah keputusan D-01 s/d D-72. Cara menjalankan: `docs/06-local-dev.md`.
+
+### 10.1 Yang dibangun
+
+| Bagian | Isi |
+|---|---|
+| Repo & tooling | Monorepo pnpm (`apps/web`, `apps/worker`, `packages/contracts`, `packages/ai-tools`, `packages/testkit`, `packages/db-types`), `supabase/config.toml`, `supabase/seed.sql`, `.env.example`, CI GitHub Actions (cek rahasia, hash `smoke.sql`, harness SQL, drift `db/schema.sql`, typecheck, test TS, build web). |
+| Migration | `…0000_baseline` (identik byte demi byte dengan `schema.sql` Tahap 2b, diuji `cmp` + `pg_dump`), `0100`–`0240` sesuai §2.1 + tambahan hasil review (`capture.error_code`, `capture.captured_at`, zona waktu), `0300` RPC baca, `0310` RPC tulis, `0320` fungsi pipeline/job/retensi/hapus akun, `0900` pg_cron (dilewati jika extension tidak ada). Setiap tabel, view, dan fungsi baru di-`REVOKE` eksplisit. |
+| RPC | R1–R21 dan W1–W18 (§3.2), semua `SECURITY INVOKER` kecuali R2, W14, W15 (DEFINER, cek owner/whitelist) dan helper `app.*` kecil (lihat 10.2 no. 4). Kode error §3.1 lewat `app.err()` (SQLSTATE `PTnnn`). Query §3.4 diterapkan (F-08, F-13, D-54). |
+| Alur tulis | §4.1–4.6: satu RPC = satu transaksi, idempoten berdasarkan keadaan, konkurensi optimistik `STALE_WRITE`, kunci advisory sidik jari, race opt-out vs batch berbagi. |
+| Pipeline | Fungsi `app.*` (claim `SKIP LOCKED`, lease, backoff 30/120/600 dtk, percobaan maks, reaper, matching tier 1–3, `apply_extraction` + aturan auto-save §5.5, harga efektif §5.7). Worker Node.js: `StubExtractor` + `StubAiMatcher` berbasis fixture, `BlobStore` (Supabase Storage dan folder lokal), job `purge_images`, `redact_ocr` (stub regex), `delete_household`, `purge_storage_paths`, sapuan unggahan yatim, `LISTEN/NOTIFY` + polling, mode `--dev-scheduler`. |
+| Tools AI | 6 tool §6 (zod → JSON Schema, handler → RPC baca dengan JWT user), `runTool()` mengembalikan error sebagai data. Belum disambungkan ke Claude. |
+| Kontrak | `packages/contracts`: kode error + HTTP, kontrak `extra` (X-10), `unitPrice()` (setara rumus SQL), `ParsedReceipt`/`ParsedObservation`, input/output RPC, daftar RPC kontrak. |
+| Route Handler | `POST /api/account/delete` (§7.6): login ulang ≤ 15 menit + teks konfirmasi, `begin_account_deletion` (service role), `auth.admin.deleteUser`, 202. |
+| Snapshot | `db/schema.sql` dibangkitkan dari migration (`db/scripts/snapshot.sh`), dicek CI (D-72). Skema 2b asli disimpan di `db/tests/fixtures/schema-2b.sql`. |
+
+### 10.2 Hasil test
+
+| Lapisan | File | Jumlah |
+|---|---|---|
+| L1 SQL `smoke.sql` (tidak diubah, hash dicek CI) | 1 | **43 / 43 lulus** |
+| L1 SQL `flows/` (00, 10, 20, 30, 31, 40, 50, 60, 70, 80, 85, 90, 95, 98, 99) | 15 | **526 pengecekan lulus** |
+| L2 + L3 TypeScript (vitest) | 11 file | **127 test lulus**: contracts 60 (termasuk kesetaraan TS ↔ SQL), worker 37 (unit, end-to-end fixture, 2 worker paralel, crash setelah claim, LISTEN, dev scheduler, job), ai-tools 21, web 9 |
+| Typecheck (`tsc`) dan `next build` | semua paket | bersih |
+
+Catatan:
+- `98_rls_matrix.sql` dibangkitkan dari katalog: 27 tabel `public` × (select, update, delete, insert lintas household) dan 21 RPC baca dipanggil sebagai user B dengan id milik A. Tabel tanpa `household_id` yang belum diklasifikasi, atau parameter RPC yang belum dipetakan, membuat test gagal.
+- `99_privilege_inventory.sql` membandingkan seluruh hak `anon`/`authenticated` (tabel, kolom, sequence, fungsi di `public` dan `app`) dengan whitelist yang dibangkitkan `db/scripts/gen_inventory_test.sh` dan ditinjau lewat diff.
+- Test kesetaraan TS ↔ SQL menemukan satu bug di migration 0140: `app.valid_price_extra` menerima `member_hint` tanpa `text` (NULL lolos dari `NOT`). Sudah diperbaiki (`coalesce`) dan ditambah test di `10_*`.
+
+### 10.3 Penyimpangan dari dokumen ini (beserta alasan)
+
+| # | Bagian | Penyimpangan | Alasan |
+|---|---|---|---|
+| 1 | §7.2 `receipt` | `INSERT` untuk `authenticated` **dipertahankan** (semua kolom kecuali `pii`). `DELETE` dicabut, `UPDATE` hanya kolom header, `SELECT` tanpa `pii`. | `smoke.sql` menyisipkan struk sebagai user. Mencabut `INSERT` membuat test lama gagal, padahal D-64 tidak menyebut pencabutan insert. Lihat **Q-31**. |
+| 2 | W1 | `submit_capture` punya parameter opsional tambahan `p_captured_at`. | Kolom `capture.captured_at` (Q-27, D-71) butuh sumber dari klien. |
+| 3 | §7.6 | Langkah 2 dipanggil lewat `public.begin_account_deletion(p_user_id)`, pembungkus `app.begin_account_deletion` yang **hanya** bisa dijalankan `service_role`. | supabase-js (service role) hanya bisa memanggil RPC di schema yang diekspos (`public`). Lihat **Q-32**. |
+| 4 | §1.2, §7.1 | Helper DEFINER kecil di `app` dipanggil RPC INVOKER: `set_receipt_state`, `enqueue_storage_purge`, `missing_storage_paths`, `require_owner`, `config_numeric`/`config_json`, `household_today`. Semuanya memeriksa household pemanggil. | Kolom/tabel yang tidak boleh ditulis atau dibaca user langsung (`receipt.status`, `app.job`, `storage.objects` milik household, `app.config`). RPC publiknya tetap INVOKER. |
+| 5 | §5.1, §2.2 | "Hanya lewat RPC" (transisi `capture.status` oleh user, keputusan `capture_item`) ditegakkan dengan penanda transaksi `app.via_rpc` yang dinyalakan RPC. | PostgREST tidak bisa memanggil `set_config`, jadi klien REST tidak bisa meniru penanda itu. |
+| 6 | §2.2 `capture_item` | `GRANT UPDATE` per kolom (bukan seluruh tabel): kolom yang bisa diedit di S-11 + kolom keputusan. | Lebih ketat; `household_id`, `capture_id`, `raw_text`, dan candidates tidak bisa diubah user. |
+| 7 | §4.3 tabel turunan | Baris **timbang** juga memperhitungkan void (`berat − Σ void.qty`, neto termasuk void). | Rumus §4.3 untuk timbang tidak menyebut void. Tanpa void hasilnya identik dengan rumus §4.3. Lihat **Q-33**. |
+| 8 | §4.1, §5.5 | `member_hint` struk dideteksi dari baris **diskon** yang teksnya memuat kata "member"; `program_id` diisi jika toko punya tepat satu program aktif. `ParsedReceipt.member_hint` (header) tidak disimpan. | Tidak ada kolom untuk membawa `member_hint` dari parser ke saat konfirmasi. Lihat **Q-34**. |
+| 9 | §5.3 | Hitungan percobaan = run sejak `capture.processed_at` terakhir. `retry_capture` oleh user memulai putaran baru (3 percobaan lagi, tanpa backoff). | Tanpa kolom baru. `processed_at` diisi saat capture selesai atau gagal final. Lihat **Q-35**. |
+| 10 | §5.4 tier 4 | `AiMatcher` hanya dipanggil untuk item yang **tidak punya kandidat sama sekali** dari tier 1–3. | Tafsiran "tidak memberi kandidat ≥ ambang", dengan ambang = `fuzzy_min_similarity`. Paling hemat biaya. Lihat **Q-36**. |
+| 11 | §3.1 | Dua kode error tambahan: `FORBIDDEN` (403, bukan owner / tanpa household) dan `INVALID_INPUT` (400, patch berkunci tidak dikenal, aksi tidak dikenal). Search/R12 tetap `22023` sesuai §3.3. | Tabel §3.1 tidak punya kode untuk kasus ini. Lihat **Q-37**. |
+| 12 | W8, W17 | Brand baru dengan nama yang sudah ada (milik sendiri atau global) dan toko privat dengan nama yang sama **dipakai ulang**, bukan error `23505`. | §3.3 S-15 menyebut "23505 (brand dobel → pakai yang ada)"; implementasi langsung memakai yang ada. Data global tidak dibuat atau diubah (D-29). |
+| 13 | W4 | Aksi `skip` pada baris yang sudah punya record auto-save **menghapus** record itu. | "Lewati" berarti baris ini tidak disimpan. Baris tanpa record: tidak membuat record (sesuai §4.1). |
+| 14 | §2.3 F-09 | `REVOKE` hak sequence `public` dari `anon`/`authenticated` (0230). | Default privileges Supabase juga berlaku untuk sequence; tidak ada klien yang membutuhkannya. |
+| 15 | Job | Lease job memakai `app.job.run_after` selama `running`; job yang lease-nya habis dikembalikan oleh `app.reap_stale_runs()`. | Tanpa kolom baru. |
+| 16 | §1.5 | `packages/db-types` berisi placeholder. | `supabase gen types` butuh Supabase CLI + Docker yang tidak tersedia di lingkungan 4b. Lihat **Q-38**. |
+| 17 | D-72 | `db/schema.sql` = `pg_dump` schema `public` + `app` + data referensi. Trigger di `auth.users`, bucket/policy Storage, extension, jadwal pg_cron, dan zona waktu database tidak ikut (disebut di header file). | `pg_dump -n` tidak mencakup objek di schema stub (`auth`, `storage`). Lihat **Q-39**. |
+| 18 | §8.2 `00_*` | `pg_dump` dibandingkan setelah membuang baris `\restrict`/`\unrestrict` (token acak per dump di PostgreSQL 16.10+). | Tanpa itu dua dump identik selalu berbeda. |
+
+### 10.4 Pertanyaan Tahap 4b
+
+Setiap pertanyaan punya usulan default. Tidak ada yang menghalangi milestone 4b; semuanya sudah dikerjakan dengan default.
+
+| ID | Pertanyaan | Usulan default |
+|---|---|---|
+| Q-31 | §7.2 mencabut `INSERT` `receipt` dari `authenticated`, tetapi `smoke.sql` (tidak boleh diubah) menyisipkan struk sebagai user. Pertahankan `INSERT` (tanpa `pii`), atau ubah smoke test lalu cabut? | **Pertahankan** di MVP. Struk tetap dibuat worker; klien tidak punya alur yang menyisipkan struk. Tinjau ulang jika smoke test boleh diubah. |
+| Q-32 | Pembungkus `public.begin_account_deletion` (hanya `service_role`) untuk Route Handler, atau Route Handler memakai koneksi Postgres langsung ke `app.*`? | **Pembungkus RPC.** Route Handler cukup memakai supabase-js; tidak perlu `DATABASE_URL` di Next.js. |
+| Q-33 | Void pada baris timbang: ikut dihitung seperti pada baris satuan? | **Ya** (sudah diterapkan). |
+| Q-34 | `member_hint` dari teks diskon ("member"), atau tambah kolom (mis. `receipt_line.extra`) agar penanda dari parser terbawa? | **Teks diskon** di MVP. Kolom baru ditinjau bersama uji OCR (D-16, Tahap 6). |
+| Q-35 | `retry_capture` oleh user memulai putaran 3 percobaan baru? | **Ya.** User sudah memutuskan untuk mencoba lagi. |
+| Q-36 | Tier 4 (AI) hanya untuk item tanpa kandidat sama sekali, atau juga untuk item yang kandidat terbaiknya < τ? | **Tanpa kandidat saja** sampai uji OCR (D-16). Item dengan kandidat lemah tetap masuk konfirmasi, dan kandidatnya tampil di S-14. |
+| Q-37 | Tambah `FORBIDDEN` (403) dan `INVALID_INPUT` (400) ke tabel kode error §3.1? | **Ya.** Sudah ada di `app.err()` dan `packages/contracts`. |
+| Q-38 | `packages/db-types` dibangkitkan saat Tahap 5 dimulai (butuh Supabase CLI)? | **Ya.** Sampai itu, `packages/contracts` (zod) menjadi sumber tipe RPC. |
+| Q-39 | Isi snapshot `db/schema.sql`: cukup `public` + `app` + data referensi (header menyebut objek di luar itu)? | **Ya.** |
+| Q-40 | Teks konfirmasi hapus akun `"HAPUS AKUN"` dan "login ulang" = `user.last_sign_in_at` ≤ 15 menit? | **Ya.** Teks UI final di Tahap 5 (konstanta `ACCOUNT_DELETE_CONFIRMATION`). |
+| Q-41 | Kecurigaan duplikat hash ke capture lain yang **tidak** punya struk (mis. capture gagal): hanya mencegah auto-save, tidak ikut ke banner S-10. Cukup? | **Cukup** di MVP. `duplicate_of_receipt_id` butuh struk yang dirujuk; dialog unggah (U-10) sudah memperingatkan user. |
+| Q-42 | Mode B (Supabase CLI) belum dijalankan di lingkungan 4b. Risiko yang perlu dicek saat pertama dijalankan: hak membuat policy di `storage.objects`, `ALTER DATABASE … SET timezone` di migration, dan `WORKER_DB_ROLE` untuk role `postgres` Supabase. Jalankan sebagai bagian review 4b atau awal Tahap 5? | **Awal Tahap 5** (saat Supabase lokal dipakai untuk frontend), bersama test L4 manual (§8.1). Temuan dicatat sebagai F-xx baru. |

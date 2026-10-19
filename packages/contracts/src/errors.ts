@@ -80,3 +80,7 @@ export function parseRpcError(e: RpcErrorLike): RpcError {
       : (sqlstate && BUILTIN_HTTP[sqlstate]) || 500;
   return { code, sqlstate, http, detail, hint: e.hint ?? null, message: e.message };
 }
+
+// Hapus akun (§7.6): teks konfirmasi di body dan jendela login ulang.
+export const ACCOUNT_DELETE_CONFIRMATION = 'HAPUS AKUN';
+export const ACCOUNT_DELETE_REAUTH_MINUTES = 15;

@@ -17,6 +17,10 @@ type ReceiptPayload = {
   lines: { id: string; line_no: number; line_type: string; needs_check: boolean; suggestion: { id: string } | null; record: unknown; match_tier: string | null }[];
 };
 
+it('worker terhubung sebagai service_role (hak sama dengan Supabase)', async () => {
+  expect((await env.workerDb.query('select current_user as u')).rows[0].u).toBe('service_role');
+});
+
 describe('struk AEON: sebagian auto-save, sisanya dikonfirmasi user', () => {
   let captureId: string;
   let receiptId: string;
