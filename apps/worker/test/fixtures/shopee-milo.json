@@ -1,0 +1,17 @@
+{
+  "images": ["shopee-milo.jpg"],
+  "raw_text": "Shopee | Nestle Official Store | Milo Original 500 g | Rp47.000 | Ongkir Rp9.000",
+  "output": {
+    "kind": "marketplace",
+    "store_hint": { "name": "Shopee" },
+    "items": [
+      {
+        "raw_text": "Milo Original 500 g", "listing_title": "Milo Original 500 g Nestle",
+        "listing_url": "https://shopee.co.id/milo-original-500g",
+        "normal_price": 47000, "shipping_fee": 9000,
+        "seller_name": "Nestle Official Store", "seller_ref": "nestle-official",
+        "field_confidence": { "price": 0.99 }
+      }
+    ]
+  }
+}

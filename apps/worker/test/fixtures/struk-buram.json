@@ -1,0 +1,5 @@
+{
+  "images": ["struk-buram.jpg"],
+  "output": { "kind": "receipt", "header": {}, "lines": [] },
+  "failures": [{ "type": "permanent", "code": "blurry", "message": "Gambar buram atau tidak terbaca. Coba foto ulang." }]
+}

@@ -1,0 +1,28 @@
+{
+  "images": ["struk-aeon.jpg"],
+  "raw_text": "AEON BSD\n15/10/2026 19:02\nMILO ORI 500G      2 x 45.000   90.000\n  DISC MEMBER                   -5.000\nINDOMIE GRG 85G    5 x 3.500    17.500\nKANTONG PLASTIK                    200\nSNACK XYZ                       12.000\nTOTAL                          114.700\nDEBIT ****4321  HP 081298765432",
+  "output": {
+    "kind": "receipt",
+    "store_hint": { "name": "AEON", "branch_name": "BSD" },
+    "header": {
+      "transaction_date": "2026-10-15",
+      "transaction_time": "19:02",
+      "total_amount": 114700,
+      "payment_method": "debit",
+      "field_confidence": { "store": 0.97, "branch": 0.9, "date": 0.98, "total": 0.99 }
+    },
+    "pii": { "card_last4": "4321", "phone": "081298765432" },
+    "lines": [
+      { "line_no": 1, "line_type": "product", "raw_text": "MILO ORI 500G", "quantity": 2, "unit_amount": 45000, "line_amount": 90000, "barcode": "8992696404441", "parse_confidence": 0.99 },
+      { "line_no": 2, "line_type": "discount", "raw_text": "DISC MEMBER", "line_amount": -5000, "applies_to_line_no": 1 },
+      { "line_no": 3, "line_type": "product", "raw_text": "INDOMIE GRG 85G", "quantity": 5, "unit_amount": 3500, "line_amount": 17500, "parse_confidence": 0.97 },
+      { "line_no": 4, "line_type": "non_product", "raw_text": "KANTONG PLASTIK", "quantity": 1, "unit_amount": 200, "line_amount": 200 },
+      { "line_no": 5, "line_type": "product", "raw_text": "SNACK XYZ", "quantity": 1, "unit_amount": 12000, "line_amount": 12000, "parse_confidence": 0.95 }
+    ],
+    "adjustments": []
+  },
+  "ai_matches": {
+    "SNACK XYZ": { "product_id": "70000000-0000-0000-0000-000000000310", "confidence": 0.62 }
+  },
+  "usage": { "inputTokens": 0, "outputTokens": 0, "costUsd": 0 }
+}
