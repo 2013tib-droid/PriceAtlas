@@ -1,6 +1,6 @@
 # Tahap 5a — Desain Frontend
 
-> **Status: draft (2026-10-19), menunggu review.** Belum ada kode aplikasi yang ditulis. Kode baru dimulai di Tahap 5b setelah dokumen ini disetujui.
+> **Status: disetujui (2026-10-19).** Semua default Q-43 s/d Q-64 diterima dan dicatat sebagai D-78 s/d D-83. Kode dimulai di Tahap 5b (M0).
 > Dasar: `PROJECT.md` (D-01 s/d D-77, terutama D-57–D-61 dan D-73–D-77), `docs/04-wireframe.md` + `docs/wireframes/index.html` (S-00a s/d S-20, alur 1–8, W-xx), `docs/05-backend-design.md` (R1–R21, W1–W18, §3.1, §4, §5, §7, §10), `docs/06-local-dev.md`, `packages/contracts`, `apps/web`.
 
 Dokumen ini tidak mengubah requirement, keputusan, skema, maupun RPC. Temuan baru ditulis sebagai **F-xx** (melanjutkan F-16 di `docs/05` §0.2), potensi masalah sebagai **P-xx**, dan pertanyaan sebagai **Q-43** dst. Setiap pertanyaan punya usulan default.
@@ -770,3 +770,18 @@ Setiap pertanyaan punya usulan default. Jawab "setuju semua" jika semua default 
 | Konversi HEIC dan kualitas gambar untuk OCR | Uji OCR (D-16, Tahap 6) | Parameter §6 adalah awal; dikalibrasi di Tahap 6. |
 | Warna, tipografi, ikon aplikasi | Belum ada desain visual (wireframe grayscale) | M0 memakai token netral yang memenuhi kontras AA; desain visual bisa diganti lewat token tanpa mengubah komponen. |
 | Hosting web | Tahap 7 | Shell statis + Route Handler kecil cocok untuk Vercel atau Node biasa. |
+
+---
+
+**Hasil review (2026-10-19):** semua default disetujui.
+
+| Pertanyaan | Keputusan |
+|---|---|
+| Q-43, Q-44 | D-78 |
+| Q-45, Q-46, Q-53, Q-58 | D-79 |
+| Q-47, Q-48, Q-49, Q-59, Q-63 | D-80 |
+| Q-50, Q-54, Q-61, Q-62, Q-64 | D-81 |
+| Q-51, Q-52, Q-56 | D-82 |
+| Q-55, Q-57, Q-60 | D-83 |
+
+**Catatan mode B (setelah review):** jaringan lingkungan dibuka untuk registry, dan `registry-1.docker.io` serta `public.ecr.aws` kini terjangkau. `supabase start` tetap gagal karena host CDN tempat layer image diunduh (`production.cloudfront.docker.com` untuk Docker Hub, `*.cloudfront.net` untuk ECR Public) masih ditolak proxy. Verifikasi L4 dan `db-types` tetap dijadwalkan di M0 (D-78).
