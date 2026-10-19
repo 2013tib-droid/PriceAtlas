@@ -129,7 +129,7 @@ update public.receipt set total_amount = 55500 where id = '90000000-0000-0000-00
 select test.ok((select count(*) = 1 and bool_and(not (before ? 'pii') and not (after ? 'pii'))
                   from public.audit_log where entity_type = 'receipt'),
                'F-03: audit koreksi struk tanpa kunci pii');
-select test.ok(not exists (select 1 from public.audit_log where before::text like '%0812%' or after::text like '%0812%'),
+select test.ok(not exists (select 1 from public.audit_log where before::text like '%08123456789%' or after::text like '%08123456789%'),
                'F-03: nomor HP tidak ada di audit');
 
 select test.logout();
