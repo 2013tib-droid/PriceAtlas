@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | Nama sementara | Price Intelligence (repo: PriceAtlas) |
-| Status | Tahap 5a (desain frontend) draft, menunggu review |
+| Status | Tahap 5a (desain frontend) disetujui, siap masuk Tahap 5b (M0) |
 | Terakhir diperbarui | 2026-10-19 |
 
 ---
@@ -284,6 +284,12 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 | D-75 | Aturan pipeline 4b | `retry_capture` oleh user memulai putaran baru 3 percobaan. Tier 4 (AI) hanya untuk item tanpa kandidat dari tier 1–3, sampai uji OCR (D-16). |
 | D-76 | Hapus akun | Teks konfirmasi `"HAPUS AKUN"` dan login ulang = `last_sign_in_at` ≤ 15 menit. Teks UI final di Tahap 5. |
 | D-77 | Tooling dan awal Tahap 5 | `db/schema.sql` = snapshot `public` + `app` + data referensi. `packages/db-types` dibangkitkan di awal Tahap 5. Mode B (Supabase CLI) dan test L4 manual dijalankan di awal Tahap 5; temuan dicatat sebagai F-xx baru. |
+| D-78 | Versi database dan Supabase lokal | PostgreSQL 17 di semua tempat (`config.toml`, CI, mode A) karena Supabase hanya menyediakan 15/17 (F-17). `packages/db-types` dan test L4 dibangkitkan/dijalankan di job CI dengan Supabase CLI, dengan cek drift. Perbaikan F-18 s/d F-22 masuk M0. Rincian: `docs/07-frontend-design.md` §1. |
+| D-79 | Arsitektur frontend | Shell statis + data diambil di klien lewat supabase-js (JWT user). Id entitas lewat query string (`/produk?id=`). Slug route berbahasa Indonesia, identifier kode bahasa Inggris. `proxy.ts` (segarkan sesi) dan `/auth/callback` (PKCE Google) adalah pengecualian auth pada D-61; tidak ada penulisan data lewat server Next.js. |
+| D-80 | Stack UI | Tailwind CSS v4 + primitif Radix (pola shadcn/ui), lucide-react, vaul, sonner. TanStack Query v5 + persist IndexedDB (data struk tidak di-persist). react-hook-form + zod dari `packages/contracts`. Grafik S-03 dengan SVG sendiri. ESLint (flat + jsx-a11y) + Prettier. |
+| D-81 | PWA dan offline | Serwist (spike di M0, cadangan workbox). SW tidak meng-cache REST/Storage/Auth. Antrean foto di IndexedDB diunggah dari halaman, bukan Background Sync. Mulai sesi belanja butuh online. Keluar/hapus akun menghapus data lokal (dengan peringatan jika antrean belum kosong). Ajakan pasang PWA di iOS + `storage.persist()`. Batas UI 10 bagian per struk, peringatan antrean > 50 MB. |
+| D-82 | Kamera dan gambar | Struk memakai kamera bawaan (`<input capture>`), label dan barcode memakai jendela bidik di app. Scan barcode disembunyikan jika BarcodeDetector tidak ada (D-58, tanpa polyfill di MVP). Kompresi di klien: sisi panjang 2560 px (struk) / 2048 px (lainnya), JPEG 0,85–0,88, target ≤ 1,5 MB, EXIF dibuang, aturan lewati kompresi; HEIC apa adanya di browser non-Safari, konversi di worker pada Tahap 6. |
+| D-83 | Login, bahasa, test | Login hanya dengan kode OTP 6 digit (tanpa magic link), template email Indonesia di `supabase/templates/`. UI hanya id-ID tanpa pustaka i18n, teks terpusat di `lib/copy/id.ts`. e2e Playwright memakai Supabase CLI di CI, profil Chromium dan WebKit. |
 
 ---
 
@@ -321,7 +327,7 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 | 2 | Database Design | ✅ Selesai ([domain model](docs/02-domain-model.md), [desain fisik](docs/03-database-design.md), [skema](db/schema.sql)) |
 | 3 | Wireframe | ✅ Selesai ([spesifikasi](docs/04-wireframe.md), [prototipe](docs/wireframes/index.html)) |
 | 4 | Backend | ✅ Selesai ([desain backend](docs/05-backend-design.md), [menjalankan lokal](docs/06-local-dev.md)) |
-| 5 | Frontend | 🔄 5a draft ([desain frontend](docs/07-frontend-design.md), [pertanyaan Q-43 s/d Q-64](docs/07-frontend-design.md#13-pertanyaan-untuk-didiskusikan)) |
+| 5 | Frontend | 🔄 5a disetujui ([desain frontend](docs/07-frontend-design.md)), 5b berikutnya (M0–M7) |
 | 6 | AI Integration (termasuk uji OCR, D-16) | — |
 | 7 | Production | — |
 
