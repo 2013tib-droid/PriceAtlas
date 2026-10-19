@@ -12,7 +12,7 @@ max_rows = 1000
 [db]
 port = 54322
 shadow_port = 54320
-major_version = 16
+major_version = 17   # Supabase CLI hanya menerima 15 atau 17 (lihat Q-43)
 
 [db.seed]
 enabled = true
@@ -22,7 +22,7 @@ sql_paths = ["./seed.sql"]
 enabled = true
 port = 54323
 
-[inbucket]
+[local_smtp]
 enabled = true
 port = 54324
 

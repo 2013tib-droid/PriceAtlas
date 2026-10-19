@@ -200,13 +200,13 @@ Test L1 `60_public_share.sql` dan `70_capture_pipeline.sql` membuka sesi kedua l
 
 ## 3. Mode B — Supabase CLI
 
-> Belum dijalankan di lingkungan pembuatan Tahap 4b (tanpa Docker). Langkah di bawah mengikuti dokumentasi Supabase CLI; perbedaan yang ditemukan saat dijalankan dicatat sebagai pertanyaan baru (lihat Q-42 di `docs/05-backend-design.md`).
+> Diuji otomatis oleh workflow `.github/workflows/supabase-l4.yml` (L4: manual, tiap malam, dan saat migration/worker berubah). Supabase CLI dipasang sebagai devDependency (`pnpm exec supabase …`). Postgres Supabase lokal = **17** (CLI hanya menerima 15/17), sedangkan harness L1 memakai 16 (Q-43).
 
 ### 3.1 Menyalakan Supabase lokal
 
 ```bash
-supabase start          # menerapkan supabase/migrations/* lalu supabase/seed.sql
-supabase status -o env  # API_URL, ANON_KEY, SERVICE_ROLE_KEY, DB_URL
+pnpm exec supabase start          # menerapkan supabase/migrations/* lalu supabase/seed.sql
+pnpm exec supabase status -o env  # API_URL, ANON_KEY, SERVICE_ROLE_KEY, DB_URL
 ```
 
 Perbedaan dengan mode A:
@@ -260,6 +260,14 @@ Job `delete_household` lalu dikerjakan worker (hapus file Storage, cascade data,
 pnpm --filter @priceatlas/db-types gen     # supabase gen types typescript --local
 ```
 
-### 3.6 Test L4 (opsional, manual)
+### 3.6 Test L4
 
-Belum diotomasi di Tahap 4b. Yang perlu dicek manual: policy Storage asli (unggah ke folder household lain ditolak, hapus oleh user ditolak), pemetaan error `PTnnn` → HTTP oleh PostgREST, OTP lewat Inbucket, dan default privileges asli (jalankan `db/tests/flows/99_privilege_inventory.sql` terhadap database Supabase lokal setelah `create schema test` + `\i db/tests/lib/privilege_inventory.sql`).
+```bash
+pnpm exec supabase start
+set -a; source <(pnpm exec supabase status -o env); set +a
+export SUPABASE_URL=$API_URL SUPABASE_ANON_KEY=$ANON_KEY SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY SUPABASE_DB_URL=$DB_URL
+pnpm test:l4                                   # tests/l4: Auth, PostgREST, Storage asli, worker, hapus akun, pg_cron
+psql "$SUPABASE_DB_URL" -X -q -f db/tests/flows/99_privilege_inventory.sql   # default privileges asli
+```
+
+Di cloud session Claude Code, `supabase start` butuh daemon Docker (`dockerd &`) dan akses jaringan ke registry image beserta host CDN-nya: `registry-1.docker.io`, `auth.docker.io`, `production.cloudfront.docker.com` (Docker Hub), atau `public.ecr.aws` + `d2glxqk2uabbnd.cloudfront.net` (ECR, pakai `SUPABASE_INTERNAL_IMAGE_REGISTRY=public.ecr.aws`).

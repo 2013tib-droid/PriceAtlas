@@ -1,0 +1,75 @@
+name: Supabase L4
+
+# L4 (docs/05 §8.1): migration dan alur terhadap Supabase lokal asli (`supabase start`),
+# bukan stub. Berjalan manual, tiap malam, dan saat migration/worker/test L4 berubah.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "7 18 * * *"          # 01:07 WIB
+  push:
+    paths:
+      - "supabase/**"
+      - "tests/l4/**"
+      - "apps/worker/src/**"
+      - "apps/web/lib/**"
+      - ".github/workflows/supabase-l4.yml"
+
+jobs:
+  l4:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GOOGLE_OAUTH_CLIENT_ID: dummy-ci
+      GOOGLE_OAUTH_SECRET: dummy-ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: supabase start (migration + seed.sql di Postgres Supabase asli)
+        run: pnpm exec supabase start
+
+      - name: Variabel koneksi
+        run: |
+          pnpm exec supabase status -o env > /tmp/sb.env
+          set -a; . /tmp/sb.env; set +a
+          {
+            echo "SUPABASE_URL=$API_URL"
+            echo "SUPABASE_ANON_KEY=$ANON_KEY"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY"
+            echo "SUPABASE_DB_URL=$DB_URL"
+          } >> "$GITHUB_ENV"
+          echo "::add-mask::$SERVICE_ROLE_KEY"
+
+      - name: Test L4 (Auth, PostgREST, Storage, worker, hapus akun, pg_cron, zona waktu)
+        run: pnpm test:l4
+
+      - name: Inventaris hak akses terhadap default privileges Supabase asli (F-09)
+        if: always()
+        run: psql "$SUPABASE_DB_URL" -X -q -v ON_ERROR_STOP=1 -f db/tests/flows/99_privilege_inventory.sql
+
+      - name: Bangkitkan tipe database (packages/db-types)
+        if: always()
+        run: |
+          pnpm exec supabase gen types typescript --local --schema public > /tmp/database.ts
+          mkdir -p /tmp/db-types && cp /tmp/database.ts /tmp/db-types/database.ts
+          if ! diff -q /tmp/database.ts packages/db-types/src/database.ts >/dev/null; then
+            echo "::notice::packages/db-types/src/database.ts berbeda dari hasil generate (lihat artifact db-types)"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: db-types
+          path: /tmp/db-types/database.ts
+          if-no-files-found: ignore
+
+      - name: supabase stop
+        if: always()
+        run: pnpm exec supabase stop --no-backup

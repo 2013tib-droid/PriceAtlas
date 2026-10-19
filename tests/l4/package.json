@@ -1,0 +1,19 @@
+{
+  "name": "@priceatlas/l4",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:l4": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@priceatlas/contracts": "workspace:*",
+    "@supabase/supabase-js": "^2.118.0",
+    "@types/node": "^22.20.0",
+    "@types/pg": "^8.15.0",
+    "pg": "^8.16.0",
+    "typescript": "5.9.3",
+    "vitest": "^4.1.12"
+  }
+}

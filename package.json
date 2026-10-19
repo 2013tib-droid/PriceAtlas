@@ -10,12 +10,17 @@
     "test": "pnpm -r --workspace-concurrency=1 test",
     "typecheck": "pnpm -r typecheck",
     "db:snapshot": "bash db/scripts/snapshot.sh",
-    "db:check-snapshot": "bash db/scripts/snapshot.sh --check"
+    "db:check-snapshot": "bash db/scripts/snapshot.sh --check",
+    "test:l4": "pnpm --filter @priceatlas/l4 test:l4"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
       "esbuild",
-      "sharp"
+      "sharp",
+      "supabase"
     ]
+  },
+  "devDependencies": {
+    "supabase": "^2.121.0"
   }
 }
