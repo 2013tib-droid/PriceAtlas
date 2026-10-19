@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | Nama sementara | Price Intelligence (repo: PriceAtlas) |
-| Status | Tahap 1 (Requirement) selesai, siap masuk Tahap 2 (Database Design) |
+| Status | Tahap 2a (Domain Model) draft, menunggu diskusi. Lihat [`docs/02-domain-model.md`](docs/02-domain-model.md) |
 | Terakhir diperbarui | 2026-10-19 |
 
 ---
@@ -262,7 +262,7 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 | Tahap | Nama | Status |
 |---|---|---|
 | 1 | Requirement | ✅ Selesai |
-| 2 | Database Design | ⏭️ Berikutnya |
+| 2 | Database Design | 🔄 2a Domain Model: draft ([docs/02-domain-model.md](docs/02-domain-model.md)) · 2b Desain Fisik: menunggu |
 | 3 | Wireframe | — |
 | 4 | Backend | — |
 | 5 | Frontend | — |
