@@ -68,6 +68,8 @@ test('setelah login: shell (app) terbuka offline dengan strip offline', async ({
   await page.goto(`${proxy.url}/masuk`);
   await page.getByLabel('Email').fill(email);
   await page.getByRole('button', { name: 'Kirim kode' }).click();
+  // Tunggu signInWithOtp selesai (user dibuat) sebelum generateLink, supaya tidak berlomba.
+  await expect(page.getByRole('heading', { name: 'Masukkan kode' })).toBeVisible();
   await page.getByLabel('Kode 6 angka').fill(await generateEmailOtp(email));
   await page.getByRole('button', { name: 'Masuk' }).click();
   await expect(page.getByTestId('signed-in-as')).toContainText(email);
