@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | Nama sementara | Price Intelligence (repo: PriceAtlas) |
-| Status | Tahap 2 (Database Design) selesai, siap masuk Tahap 3 (Wireframe) |
+| Status | Tahap 3 (Wireframe) draft, menunggu review |
 | Terakhir diperbarui | 2026-10-19 |
 
 ---
@@ -288,7 +288,7 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 |---|---|---|
 | 1 | Requirement | ✅ Selesai |
 | 2 | Database Design | ✅ Selesai ([domain model](docs/02-domain-model.md), [desain fisik](docs/03-database-design.md), [skema](db/schema.sql)) |
-| 3 | Wireframe | ⏭️ Berikutnya |
+| 3 | Wireframe | 📝 Draft, menunggu review ([spesifikasi](docs/04-wireframe.md), [prototipe](docs/wireframes/index.html)) |
 | 4 | Backend | — |
 | 5 | Frontend | — |
 | 6 | AI Integration (termasuk uji OCR, D-16) | — |
