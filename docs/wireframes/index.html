@@ -1,0 +1,1992 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PriceAtlas Wireframe</title>
+<!--
+  Wireframe low-fidelity Tahap 3. Spesifikasi: ../04-wireframe.md
+  Satu file, tanpa build step, tanpa dependensi. Grayscale, tanpa branding.
+  Navigasi: #<id-layar> atau #<id-layar>/<index-keadaan>, mis. #s10/1
+-->
+<style>
+  :root {
+    --ink: #111; --g1: #3a3a3a; --g2: #6b6b6b; --g3: #a3a3a3; --g4: #d4d4d4; --g5: #efefef; --bg: #fff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    display: flex; flex-direction: column; height: 100dvh;
+    background: #dcdcdc; color: var(--ink);
+    font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  a { color: inherit; }
+
+  /* ---------- Bilah kontrol wireframe (bukan bagian aplikasi) ---------- */
+  #wf { flex: none; background: #111; color: #fff; padding: 6px 8px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  #wf select, #wf button { font: inherit; font-size: 13px; border: 1px solid #666; background: #222; color: #fff; border-radius: 3px; padding: 5px 6px; }
+  #wf select { flex: 1 1 150px; min-width: 0; }
+  #wf button[aria-pressed="true"] { background: #fff; color: #111; }
+  #wf .lbl { font-size: 11px; color: #aaa; }
+
+  /* ---------- Bingkai HP ---------- */
+  #phone { flex: 1; min-height: 0; position: relative; width: 100%; max-width: 420px; margin: 0 auto; background: var(--bg); display: flex; flex-direction: column; overflow: hidden; }
+  @media (min-width: 600px) {
+    #phone { flex: none; height: min(840px, calc(100dvh - 90px)); margin: 16px auto; border: 2px solid var(--ink); border-radius: 22px; }
+  }
+  .screen, .st { display: none; flex: 1; min-height: 0; flex-direction: column; }
+  .screen.on, .st.on { display: flex; }
+  .top { flex: none; display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-bottom: 1px solid var(--g4); min-height: 48px; }
+  .top .back { text-decoration: none; font-size: 22px; line-height: 1; padding: 0 6px 0 0; }
+  .top h1 { font-size: 16px; margin: 0; flex: 1; }
+  .body { flex: 1; overflow-y: auto; padding: 12px 16px 20px; }
+  .dock { flex: none; border-top: 1px solid var(--g4); padding: 8px 16px; background: var(--bg); display: flex; gap: 8px; }
+  .dock > * { flex: 1; }
+
+  /* ---------- Banner sesi & tab bar ---------- */
+  #banner { display: none; flex: none; align-items: center; gap: 8px; padding: 6px 12px 6px 16px; border-top: 2px solid var(--ink); background: var(--g5); font-size: 13px; }
+  body.sess #banner.show { display: flex; }
+  #banner .grow { flex: 1; }
+  #tabbar { flex: none; display: none; border-top: 1px solid var(--g3); padding: 4px 4px calc(4px + env(safe-area-inset-bottom)); }
+  #tabbar.show { display: flex; }
+  #tabbar a { flex: 1; text-align: center; text-decoration: none; font-size: 11px; padding: 6px 0; color: var(--g2); }
+  #tabbar a .ic { display: block; font-size: 18px; line-height: 1.2; }
+  #tabbar a.on { color: var(--ink); font-weight: 700; }
+  #tabbar a.fab .ic { width: 52px; height: 52px; line-height: 50px; margin: -18px auto 0; border: 2px solid var(--ink); border-radius: 50%; background: var(--ink); color: #fff; font-size: 22px; }
+  .badge { display: inline-block; min-width: 16px; padding: 0 4px; border-radius: 8px; background: var(--ink); color: #fff; font-size: 10px; line-height: 16px; vertical-align: top; }
+
+  /* ---------- Komponen ---------- */
+  .card { border: 1px solid var(--g3); border-radius: 3px; padding: 10px 12px; margin: 8px 0; display: block; text-decoration: none; }
+  .card.dash { border-style: dashed; }
+  .card.thick { border: 2px solid var(--ink); }
+  .grp { border: 1px solid var(--g3); border-radius: 3px; margin: 10px 0; }
+  .grp > .gh { background: var(--g5); padding: 8px 12px; border-bottom: 1px solid var(--g3); }
+  .grp > .card { border: 0; border-bottom: 1px solid var(--g4); margin: 0; border-radius: 0; }
+  .grp > .card:last-child { border-bottom: 0; }
+  .row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .row.c { align-items: center; }
+  .grow { flex: 1; min-width: 0; }
+  .muted { color: var(--g2); font-size: 12px; }
+  .tiny { font-size: 11px; color: var(--g2); }
+  .b { font-weight: 700; }
+  .big { font-size: 22px; font-weight: 800; letter-spacing: -.3px; }
+  .xl { font-size: 30px; font-weight: 800; letter-spacing: -.5px; }
+  .h { font-size: 11px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: var(--g1); margin: 18px 0 4px; }
+  .tag { display: inline-block; border: 1px solid var(--ink); font-size: 10px; font-weight: 700; letter-spacing: .4px; padding: 0 4px; line-height: 15px; border-radius: 2px; vertical-align: middle; white-space: nowrap; }
+  .tag.solid { background: var(--ink); color: #fff; }
+  .tag.dim { border-style: dashed; color: var(--g2); border-color: var(--g2); font-weight: 600; }
+  .btn { display: block; text-align: center; text-decoration: none; border: 1.5px solid var(--ink); border-radius: 3px; padding: 11px 10px; font-weight: 600; background: var(--bg); cursor: pointer; font: inherit; font-weight: 600; color: inherit; width: 100%; }
+  .btn.pri { background: var(--ink); color: #fff; }
+  .btn.sm { display: inline-block; width: auto; padding: 5px 10px; font-size: 13px; }
+  .btn.dis { border-color: var(--g3); color: var(--g3); background: var(--g5); pointer-events: none; }
+  .btn.big { min-height: 56px; font-size: 16px; }
+  .btns { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .btns > .btn.sm { flex: 1; }
+  .ph { background: linear-gradient(to top right, transparent calc(50% - .5px), var(--g3) 50%, transparent calc(50% + .5px)), linear-gradient(to top left, transparent calc(50% - .5px), var(--g3) 50%, transparent calc(50% + .5px)); border: 1px solid var(--g3); color: var(--g2); font-size: 11px; display: flex; align-items: center; justify-content: center; text-align: center; }
+  .thumb { width: 44px; height: 44px; flex: none; }
+  .sk { background: var(--g4); border-radius: 2px; height: 12px; margin: 6px 0; }
+  .sk.w60 { width: 60%; } .sk.w40 { width: 40%; } .sk.w80 { width: 80%; } .sk.h24 { height: 24px; }
+  .note { border: 1px dashed var(--g1); background: repeating-linear-gradient(45deg, #fafafa, #fafafa 6px, #f0f0f0 6px, #f0f0f0 12px); padding: 8px 10px; font-size: 12px; margin: 8px 0; border-radius: 2px; }
+  .warn { border: 2px solid var(--ink); padding: 10px 12px; margin: 8px 0; border-radius: 3px; }
+  .warn .t { font-weight: 700; }
+  .strip { background: var(--ink); color: #fff; font-size: 12px; padding: 6px 16px; flex: none; }
+  .field { border: 1px solid var(--g2); border-radius: 3px; padding: 10px; margin: 4px 0 10px; display: flex; justify-content: space-between; gap: 8px; }
+  .field .v { font-weight: 600; }
+  .field.uncertain { border: 2px dashed var(--ink); }
+  label.l { display: block; font-size: 12px; color: var(--g1); margin-top: 6px; }
+  .search { display: flex; align-items: center; gap: 8px; border: 2px solid var(--ink); border-radius: 24px; padding: 10px 14px; text-decoration: none; }
+  .search .grow { color: var(--g2); }
+  .chip { display: inline-block; border: 1px solid var(--g2); border-radius: 14px; padding: 4px 10px; font-size: 13px; margin: 3px 2px; text-decoration: none; }
+  .chip.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .seg { display: flex; border: 1px solid var(--ink); border-radius: 3px; overflow: hidden; margin: 8px 0; }
+  .seg span { flex: 1; text-align: center; padding: 6px; font-size: 13px; }
+  .seg span.on { background: var(--ink); color: #fff; }
+  .li { display: flex; gap: 10px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--g4); text-decoration: none; }
+  .li:last-child { border-bottom: 0; }
+  .strike { text-decoration: line-through; color: var(--g2); }
+  .dimrow { color: var(--g2); }
+  .sub { padding-left: 14px; border-left: 2px solid var(--g4); margin: 4px 0 0 2px; font-size: 12px; color: var(--g1); }
+  .toggle { display: inline-block; width: 40px; height: 22px; border: 1.5px solid var(--ink); border-radius: 11px; position: relative; vertical-align: middle; flex: none; }
+  .toggle::after { content: ""; position: absolute; top: 2px; left: 2px; width: 15px; height: 15px; border-radius: 50%; background: var(--g3); }
+  .toggle.on { background: var(--ink); }
+  .toggle.on::after { left: 20px; background: #fff; }
+  .toggle.dis { border-color: var(--g3); }
+  .chk { display: inline-block; width: 18px; height: 18px; border: 1.5px solid var(--ink); border-radius: 2px; vertical-align: middle; text-align: center; line-height: 15px; font-size: 13px; flex: none; }
+  .chk.on::after { content: "✓"; }
+  .chart { height: 120px; border-left: 1px solid var(--g2); border-bottom: 1px solid var(--g2); position: relative; margin: 8px 0 18px 26px; }
+  .chart i { position: absolute; width: 8px; height: 8px; border: 1.5px solid var(--ink); border-radius: 50%; background: var(--bg); transform: translate(-50%, 50%); }
+  .chart i.f { background: var(--ink); }
+  .chart .y { position: absolute; left: -26px; font-size: 10px; color: var(--g2); transform: translateY(50%); }
+  .chart .x { position: absolute; bottom: -16px; font-size: 10px; color: var(--g2); transform: translateX(-50%); }
+  .chart .ln { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--g3); }
+  .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+  .keypad span { border: 1px solid var(--g3); border-radius: 3px; text-align: center; padding: 12px 0; font-size: 18px; font-weight: 600; }
+  .backdrop { flex: 1; min-height: 0; background: repeating-linear-gradient(-45deg, #e8e8e8, #e8e8e8 8px, #dedede 8px, #dedede 16px); position: relative; }
+  .backdrop .lbl { position: absolute; top: 12px; left: 16px; font-size: 12px; color: var(--g2); }
+  .sheet { flex: none; border-top: 2px solid var(--ink); border-radius: 14px 14px 0 0; padding: 8px 16px 16px; background: var(--bg); max-height: 82%; overflow-y: auto; }
+  .sheet .grab { width: 40px; height: 4px; background: var(--g3); border-radius: 2px; margin: 0 auto 10px; }
+  .opt { display: flex; gap: 12px; align-items: center; border: 1.5px solid var(--ink); border-radius: 3px; padding: 14px 12px; margin: 8px 0; text-decoration: none; }
+  .opt .ic { font-size: 22px; width: 30px; text-align: center; }
+  .opt.sel { border-width: 3px; }
+  .cam { flex: 1; min-height: 0; background: #2b2b2b; color: #ccc; position: relative; display: flex; align-items: center; justify-content: center; }
+  .cam .frame { width: 70%; height: 72%; border: 2px dashed #bbb; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 12px; padding: 10px; }
+  .cam .frame.wide { height: 34%; width: 80%; }
+  .cam .hint { position: absolute; top: 10px; left: 12px; right: 12px; font-size: 12px; background: rgba(0,0,0,.5); padding: 6px 8px; border-radius: 3px; color: #eee; }
+  .camctl { flex: none; background: #1c1c1c; color: #eee; padding: 10px 16px 16px; }
+  .camctl .thumbs { display: flex; gap: 6px; margin-bottom: 10px; min-height: 44px; }
+  .camctl .thumbs span { width: 36px; height: 44px; border: 1px solid #888; font-size: 10px; display: flex; align-items: center; justify-content: center; }
+  .camctl .ctl { display: flex; align-items: center; justify-content: space-between; }
+  .shutter { width: 72px; height: 72px; border-radius: 50%; border: 4px solid #eee; background: #ddd; box-shadow: inset 0 0 0 4px #1c1c1c; }
+  .camctl .side { width: 80px; text-align: center; font-size: 13px; color: #eee; text-decoration: none; }
+  .dialog { position: absolute; left: 16px; right: 16px; top: 22%; background: var(--bg); color: var(--ink); border: 2px solid var(--ink); border-radius: 6px; padding: 14px; }
+  .toast { margin: 10px 0; background: var(--ink); color: #fff; padding: 10px 12px; border-radius: 3px; font-size: 13px; }
+  .bubble { border: 1px solid var(--g3); border-radius: 10px; padding: 10px 12px; margin: 8px 0; }
+  .bubble.me { margin-left: 40px; background: var(--g5); }
+  .bubble.ai { margin-right: 20px; }
+  .steps { display: flex; gap: 4px; margin: 8px 0 14px; }
+  .steps span { flex: 1; height: 4px; background: var(--g4); }
+  .steps span.on { background: var(--ink); }
+  .conf { font-size: 10px; font-weight: 700; border: 1px dashed var(--ink); padding: 0 4px; border-radius: 2px; }
+  hr { border: 0; border-top: 1px solid var(--g4); margin: 12px 0; }
+  ul.plain { padding-left: 18px; margin: 6px 0; }
+  ul.plain li { margin: 3px 0; }
+  .idx a { display: block; padding: 7px 0; border-bottom: 1px solid var(--g4); text-decoration: none; }
+  .idx a .tiny { display: block; }
+
+  /* Peta data: tabel.kolom di samping elemen */
+  .m { display: none; font: 10px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace; font-style: normal; border: 1px dashed var(--g2); color: var(--g1); background: #f6f6f6; padding: 0 3px; margin: 1px 2px; border-radius: 2px; word-break: break-all; }
+  .m.x { border: 1.5px solid var(--ink); background: #fff; font-weight: 700; color: var(--ink); }
+  body.map .m { display: inline-block; }
+</style>
+</head>
+<body>
+
+<div id="wf" role="toolbar" aria-label="Kontrol wireframe">
+  <select id="selScreen" aria-label="Layar"></select>
+  <select id="selState" aria-label="Keadaan"></select>
+  <button id="btnMap" aria-pressed="false" title="Tampilkan tabel.kolom">Peta data</button>
+  <button id="btnSess" aria-pressed="false" title="Simulasikan sesi belanja aktif">Sesi aktif</button>
+</div>
+
+<div id="phone">
+
+<!-- =====================================================================
+     INDEX
+     ===================================================================== -->
+<section class="screen" id="idx" data-title="Indeks layar">
+  <div class="st" data-state="Indeks">
+    <div class="top"><h1>Wireframe PriceAtlas · Tahap 3</h1></div>
+    <div class="body idx">
+      <p class="muted">Low-fidelity. Ganti layar dan keadaan lewat bilah hitam di atas. <b>Peta data</b> menampilkan <code>tabel.kolom</code> dari <code>db/schema.sql</code>. Tanda ⛔ berarti data tidak ada di skema. <b>Sesi aktif</b> menyimulasikan sesi belanja di semua layar.</p>
+      <div class="h">8 · Onboarding</div>
+      <a href="#s00a">S-00a Masuk</a>
+      <a href="#s00b">S-00b Selamat datang</a>
+      <a href="#s00c">S-00c Program member (onboarding)</a>
+      <div class="h">1 · Cari sebelum membeli (inti)</div>
+      <a href="#s01">S-01 Beranda / Cari <span class="tiny">kosong, normal, sesi aktif, offline</span></a>
+      <a href="#s02">S-02 Hasil cari <span class="tiny">tren kurang, cabang tak diketahui, privat, member, bundle</span></a>
+      <a href="#s03b">S-03b Cek harga rak</a>
+      <a href="#s20">S-20 Tanya (AI lewat tools)</a>
+      <div class="h">2 · Detail produk</div>
+      <a href="#s03">S-03 Detail produk</a>
+      <a href="#s04">S-04 Bandingkan ukuran</a>
+      <a href="#s05">S-05 Lebih hemat di mana</a>
+      <div class="h">3 · Foto struk</div>
+      <a href="#s06">S-06 Pilih jenis foto</a>
+      <a href="#s07">S-07 Kamera</a>
+      <a href="#s07b">S-07b Pilih dari galeri</a>
+      <a href="#s08">S-08 Unggahan</a>
+      <a href="#s09">S-09 Detail unggahan (status)</a>
+      <a href="#s10">S-10 Konfirmasi / detail struk</a>
+      <div class="h">4–5 · Sesi belanja, label, marketplace</div>
+      <a href="#s13">S-13 Sesi belanja</a>
+      <a href="#s12">S-12 Pilih toko &amp; cabang</a>
+      <a href="#s11">S-11 Konfirmasi label &amp; screenshot</a>
+      <div class="h">6 · Koreksi data</div>
+      <a href="#s16">S-16 Detail &amp; koreksi harga</a>
+      <a href="#s14">S-14 Pilih produk</a>
+      <a href="#s15">S-15 Produk baru</a>
+      <a href="#s17">S-17 Gabungkan produk</a>
+      <a href="#s18">S-18 Pisahkan produk</a>
+      <div class="h">7 · Pengaturan</div>
+      <a href="#s19">S-19 Saya</a>
+      <a href="#s19b">S-19b Program member</a>
+      <a href="#s19c">S-19c Berbagi harga publik</a>
+      <hr>
+      <a class="btn pri" href="#s00a">Mulai dari awal (onboarding)</a>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-00a MASUK
+     ===================================================================== -->
+<section class="screen" id="s00a" data-title="S-00a Masuk">
+  <div class="st" data-state="Isi email">
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <div class="ph" style="height:90px;width:90px;margin:0 auto 16px">[logo]</div>
+      <p style="text-align:center" class="b">Cek dulu sebelum beli</p>
+      <label class="l">Email</label>
+      <div class="field"><span class="muted">nama@email.com</span></div>
+      <a class="btn pri big" href="#s00a/1">Kirim kode masuk</a>
+      <p style="text-align:center" class="muted">atau</p>
+      <a class="btn" href="#s00b">Lanjut dengan Google</a>
+      <p class="tiny" style="text-align:center">Metode final: W-17</p>
+    </div>
+  </div>
+  <div class="st" data-state="Masukkan kode">
+    <div class="top"><a class="back" href="#s00a">‹</a><h1>Masukkan kode</h1></div>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <p>Kode 6 digit dikirim ke <b>nama@email.com</b></p>
+      <div class="row" style="gap:6px;margin:10px 0">
+        <div class="field grow" style="justify-content:center">4</div><div class="field grow" style="justify-content:center">8</div><div class="field grow" style="justify-content:center">1</div><div class="field grow" style="justify-content:center">_</div><div class="field grow" style="justify-content:center">_</div><div class="field grow" style="justify-content:center">_</div>
+      </div>
+      <a class="btn pri big" href="#s00b">Masuk</a>
+      <p class="muted" style="text-align:center">Kirim ulang kode (0:42)</p>
+    </div>
+  </div>
+  <div class="st" data-state="Kode salah / gagal">
+    <div class="top"><a class="back" href="#s00a">‹</a><h1>Masukkan kode</h1></div>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <div class="warn"><span class="t">Kode salah atau kedaluwarsa.</span> Coba lagi atau kirim kode baru.</div>
+      <a class="btn" href="#s00a/1">Kirim kode baru</a>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-00b SELAMAT DATANG
+     ===================================================================== -->
+<section class="screen" id="s00b" data-title="S-00b Selamat datang">
+  <div class="st" data-state="Tunggal">
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <div class="steps"><span class="on"></span><span></span></div>
+      <div class="ph" style="height:150px;margin-bottom:16px">[ilustrasi: label harga di rak + tanda tanya]</div>
+      <div class="big">Murah atau mahal?<br>Cek dulu sebelum beli.</div>
+      <p>Foto struk dan label harga. Kami bandingkan harga di depanmu dengan <b>histori belanjamu sendiri</b>.</p>
+      <ul class="plain">
+        <li>Harga termurah 90 hari terakhir, dan di toko mana</li>
+        <li>Harga per gram / per ml, supaya ukuran bisa dibandingkan</li>
+        <li>Naik atau turun dibanding sebelumnya</li>
+      </ul>
+      <p class="tiny">Bukan aplikasi pencatat pengeluaran. Data harga privat secara default.</p>
+    </div>
+    <div class="dock"><a class="btn" href="#s01">Lewati</a><a class="btn pri" href="#s00c">Mulai</a></div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-00c PROGRAM MEMBER (ONBOARDING)
+     ===================================================================== -->
+<section class="screen" id="s00c" data-title="S-00c Program member (onboarding)">
+  <div class="st" data-state="Tunggal">
+    <div class="body">
+      <div class="steps"><span class="on"></span><span class="on"></span></div>
+      <div class="big">Kamu member di mana?</div>
+      <p class="muted">Harga member hanya dihitung sebagai harga terbaik untuk program yang kamu ikuti. Bisa diubah nanti di <b>Saya</b>.</p>
+      <div class="li"><div class="grow"><div class="b">AEON Member</div><div class="tiny">AEON</div></div><span class="toggle on"></span></div>
+      <div class="li"><div class="grow"><div class="b">Alfagift</div><div class="tiny">Alfamart</div></div><span class="toggle"></span></div>
+      <div class="li"><div class="grow"><div class="b">Poinku</div><div class="tiny">Indomaret</div></div><span class="toggle"></span></div>
+      <p class="tiny"><i class="m">member_program.name</i><i class="m">household_program_membership</i></p>
+      <div class="note">Ditanyakan di awal karena bergabung belakangan tidak menghitung ulang harga lama (D-41).</div>
+    </div>
+    <div class="dock"><a class="btn" href="#s01">Lewati</a><a class="btn pri" href="#s01">Simpan &amp; lanjut</a></div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-01 BERANDA / CARI
+     ===================================================================== -->
+<section class="screen" id="s01" data-title="S-01 Beranda / Cari" data-tab="cari">
+  <div class="st" data-state="Kosong (pengguna baru)">
+    <div class="top"><h1>Cari harga</h1></div>
+    <div class="body">
+      <p class="muted">Histori harga masih kosong. Setiap struk yang kamu foto menambah data pembanding.</p>
+      <a class="card thick" href="#s06">
+        <div class="row c"><span class="xl">📷</span><div class="grow"><div class="b">Foto struk belanja terakhirmu</div><div class="muted">Satu struk = 10–30 harga sekaligus. Cara tercepat mengisi histori.</div></div></div>
+      </a>
+      <a class="card" href="#s13">
+        <div class="b">Lagi di toko?</div><div class="muted">Mulai sesi belanja supaya label harga tercatat di cabang yang benar.</div>
+      </a>
+      <a class="card" href="#s02">
+        <div class="b">Coba cari produk</div><div class="muted">Kamu bisa melihat produk dari katalog. Harganya muncul setelah ada data darimu.</div>
+      </a>
+    </div>
+    <div class="dock" style="display:block"><a class="search" href="#s02"><span>🔍</span><span class="grow">Cari produk, mis. "milo"</span><span title="Scan barcode (U-22)">▥</span></a></div>
+  </div>
+
+  <div class="st" data-state="Normal">
+    <div class="top"><h1>Cari harga</h1><a class="tag solid" href="#s08">2 perlu dicek</a></div>
+    <div class="body">
+      <div class="h">Pencarian terakhir</div>
+      <a class="chip" href="#s02">milo</a><a class="chip" href="#s02">bimoli</a><a class="chip" href="#s02">ultra milk</a><a class="chip" href="#s02">indomie goreng</a>
+      <i class="m">💾 klien</i>
+      <div class="h">Baru dicek</div>
+      <a class="card" href="#s03">
+        <div class="row"><span class="b">Milo Original 200g</span><span class="muted">↓ 4%</span></div>
+        <div class="row"><span>Rp19.500 <span class="tag">PROMO</span></span><span class="b">Rp97,5/g</span></div>
+        <div class="muted">AEON · BSD City · 12 Okt</div>
+      </a>
+      <a class="card" href="#s03">
+        <div class="row"><span class="b">Bimoli Special 2 L</span><span class="muted">tren: data belum cukup</span></div>
+        <div class="row"><span>Rp38.500 <span class="tag">PROMO</span></span><span class="b">Rp19,3/ml</span></div>
+        <div class="muted">Alfamart · Pamulang 2 · 10 Okt</div>
+      </a>
+      <div class="h">Harga baru masuk</div>
+      <i class="m">price_record (price_record_recent_idx)</i>
+      <div class="li"><div class="grow">Indomie Goreng 85g<div class="tiny">Indomaret · Cendana · kemarin</div></div><div>Rp3.100 <span class="tag">NORMAL</span></div></div>
+      <div class="li"><div class="grow">Ultra Milk Full Cream 1 L<div class="tiny">AEON · BSD City · 12 Okt</div></div><div>Rp18.900 <span class="tag">NORMAL</span></div></div>
+      <div class="li"><div class="grow">Jeruk Medan<div class="tiny">AEON · BSD City · 12 Okt · 0,535 kg</div></div><div>Rp32.000/kg</div></div>
+    </div>
+    <div class="dock" style="display:block"><a class="search" href="#s02"><span>🔍</span><span class="grow">Cari produk, mis. "milo"</span><span>▥</span></a></div>
+  </div>
+
+  <div class="st" data-state="Sesi aktif">
+    <div class="top"><h1>Cari harga</h1></div>
+    <div class="body">
+      <div class="note">Nyalakan tombol <b>Sesi aktif</b> di bilah atas untuk melihat banner sesi di atas tab bar (U-13).</div>
+      <div class="h">Label di sesi ini · AEON BSD City</div>
+      <a class="card" href="#s13">
+        <div class="row"><span>Milo Original 200g</span><span>Rp19.500 <span class="tag">PROMO</span></span></div>
+        <div class="muted">Setara termurahmu 90 hari</div>
+      </a>
+      <a class="card" href="#s13"><div class="row"><span>Ultra Milk Full Cream 1 L</span><span>Rp18.900</span></div><div class="muted">7% lebih mahal dari termurahmu (Rp17.600 · Alfamart)</div></a>
+      <a class="card dash" href="#s13"><span class="muted">+2 label lagi · 1 perlu dicek ›</span></a>
+    </div>
+    <div class="dock" style="display:block"><a class="search" href="#s02"><span>🔍</span><span class="grow">Cek harga produk di rak…</span><span>▥</span></a></div>
+  </div>
+
+  <div class="st" data-state="Offline">
+    <div class="strip">Offline. Foto tetap tersimpan dan diunggah otomatis.</div>
+    <div class="top"><h1>Cari harga</h1></div>
+    <div class="body">
+      <div class="h">Baru dicek (tersimpan di HP)</div>
+      <a class="card" href="#s03">
+        <div class="row"><span class="b">Milo Original 200g</span><span class="tag dim">data tersimpan</span></div>
+        <div class="row"><span>Rp19.500 <span class="tag">PROMO</span></span><span class="b">Rp97,5/g</span></div>
+        <div class="muted">AEON · BSD City · 12 Okt · mungkin tidak terbaru</div>
+      </a>
+      <div class="card dash"><div class="b">Menunggu sinyal (3 foto)</div><div class="muted">Akan diunggah otomatis.</div><i class="m">💾 antrean klien (U-17)</i></div>
+      <p class="tiny">Cakupan cache offline: W-22</p>
+    </div>
+    <div class="dock" style="display:block"><a class="search" href="#s02/7"><span>🔍</span><span class="grow">Cari di data tersimpan…</span></a></div>
+  </div>
+
+  <div class="st" data-state="Memuat">
+    <div class="top"><h1>Cari harga</h1></div>
+    <div class="body">
+      <div class="h">Pencarian terakhir</div><div class="sk w60"></div>
+      <div class="h">Baru dicek</div>
+      <div class="card"><div class="sk w60"></div><div class="sk h24 w40"></div><div class="sk w80"></div></div>
+      <div class="card"><div class="sk w60"></div><div class="sk h24 w40"></div><div class="sk w80"></div></div>
+    </div>
+    <div class="dock" style="display:block"><div class="search"><span>🔍</span><span class="grow">Cari produk…</span></div></div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-02 HASIL CARI
+     ===================================================================== -->
+<section class="screen" id="s02" data-title="S-02 Hasil cari" data-tab="cari">
+  <div class="st" data-state="Normal (milo)">
+    <div class="top"><a class="back" href="#s01">‹</a><h1>"milo"</h1><span class="muted">6 produk</span></div>
+    <div class="body">
+      <div class="grp">
+        <div class="gh">
+          <div class="row"><span class="b">Milo Original</span><a class="tiny" href="#s04">Bandingkan ukuran ›</a></div>
+          <div class="muted">Paling hemat per gram: <b>500g</b> (Rp91,8/g)</div>
+          <i class="m">product_group.name</i><i class="m">ƒ min(best_90d_unit_price) per unit.dimension</i>
+        </div>
+        <a class="card" href="#s03">
+          <div class="row"><span class="b">Milo Original 200g</span><span>↓ 4% <span class="tiny">vs 30 hr sebelumnya</span></span></div>
+          <i class="m">product.name</i><i class="m">pack_count×content_size content_unit</i><i class="m">trend_direction, trend_pct</i>
+          <div class="row"><span class="big">Rp19.500 <span class="tag">PROMO</span></span><span class="b">Rp97,5/g</span></div>
+          <i class="m">best_90d_effective_price</i><i class="m">best_90d_price_basis</i><i class="m">best_90d_unit_price</i>
+          <div>AEON · BSD City · 12 Okt <span class="tiny">· terbaik 90 hari</span></div>
+          <i class="m">best_90d_store_id→store.name</i><i class="m">best_90d_branch_id→branch.name</i><i class="m">best_90d_date</i>
+          <div class="muted">Sepanjang masa: Rp18.900 <span class="tag">NORMAL</span> · Alfamart · Pamulang 2 · 2 Mar 2026</div>
+          <i class="m">best_all_*</i>
+          <div class="tiny">9 data · terakhir 3 hari lalu</div>
+          <i class="m">record_count</i><i class="m">last_transaction_date</i>
+          <div class="sub">Ada harga member AEON Rp17.900 · tidak dihitung karena kamu belum terdaftar · <u>Atur</u> <i class="m x">ƒ query price_record (X-07)</i></div>
+        </a>
+        <a class="card" href="#s03">
+          <div class="row"><span class="b">Milo Original 500g</span><span class="muted">Tren: data belum cukup</span></div>
+          <div class="row"><span class="big">Rp45.900 <span class="tag">NORMAL</span></span><span class="b">Rp91,8/g</span></div>
+          <div>AEON · BSD City · 5 Okt</div>
+          <div class="muted">Sepanjang masa: sama</div>
+          <div class="tiny">3 data · terakhir 5 Okt</div>
+          <i class="m">trend_direction IS NULL</i>
+        </a>
+        <a class="card" href="#s03/3">
+          <div class="row"><span class="b">Milo Original 1 kg</span></div>
+          <div class="muted">Belum ada data harga di historimu</div>
+          <div class="btns"><span class="btn sm">Cek harga rak</span></div>
+          <i class="m x">left join price_summary (W-06)</i>
+        </a>
+      </div>
+
+      <div class="grp">
+        <div class="gh"><div class="row"><span class="b">Milo 3in1</span></div></div>
+        <a class="card" href="#s03">
+          <div class="row"><span class="b">Milo 3in1 Activ-Go 10 × 35g</span><span class="muted">Tren: data belum cukup</span></div>
+          <div class="row"><span class="big">Rp21.000 <span class="tag">PROMO</span></span><span class="b">Rp60,0/g</span></div>
+          <div>Indomaret · <i>cabang tidak diketahui</i> · 28 Sep</div>
+          <i class="m">best_90d_branch_id IS NULL (D-28)</i>
+          <div class="tiny">Rp2.100/sachet · 2 data · terakhir 28 Sep</div>
+          <i class="m">ƒ effective_price ÷ pack_count</i>
+        </a>
+      </div>
+
+      <a class="card" href="#s03/4">
+        <div class="row"><span class="b">Milo Can 400g (impor) <span class="tag">PRIBADI</span></span></div>
+        <i class="m">product.household_id IS NOT NULL</i>
+        <div class="muted">Belum ada harga 90 hari terakhir</div>
+        <div class="row"><span class="big">Rp62.000 <span class="tag">NORMAL</span></span><span class="b">Rp155,0/g</span></div>
+        <div>Ranch Market · Pondok Indah · sepanjang masa</div>
+        <div class="tiny">1 data · terakhir dicatat 5 bln lalu</div>
+        <i class="m">best_90d_* IS NULL</i>
+      </a>
+
+      <a class="card" href="#s03">
+        <div class="row"><span class="b">Milo UHT 180 ml</span></div>
+        <div class="muted">Hanya ada 1 data bundle · tidak dipakai untuk harga terbaik</div>
+        <span class="tag dim">BUNDLE</span> <i class="m x">ƒ query is_bundle (X-07)</i>
+      </a>
+
+      <a class="card dash" href="#s20"><span>💬 Tanya: <i>"milo paling murah di mana?"</i></span></a>
+    </div>
+    <div class="dock" style="display:block"><div class="search"><span>🔍</span><span class="grow" style="color:var(--ink)">milo</span><span>✕</span></div></div>
+  </div>
+
+  <div class="st" data-state="Memuat">
+    <div class="top"><a class="back" href="#s01">‹</a><h1>"milo"</h1></div>
+    <div class="body">
+      <div class="card"><div class="sk w60"></div><div class="sk h24 w40"></div><div class="sk w80"></div><div class="sk w60"></div></div>
+      <div class="card"><div class="sk w60"></div><div class="sk h24 w40"></div><div class="sk w80"></div><div class="sk w60"></div></div>
+      <div class="card"><div class="sk w60"></div><div class="sk h24 w40"></div><div class="sk w80"></div></div>
+    </div>
+    <div class="dock" style="display:block"><div class="search"><span>🔍</span><span class="grow" style="color:var(--ink)">milo</span></div></div>
+  </div>
+
+  <div class="st" data-state="Tidak ditemukan">
+    <div class="top"><a class="back" href="#s01">‹</a><h1>"milo actv"</h1></div>
+    <div class="body">
+      <p class="b">Tidak ada produk "milo actv".</p>
+      <p class="muted">Coba kata lain, scan barcode, atau foto labelnya.</p>
+      <div class="btns"><a class="btn sm" href="#s07/4">▥ Scan barcode</a><a class="btn sm" href="#s07/1">📷 Foto label</a></div>
+      <a class="card dash" href="#s20"><span>💬 Tanya: <i>"milo actv"</i></span></a>
+    </div>
+    <div class="dock" style="display:block"><div class="search"><span>🔍</span><span class="grow" style="color:var(--ink)">milo actv</span><span>✕</span></div></div>
+  </div>
+
+  <div class="st" data-state="Brand tidak ketemu (W-06)">
+    <div class="top"><a class="back" href="#s01">‹</a><h1>"nestle"</h1></div>
+    <div class="body">
+      <p class="b">Tidak ada produk "nestle".</p>
+      <div class="note">Contoh masalah T-6: <code>product.search_text</code> tidak memuat nama brand, jadi Milo tidak ketemu lewat "nestle". Usulan W-06: search ikut join <code>brand.name</code>.</div>
+    </div>
+    <div class="dock" style="display:block"><div class="search"><span>🔍</span><span class="grow" style="color:var(--ink)">nestle</span></div></div>
+  </div>
+
+  <div class="st" data-state="Gagal (jaringan)">
+    <div class="top"><a class="back" href="#s01">‹</a><h1>"milo"</h1></div>
+    <div class="body">
+      <div class="warn"><span class="t">Gagal memuat hasil.</span> Periksa koneksi.</div>
+      <a class="btn" href="#s02">Coba lagi</a>
+    </div>
+    <div class="dock" style="display:block"><div class="search"><span>🔍</span><span class="grow" style="color:var(--ink)">milo</span></div></div>
+  </div>
+
+  <div class="st" data-state="Pengguna baru (katalog saja)">
+    <div class="top"><a class="back" href="#s01">‹</a><h1>"milo"</h1></div>
+    <div class="body">
+      <p class="muted">Produk ditemukan di katalog, tetapi belum ada harga di historimu.</p>
+      <a class="card" href="#s03/3"><div class="b">Milo Original 200g</div><div class="muted">Belum ada data harga</div><div class="btns"><span class="btn sm">Cek harga rak</span></div></a>
+      <a class="card" href="#s03/3"><div class="b">Milo Original 500g</div><div class="muted">Belum ada data harga</div></a>
+      <div class="note">Data publik pengguna lain tidak ditampilkan (W-09, default: tidak di MVP).</div>
+    </div>
+    <div class="dock" style="display:block"><div class="search"><span>🔍</span><span class="grow" style="color:var(--ink)">milo</span></div></div>
+  </div>
+
+  <div class="st" data-state="Ringkasan sedang diperbarui">
+    <div class="top"><a class="back" href="#s01">‹</a><h1>"milo"</h1></div>
+    <div class="body">
+      <p class="tiny">⟳ Ringkasan sedang diperbarui…</p>
+      <a class="card" href="#s03"><div class="b">Milo Original 200g</div><div class="row"><span class="big">Rp19.500 <span class="tag">PROMO</span></span><span class="b">Rp97,5/g</span></div><div>AEON · BSD City · 12 Okt</div></a>
+      <i class="m">price_summary.refreshed_at &lt; perubahan terakhir</i>
+    </div>
+    <div class="dock" style="display:block"><div class="search"><span>🔍</span><span class="grow" style="color:var(--ink)">milo</span></div></div>
+  </div>
+
+  <div class="st" data-state="Offline (cache)">
+    <div class="strip">Offline. Hasil dari data tersimpan di HP.</div>
+    <div class="top"><a class="back" href="#s01/3">‹</a><h1>"milo"</h1></div>
+    <div class="body">
+      <a class="card" href="#s03"><div class="row"><span class="b">Milo Original 200g</span><span class="tag dim">tersimpan</span></div><div class="row"><span class="big">Rp19.500 <span class="tag">PROMO</span></span><span class="b">Rp97,5/g</span></div><div>AEON · BSD City · 12 Okt</div></a>
+      <p class="muted">Produk lain tidak tersedia offline.</p>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-03 DETAIL PRODUK
+     ===================================================================== -->
+<section class="screen" id="s03" data-title="S-03 Detail produk" data-tab="cari">
+  <div class="st" data-state="Normal">
+    <div class="top"><a class="back" href="#s02">‹</a><h1>Milo Original 200g</h1></div>
+    <div class="body">
+      <div class="row c"><div class="ph thumb">[ikon]</div><div class="grow"><div class="muted">Nestlé · Minuman · 1 × 200 g</div><div class="tiny">Group: Milo Original</div></div></div>
+      <i class="m">brand.name</i><i class="m">category.name</i><i class="m">product_group.name</i>
+
+      <div class="card thick">
+        <div class="tiny">Termurah 90 hari</div>
+        <div class="row"><span class="xl">Rp19.500</span><span class="big">Rp97,5/g</span></div>
+        <div><span class="tag">PROMO</span> AEON · BSD City · 12 Okt</div>
+        <hr>
+        <div class="row"><span class="muted">Sepanjang masa</span><span>Rp18.900 <span class="tag">NORMAL</span> · Rp94,5/g</span></div>
+        <div class="tiny" style="text-align:right">Alfamart · Pamulang 2 · 2 Mar 2026</div>
+        <div class="row"><span class="muted">Terakhir</span><span>Rp21.200 · Alfamart · 3 hari lalu</span></div>
+        <i class="m">last_effective_price</i><i class="m x">toko terakhir: ƒ price_record (X-06)</i>
+        <div class="row"><span class="muted">Tren</span><span class="b">↓ 4% vs 30 hari sebelumnya</span></div>
+        <div class="tiny">9 data · terakhir 16 Okt</div>
+      </div>
+
+      <div class="h">Grafik harga per gram</div>
+      <div class="seg"><span class="on">Harga efektif</span><span>Hanya harga normal</span></div>
+      <i class="m">ƒ normal_price ÷ ukuran (D-33)</i>
+      <div class="chart">
+        <span class="y" style="bottom:100%">110</span><span class="y" style="bottom:50%">100</span><span class="y" style="bottom:0">90</span>
+        <span class="ln" style="bottom:37.5%"></span>
+        <i style="left:6%;bottom:22.5%" class="f"></i>
+        <i style="left:58%;bottom:92.5%"></i><i style="left:64%;bottom:87.5%"></i>
+        <i style="left:72%;bottom:90%"></i><i style="left:78%;bottom:97.5%"></i>
+        <i style="left:84%;bottom:72.5%"></i><i style="left:92%;bottom:37.5%" class="f"></i>
+        <i style="left:97%;bottom:80%"></i>
+        <span class="x" style="left:6%">Mar</span><span class="x" style="left:58%">Agu</span><span class="x" style="left:78%">Sep</span><span class="x" style="left:95%">Okt</span>
+      </div>
+      <p class="tiny">● = harga terbaik. Bundle tidak ditampilkan. Garis putus = terbaik 90 hari.</p>
+
+      <div class="h">Lebih hemat di mana · 90 hari</div>
+      <div class="li"><div class="grow">AEON · BSD City</div><div>rata-rata Rp103,0/g</div></div>
+      <div class="li"><div class="grow">Shopee · Nestlé Official Store<div class="tiny">belum termasuk ongkir</div></div><div>Rp104,5/g</div></div>
+      <div class="li"><div class="grow">Alfamart · Pamulang 2</div><div>Rp107,3/g</div></div>
+      <a class="btn sm" href="#s05">Lihat semua toko ›</a>
+
+      <div class="h">Ukuran lain di Milo Original</div>
+      <a class="li" href="#s04"><div class="grow">500 g</div><div class="b">Rp91,8/g · 6% lebih hemat</div></a>
+      <a class="li" href="#s04"><div class="grow">1 kg</div><div class="muted">belum ada harga</div></a>
+
+      <div class="h">Histori (9 dihitung · 1 bundle)</div>
+      <i class="m">price_record WHERE product_id ORDER BY transaction_date DESC</i>
+      <a class="li" href="#s16/1"><div class="ph thumb">🧾</div><div class="grow">16 Okt · Alfamart · Pamulang 2<div class="tiny">struk</div></div><div style="text-align:right">Rp21.200 <span class="tag">NORMAL</span><div class="tiny">Rp106,0/g</div></div></a>
+      <a class="li" href="#s16/1"><div class="ph thumb">🧾</div><div class="grow">12 Okt · AEON · BSD City<div class="tiny">struk · normal Rp22.900</div></div><div style="text-align:right">Rp19.500 <span class="tag">PROMO</span><div class="tiny">Rp97,5/g ● terbaik</div></div></a>
+      <a class="li" href="#s16"><div class="ph thumb">🏷</div><div class="grow">12 Okt · AEON · BSD City<div class="tiny">label · promo 10–16 Okt</div><div class="tiny"><span class="tag dim">MEMBER Rp17.900 · tidak dihitung</span></div></div><div style="text-align:right">Rp19.500 <span class="tag">PROMO</span><div class="tiny">Rp97,5/g</div></div></a>
+      <i class="m">member_price + member_program_id, price_basis≠'member' (D-27)</i>
+      <a class="li" href="#s16/2"><div class="ph thumb">📱</div><div class="grow">3 Okt · Shopee · Nestlé Official Store<div class="tiny">screenshot · ongkir Rp12.000 (info)</div></div><div style="text-align:right">Rp20.900 <span class="tag">PROMO</span><div class="tiny">Rp104,5/g</div></div></a>
+      <i class="m">price_record.extra (D-36)</i>
+      <a class="li" href="#s16/1"><div class="ph thumb">🧾</div><div class="grow">28 Sep · AEON · BSD City<div class="tiny">struk · 2 × Rp21.900</div></div><div style="text-align:right">Rp21.900 <span class="tag">NORMAL</span><div class="tiny">Rp109,5/g</div></div></a>
+      <a class="li" href="#s16"><div class="ph thumb">🏷</div><div class="grow">20 Sep · Indomaret · <i>cabang tidak diketahui</i><div class="tiny">label</div></div><div style="text-align:right">Rp21.600 <span class="tag">NORMAL</span><div class="tiny">Rp108,0/g</div></div></a>
+      <a class="li dimrow" href="#s16/1"><div class="ph thumb">🧾</div><div class="grow">14 Sep · Alfamart · Pamulang 2<div class="tiny">struk · paket 2 Milo + tumbler Rp45.000</div></div><div style="text-align:right"><span class="tag dim">BUNDLE · tidak dihitung</span></div></a>
+      <i class="m">is_bundle (D-08)</i>
+      <a class="li" href="#s16/1"><div class="ph thumb">🧾</div><div class="grow">5 Sep · AEON · BSD City<div class="tiny">struk</div></div><div style="text-align:right">Rp21.500 <span class="tag">NORMAL</span><div class="tiny">Rp107,5/g</div></div></a>
+      <p class="muted">+2 lagi · <u>Tampilkan yang dibatalkan</u></p>
+    </div>
+    <div class="dock"><a class="btn" href="#s03/7" style="flex:0 0 56px">⋯</a><a class="btn pri big" href="#s03b">Cek harga rak</a></div>
+  </div>
+
+  <div class="st" data-state="Tren belum cukup">
+    <div class="top"><a class="back" href="#s02">‹</a><h1>Milo Original 500g</h1></div>
+    <div class="body">
+      <div class="card thick">
+        <div class="tiny">Termurah 90 hari</div>
+        <div class="row"><span class="xl">Rp45.900</span><span class="big">Rp91,8/g</span></div>
+        <div><span class="tag">NORMAL</span> AEON · BSD City · 5 Okt</div>
+        <hr>
+        <div class="row"><span class="muted">Tren</span><span>Data belum cukup</span></div>
+        <div class="tiny">Tren muncul setelah ada minimal 2 data di 30 hari terakhir <b>dan</b> 2 data di 30 hari sebelumnya. Saat ini: 2 dan 1.</div>
+        <i class="m">ƒ hitung per jendela (D-44, app.config)</i>
+        <div class="tiny">3 data · terakhir 5 Okt</div>
+      </div>
+      <div class="h">Histori (3)</div>
+      <div class="li"><div class="grow">5 Okt · AEON · BSD City</div><div>Rp45.900</div></div>
+      <div class="li"><div class="grow">24 Sep · AEON · BSD City</div><div>Rp47.500</div></div>
+      <div class="li"><div class="grow">2 Sep · Alfamart · Pamulang 2</div><div>Rp48.900</div></div>
+    </div>
+    <div class="dock"><a class="btn" style="flex:0 0 56px">⋯</a><a class="btn pri big" href="#s03b">Cek harga rak</a></div>
+  </div>
+
+  <div class="st" data-state="Hanya all-time">
+    <div class="top"><a class="back" href="#s02">‹</a><h1>Milo Original 200g</h1></div>
+    <div class="body">
+      <div class="card thick">
+        <div class="b">Belum ada harga 90 hari terakhir</div>
+        <div class="tiny">Termurah sepanjang masa</div>
+        <div class="row"><span class="xl">Rp18.900</span><span class="big">Rp94,5/g</span></div>
+        <div><span class="tag">NORMAL</span> Alfamart · Pamulang 2 · 2 Mar 2026</div>
+        <div class="tiny">terakhir dicatat 7 bln lalu · 1 data</div>
+        <i class="m">best_90d_* IS NULL</i>
+      </div>
+      <div class="note">Harga lama mungkin sudah tidak relevan. Foto label berikutnya untuk memperbarui.</div>
+    </div>
+    <div class="dock"><a class="btn" style="flex:0 0 56px">⋯</a><a class="btn pri big" href="#s03b">Cek harga rak</a></div>
+  </div>
+
+  <div class="st" data-state="Belum ada data">
+    <div class="top"><a class="back" href="#s02">‹</a><h1>Milo Original 1 kg</h1></div>
+    <div class="body">
+      <div class="muted">Nestlé · Minuman · 1 × 1 kg</div>
+      <div class="card dash" style="text-align:center">
+        <div class="b">Belum ada harga di historimu</div>
+        <p class="muted">Foto label atau struk yang memuat produk ini. Harga terbaik dan tren akan muncul di sini.</p>
+        <a class="btn sm" href="#s06">📷 Foto label / struk</a>
+      </div>
+      <div class="h">Ukuran lain di Milo Original</div>
+      <a class="li" href="#s04"><div class="grow">500 g</div><div class="b">Rp91,8/g</div></a>
+      <a class="li" href="#s04"><div class="grow">200 g</div><div class="b">Rp97,5/g</div></a>
+      <p class="tiny">"Cek harga rak" tetap bisa dipakai, tetapi hanya menghitung harga per gram.</p>
+    </div>
+    <div class="dock"><a class="btn" style="flex:0 0 56px">⋯</a><a class="btn pri big" href="#s03b/3">Cek harga rak</a></div>
+  </div>
+
+  <div class="st" data-state="Produk privat">
+    <div class="top"><a class="back" href="#s02">‹</a><h1>Milo Can 400g (impor)</h1></div>
+    <div class="body">
+      <div><span class="tag">PRIBADI</span> <span class="muted">Dibuat olehmu · hanya terlihat olehmu</span></div>
+      <i class="m">product.household_id = household saya (D-29)</i>
+      <div class="card thick">
+        <div class="b">Belum ada harga 90 hari terakhir</div>
+        <div class="row"><span class="xl">Rp62.000</span><span class="big">Rp155,0/g</span></div>
+        <div><span class="tag">NORMAL</span> Ranch Market · Pondok Indah · Mei 2026</div>
+        <div class="tiny">1 data</div>
+      </div>
+      <div class="h">Menu ⋯ untuk produk pribadi</div>
+      <a class="li" href="#s15/3">✎ Edit produk</a>
+      <a class="li" href="#s17">⇥ Gabungkan dengan produk lain</a>
+      <a class="li" href="#s18">⇤ Pisahkan sebagian histori</a>
+      <div class="li">🗑 Hapus produk <span class="tiny">(hanya jika tidak ada harga)</span></div>
+    </div>
+    <div class="dock"><a class="btn" style="flex:0 0 56px">⋯</a><a class="btn pri big" href="#s03b">Cek harga rak</a></div>
+  </div>
+
+  <div class="st" data-state="Produk sudah digabung (alih)">
+    <div class="top"><a class="back" href="#s02">‹</a><h1>Milo Original 200g</h1></div>
+    <div class="body">
+      <div class="toast">"Milo 200 gr" sudah digabung ke Milo Original 200g.</div>
+      <i class="m">product.status='merged' → merged_into_id</i>
+      <div class="card thick"><div class="tiny">Termurah 90 hari</div><div class="row"><span class="xl">Rp19.500</span><span class="big">Rp97,5/g</span></div><div><span class="tag">PROMO</span> AEON · BSD City · 12 Okt</div></div>
+    </div>
+    <div class="dock"><a class="btn" style="flex:0 0 56px">⋯</a><a class="btn pri big" href="#s03b">Cek harga rak</a></div>
+  </div>
+
+  <div class="st" data-state="Produk timbang">
+    <div class="top"><a class="back" href="#s02">‹</a><h1>Jeruk Medan</h1></div>
+    <div class="body">
+      <div class="muted">Buah · dijual per kg</div>
+      <i class="m">product.sale_mode='weight', content_unit='kg'</i>
+      <div class="card thick">
+        <div class="tiny">Termurah 90 hari</div>
+        <div class="row"><span class="xl">Rp28.500/kg</span><span class="muted">Rp28,5/g</span></div>
+        <div><span class="tag">PROMO</span> Superindo · Bintaro · 1 Okt</div>
+        <div class="row"><span class="muted">Tren</span><span>→ stabil (+1%)</span></div>
+        <div class="tiny">6 data · terakhir 12 Okt</div>
+      </div>
+      <div class="h">Histori</div>
+      <div class="li"><div class="grow">12 Okt · AEON · BSD City<div class="tiny">0,535 kg · bayar Rp17.120</div></div><div>Rp32.000/kg</div></div>
+      <i class="m">actual_weight</i><i class="m">effective_price per content_unit</i>
+      <div class="li"><div class="grow">1 Okt · Superindo · Bintaro<div class="tiny">1,2 kg · bayar Rp34.200</div></div><div>Rp28.500/kg <span class="tag">PROMO</span></div></div>
+    </div>
+    <div class="dock"><a class="btn" style="flex:0 0 56px">⋯</a><a class="btn pri big" href="#s03b/4">Cek harga rak (per kg)</a></div>
+  </div>
+
+  <div class="st" data-state="Menu ⋯ (produk global)">
+    <div class="backdrop"><span class="lbl">[S-03 di belakang]</span></div>
+    <div class="sheet">
+      <div class="grab"></div>
+      <div class="b">Milo Original 200g · katalog umum</div>
+      <a class="li" href="#s18">⇤ Pisahkan sebagian historiku ke produk lain</a>
+      <div class="li dimrow">⇥ Gabungkan <span class="tiny">· produk katalog umum hanya bisa digabung oleh kurator (D-30)</span></div>
+      <div class="li dimrow">✎ Edit produk <span class="tiny">· tidak bisa untuk produk katalog</span></div>
+      <a class="li" href="#s03">Tutup</a>
+    </div>
+  </div>
+
+  <div class="st" data-state="Memuat">
+    <div class="top"><a class="back" href="#s02">‹</a><h1><span class="sk w60" style="display:inline-block;width:140px"></span></h1></div>
+    <div class="body">
+      <div class="card thick"><div class="sk w40"></div><div class="sk h24 w60"></div><div class="sk w80"></div><div class="sk w60"></div></div>
+      <div class="sk" style="height:120px"></div>
+      <div class="sk w80"></div><div class="sk w80"></div><div class="sk w80"></div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-03b CEK HARGA RAK (SHEET)
+     ===================================================================== -->
+<section class="screen" id="s03b" data-title="S-03b Cek harga rak">
+  <div class="st" data-state="Lebih mahal">
+    <div class="backdrop"><span class="lbl">[S-03 Milo Original 200g]</span></div>
+    <div class="sheet">
+      <div class="grab"></div>
+      <div class="row"><span class="b">Cek harga rak · Milo Original 200g</span><a href="#s03">✕</a></div>
+      <div class="field"><span class="muted">Harga di rak</span><span class="big">Rp21.900</span></div>
+      <div class="big">Rp109,5/g</div>
+      <div class="warn"><span class="t">12% lebih mahal</span> dari termurahmu 90 hari<div class="muted">Rp19.500 PROMO · AEON BSD City · 12 Okt</div></div>
+      <div>3% lebih mahal dari harga terakhir <span class="muted">(Rp21.200 · Alfamart · 3 hari lalu)</span></div>
+      <div class="sub">Ukuran 500 g di historimu: Rp91,8/g (16% lebih hemat per gram) <a href="#s04">›</a></div>
+      <i class="m">ƒ klien: input ÷ (pack_count×content_size×to_base_factor) vs best_90d_unit_price, last_unit_price</i>
+      <div class="keypad"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>000</span><span>0</span><span>⌫</span></div>
+      <p class="tiny">Tidak disimpan (U-06). <a href="#s07/1">📷 Foto labelnya untuk disimpan</a></p>
+    </div>
+  </div>
+  <div class="st" data-state="Mendekati">
+    <div class="backdrop"><span class="lbl">[S-03]</span></div>
+    <div class="sheet">
+      <div class="grab"></div>
+      <div class="field"><span class="muted">Harga di rak</span><span class="big">Rp20.000</span></div>
+      <div class="big">Rp100,0/g</div>
+      <div class="card thick"><span class="b">Mendekati harga terbaikmu</span> · 3% di atas termurah 90 hari (Rp19.500)</div>
+      <p class="tiny">Ambang "mendekati" ≤ 5%: W-08</p>
+      <div class="keypad"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>000</span><span>0</span><span>⌫</span></div>
+    </div>
+  </div>
+  <div class="st" data-state="Lebih murah">
+    <div class="backdrop"><span class="lbl">[S-03]</span></div>
+    <div class="sheet">
+      <div class="grab"></div>
+      <div class="field"><span class="muted">Harga di rak</span><span class="big">Rp18.500</span></div>
+      <div class="big">Rp92,5/g</div>
+      <div class="card thick"><span class="b">Lebih murah dari semua harga di historimu</span> 90 hari terakhir (5% di bawah Rp19.500)</div>
+      <a class="btn" href="#s07/1">📷 Foto labelnya untuk disimpan</a>
+      <div class="keypad"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>000</span><span>0</span><span>⌫</span></div>
+    </div>
+  </div>
+  <div class="st" data-state="Belum ada data">
+    <div class="backdrop"><span class="lbl">[S-03 Milo Original 1 kg]</span></div>
+    <div class="sheet">
+      <div class="grab"></div>
+      <div class="field"><span class="muted">Harga di rak</span><span class="big">Rp92.000</span></div>
+      <div class="big">Rp92,0/g</div>
+      <p class="muted">Belum ada pembanding di historimu untuk ukuran ini.</p>
+      <div class="sub">Ukuran 500 g di historimu: Rp91,8/g, hampir sama per gram.</div>
+      <div class="keypad"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>000</span><span>0</span><span>⌫</span></div>
+    </div>
+  </div>
+  <div class="st" data-state="Produk timbang">
+    <div class="backdrop"><span class="lbl">[S-03 Jeruk Medan]</span></div>
+    <div class="sheet">
+      <div class="grab"></div>
+      <div class="field"><span class="muted">Harga per kg di rak</span><span class="big">Rp34.900</span></div>
+      <div class="warn"><span class="t">22% lebih mahal</span> dari termurahmu 90 hari (Rp28.500/kg · Superindo Bintaro)</div>
+      <div class="keypad"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>000</span><span>0</span><span>⌫</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-04 BANDINGKAN UKURAN
+     ===================================================================== -->
+<section class="screen" id="s04" data-title="S-04 Bandingkan ukuran" data-tab="cari">
+  <div class="st" data-state="Normal">
+    <div class="top"><a class="back" href="#s02">‹</a><h1>Milo Original · ukuran</h1></div>
+    <div class="body">
+      <div class="seg"><span class="on">90 hari</span><span>Sepanjang masa</span></div>
+      <p class="muted">Dibandingkan per gram, harga terbaik.</p>
+      <a class="card thick" href="#s03/1">
+        <div class="row"><span class="b">500 g</span><span class="tag solid">PALING HEMAT</span></div>
+        <div class="row"><span class="big">Rp91,8/g</span><span>Rp45.900 <span class="tag">NORMAL</span></span></div>
+        <div class="muted">AEON · BSD City · 5 Okt · 3 data</div>
+      </a>
+      <a class="card" href="#s03">
+        <div class="row"><span class="b">200 g</span><span class="b">+6%</span></div>
+        <div class="row"><span class="big">Rp97,5/g</span><span>Rp19.500 <span class="tag">PROMO</span></span></div>
+        <div class="muted">AEON · BSD City · 12 Okt · 9 data</div>
+      </a>
+      <a class="card dash" href="#s03/3"><div class="row"><span class="b">1 kg</span><span class="muted">belum ada harga</span></div></a>
+      <i class="m">product WHERE product_group_id · unit.dimension · price_summary.best_90d_unit_price (query §9 no. 5)</i>
+      <div class="note">Artinya: untuk 1 kg Milo, membeli 2 × 500 g menghemat ±Rp5.700 dibanding 5 × 200 g (berdasarkan harga terbaikmu). <span class="tiny">ƒ</span></div>
+    </div>
+  </div>
+  <div class="st" data-state="Multipack (harga per isi)">
+    <div class="top"><a class="back" href="#s02">‹</a><h1>Indomie Goreng · ukuran</h1></div>
+    <div class="body">
+      <a class="card thick"><div class="row"><span class="b">5 × 85 g (multipack)</span><span class="tag solid">PALING HEMAT</span></div><div class="row"><span class="big">Rp34,1/g</span><span>Rp14.500 <span class="tag">PROMO</span></span></div><div class="muted">Rp2.900/bungkus · Alfamart · Pamulang 2</div></a>
+      <i class="m">ƒ effective_price ÷ pack_count (§5.1)</i>
+      <a class="card"><div class="row"><span class="b">85 g</span><span class="b">+7%</span></div><div class="row"><span class="big">Rp36,5/g</span><span>Rp3.100 <span class="tag">NORMAL</span></span></div><div class="muted">Indomaret · Cendana</div></a>
+      <a class="card"><div class="row"><span class="b">40 × 85 g (dus)</span><span class="b">+0%</span></div><div class="row"><span class="big">Rp34,1/g</span><span>Rp116.000</span></div><div class="muted">Shopee · Indofood Official · belum termasuk ongkir</div></a>
+    </div>
+  </div>
+  <div class="st" data-state="Dimensi berbeda">
+    <div class="top"><a class="back" href="#s02">‹</a><h1>Rinso · ukuran</h1></div>
+    <div class="body">
+      <div class="h">Per ml</div>
+      <a class="card"><div class="row"><span class="b">Rinso Cair 750 ml</span><span class="big">Rp30,5/ml</span></div></a>
+      <div class="h">Per gram</div>
+      <a class="card"><div class="row"><span class="b">Rinso Bubuk 770 g</span><span class="big">Rp27,9/g</span></div></a>
+      <div class="note">Tidak dibandingkan: satuan berbeda (ml vs g), §5.2.</div>
+    </div>
+  </div>
+  <div class="st" data-state="Ukuran lama (shrinkflation)">
+    <div class="top"><a class="back" href="#s02">‹</a><h1>Chitato Sapi Panggang · ukuran</h1></div>
+    <div class="body">
+      <a class="card"><div class="row"><span class="b">68 g</span><span class="big">Rp147,1/g</span></div><div class="muted">Rp10.000 · Alfamart · 2 Okt</div></a>
+      <a class="card"><div class="row"><span class="b">75 g</span><span class="big">Rp133,3/g</span></div><div class="muted">Rp10.000 · data terakhir Mar 2026 · mungkin sudah tidak dijual</div></a>
+      <i class="m">barcode_assignment.valid_until (D-18)</i>
+      <div class="note">Harga per bungkus sama, isinya berkurang 9%. Per gram jadi 10% lebih mahal.</div>
+    </div>
+  </div>
+  <div class="st" data-state="Hanya satu ukuran">
+    <div class="top"><a class="back" href="#s02">‹</a><h1>Bimoli Special · ukuran</h1></div>
+    <div class="body"><a class="card"><div class="row"><span class="b">2 L</span><span class="big">Rp19,3/ml</span></div></a><p class="muted">Baru ada satu ukuran di group ini.</p></div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-05 LEBIH HEMAT DI MANA
+     ===================================================================== -->
+<section class="screen" id="s05" data-title="S-05 Lebih hemat di mana" data-tab="cari">
+  <div class="st" data-state="Per produk">
+    <div class="top"><a class="back" href="#s03">‹</a><h1>Lebih hemat di mana</h1></div>
+    <div class="body">
+      <div class="seg"><span class="on">Milo Original 200g</span><span>Semua ukuran</span></div>
+      <div class="seg"><span class="on">90 hari</span><span>Sepanjang masa</span></div>
+      <p class="muted">Urut menurut rata-rata harga per gram.</p>
+      <i class="m">query §9 no. 6 · min/avg(unit_price), count(*) GROUP BY store_id, branch_id</i>
+      <div class="card thick"><div class="row"><span class="b">1. AEON · BSD City</span><span class="big">Rp103,0/g</span></div><div class="muted">termurah Rp97,5/g · 4 data · terakhir 12 Okt</div></div>
+      <div class="card"><div class="row"><span class="b">2. Shopee · Nestlé Official Store</span><span class="big">Rp104,5/g</span></div><div class="muted">baru 1 data · 3 Okt</div><div class="tiny">harga belum termasuk ongkir (D-36)</div><i class="m">store.channel='online'</i></div>
+      <div class="card"><div class="row"><span class="b">3. Alfamart · Pamulang 2</span><span class="big">Rp107,3/g</span></div><div class="muted">termurah Rp106,0/g · 2 data · terakhir 16 Okt</div></div>
+      <div class="card"><div class="row"><span class="b">4. Indomaret · <i>cabang tidak diketahui</i></span><span class="big">Rp108,0/g</span></div><div class="muted">baru 1 data · 20 Sep</div><i class="m">branch_id IS NULL (D-28)</i></div>
+      <p class="tiny">Perbandingan per keranjang belanja ditunda setelah MVP (D-39).</p>
+    </div>
+  </div>
+  <div class="st" data-state="Per Product Group">
+    <div class="top"><a class="back" href="#s03">‹</a><h1>Lebih hemat di mana</h1></div>
+    <div class="body">
+      <div class="seg"><span>Milo Original 200g</span><span class="on">Semua ukuran</span></div>
+      <p class="muted">Milo Original (200 g, 500 g) · per gram · 90 hari</p>
+      <div class="card thick"><div class="row"><span class="b">1. AEON · BSD City</span><span class="big">Rp98,9/g</span></div><div class="muted">6 data · paling hemat: 500 g</div></div>
+      <div class="card"><div class="row"><span class="b">2. Shopee · Nestlé Official Store</span><span class="big">Rp104,5/g</span></div><div class="muted">1 data · belum termasuk ongkir</div></div>
+      <div class="card"><div class="row"><span class="b">3. Alfamart · Pamulang 2</span><span class="big">Rp104,4/g</span></div><div class="muted">3 data</div></div>
+      <div class="note">Tahap 4: query per group perlu menyaring dimensi dan mata uang yang sama (catatan 8.4).</div>
+    </div>
+  </div>
+  <div class="st" data-state="Sepanjang masa (cabang tutup)">
+    <div class="top"><a class="back" href="#s03">‹</a><h1>Lebih hemat di mana</h1></div>
+    <div class="body">
+      <div class="seg"><span>90 hari</span><span class="on">Sepanjang masa</span></div>
+      <div class="card"><div class="row"><span class="b">AEON · Sentul (tutup)</span><span class="big">Rp96,0/g</span></div><div class="muted">→ dilanjutkan oleh AEON · Sentul City · 3 data · terakhir Jan 2026</div><i class="m">branch.status='closed', successor_branch_id</i></div>
+      <div class="card"><div class="row"><span class="b">Alfamart · Pamulang 2</span><span class="big">Rp105,0/g</span></div></div>
+    </div>
+  </div>
+  <div class="st" data-state="Kosong">
+    <div class="top"><a class="back" href="#s03">‹</a><h1>Lebih hemat di mana</h1></div>
+    <div class="body"><div class="card dash" style="text-align:center"><div class="b">Belum ada histori 90 hari</div><p class="muted">Ada 1 data sepanjang masa.</p><a class="btn sm" href="#s05/2">Lihat sepanjang masa</a></div></div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-06 PILIH JENIS FOTO (SHEET)
+     ===================================================================== -->
+<section class="screen" id="s06" data-title="S-06 Pilih jenis foto" data-tab="cam" data-nobanner="1">
+  <div class="st" data-state="Tanpa sesi">
+    <div class="backdrop"><span class="lbl">[layar sebelumnya]</span></div>
+    <div class="sheet">
+      <div class="grab"></div>
+      <div class="b">Foto apa?</div>
+      <i class="m">capture.kind</i>
+      <a class="opt" href="#s07"><span class="ic">🧾</span><div class="grow"><div class="b">Struk</div><div class="muted">barang yang sudah dibeli</div></div></a>
+      <a class="opt" href="#s12/3"><span class="ic">🏷</span><div class="grow"><div class="b">Label harga</div><div class="muted">harga di rak toko · kami tanya lokasinya</div></div></a>
+      <a class="opt" href="#s07b/1"><span class="ic">📱</span><div class="grow"><div class="b">Screenshot marketplace</div><div class="muted">Shopee, Tokopedia, dll.</div></div></a>
+      <a class="btn" href="#s07b">🖼 Pilih dari galeri</a>
+    </div>
+  </div>
+  <div class="st" data-state="Sesi aktif">
+    <div class="backdrop"><span class="lbl">[layar sebelumnya]</span></div>
+    <div class="sheet">
+      <div class="grab"></div>
+      <div class="b">Foto apa?</div>
+      <div class="muted">● Belanja di AEON · BSD City</div>
+      <i class="m">shopping_session.branch_id</i>
+      <a class="opt sel" href="#s07/1"><span class="ic">🏷</span><div class="grow"><div class="b">Label harga</div><div class="muted">masuk ke AEON · BSD City</div></div></a>
+      <a class="opt" href="#s07"><span class="ic">🧾</span><div class="grow"><div class="b">Struk</div><div class="muted">barang yang sudah dibeli</div></div></a>
+      <a class="opt" href="#s07b/1"><span class="ic">📱</span><div class="grow"><div class="b">Screenshot marketplace</div></div></a>
+      <p class="tiny">Saat sesi aktif, "Label" ditaruh paling atas (U-08).</p>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-07 KAMERA
+     ===================================================================== -->
+<section class="screen" id="s07" data-title="S-07 Kamera" data-nobanner="1">
+  <div class="st" data-state="Struk: bidik">
+    <div class="cam">
+      <div class="hint">Struk panjang? Foto per bagian, lalu ketuk <b>Tambah bagian</b>. Pastikan struk tidak terlipat.</div>
+      <div class="frame">[jendela bidik kamera]<br>bingkai struk</div>
+    </div>
+    <div class="camctl">
+      <div class="thumbs"></div>
+      <div class="ctl"><a class="side" href="#s07b">🖼<br>Galeri</a><a class="shutter" href="#s07/2" aria-label="Ambil foto"></a><a class="side" href="#s06">✕<br>Batal</a></div>
+    </div>
+  </div>
+  <div class="st" data-state="Label: bidik (sesi)">
+    <div class="cam">
+      <div class="hint">● AEON · BSD City · label ke-5. Kamera tetap terbuka untuk label berikutnya.</div>
+      <div class="frame wide">[bingkai label harga]</div>
+    </div>
+    <div class="camctl">
+      <div class="thumbs"><span>🏷</span><span>🏷</span><span>🏷</span><span>🏷</span></div>
+      <div class="ctl"><a class="side" href="#s07b">🖼<br>Galeri</a><a class="shutter" href="#s13/2" aria-label="Ambil foto"></a><a class="side" href="#s13/2">Selesai<br>(4)</a></div>
+    </div>
+  </div>
+  <div class="st" data-state="Struk: 2 bagian">
+    <div class="cam">
+      <div class="hint">Bagian 3: lanjutkan dari baris terakhir bagian 2.</div>
+      <div class="frame">[jendela bidik]</div>
+    </div>
+    <div class="camctl">
+      <div class="thumbs"><span>1</span><span>2</span><span style="border-style:dashed">+</span></div>
+      <i class="m">capture_image.position</i>
+      <div class="ctl"><a class="side" href="#s07">↺<br>Ulang</a><a class="shutter" href="#s07/2" aria-label="Tambah bagian"></a><a class="side" href="#s07/7" style="font-weight:700">Selesai<br>(2)</a></div>
+    </div>
+  </div>
+  <div class="st" data-state="Gambar duplikat (hash)">
+    <div class="cam" style="position:relative">
+      <div class="frame">[pratinjau foto]</div>
+      <div class="dialog">
+        <div class="b">Foto ini sudah pernah diunggah</div>
+        <p class="muted">12 Okt · struk AEON · BSD City · Rp185.900</p>
+        <i class="m">capture_image.sha256 (D-20)</i>
+        <div class="btns"><a class="btn sm" href="#s10/5">Lihat yang lama</a><a class="btn sm pri" href="#s08">Tetap unggah</a></div>
+        <p class="tiny">Kamu yang memilih. Tidak ada yang dibuang otomatis (U-10).</p>
+      </div>
+    </div>
+  </div>
+  <div class="st" data-state="Scan barcode">
+    <div class="cam">
+      <div class="hint">Arahkan ke barcode produk.</div>
+      <div class="frame wide">||| ||| || |||| ||</div>
+    </div>
+    <div class="camctl">
+      <div class="ctl"><span class="side"></span><span class="tiny" style="color:#ccc">Terbaca → Milo Original 200g</span><a class="side" href="#s03">Buka ›</a></div>
+      <i class="m">barcode_assignment.code (valid_from/until)</i>
+      <p class="tiny" style="color:#aaa">Barcode tidak dikenal → S-14 Pilih produk. Fitur usulan U-22 / W-14.</p>
+    </div>
+  </div>
+  <div class="st" data-state="Offline">
+    <div class="strip">Offline</div>
+    <div class="cam"><div class="frame">[jendela bidik]</div>
+      <div class="dialog"><div class="b">Foto disimpan di HP</div><p class="muted">Akan diunggah otomatis saat ada sinyal. Kamu bisa lanjut foto.</p><i class="m">💾 belum ada baris capture</i><a class="btn sm pri" href="#s07">OK</a></div>
+    </div>
+  </div>
+  <div class="st" data-state="Izin kamera ditolak">
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <div class="b">Kamera belum diizinkan</div>
+      <p class="muted">Izinkan kamera di pengaturan browser, atau pilih foto dari galeri.</p>
+      <a class="btn pri" href="#s07b">Pilih dari galeri</a>
+    </div>
+  </div>
+  <div class="st" data-state="Setelah selesai (toast)">
+    <div class="backdrop"><span class="lbl">[kembali ke layar sebelumnya]</span></div>
+    <div class="sheet"><div class="toast">Struk diunggah. Kami kabari di tab Unggahan kalau ada yang perlu dicek.</div><p class="tiny">Tidak ada layar tunggu (U-11).</p></div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-07b PILIH DARI GALERI
+     ===================================================================== -->
+<section class="screen" id="s07b" data-title="S-07b Pilih dari galeri" data-nobanner="1">
+  <div class="st" data-state="Struk: banyak gambar">
+    <div class="backdrop"><span class="lbl">[galeri: 5 gambar dipilih]</span>
+      <div class="dialog">
+        <div class="b">5 gambar dipilih. Ini…</div>
+        <a class="opt" href="#s08"><span class="ic">▤▤</span><div class="grow"><div class="b">5 struk berbeda</div><div class="tiny">5 capture × 1 gambar</div></div></a>
+        <a class="opt" href="#s08"><span class="ic">▥</span><div class="grow"><div class="b">1 struk panjang</div><div class="tiny">1 capture × 5 gambar, urut seperti dipilih</div></div></a>
+        <a class="btn sm" href="#s07b/2">Atur sendiri</a>
+        <i class="m">capture ─&lt; capture_image</i>
+      </div>
+    </div>
+  </div>
+  <div class="st" data-state="Screenshot: banyak">
+    <div class="backdrop"><span class="lbl">[galeri: 3 screenshot dipilih]</span>
+      <div class="dialog">
+        <div class="b">3 screenshot marketplace</div>
+        <p class="muted">Setiap screenshot diproses terpisah. Satu screenshot bisa berisi beberapa produk.</p>
+        <a class="btn pri" href="#s08">Unggah 3</a>
+      </div>
+    </div>
+  </div>
+  <div class="st" data-state="Atur sendiri">
+    <div class="top"><a class="back" href="#s07b">‹</a><h1>Kelompokkan gambar</h1></div>
+    <div class="body">
+      <p class="muted">Ketuk gambar untuk menggabungkannya menjadi satu struk.</p>
+      <div class="row" style="gap:6px;justify-content:flex-start"><div class="ph" style="width:60px;height:80px">A1</div><div class="ph" style="width:60px;height:80px">A2</div><span class="muted">→ struk A</span></div>
+      <div class="row" style="gap:6px;justify-content:flex-start;margin-top:8px"><div class="ph" style="width:60px;height:80px">B</div><span class="muted">→ struk B</span></div>
+      <div class="row" style="gap:6px;justify-content:flex-start;margin-top:8px"><div class="ph" style="width:60px;height:80px">C1</div><div class="ph" style="width:60px;height:80px">C2</div><span class="muted">→ struk C</span></div>
+    </div>
+    <div class="dock"><a class="btn pri" href="#s08">Unggah 3 struk</a></div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-08 UNGGAHAN
+     ===================================================================== -->
+<section class="screen" id="s08" data-title="S-08 Unggahan" data-tab="ungg">
+  <div class="st" data-state="Normal (campuran)">
+    <div class="top"><h1>Unggahan</h1></div>
+    <div class="body">
+      <span class="chip on">Semua</span><span class="chip">Struk</span><span class="chip">Label</span><span class="chip">Screenshot</span>
+      <div class="h">Perlu dicek (2)</div>
+      <i class="m">capture.status='needs_confirmation'</i>
+      <a class="li" href="#s10"><div class="ph thumb">🧾</div><div class="grow"><div class="b">AEON · BSD City</div><div class="tiny">struk · 12 Okt · diunggah hari ini</div></div><div class="tag solid">3 item ›</div></a>
+      <i class="m">ƒ receipt_line produk tanpa price_record</i>
+      <a class="li" href="#s11"><div class="ph thumb">🏷</div><div class="grow"><div class="b">AEON · BSD City</div><div class="tiny">label · hari ini · sesi belanja</div></div><div class="tag solid">1 item ›</div></a>
+      <i class="m x">⛔ jumlah kandidat observasi (X-01)</i>
+      <div class="h">Sedang diproses (1)</div>
+      <a class="li" href="#s09/1"><div class="ph thumb">🧾</div><div class="grow"><div>Struk</div><div class="tiny">diunggah 2 menit lalu</div></div><div class="muted">Diproses…</div></a>
+      <div class="h">Selesai</div>
+      <a class="li" href="#s09/3"><div class="ph thumb">🧾</div><div class="grow"><div>Alfamart · Pamulang 2</div><div class="tiny">struk · 10 Okt</div></div><div class="muted">14 harga ›</div></a>
+      <i class="m">ƒ count(price_record) per capture_id</i>
+      <a class="li" href="#s09/3"><div class="ph thumb">📱</div><div class="grow"><div>Shopee · Nestlé Official Store</div><div class="tiny">screenshot · 3 Okt</div></div><div class="muted">2 harga ›</div></a>
+      <div class="h">Gagal (1)</div>
+      <a class="li" href="#s09/4"><div class="ph thumb">🧾</div><div class="grow"><div>Struk</div><div class="tiny">diunggah kemarin · gambar tidak terbaca</div></div><span class="btn sm">Ulangi</span></a>
+      <i class="m">capture.error_message</i><i class="m x">⛔ error_code (X-08)</i>
+    </div>
+  </div>
+  <div class="st" data-state="Kosong">
+    <div class="top"><h1>Unggahan</h1></div>
+    <div class="body"><div class="card dash" style="text-align:center;margin-top:40px"><div class="b">Belum ada unggahan</div><p class="muted">Foto struk pertamamu untuk mulai mengisi histori harga.</p><a class="btn pri" href="#s06">📷 Foto struk</a></div></div>
+  </div>
+  <div class="st" data-state="Offline (antre di HP)">
+    <div class="strip">Offline</div>
+    <div class="top"><h1>Unggahan</h1></div>
+    <div class="body">
+      <div class="h">Menunggu sinyal (3)</div>
+      <div class="li"><div class="ph thumb">🏷</div><div class="grow">Label · AEON BSD City<div class="tiny">diambil 14:22</div></div><span class="muted">di HP</span></div>
+      <div class="li"><div class="ph thumb">🏷</div><div class="grow">Label · AEON BSD City<div class="tiny">diambil 14:23</div></div><span class="muted">di HP</span></div>
+      <div class="li"><div class="ph thumb">🧾</div><div class="grow">Struk (2 bagian)<div class="tiny">diambil 14:40</div></div><span class="muted">di HP</span></div>
+      <i class="m">💾 klien (U-17)</i>
+    </div>
+  </div>
+  <div class="st" data-state="Semua beres">
+    <div class="top"><h1>Unggahan</h1></div>
+    <div class="body"><p class="muted">✓ Semua sudah dicek.</p><div class="h">Selesai</div><a class="li" href="#s09/3"><div class="ph thumb">🧾</div><div class="grow">AEON · BSD City<div class="tiny">struk · 12 Okt</div></div><div class="muted">14 harga ›</div></a></div>
+  </div>
+  <div class="st" data-state="Memuat">
+    <div class="top"><h1>Unggahan</h1></div>
+    <div class="body"><div class="sk w40"></div><div class="sk h24"></div><div class="sk h24"></div><div class="sk h24"></div></div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-09 DETAIL UNGGAHAN
+     ===================================================================== -->
+<section class="screen" id="s09" data-title="S-09 Detail unggahan">
+  <div class="st" data-state="uploaded">
+    <div class="top"><a class="back" href="#s08">‹</a><h1>Struk · diunggah 14:41</h1></div>
+    <div class="body">
+      <div class="row" style="gap:6px;justify-content:flex-start"><div class="ph" style="width:80px;height:110px">bagian 1</div><div class="ph" style="width:80px;height:110px">bagian 2</div></div>
+      <div class="h">Status</div>
+      <div>● Diunggah · <b>menunggu antrean</b></div><div class="muted">○ Dibaca · ○ Dicek · ○ Selesai</div>
+      <i class="m">capture.status='uploaded'</i>
+    </div>
+    <div class="dock"><a class="btn" href="#s08">Hapus</a></div>
+  </div>
+  <div class="st" data-state="processing">
+    <div class="top"><a class="back" href="#s08">‹</a><h1>Struk · diunggah 14:41</h1></div>
+    <div class="body">
+      <div class="ph" style="height:140px">[gambar struk]</div>
+      <div class="h">Status</div>
+      <div>● Diunggah · ● <b>Sedang dibaca…</b></div>
+      <div class="sk" style="height:6px"></div>
+      <p class="muted">Boleh ditinggal. Kami kabari di tab Unggahan.</p>
+      <i class="m">processing_run.status='running'</i>
+    </div>
+  </div>
+  <div class="st" data-state="needs_confirmation">
+    <div class="top"><a class="back" href="#s08">‹</a><h1>Struk · AEON BSD City</h1></div>
+    <div class="body">
+      <div class="ph" style="height:140px">[gambar struk]</div>
+      <div class="h">Status</div>
+      <div>● Diunggah · ● Dibaca · ● <b>Perlu dicek: 3 item</b></div>
+      <p class="muted">11 item sudah tersimpan otomatis.</p>
+    </div>
+    <div class="dock"><a class="btn pri big" href="#s10">Cek sekarang</a></div>
+  </div>
+  <div class="st" data-state="done">
+    <div class="top"><a class="back" href="#s08">‹</a><h1>Struk · Alfamart Pamulang 2</h1></div>
+    <div class="body">
+      <div class="ph" style="height:140px">[gambar struk]</div>
+      <div class="h">Status</div>
+      <div>● Selesai · <b>14 harga tersimpan</b></div>
+      <div class="muted">10 Okt 2026 · 2 lebih murah dari harga terbaikmu sebelumnya</div>
+      <div class="h">Harga tersimpan</div>
+      <div class="li"><div class="grow">Milo Original 200g</div><div>Rp21.200</div></div>
+      <div class="li"><div class="grow">Bimoli Special 2 L</div><div>Rp38.500 <span class="tag">PROMO</span></div></div>
+      <p class="muted">+12 lagi</p>
+    </div>
+    <div class="dock"><a class="btn" href="#s10/5">Lihat struk</a></div>
+  </div>
+  <div class="st" data-state="failed">
+    <div class="top"><a class="back" href="#s08">‹</a><h1>Struk · diunggah kemarin</h1></div>
+    <div class="body">
+      <div class="ph" style="height:140px">[gambar struk buram]</div>
+      <div class="warn"><span class="t">Gagal dibaca</span><div class="muted">Gambar terlalu buram atau struk terlipat. Percobaan ke-2.</div></div>
+      <i class="m">capture.error_message</i><i class="m">ƒ count(processing_run)</i>
+      <p class="tiny">Input manual sebagai cadangan: W-12 / tidak di MVP.</p>
+    </div>
+    <div class="dock"><a class="btn" href="#s08">Hapus</a><a class="btn" href="#s07">Foto ulang</a><a class="btn pri" href="#s09/1">Ulangi</a></div>
+  </div>
+  <div class="st" data-state="Gambar dihapus (retensi)">
+    <div class="top"><a class="back" href="#s08">‹</a><h1>Struk · AEON BSD City</h1></div>
+    <div class="body">
+      <div class="ph" style="height:140px">gambar dihapus</div>
+      <p class="muted">Gambar dihapus otomatis setelah 12 bulan (D-32). Data harga tetap ada.</p>
+      <i class="m">capture_image.purged_at</i>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-10 KONFIRMASI / DETAIL STRUK
+     ===================================================================== -->
+<section class="screen" id="s10" data-title="S-10 Konfirmasi struk">
+  <div class="st" data-state="Normal (3 perlu dicek)">
+    <div class="top"><a class="back" href="#s08">‹</a><h1>Cek struk</h1><span class="muted">3 dari 14</span></div>
+    <div class="body">
+      <a class="card" href="#s12">
+        <div class="row"><span class="b">AEON · BSD City</span><span>✎</span></div>
+        <div>12 Okt 2026 · 14:32 <span class="tiny">(diunggah hari ini)</span></div>
+        <i class="m">receipt.store_id, branch_id, transaction_date, transaction_time</i><i class="m">capture.uploaded_at</i>
+        <div class="row"><span class="muted">Total struk Rp185.900</span><span class="muted">jumlah item Rp185.900 ✓</span></div>
+        <i class="m">receipt.total_amount vs ƒ sum(receipt_line.line_amount)</i>
+      </a>
+      <div class="row" style="gap:6px;justify-content:flex-start"><div class="ph" style="width:34px;height:44px">1</div><div class="ph" style="width:34px;height:44px">2</div><span class="tiny">2 bagian · ketuk untuk lihat</span></div>
+
+      <div class="h">Perlu dicek (3)</div>
+      <div class="card thick">
+        <div class="tiny">"MILO ACT 200G" <span class="conf">RAGU</span></div>
+        <i class="m">receipt_line.raw_text</i><i class="m">match_confidence &lt; ⛔ ambang (X-03)</i>
+        <div class="b">→ Milo Original 200g?</div>
+        <i class="m">suggested_product_id</i>
+        <div>1 × Rp22.900</div>
+        <div class="sub">diskon −Rp3.400 → <b>Rp19.500 <span class="tag">PROMO</span></b> · Rp97,5/g</div>
+        <i class="m">line_type='discount', applies_to_line_id</i>
+        <div class="btns"><a class="btn sm pri" href="#s10">Benar</a><a class="btn sm" href="#s14">Ganti produk</a><a class="btn sm">Bukan produk</a></div>
+        <div class="tiny">⋯ Tandai bundle</div>
+      </div>
+      <div class="card thick">
+        <div class="tiny">"BIMOLI SPC 2L" <span class="conf">RAGU</span></div>
+        <div class="b">→ Bimoli Special 2 L?</div>
+        <div>1 × Rp38.500</div>
+        <div class="btns"><a class="btn sm pri">Benar</a><a class="btn sm" href="#s14">Ganti produk</a><a class="btn sm">Bukan produk</a></div>
+      </div>
+      <div class="card thick">
+        <div class="tiny">"ROTI TWR KJ" <span class="conf">TIDAK DIKENALI</span></div>
+        <div>2 × Rp7.500 = Rp15.000</div>
+        <div class="btns"><a class="btn sm pri" href="#s14/1">Pilih produk</a><a class="btn sm">Bukan produk</a></div>
+      </div>
+      <a class="btn" style="margin:6px 0">Benarkan semua saran (2)</a>
+      <p class="tiny">Setelah dibenarkan, "MILO ACT 200G" di AEON akan dikenali otomatis.<i class="m">→ product_alias (household_id, store_id, alias_text)</i></p>
+
+      <div class="h">Tersimpan otomatis (11) ▾</div>
+      <div class="li"><div class="grow">Ultra Milk Full Cream 1 L</div><div>Rp18.900</div></div>
+      <div class="li"><div class="grow">Indomie Goreng 85g<div class="tiny">5 × Rp3.100</div></div><div>Rp15.500</div></div>
+      <i class="m">quantity × unit_amount</i>
+      <div class="li"><div class="grow">Jeruk Medan<div class="tiny">0,535 kg × Rp32.000/kg</div></div><div>Rp17.120</div></div>
+      <div class="li strike"><div class="grow">Teh Pucuk Harum 350ml<div class="tiny">dibatalkan di struk (VOID)</div></div><div>Rp4.000</div></div>
+      <i class="m">line_type='void'</i>
+      <p class="muted">+7 lagi</p>
+
+      <div class="h">Bukan produk (2) ▸</div>
+      <div class="li dimrow"><div class="grow">KANTONG BELANJA · DONASI</div><div>Rp2.500</div></div>
+      <i class="m">line_type='non_product'</i>
+
+      <div class="h">Voucher &amp; poin ▸</div>
+      <div class="li"><div class="grow">Voucher AEON<div class="tiny">tidak mengurangi harga item (D-01)</div></div><div>−Rp10.000</div></div>
+      <div class="li"><div class="grow">Poin</div><div>+185</div></div>
+      <i class="m">receipt_adjustment.kind, amount, points</i>
+      <p class="tiny">Nomor kartu dan data pribadi di struk disamarkan. <i class="m">receipt.pii tidak ditampilkan</i></p>
+    </div>
+    <div class="dock"><a class="btn pri big" href="#s10/6">Simpan 14 harga</a></div>
+  </div>
+
+  <div class="st" data-state="Kemungkinan duplikat">
+    <div class="top"><a class="back" href="#s08">‹</a><h1>Cek struk</h1></div>
+    <div class="body">
+      <div class="warn">
+        <div class="t">Mungkin duplikat</div>
+        <div class="muted">Struk AEON · BSD City · 12 Okt · Rp185.900 sudah tersimpan (diunggah 13 Okt).</div>
+        <i class="m">ƒ receipt_fingerprint_idx (store_id, transaction_date, total_amount)</i>
+        <div class="btns"><a class="btn sm" href="#s10/5">Lihat</a><a class="btn sm" href="#s10">Ini struk berbeda</a><a class="btn sm pri" href="#s08/3">Buang yang ini</a></div>
+        <i class="m">receipt.status='discarded', duplicate_of_receipt_id</i>
+      </div>
+      <p class="tiny">Struk yang dicurigai duplikat tidak pernah disimpan otomatis (U-10).</p>
+      <div class="card dimrow"><div class="b">AEON · BSD City</div><div>12 Okt 2026 · 14:32</div><div class="muted">14 item</div></div>
+    </div>
+    <div class="dock"><span class="btn dis">Simpan (pilih dulu)</span></div>
+  </div>
+
+  <div class="st" data-state="Toko tidak dikenali (W-02)">
+    <div class="top"><a class="back" href="#s08">‹</a><h1>Cek struk</h1></div>
+    <div class="body">
+      <a class="field uncertain" href="#s12"><span class="muted">Toko belum dikenali</span><span class="b">Pilih toko ›</span></a>
+      <i class="m x">⛔ receipt.store_id NOT NULL (X-02)</i>
+      <div class="field uncertain"><span>Tanggal</span><span class="v">12 Okt 2026? <span class="conf">RAGU</span></span></div>
+      <i class="m x">⛔ confidence per field header (X-02)</i>
+      <div class="field"><span>Total</span><span class="v">Rp64.300</span></div>
+      <div class="note">Layar dirancang, penyimpanannya menunggu W-02.</div>
+    </div>
+    <div class="dock"><span class="btn dis">Simpan (pilih toko dulu)</span></div>
+  </div>
+
+  <div class="st" data-state="Total tidak cocok">
+    <div class="top"><a class="back" href="#s08">‹</a><h1>Cek struk</h1></div>
+    <div class="body">
+      <div class="card"><div class="b">AEON · BSD City</div><div>12 Okt 2026</div>
+        <div class="warn" style="margin-bottom:0"><span class="t">Selisih Rp3.500</span><div class="muted">Jumlah item Rp182.400 · total struk Rp185.900. Mungkin ada baris yang terlewat.</div><a class="btn sm">Lihat gambar</a></div>
+      </div>
+      <p class="tiny">Tidak memblokir simpan (W-03).</p>
+    </div>
+    <div class="dock"><a class="btn pri big" href="#s10/6">Simpan 13 harga</a></div>
+  </div>
+
+  <div class="st" data-state="Diskon member, belum terdaftar">
+    <div class="top"><a class="back" href="#s08">‹</a><h1>Cek struk</h1></div>
+    <div class="body">
+      <div class="card thick">
+        <div class="b">Struk ini memakai harga member AEON.</div>
+        <div class="muted">Kamu member AEON? Harga member dari program yang kamu ikuti akan dihitung sebagai harga terbaik.</div>
+        <div class="btns"><a class="btn sm pri" href="#s10">Ya, tandai</a><a class="btn sm" href="#s10">Bukan</a></div>
+        <i class="m">→ household_program_membership (U-21)</i>
+      </div>
+      <div class="card"><div class="tiny">"MILO ACT 200G"</div><div class="b">Milo Original 200g</div><div class="sub">HEMAT MEMBER −Rp5.000 → Rp17.900 <span class="tag">MEMBER · AEON Member</span></div></div>
+    </div>
+    <div class="dock"><a class="btn pri big">Simpan 14 harga</a></div>
+  </div>
+
+  <div class="st" data-state="Mode tersimpan (koreksi)">
+    <div class="top"><a class="back" href="#s09/3">‹</a><h1>Struk · AEON BSD City</h1></div>
+    <div class="body">
+      <a class="card" href="#s12"><div class="row"><span class="b">AEON · BSD City</span><span>✎</span></div><div class="row"><span>12 Okt 2026 · 14:32</span><span>✎</span></div><div class="muted">Total Rp185.900 · 14 harga</div></a>
+      <p class="tiny">Mengubah tanggal atau toko berlaku untuk semua harga di struk ini. <i class="m">trigger receipt_propagate_header</i></p>
+      <div class="h">Item</div>
+      <a class="li" href="#s16/1"><div class="grow">Milo Original 200g<div class="tiny">"MILO ACT 200G"</div></div><div>Rp19.500 <span class="tag">PROMO</span> ›</div></a>
+      <a class="li" href="#s16/1"><div class="grow">Bimoli Special 2 L</div><div>Rp38.500 ›</div></a>
+      <a class="li" href="#s16/1"><div class="grow">Ultra Milk Full Cream 1 L</div><div>Rp18.900 ›</div></a>
+      <p class="muted">+11 lagi</p>
+    </div>
+  </div>
+
+  <div class="st" data-state="Setelah simpan">
+    <div class="top"><a class="back" href="#s08">‹</a><h1>Struk tersimpan</h1></div>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:center;text-align:center">
+      <div class="xl">14 harga baru</div>
+      <p>2 lebih murah dari harga terbaikmu sebelumnya:</p>
+      <a class="card" href="#s03"><div class="row"><span>Bimoli Special 2 L</span><span class="b">↓ 6%</span></div></a>
+      <a class="card" href="#s03"><div class="row"><span>Ultra Milk Full Cream 1 L</span><span class="b">↓ 2%</span></div></a>
+      <p class="tiny">Ringkasan diperbarui dalam beberapa detik. Total belanja sengaja tidak ditonjolkan.</p>
+    </div>
+    <div class="dock"><a class="btn" href="#s01/1">Selesai</a></div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-11 KONFIRMASI LABEL & SCREENSHOT
+     ===================================================================== -->
+<section class="screen" id="s11" data-title="S-11 Konfirmasi label & screenshot">
+  <div class="st" data-state="Label: member belum berlaku">
+    <div class="top"><a class="back" href="#s08">‹</a><h1>Cek label</h1><span class="muted">1/1</span></div>
+    <div class="body">
+      <div class="note">⚠ Sumber data kandidat belum ada di skema (W-01). <i class="m x">⛔ X-01 staging</i></div>
+      <div class="ph" style="height:90px">[potongan foto label]</div>
+      <div class="row c"><div class="grow"><div class="b">Milo Original 200g?</div></div><span class="conf">RAGU</span><a class="btn sm" href="#s14">Ganti</a></div>
+      <i class="m">→ price_record.product_id</i>
+      <label class="l">Harga normal</label><div class="field"><span></span><span class="v">Rp22.900</span></div>
+      <i class="m">normal_price</i>
+      <label class="l">Harga promo · berlaku</label><div class="field"><span class="muted">10–16 Okt</span><span class="v">Rp19.500</span></div>
+      <i class="m">promo_price, promo_valid_from/until</i>
+      <label class="l">Harga member · program</label><div class="field"><span class="muted">AEON Member</span><span class="v">Rp17.900</span></div>
+      <i class="m">member_price, member_program_id</i>
+      <div class="card thick">
+        <div>Dihitung untukmu: <b>Rp19.500 <span class="tag">PROMO</span></b> · Rp97,5/g</div>
+        <i class="m">ƒ effective_price, price_basis (D-26)</i>
+        <div class="sub">Harga member tidak dihitung: kamu belum terdaftar AEON Member. <a href="#s19b">Saya member</a><br><span class="tiny">Menandai sekarang hanya berlaku untuk label ini dan seterusnya, bukan data lama (D-41).</span></div>
+      </div>
+      <a class="field" href="#s12/3"><span>Lokasi</span><span class="v">AEON · BSD City <span class="tiny">(dari sesi)</span> ›</span></a>
+      <i class="m">shopping_session.branch_id → price_record.branch_id</i>
+      <div class="field"><span>Tanggal</span><span class="v">hari ini ›</span></div>
+      <div class="row c"><span class="chk"></span><span class="grow">Ini bundle (paket campuran)</span></div>
+    </div>
+    <div class="dock"><a class="btn" style="flex:0 0 90px">Hapus</a><a class="btn pri big" href="#s13/2">Simpan 1 harga</a></div>
+  </div>
+
+  <div class="st" data-state="Label: cabang tidak diketahui">
+    <div class="top"><a class="back" href="#s08">‹</a><h1>Cek label</h1></div>
+    <div class="body">
+      <div class="ph" style="height:90px">[potongan foto label]</div>
+      <div class="b">Indomie Goreng 85g</div>
+      <label class="l">Harga promo · min. 5 pcs</label><div class="field"><span class="muted">5 untuk</span><span class="v">Rp14.500 <span class="tag">PROMO 5+</span></span></div>
+      <i class="m">promo_min_qty (D-34)</i>
+      <p class="tiny">Promo kuantitas tetap ikut harga terbaik: Rp2.900/bungkus.</p>
+      <a class="field uncertain" href="#s12/3"><span>Lokasi</span><span class="v">Indomaret · <i>cabang tidak diketahui</i> ›</span></a>
+      <i class="m">price_record.branch_id NULL (D-28)</i>
+      <p class="tiny">Boleh disimpan. Tetap ikut harga terbaik dengan label "cabang tidak diketahui".</p>
+    </div>
+    <div class="dock"><a class="btn pri big">Simpan 1 harga</a></div>
+  </div>
+
+  <div class="st" data-state="Label: toko tidak diketahui">
+    <div class="top"><a class="back" href="#s08">‹</a><h1>Cek label</h1></div>
+    <div class="body">
+      <div class="ph" style="height:90px">[label polos tanpa logo]</div>
+      <div class="b">Bimoli Special 2 L · Rp39.900</div>
+      <a class="field uncertain" href="#s12/3"><span class="muted">Toko belum diketahui</span><span class="b">Pilih toko ›</span></a>
+      <p class="tiny">Toko wajib, cabang boleh kosong (D-28).</p>
+    </div>
+    <div class="dock"><span class="btn dis">Simpan (pilih toko dulu)</span></div>
+  </div>
+
+  <div class="st" data-state="Beberapa label dalam 1 foto">
+    <div class="top"><a class="back" href="#s08">‹</a><h1>Cek label</h1><span class="muted">3 item</span></div>
+    <div class="body">
+      <div class="ph" style="height:90px">[foto rak dengan 3 label]</div>
+      <div class="card"><div class="row"><span class="tiny">1/3</span><span class="tag dim">yakin</span></div><div class="b">Ultra Milk Full Cream 1 L</div><div>Rp18.900 <span class="tag">NORMAL</span></div></div>
+      <div class="card thick"><div class="row"><span class="tiny">2/3</span><span class="conf">RAGU</span></div><div class="b">Ultra Milk Cokelat 1 L?</div><div>Rp18.900</div><div class="btns"><span class="btn sm pri">Benar</span><a class="btn sm" href="#s14">Ganti</a></div></div>
+      <div class="card"><div class="row"><span class="tiny">3/3</span><span class="conf">TIDAK DIKENALI</span></div><div>Rp7.200</div><div class="btns"><a class="btn sm" href="#s14/1">Pilih produk</a><span class="btn sm">Bukan label</span></div></div>
+    </div>
+    <div class="dock"><a class="btn pri big">Simpan 2 harga</a></div>
+  </div>
+
+  <div class="st" data-state="Promo sudah berakhir">
+    <div class="top"><a class="back" href="#s08">‹</a><h1>Cek label</h1></div>
+    <div class="body">
+      <div class="b">Milo Original 200g</div>
+      <label class="l">Harga promo · berlaku</label><div class="field"><span class="muted">1–7 Okt</span><span class="v strike">Rp19.500</span></div>
+      <div class="card thick">Promo sudah berakhir (difoto 12 Okt). Dihitung <b>Rp22.900 <span class="tag">NORMAL</span></b>.</div>
+      <i class="m">ƒ transaction_date vs promo_valid_until (D-26)</i>
+    </div>
+    <div class="dock"><a class="btn pri big">Simpan 1 harga</a></div>
+  </div>
+
+  <div class="st" data-state="Marketplace">
+    <div class="top"><a class="back" href="#s08">‹</a><h1>Cek screenshot</h1></div>
+    <div class="body">
+      <div class="ph" style="height:90px">[screenshot listing]</div>
+      <div class="tiny">Judul listing</div>
+      <div>"MILO ACTIV-GO 500G ORIGINAL SUSU COKELAT BUBUK"</div>
+      <i class="m">→ product_alias.alias_text (store = Shopee)</i>
+      <div class="row c"><div class="grow b">→ Milo Original 500g?</div><a class="btn sm" href="#s14">Ganti</a></div>
+      <a class="field" href="#s12/4"><span>Toko · seller</span><span class="v">Shopee · Nestlé Official Store ›</span></a>
+      <i class="m">store.channel='online'</i><i class="m">branch.kind='seller', external_ref (D-06)</i>
+      <label class="l">Harga</label><div class="field"><span class="muted">normal Rp52.000</span><span class="v">Rp46.500 <span class="tag">PROMO</span></span></div>
+      <label class="l">Info (tidak mengubah harga)</label>
+      <div class="field"><span>Ongkir</span><span class="v">Rp12.000</span></div>
+      <div class="field"><span>Voucher toko</span><span class="v">−Rp5.000</span></div>
+      <i class="m">price_record.extra (D-36)</i><i class="m x">⛔ kunci jsonb belum didefinisikan (X-10)</i>
+      <div class="field"><span>Tanggal</span><span class="v">hari ini (tanggal unggah) ›</span></div>
+      <p class="tiny">Tanggal screenshot lama bisa diubah (W-24).</p>
+    </div>
+    <div class="dock"><a class="btn pri big">Simpan 1 harga</a></div>
+  </div>
+
+  <div class="st" data-state="Marketplace: judul ≠ produk">
+    <div class="top"><a class="back" href="#s08">‹</a><h1>Cek screenshot</h1></div>
+    <div class="body">
+      <div>"MILO ACTIV-GO 500G ORIGINAL…"</div>
+      <div class="row c"><div class="grow b">→ Milo Original 200g</div><a class="btn sm" href="#s14">Ganti</a></div>
+      <div class="warn"><span class="t">Ukuran tidak cocok</span><div class="muted">Judul menyebut 500G, produk yang dipilih 200 g.</div></div>
+    </div>
+    <div class="dock"><a class="btn pri big">Simpan 1 harga</a></div>
+  </div>
+
+  <div class="st" data-state="Bundle">
+    <div class="top"><a class="back" href="#s08">‹</a><h1>Cek label</h1></div>
+    <div class="body">
+      <div class="ph" style="height:90px">[label paket]</div>
+      <div class="b">Milo Original 200g</div>
+      <div>"Paket 2 Milo + tumbler" · Rp45.000</div>
+      <div class="row c"><span class="chk on"></span><span class="grow b">Ini bundle (paket campuran)</span></div>
+      <p class="tiny">Tetap tersimpan di histori, tetapi tidak dipakai untuk harga terbaik dan tren (D-08). <i class="m">is_bundle=true</i></p>
+    </div>
+    <div class="dock"><a class="btn pri big">Simpan 1 harga</a></div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-12 PILIH TOKO & CABANG
+     ===================================================================== -->
+<section class="screen" id="s12" data-title="S-12 Pilih toko & cabang">
+  <div class="st" data-state="Sesi: pilih toko">
+    <div class="top"><a class="back" href="#s13">‹</a><h1>Kamu belanja di mana?</h1></div>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <div class="h">Semua toko</div>
+      <a class="li" href="#s12/1"><div class="grow">AEON</div><span class="tiny">offline</span></a>
+      <a class="li" href="#s12/1"><div class="grow">Alfamart</div><span class="tiny">offline</span></a>
+      <a class="li" href="#s12/1"><div class="grow">Alfamidi</div><span class="tiny">offline</span></a>
+      <a class="li" href="#s12/1"><div class="grow">Indomaret</div><span class="tiny">offline</span></a>
+      <a class="li" href="#s12/1"><div class="grow">Warung Bu Siti <span class="tag">PRIBADI</span></div><span class="tiny">offline</span></a>
+      <a class="li" href="#s12/2"><div class="grow">+ Toko baru</div></a>
+      <i class="m">store (global + privat)</i>
+      <div class="h">Terakhir dipakai</div>
+      <a class="card thick" href="#s13/2"><div class="b">AEON · BSD City</div><div class="tiny">3 hari lalu</div></a>
+      <a class="card" href="#s13/2"><div class="b">Alfamart · Pamulang 2</div><div class="tiny">16 Okt</div></a>
+      <i class="m">ƒ shopping_session / price_record terbaru</i>
+      <div class="search" style="margin-top:8px"><span>🔍</span><span class="grow">Cari toko…</span></div>
+    </div>
+  </div>
+  <div class="st" data-state="Sesi: pilih cabang">
+    <div class="top"><a class="back" href="#s12">‹</a><h1>AEON · cabang</h1></div>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <a class="li" href="#s13/2"><div class="grow">Tanjung Barat<div class="tiny">Jakarta Selatan</div></div></a>
+      <a class="li" href="#s13/2"><div class="grow">Sentul City<div class="tiny">Bogor</div></div></a>
+      <div class="li dimrow"><div class="grow">Sentul (tutup)<div class="tiny">→ Sentul City</div></div></div>
+      <i class="m">branch.status='closed' tidak bisa dipilih</i>
+      <a class="li" href="#s12/2"><div class="grow">+ Cabang baru <span class="tiny">(nama + kota, pribadi)</span></div></a>
+      <div class="h">Terakhir dipakai</div>
+      <a class="card thick" href="#s13/2"><div class="b">BSD City</div><div class="tiny">Tangerang Selatan</div></a>
+      <i class="m">branch.name, city, region</i>
+      <p class="tiny">Mode sesi: "Tidak tahu cabangnya" tidak tersedia karena shopping_session.branch_id wajib (W-19).</p>
+    </div>
+  </div>
+  <div class="st" data-state="Cabang / toko baru">
+    <div class="top"><a class="back" href="#s12/1">‹</a><h1>Cabang baru · AEON</h1></div>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <label class="l">Nama cabang</label><div class="field"><span class="v">Mall Alam Sutera</span></div>
+      <label class="l">Kota (opsional)</label><div class="field"><span class="muted">Tangerang</span></div>
+      <p class="tiny"><span class="tag">PRIBADI</span> Cabang baru hanya terlihat olehmu. Kurator bisa menambahkannya ke katalog umum (D-29).</p>
+      <i class="m">branch (household_id = saya, kind='physical')</i>
+    </div>
+    <div class="dock"><a class="btn pri big" href="#s13/2">Simpan &amp; mulai</a></div>
+  </div>
+  <div class="st" data-state="Manual: label dari mana?">
+    <div class="top"><a class="back" href="#s06">‹</a><h1>Label ini dari mana?</h1></div>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <a class="card" href="#s13"><div class="b">Mulai sesi belanja</div><div class="muted">Kalau mau foto beberapa label di toko yang sama</div></a>
+      <div class="h">Atau pilih untuk label ini saja</div>
+      <a class="li" href="#s07/1"><div class="grow">AEON · BSD City</div><span class="tiny">terakhir</span></a>
+      <a class="li" href="#s07/1"><div class="grow">Alfamart · Pamulang 2</div></a>
+      <a class="li" href="#s12"><div class="grow">Pilih toko lain…</div></a>
+      <a class="li" href="#s07/1"><div class="grow">Indomaret · <b>tidak tahu cabangnya</b></div><span class="tiny">D-28</span></a>
+      <i class="m">capture.store_id, capture.branch_id (NULL boleh)</i>
+    </div>
+  </div>
+  <div class="st" data-state="Seller marketplace">
+    <div class="top"><a class="back" href="#s11/5">‹</a><h1>Shopee · seller</h1></div>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <a class="li" href="#s11/5"><div class="grow">Nestlé Official Store<div class="tiny">dari screenshot</div></div></a>
+      <a class="li" href="#s11/5"><div class="grow">Toko Susu Murah Jaya <span class="tag">PRIBADI</span></div></a>
+      <a class="li"><div class="grow">+ Seller baru</div></a>
+      <i class="m">branch.kind='seller', external_ref</i>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-13 SESI BELANJA
+     ===================================================================== -->
+<section class="screen" id="s13" data-title="S-13 Sesi belanja" data-tab="bel" data-nobanner="1">
+  <div class="st" data-state="Tidak ada sesi">
+    <div class="top"><h1>Belanja</h1></div>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <div class="card dash"><div class="b">Lagi di toko?</div><p class="muted">Mulai sesi supaya label harga yang kamu foto otomatis tercatat di cabang yang benar. Sesi berakhir sendiri setelah 4 jam.</p></div>
+      <div class="h">Mulai lagi di</div>
+      <a class="card" href="#s13/2"><div class="b">AEON · BSD City</div><div class="tiny">3 hari lalu · 4 label</div></a>
+      <a class="card" href="#s13/2"><div class="b">Alfamart · Pamulang 2</div><div class="tiny">16 Okt</div></a>
+    </div>
+    <div class="dock"><a class="btn pri big" href="#s12">Mulai belanja</a></div>
+  </div>
+  <div class="st" data-state="Aktif, belum ada label">
+    <div class="top"><h1>Belanja di AEON · BSD City</h1></div>
+    <div class="body">
+      <div class="muted">Mulai 14:05 · berakhir otomatis 18:05</div>
+      <i class="m">shopping_session.started_at, expires_at (D-43)</i>
+      <div class="card dash" style="text-align:center;margin-top:30px"><div class="b">Foto label harga pertama</div><p class="muted">Setiap label langsung dibandingkan dengan historimu.</p></div>
+    </div>
+    <div class="dock"><a class="btn" style="flex:0 0 110px" href="#s13">Akhiri sesi</a><a class="btn pri big" href="#s07/1">📷 Foto label</a></div>
+  </div>
+  <div class="st" data-state="Aktif, ada label">
+    <div class="top"><h1>Belanja di AEON · BSD City</h1></div>
+    <div class="body">
+      <div class="row"><span class="muted">Mulai 14:05 · berakhir 18:05</span><a class="tiny" href="#s12/1">Ganti cabang</a></div>
+      <div class="h">Label di sesi ini (4)</div>
+      <i class="m">capture WHERE shopping_session_id</i>
+      <a class="li" href="#s16"><div class="ph thumb">🏷</div><div class="grow"><div class="b">Milo Original 200g</div><div class="tiny">Setara termurahmu 90 hari</div></div><div>Rp19.500 <span class="tag">PROMO</span></div></a>
+      <i class="m">ƒ unit_price vs price_summary.best_90d_unit_price</i>
+      <a class="li" href="#s16"><div class="ph thumb">🏷</div><div class="grow"><div class="b">Ultra Milk Full Cream 1 L</div><div class="tiny">7% lebih mahal dari termurahmu (Rp17.600 · Alfamart)</div></div><div>Rp18.900</div></a>
+      <div class="li"><div class="ph thumb">🏷</div><div class="grow"><div>Diproses…</div></div><div class="muted">⟳</div></div>
+      <a class="li" href="#s11"><div class="ph thumb">🏷</div><div class="grow"><div class="b">Perlu dicek</div><div class="tiny">1 item ragu</div></div><span class="tag solid">Cek ›</span></a>
+      <a class="search" style="margin-top:12px" href="#s02"><span>🔍</span><span class="grow">Cek harga produk lain…</span></a>
+    </div>
+    <div class="dock"><a class="btn" style="flex:0 0 110px" href="#s13/4">Akhiri sesi</a><a class="btn pri big" href="#s07/1">📷 Foto label</a></div>
+  </div>
+  <div class="st" data-state="Hampir kedaluwarsa">
+    <div class="top"><h1>Belanja di AEON · BSD City</h1></div>
+    <div class="body">
+      <div class="warn"><span class="t">Sesi berakhir 25 menit lagi.</span> Masih di AEON BSD City?<div class="btns"><a class="btn sm pri" href="#s13/2">Perpanjang 2 jam</a><a class="btn sm" href="#s13/4">Akhiri</a></div></div>
+      <i class="m">shopping_session.expires_at (W-20)</i>
+      <div class="h">Label di sesi ini (6)</div>
+      <div class="li"><div class="grow">Milo Original 200g</div><div>Rp19.500</div></div>
+    </div>
+    <div class="dock"><a class="btn" style="flex:0 0 110px">Akhiri sesi</a><a class="btn pri big" href="#s07/1">📷 Foto label</a></div>
+  </div>
+  <div class="st" data-state="Kedaluwarsa / berakhir">
+    <div class="top"><h1>Belanja</h1></div>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <div class="card thick"><div class="b">Sesi di AEON · BSD City berakhir otomatis pukul 18:05.</div><div class="muted">6 label tersimpan · 1 lebih murah dari harga terbaikmu.</div></div>
+      <i class="m">expires_at &lt; now() atau ended_at</i>
+      <p class="tiny">Label berikutnya tidak masuk ke sesi lama (domain model 2.6: sesi lupa ditutup).</p>
+    </div>
+    <div class="dock"><a class="btn pri big" href="#s12">Mulai sesi baru</a></div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-14 PILIH PRODUK
+     ===================================================================== -->
+<section class="screen" id="s14" data-title="S-14 Pilih produk">
+  <div class="st" data-state="Saran + cari">
+    <div class="top"><a class="back" href="#s10">‹</a><h1>Pilih produk</h1></div>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <div class="tiny">Untuk baris: "MILO ACT 200G" · AEON</div>
+      <div class="h">Saran</div>
+      <a class="li" href="#s10"><div class="grow b">Milo Original 200g<div class="tiny">Nestlé · 1 × 200 g</div></div><span class="conf">RAGU</span></a>
+      <i class="m">receipt_line.suggested_product_id</i>
+      <a class="li" href="#s10"><div class="grow">Milo Activ-Go 200g<div class="tiny">Nestlé · 1 × 200 g</div></div></a>
+      <i class="m x">⛔ kandidat ke-2 dst. (X-12)</i>
+      <div class="h">Hasil cari</div>
+      <a class="li" href="#s10"><div class="grow">Milo Original 500g<div class="tiny">1 × 500 g · ukuran berbeda dari teks (200G)</div></div></a>
+      <a class="li" href="#s10"><div class="grow">Milo Can 400g (impor) <span class="tag">PRIBADI</span></div></a>
+      <a class="li" href="#s15"><div class="grow b">+ Buat produk baru</div></a>
+      <div class="search" style="margin-top:8px"><span>🔍</span><span class="grow" style="color:var(--ink)">milo act 200g</span></div>
+    </div>
+  </div>
+  <div class="st" data-state="Tidak ditemukan">
+    <div class="top"><a class="back" href="#s10">‹</a><h1>Pilih produk</h1></div>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <div class="tiny">Untuk baris: "ROTI TWR KJ" · AEON</div>
+      <p class="muted">Tidak ada produk "roti twr kj".</p>
+      <a class="card thick" href="#s15"><div class="b">+ Buat produk baru</div><div class="tiny">Produk baru bersifat pribadi (D-29)</div></a>
+      <div class="search" style="margin-top:8px"><span>🔍</span><span class="grow" style="color:var(--ink)">roti twr kj</span></div>
+    </div>
+  </div>
+  <div class="st" data-state="Mode target merge">
+    <div class="top"><a class="back" href="#s17">‹</a><h1>Gabungkan ke…</h1></div>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <div class="tiny">Sumber: "Milo 200 gr" (PRIBADI)</div>
+      <a class="li" href="#s17/1"><div class="grow b">Milo Original 200g<div class="tiny">katalog · 1 × 200 g</div></div></a>
+      <a class="li" href="#s17/2"><div class="grow">Milo Original 500g<div class="tiny">katalog · 1 × 500 g</div></div></a>
+      <p class="tiny">Hanya produk katalog umum atau produk pribadimu. <i class="m">aturan merge_product</i></p>
+      <div class="search"><span>🔍</span><span class="grow" style="color:var(--ink)">milo</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-15 PRODUK BARU
+     ===================================================================== -->
+<section class="screen" id="s15" data-title="S-15 Produk baru">
+  <div class="st" data-state="Kemasan">
+    <div class="top"><a class="back" href="#s14">‹</a><h1>Produk baru</h1><span class="tag">PRIBADI</span></div>
+    <div class="body">
+      <label class="l">Nama</label><div class="field"><span class="v">Roti Tawar Kupas Kecil</span></div><i class="m">product.name</i>
+      <label class="l">Brand</label><div class="field"><span class="v">Sari Roti</span><span class="tiny">pilih / baru</span></div><i class="m">product.brand_id → brand</i>
+      <label class="l">Varian (opsional)</label><div class="field"><span class="muted">mis. Original, Cokelat</span></div><i class="m">product.variant</i>
+      <label class="l">Group (untuk bandingkan ukuran)</label><div class="field"><span class="v">Sari Roti Tawar</span><span class="tiny">pilih / baru</span></div><i class="m">product.product_group_id</i>
+      <label class="l">Kategori</label><div class="field"><span class="v">Makanan</span></div><i class="m">product.category_id</i>
+      <label class="l">Cara jual</label><div class="seg"><span class="on">Per kemasan</span><span>Timbang</span></div><i class="m">product.sale_mode</i>
+      <label class="l">Isi</label>
+      <div class="row c"><div class="field" style="flex:0 0 60px">1</div><span>×</span><div class="field grow">200</div><div class="field" style="flex:0 0 70px">g ▾</div></div>
+      <i class="m">pack_count × content_size content_unit</i>
+      <label class="l">Barcode (opsional)</label><div class="field"><span class="muted">scan / ketik</span><span>▥</span></div><a class="tiny">+ barcode lain</a>
+      <i class="m">barcode_assignment.code, code_type</i>
+      <div class="card">Pratinjau: <b>Sari Roti · Roti Tawar Kupas Kecil · 1 × 200 g</b><div class="tiny">Harga per gram dihitung otomatis.</div></div>
+      <div class="warn"><span class="t">Produk serupa sudah ada:</span> Sari Roti Tawar Spesial 200g (katalog). <a href="#s14">Pakai itu?</a></div>
+      <i class="m">ƒ trigram product.search_text</i>
+    </div>
+    <div class="dock"><a class="btn pri big" href="#s10">Simpan produk</a></div>
+  </div>
+  <div class="st" data-state="Multipack">
+    <div class="top"><a class="back" href="#s14">‹</a><h1>Produk baru</h1><span class="tag">PRIBADI</span></div>
+    <div class="body">
+      <label class="l">Nama</label><div class="field"><span class="v">Milo 3in1 Activ-Go</span></div>
+      <label class="l">Isi</label>
+      <div class="row c"><div class="field" style="flex:0 0 60px">10</div><span>×</span><div class="field grow">35</div><div class="field" style="flex:0 0 70px">g ▾</div></div>
+      <div class="card">Pratinjau: 10 × 35 g = <b>350 g</b> · harga per gram dan per sachet dihitung otomatis (D-17)</div>
+    </div>
+    <div class="dock"><a class="btn pri big">Simpan produk</a></div>
+  </div>
+  <div class="st" data-state="Timbang">
+    <div class="top"><a class="back" href="#s14">‹</a><h1>Produk baru</h1><span class="tag">PRIBADI</span></div>
+    <div class="body">
+      <label class="l">Nama</label><div class="field"><span class="v">Jeruk Sunkist</span></div>
+      <label class="l">Cara jual</label><div class="seg"><span>Per kemasan</span><span class="on">Timbang</span></div>
+      <label class="l">Harga dicatat per</label><div class="field"><span class="v">kg ▾</span></div>
+      <i class="m">sale_mode='weight', content_size NULL, content_unit='kg'</i>
+      <label class="l">Kode PLU toko (opsional)</label><div class="field"><span class="muted">mis. 21034 · AEON</span></div>
+      <i class="m">barcode_assignment.code_type='plu', store_id</i>
+      <p class="tiny">Varian kualitas (Jeruk Medan vs Sunkist) dibuat sebagai produk berbeda (§5.3).</p>
+    </div>
+    <div class="dock"><a class="btn pri big">Simpan produk</a></div>
+  </div>
+  <div class="st" data-state="Edit (ubah ukuran)">
+    <div class="top"><a class="back" href="#s03/4">‹</a><h1>Edit produk</h1><span class="tag">PRIBADI</span></div>
+    <div class="body">
+      <label class="l">Nama</label><div class="field"><span class="v">Milo Can 400g (impor)</span></div>
+      <label class="l">Isi</label>
+      <div class="row c"><div class="field" style="flex:0 0 60px">1</div><span>×</span><div class="field grow uncertain">450</div><div class="field" style="flex:0 0 70px">g ▾</div></div>
+      <div class="warn"><span class="t">Ukuran diubah 400 g → 450 g.</span> Harga per gram untuk 1 data produk ini akan dihitung ulang.</div>
+      <i class="m">trigger product_size_changed → job recompute_unit_price</i>
+    </div>
+    <div class="dock"><a class="btn pri big" href="#s03/4">Simpan</a></div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-16 DETAIL & KOREKSI HARGA
+     ===================================================================== -->
+<section class="screen" id="s16" data-title="S-16 Detail & koreksi harga">
+  <div class="st" data-state="Dari label">
+    <div class="top"><a class="back" href="#s03">‹</a><h1>Detail harga</h1></div>
+    <div class="body">
+      <div class="ph" style="height:90px">[potongan foto label sumber]</div>
+      <i class="m">capture_image via price_record.capture_id</i>
+      <a class="field" href="#s14"><span>Produk</span><span class="v">Milo Original 200g ›</span></a>
+      <a class="field" href="#s12/3"><span>Lokasi</span><span class="v">AEON · BSD City ›</span></a>
+      <div class="field"><span>Tanggal</span><span class="v">12 Okt 2026 ›</span></div><i class="m">transaction_date</i>
+      <div class="field"><span>Normal</span><span class="v">Rp22.900</span></div>
+      <div class="field"><span>Promo · 10–16 Okt</span><span class="v">Rp19.500</span></div>
+      <div class="field"><span>Member · AEON Member</span><span class="v">Rp17.900</span></div>
+      <div class="card">Dihitung: <b>Rp19.500 <span class="tag">PROMO</span></b> · Rp97,5/g<div class="tiny">Harga member tidak dihitung: kamu belum terdaftar AEON Member pada tanggal ini (D-27, D-41).</div></div>
+      <div class="row c"><span class="chk"></span><span class="grow">Bundle</span></div>
+      <p class="tiny">Dikenali otomatis lewat alias · <i class="m">match_tier, match_outcome</i></p>
+      <div class="h">Riwayat perubahan</div>
+      <div class="li"><div class="grow tiny">13 Okt · kamu · produk: "Milo Activ-Go 200g" → "Milo Original 200g"</div></div>
+      <i class="m">audit_log (entity_type='price_record')</i>
+      <a class="btn" style="margin-top:12px">Batalkan data ini (label salah tempel)</a>
+      <i class="m">status='void'</i>
+    </div>
+    <div class="dock"><a class="btn pri big" href="#s16/3">Simpan perubahan</a></div>
+  </div>
+  <div class="st" data-state="Dari struk">
+    <div class="top"><a class="back" href="#s03">‹</a><h1>Detail harga</h1></div>
+    <div class="body">
+      <div class="tiny">Dari struk AEON · BSD City · 12 Okt · baris "MILO ACT 200G"</div>
+      <i class="m">receipt_line_id → receipt_line</i>
+      <a class="field" href="#s14"><span>Produk</span><span class="v">Milo Original 200g ›</span></a>
+      <div class="field"><span>Kuantitas × harga</span><span class="v">1 × Rp22.900</span></div>
+      <div class="field"><span>Diskon item</span><span class="v">−Rp3.400</span></div>
+      <p class="tiny">Mengubah angka akan mengubah baris struk, lalu harga ini dibentuk ulang (D-23).</p>
+      <a class="field" href="#s10/5"><span>Tanggal &amp; toko</span><span class="v">diatur di struk ›</span></a>
+      <div class="card">Rp19.500 <span class="tag">PROMO</span> · Rp97,5/g</div>
+      <div class="note">Saat ganti produk: "Perbarui juga alias 'MILO ACT 200G' di AEON?" <i class="m">product_alias.product_id</i></div>
+    </div>
+    <div class="dock"><a class="btn pri big" href="#s16/3">Simpan perubahan</a></div>
+  </div>
+  <div class="st" data-state="Dari screenshot">
+    <div class="top"><a class="back" href="#s03">‹</a><h1>Detail harga</h1></div>
+    <div class="body">
+      <div class="ph" style="height:90px">[screenshot sumber]</div>
+      <div class="field"><span>Produk</span><span class="v">Milo Original 200g ›</span></div>
+      <div class="field"><span>Toko · seller</span><span class="v">Shopee · Nestlé Official Store</span></div>
+      <div class="field"><span>Harga</span><span class="v">Rp20.900 PROMO</span></div>
+      <div class="field"><span>Ongkir (info)</span><span class="v">Rp12.000</span></div>
+      <i class="m">extra</i>
+    </div>
+    <div class="dock"><a class="btn pri big">Simpan perubahan</a></div>
+  </div>
+  <div class="st" data-state="Tersimpan">
+    <div class="top"><a class="back" href="#s03">‹</a><h1>Detail harga</h1></div>
+    <div class="body"><div class="toast">Perubahan tersimpan. Ringkasan diperbarui dalam beberapa detik.</div><i class="m">antrean summary_refresh_queue (D-31)</i></div>
+  </div>
+  <div class="st" data-state="Gambar sudah dihapus">
+    <div class="top"><a class="back" href="#s03">‹</a><h1>Detail harga</h1></div>
+    <div class="body"><div class="ph" style="height:90px">gambar dihapus setelah 12 bulan</div><div class="field"><span>Produk</span><span class="v">Milo Original 200g ›</span></div><div class="field"><span>Harga</span><span class="v">Rp18.900 NORMAL</span></div></div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-17 GABUNGKAN PRODUK
+     ===================================================================== -->
+<section class="screen" id="s17" data-title="S-17 Gabungkan produk">
+  <div class="st" data-state="Mulai">
+    <div class="top"><a class="back" href="#s03/4">‹</a><h1>Gabungkan produk</h1></div>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <div class="card"><div class="b">"Milo 200 gr" <span class="tag">PRIBADI</span></div><div class="tiny">6 harga · 2 alias · 1 barcode</div></div>
+      <p class="muted">Pilih produk tujuan. Semua histori produk ini akan pindah ke sana.</p>
+    </div>
+    <div class="dock"><a class="btn pri big" href="#s14/2">Pilih produk tujuan</a></div>
+  </div>
+  <div class="st" data-state="Pratinjau">
+    <div class="top"><a class="back" href="#s14/2">‹</a><h1>Gabungkan produk</h1></div>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <div class="card">"Milo 200 gr" <span class="tag">PRIBADI</span> · 1 × 200 g</div>
+      <div style="text-align:center">↓</div>
+      <div class="card thick">Milo Original 200g · katalog · 1 × 200 g</div>
+      <div class="h">Yang dipindah</div>
+      <div>6 harga · 2 alias · 1 barcode</div>
+      <i class="m">ƒ count price_record, product_alias, barcode_assignment</i>
+      <p class="muted">"Milo 200 gr" akan menjadi rujukan ke produk tujuan. <b>Tidak bisa dibatalkan</b> (W-15).</p>
+      <i class="m">rpc merge_product(p_from, p_into) → audit_log action='merge'</i>
+    </div>
+    <div class="dock"><a class="btn pri big" href="#s03/5">Gabungkan</a></div>
+  </div>
+  <div class="st" data-state="Ukuran berbeda (peringatan)">
+    <div class="top"><a class="back" href="#s14/2">‹</a><h1>Gabungkan produk</h1></div>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <div class="card">"Milo 200 gr" <span class="tag">PRIBADI</span> · 1 × 200 g</div>
+      <div style="text-align:center">↓</div>
+      <div class="card">Milo Original 500g · 1 × 500 g</div>
+      <div class="warn"><div class="t">Ukuran berbeda: 200 g vs 500 g</div><div>Menggabungkan akan membuat harga per gram salah, karena harga kemasan 200 g akan dibagi 500 g.</div><div class="muted">Kalau ini ukuran lain dari produk yang sama, masukkan ke <b>group</b> yang sama.</div></div>
+      <i class="m">ƒ bandingkan pack_count×content_size×to_base_factor (U-16)</i>
+    </div>
+    <div class="dock"><a class="btn" href="#s17/1">Tetap gabungkan…</a><a class="btn pri" href="#s03/4">Pindahkan ke group</a></div>
+  </div>
+  <div class="st" data-state="Produk global (tidak bisa)">
+    <div class="top"><a class="back" href="#s03">‹</a><h1>Gabungkan produk</h1></div>
+    <div class="body"><div class="warn"><span class="t">Milo Original 200g adalah produk katalog umum.</span><div>Produk katalog umum hanya bisa digabung oleh kurator (D-30).</div></div><p class="muted">Kamu tetap bisa memindahkan histori milikmu ke produk lain lewat <a href="#s18">Pisahkan</a>.</p></div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-18 PISAHKAN PRODUK
+     ===================================================================== -->
+<section class="screen" id="s18" data-title="S-18 Pisahkan produk">
+  <div class="st" data-state="Pilih tujuan">
+    <div class="top"><a class="back" href="#s03">‹</a><h1>Pisahkan histori</h1></div>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <p>Sebagian histori <b>Milo Original 200g</b> sebenarnya produk lain?</p>
+      <p class="muted">Langkah 1 dari 2: ke produk mana histori dipindah?</p>
+      <a class="opt" href="#s15"><span class="ic">+</span><div class="grow"><div class="b">Produk baru</div><div class="tiny">terisi salinan, bisa diubah</div></div></a>
+      <a class="opt" href="#s18/1"><span class="ic">→</span><div class="grow"><div class="b">Produk yang sudah ada</div></div></a>
+      <p class="tiny">Tidak ada pemindahan otomatis (D-37).</p>
+    </div>
+  </div>
+  <div class="st" data-state="Pilih record">
+    <div class="top"><a class="back" href="#s18">‹</a><h1>Pindahkan ke Milo 3in1 Activ-Go</h1></div>
+    <div class="body">
+      <p class="muted">Langkah 2 dari 2: centang data yang dipindah.</p>
+      <span class="chip on">Semua toko</span><span class="chip">AEON</span><span class="chip">Struk</span>
+      <div class="li"><span class="chk"></span><div class="grow">16 Okt · Alfamart · struk</div><div>Rp21.200</div></div>
+      <div class="li"><span class="chk on"></span><div class="grow">28 Sep · AEON · struk<div class="tiny">"MILO 3IN1 ACT"</div></div><div>Rp21.900</div></div>
+      <div class="li"><span class="chk on"></span><div class="grow">5 Sep · AEON · struk<div class="tiny">"MILO 3IN1 ACT"</div></div><div>Rp21.500</div></div>
+      <div class="li"><span class="chk"></span><div class="grow">12 Okt · AEON · label</div><div>Rp19.500</div></div>
+      <i class="m">price_record.product_id (milik household)</i>
+      <div class="card"><div class="row c"><span class="chk on"></span><span class="grow">Teks struk "MILO 3IN1 ACT" di AEON selanjutnya dikenali sebagai Milo 3in1 Activ-Go</span></div><i class="m">product_alias (milik household)</i></div>
+    </div>
+    <div class="dock"><a class="btn pri big" href="#s03">Pindahkan 2 data</a></div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-19 SAYA
+     ===================================================================== -->
+<section class="screen" id="s19" data-title="S-19 Saya" data-tab="saya">
+  <div class="st" data-state="Normal">
+    <div class="top"><h1>Saya</h1></div>
+    <div class="body">
+      <div class="row c"><div class="ph thumb">[foto]</div><div class="grow"><div class="b">Rina</div><div class="tiny">rina@email.com</div></div></div>
+      <i class="m">profile.display_name</i>
+      <div class="h">Harga</div>
+      <a class="li" href="#s19b"><div class="grow">Program member<div class="tiny">1 diikuti: AEON Member</div></div><span>›</span></a>
+      <a class="li" href="#s19c"><div class="grow">Berbagi harga publik<div class="tiny">Mati</div></div><span>›</span></a>
+      <div class="h">Privasi &amp; data</div>
+      <div class="li"><div class="grow">Foto struk dihapus otomatis setelah 12 bulan<div class="tiny">Data harga tetap ada (D-32)</div></div></div>
+      <div class="li"><div class="grow">Hapus akun &amp; semua data</div><span>›</span></div>
+      <div class="li"><div class="grow">Keluar</div></div>
+      <p class="tiny">Sengaja tidak ada total pengeluaran, anggaran, atau laporan belanja (§1).</p>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="s19b" data-title="S-19b Program member" data-tab="saya">
+  <div class="st" data-state="Normal">
+    <div class="top"><a class="back" href="#s19">‹</a><h1>Program member</h1></div>
+    <div class="body">
+      <p class="muted">Harga member hanya dihitung sebagai harga terbaik untuk program yang kamu ikuti. Menandai sekarang tidak mengubah harga yang sudah tercatat. (D-27, D-41)</p>
+      <i class="m">member_program · household_program_membership</i>
+      <div class="li"><div class="grow"><div class="b">AEON Member</div><div class="tiny">AEON</div></div><span class="toggle on"></span></div>
+      <div class="li"><div class="grow"><div class="b">Alfagift</div><div class="tiny">Alfamart, Alfamidi?</div></div><span class="toggle"></span></div>
+      <div class="li"><div class="grow"><div class="b">Poinku</div><div class="tiny">Indomaret</div></div><span class="toggle"></span></div>
+      <div class="li dimrow"><div class="grow"><div>Giant Member</div><div class="tiny">Giant · program dihentikan</div></div><span class="toggle dis"></span></div>
+      <i class="m">member_program.status='discontinued'</i>
+      <p class="tiny">Program tidak ada di daftar? Belum ada di katalog (W-05). Daftar di atas hanya contoh. Isinya berasal dari seed.</p>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="s19c" data-title="S-19c Berbagi harga publik" data-tab="saya">
+  <div class="st" data-state="Mati (default)">
+    <div class="top"><a class="back" href="#s19">‹</a><h1>Berbagi harga publik</h1></div>
+    <div class="body">
+      <div class="row c"><span class="grow b">Bagikan harga secara anonim</span><a href="#s19c/1"><span class="toggle"></span></a></div>
+      <i class="m x">⛔ preferensi household (X-04)</i>
+      <div class="h">Yang dibagikan</div>
+      <ul class="plain"><li>Produk dan toko dari katalog umum</li><li>Tanggal (harian) dan cabang (D-46)</li><li>Harga dan harga per satuan</li></ul>
+      <div class="h">Yang tidak pernah dibagikan</div>
+      <ul class="plain"><li>Identitasmu dan rumah tanggamu</li><li>Struk, foto, data kartu</li><li>Produk, toko, atau cabang pribadi</li><li>Bundle</li></ul>
+      <i class="m">public_price_fact (D-25)</i>
+    </div>
+  </div>
+  <div class="st" data-state="Aktif">
+    <div class="top"><a class="back" href="#s19">‹</a><h1>Berbagi harga publik</h1></div>
+    <div class="body">
+      <div class="row c"><span class="grow b">Bagikan harga secara anonim</span><a href="#s19c/2"><span class="toggle on"></span></a></div>
+      <p class="muted">Harga baru akan dibagikan.</p>
+      <i class="m">price_record.visibility='public' untuk record baru</i>
+      <div class="note">⚠ Perilaku terhadap data lama belum dirancang (W-04). Usulan default: tombol terpisah "Bagikan juga data lama".</div>
+    </div>
+  </div>
+  <div class="st" data-state="Mematikan (konfirmasi)">
+    <div class="backdrop"><span class="lbl">[S-19c]</span>
+      <div class="dialog"><div class="b">Matikan berbagi?</div><p class="muted">Harga yang sudah dibagikan akan ditarik dari data publik.</p><i class="m">trigger sync_public_fact menghapus fakta</i><div class="btns"><a class="btn sm" href="#s19c/1">Batal</a><a class="btn sm pri" href="#s19c">Matikan</a></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     S-20 TANYA
+     ===================================================================== -->
+<section class="screen" id="s20" data-title="S-20 Tanya (AI)" data-tab="cari">
+  <div class="st" data-state="Jawaban">
+    <div class="top"><a class="back" href="#s02">‹</a><h1>Tanya</h1></div>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <div class="bubble me">milo 500 atau 200 yang lebih hemat?</div>
+      <div class="bubble ai">
+        <b>500 g lebih hemat per gram:</b> Rp91,8/g vs Rp97,5/g (6% lebih murah).
+        <div class="tiny">Berdasarkan harga terbaik 90 hari di historimu · 12 data · terakhir 16 Okt</div>
+        <a class="btn sm" href="#s04" style="margin-top:6px">Lihat perbandingan ukuran ›</a>
+        <div class="tiny" style="margin-top:6px">Dijawab dengan: <code>bandingkan_ukuran(Milo Original)</code></div>
+      </div>
+      <i class="m">tool = query §9 no. 5 (D-05)</i>
+      <div class="bubble me">di mana paling murah?</div>
+      <div class="bubble ai">
+        Untuk Milo Original 200g, rata-rata termurah di <b>AEON · BSD City</b> (Rp103,0/g, 4 data, 90 hari).
+        <a class="btn sm" href="#s05" style="margin-top:6px">Lihat semua toko ›</a>
+        <div class="tiny">Dijawab dengan: <code>lebih_hemat_di_mana(Milo Original 200g)</code></div>
+      </div>
+      <div><span class="chip">termurah di mana?</span><span class="chip">naik atau turun?</span><span class="chip">harga per gram?</span></div>
+    </div>
+    <div class="dock" style="display:block"><div class="search"><span>💬</span><span class="grow">Tanya tentang harga…</span></div></div>
+  </div>
+  <div class="st" data-state="Di luar kemampuan">
+    <div class="top"><a class="back" href="#s02">‹</a><h1>Tanya</h1></div>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <div class="bubble me">berapa total belanjaku bulan ini?</div>
+      <div class="bubble ai">Saya hanya bisa menjawab dari histori hargamu: harga termurah, di mana, tren, harga per satuan, dan perbandingan ukuran. Total pengeluaran tidak termasuk.</div>
+      <div class="bubble me">harga milo di pasaran sekarang berapa?</div>
+      <div class="bubble ai">Saya tidak punya data harga pasar. Dari historimu: termurah Milo Original 200g dalam 90 hari adalah Rp19.500 (PROMO, AEON BSD City, 12 Okt).<div class="tiny">Dijawab dengan: <code>cari_harga_terbaik</code></div></div>
+      <div class="note">AI tidak menjawab dari pengetahuan umum, dan tidak menulis atau mengubah data (D-05).</div>
+    </div>
+    <div class="dock" style="display:block"><div class="search"><span>💬</span><span class="grow">Tanya tentang harga…</span></div></div>
+  </div>
+  <div class="st" data-state="Data kurang / ambigu">
+    <div class="top"><a class="back" href="#s02">‹</a><h1>Tanya</h1></div>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <div class="bubble me">milo naik ga?</div>
+      <div class="bubble ai">Maksudmu yang mana?<div><span class="chip">Milo Original 200g</span><span class="chip">Milo Original 500g</span><span class="chip">Milo 3in1</span></div></div>
+      <div class="bubble me">500g</div>
+      <div class="bubble ai">Baru ada 3 data untuk Milo Original 500g, belum cukup untuk tren (perlu 2 data di 30 hari terakhir dan 2 data di 30 hari sebelumnya). Terakhir 5 Okt: Rp45.900.<div class="tiny">Dijawab dengan: <code>tren_harga</code></div></div>
+    </div>
+    <div class="dock" style="display:block"><div class="search"><span>💬</span><span class="grow">Tanya tentang harga…</span></div></div>
+  </div>
+  <div class="st" data-state="Memuat">
+    <div class="top"><a class="back" href="#s02">‹</a><h1>Tanya</h1></div>
+    <div class="body" style="display:flex;flex-direction:column;justify-content:flex-end">
+      <div class="bubble me">milo paling murah di mana?</div>
+      <div class="bubble ai"><span class="muted">Mencari di historimu…</span><div class="sk w60"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Global: banner sesi & tab bar -->
+<div id="banner"><span>●</span><span class="grow">Belanja di <b>AEON · BSD City</b> · 1j 12m · 4 label</span><a class="btn sm pri" href="#s07/1">📷 Foto label</a></div>
+<nav id="tabbar" aria-label="Navigasi utama">
+  <a href="#s01/1" data-tab="cari"><span class="ic">🔍</span>Cari</a>
+  <a href="#s08" data-tab="ungg"><span class="ic">▤</span>Unggahan <span class="badge">2</span></a>
+  <a href="#s06" data-tab="cam" class="fab" aria-label="Kamera"><span class="ic">📷</span></a>
+  <a href="#s13" data-tab="bel"><span class="ic">🛒</span>Belanja</a>
+  <a href="#s19" data-tab="saya"><span class="ic">☺</span>Saya</a>
+</nav>
+
+</div><!-- /#phone -->
+
+<script>
+(function () {
+  var screens = Array.prototype.slice.call(document.querySelectorAll('.screen'));
+  var selScreen = document.getElementById('selScreen');
+  var selState = document.getElementById('selState');
+  var tabbar = document.getElementById('tabbar');
+  var banner = document.getElementById('banner');
+  var current = null;
+
+  screens.forEach(function (s) {
+    var o = document.createElement('option');
+    o.value = s.id; o.textContent = s.dataset.title || s.id;
+    selScreen.appendChild(o);
+  });
+
+  function states(s) { return Array.prototype.slice.call(s.querySelectorAll(':scope > .st')); }
+
+  function show(id, stIdx) {
+    var s = document.getElementById(id);
+    if (!s || !s.classList.contains('screen')) { s = document.getElementById('idx'); }
+    var list = states(s);
+    var i = Math.min(Math.max(parseInt(stIdx, 10) || 0, 0), list.length - 1);
+
+    screens.forEach(function (x) { x.classList.toggle('on', x === s); });
+    list.forEach(function (st, k) { st.classList.toggle('on', k === i); });
+
+    if (current !== s) {
+      selState.innerHTML = '';
+      list.forEach(function (st, k) {
+        var o = document.createElement('option');
+        o.value = k; o.textContent = 'Keadaan: ' + (st.dataset.state || k);
+        selState.appendChild(o);
+      });
+      current = s;
+    }
+    selScreen.value = s.id;
+    selState.value = i;
+    selState.disabled = list.length < 2;
+
+    var tab = s.dataset.tab;
+    tabbar.classList.toggle('show', !!tab);
+    Array.prototype.forEach.call(tabbar.querySelectorAll('a'), function (a) {
+      a.classList.toggle('on', a.dataset.tab === tab);
+    });
+    banner.classList.toggle('show', !s.dataset.nobanner && s.id !== 'idx');
+
+    var body = list[i].querySelector('.body');
+    if (body) body.scrollTop = 0;
+  }
+
+  function route() {
+    var h = location.hash.replace(/^#/, '').split('/');
+    show(h[0] || 'idx', h[1]);
+  }
+
+  selScreen.addEventListener('change', function () { location.hash = selScreen.value; });
+  selState.addEventListener('change', function () { location.hash = current.id + '/' + selState.value; });
+
+  function toggler(btnId, cls) {
+    var b = document.getElementById(btnId);
+    b.addEventListener('click', function () {
+      var on = document.body.classList.toggle(cls);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      try { localStorage.setItem('wf-' + cls, on ? '1' : ''); } catch (e) {}
+    });
+    try {
+      if (localStorage.getItem('wf-' + cls)) { document.body.classList.add(cls); b.setAttribute('aria-pressed', 'true'); }
+    } catch (e) {}
+  }
+  toggler('btnMap', 'map');
+  toggler('btnSess', 'sess');
+
+  window.addEventListener('hashchange', route);
+  route();
+})();
+</script>
+</body>
+</html>

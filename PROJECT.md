@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | Nama sementara | Price Intelligence (repo: PriceAtlas) |
-| Status | Tahap 2 (Database Design) selesai, siap masuk Tahap 3 (Wireframe) |
+| Status | Tahap 3 (Wireframe) selesai, siap masuk Tahap 4 (Backend) |
 | Terakhir diperbarui | 2026-10-19 |
 
 ---
@@ -253,6 +253,20 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 | D-44 | Parameter tren | Rata-rata harga per satuan 30 hari terakhir vs 30 hari sebelumnya; minimal 2 data per jendela; perubahan < 2% = stabil. Dapat diubah di `app.config`. |
 | D-45 | Partisi `price_record` | Ditunda. Ditinjau ulang di ~50 juta baris atau p95 query > 50 ms; kandidat `HASH (household_id)`. |
 | D-46 | Granularitas data publik | Fakta publik menyimpan tanggal transaksi harian dan cabang. |
+| D-47 | Pola UX | Usulan U-01 s/d U-22 di `docs/04-wireframe.md` §7 diterima: 4 tab + tombol kamera di tengah, search di bawah layar, hasil search dikelompokkan per Product Group, aksi utama di sepertiga bawah layar, label harga selalu berupa teks (tidak hanya warna). |
+| D-48 | Kandidat item observasi | Disimpan di tabel staging baru `capture_item` (kandidat produk, harga terbaca, confidence, status `pending/accepted/rejected`, rujukan ke `price_record` setelah diterima). Diterapkan di Tahap 4. |
+| D-49 | Struk draft | `receipt.store_id` boleh NULL hanya selama `status = 'draft'`. Tambah `receipt.field_confidence jsonb` untuk menandai field header yang meragukan. Diterapkan di Tahap 4. |
+| D-50 | Ambang auto-save | `app.config.auto_save_min_confidence = 0.90`, nilai final setelah uji OCR (D-16). Selisih total struk hanya ditampilkan sebagai peringatan, tidak memaksa konfirmasi. Struk yang dicurigai duplikat tidak pernah di-auto-save. |
+| D-51 | Opt-in berbagi publik | Disimpan di `household.share_prices_public` (default `false`). Hanya berlaku untuk record baru. "Bagikan juga data lama" adalah aksi eksplisit terpisah. Mematikan opt-in menarik semua fakta yang sudah dibagikan. |
+| D-52 | Program member di luar katalog | Kurator men-seed program toko besar sebelum rilis. Jika programnya tidak ada, harga member disimpan sebagai catatan di `price_record.extra` (`member_note`) dan tidak ikut harga terbaik. Tidak ada program member privat di MVP. |
+| D-53 | Search | Mencari juga nama brand (join di RPC search). Produk katalog tanpa histori tetap tampil, di bawah hasil yang punya data. Produk `merged`/`archived` disaring. |
+| D-54 | Label tren | D-44 (30 hari vs 30 hari sebelumnya) dipakai di semua tempat, termasuk tool AI. Label UI: "vs 30 hari sebelumnya". Query bulanan §9 no. 3 desain fisik diselaraskan di Tahap 4. |
+| D-55 | Cek harga rak | Kalkulator di detail produk. Tidak menyimpan data, sehingga tidak ada sumber data baru. Ambang "mendekati harga terbaik" ≤ 5% di `app.config`. |
+| D-56 | Data publik di UI | Tidak ditampilkan di MVP. Prinsipnya tetap histori pribadi. |
+| D-57 | Tanya (AI) | Layar dirancang di Tahap 3, dibangun di Tahap 6. Hanya memakai tools berbasis query §9 desain fisik. Tidak menjawab soal pengeluaran atau dari pengetahuan umum, dan tidak menulis data. |
+| D-58 | Scan barcode di search | Ya, jika browser mendukung BarcodeDetector. Jika tidak, ikonnya disembunyikan. |
+| D-59 | Foto saat offline | Disimpan di perangkat dan diunggah otomatis saat ada sinyal. ID capture dibuat di klien. |
+| D-60 | Default UX lainnya | Satuan tampilan = satuan dasar. Tanpa notifikasi push, undo merge, foto produk, atau laporan produk global di MVP. Login: email OTP + Google. Screenshot pesanan marketplace = observasi. Sesi belanja wajib punya cabang. Sesi bisa diperpanjang +2 jam. Cache offline = produk yang pernah dibuka + 50 produk terbanyak data. Baris dengan 1 data tetap ikut urutan "lebih hemat di mana". Tanggal screenshot default = tanggal unggah dan bisa diubah. Rincian: W-12, W-13, W-15 s/d W-24 di `docs/04-wireframe.md`. |
 
 ---
 
@@ -288,8 +302,8 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 |---|---|---|
 | 1 | Requirement | ✅ Selesai |
 | 2 | Database Design | ✅ Selesai ([domain model](docs/02-domain-model.md), [desain fisik](docs/03-database-design.md), [skema](db/schema.sql)) |
-| 3 | Wireframe | ⏭️ Berikutnya |
-| 4 | Backend | — |
+| 3 | Wireframe | ✅ Selesai ([spesifikasi](docs/04-wireframe.md), [prototipe](docs/wireframes/index.html)) |
+| 4 | Backend | ⏭️ Berikutnya |
 | 5 | Frontend | — |
 | 6 | AI Integration (termasuk uji OCR, D-16) | — |
 | 7 | Production | — |
