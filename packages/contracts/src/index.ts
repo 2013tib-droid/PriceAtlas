@@ -4,3 +4,4 @@ export * from './unit-price.ts';
 export * from './parsed.ts';
 export * from './rpc.ts';
 export * from './rpc-client.ts';
+export type { ZodType } from 'zod';

@@ -1,0 +1,56 @@
+@import 'tailwindcss';
+
+/*
+ * Token desain netral (docs/07 §13.3: desain visual belum ada; warna bisa diganti lewat token
+ * tanpa mengubah komponen). Kontras teks ≥ 4,5:1 terhadap latar masing-masing (WCAG AA, §10.1):
+ *   foreground #171717 / background #ffffff  ≈ 17,9:1
+ *   muted-foreground #525252 / background    ≈ 7,8:1  ;  / muted #f5f5f5 ≈ 7,1:1
+ *   primary-foreground #ffffff / primary #1f2937 ≈ 14,7:1
+ *   danger #b91c1c / background ≈ 6,5:1  ;  success #166534 / background ≈ 7,1:1
+ *   warning-foreground #713f12 / warning #fef3c7 ≈ 7,8:1
+ *   border #737373 (komponen UI, ≥ 3:1) / background ≈ 4,7:1
+ */
+@theme {
+  --color-background: #ffffff;
+  --color-foreground: #171717;
+  --color-muted: #f5f5f5;
+  --color-muted-foreground: #525252;
+  --color-surface: #ffffff;
+  --color-border: #737373;
+  --color-divider: #e5e5e5;
+  --color-primary: #1f2937;
+  --color-primary-foreground: #ffffff;
+  --color-focus: #2563eb;
+  --color-danger: #b91c1c;
+  --color-success: #166534;
+  --color-warning: #fef3c7;
+  --color-warning-foreground: #713f12;
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  /* Target sentuh (§10.1): ≥ 44 px, aksi utama ≥ 48 px. */
+  --spacing-touch: 2.75rem;
+  --spacing-action: 3rem;
+  --spacing-tabbar: 4rem;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-focus;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

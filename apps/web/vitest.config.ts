@@ -1,7 +1,16 @@
 import { resolve } from 'node:path';
+import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
+// L5a unit (node) + L5b komponen (jsdom, ditandai `// @vitest-environment jsdom` per file).
+// Test e2e Playwright ada di e2e/ dan dijalankan terpisah (pnpm test:e2e).
 export default defineConfig({
+  plugins: [react()],
   resolve: { alias: { '@': resolve(import.meta.dirname, '.') } },
-  test: { testTimeout: 30_000, hookTimeout: 120_000 },
+  test: {
+    include: ['test/**/*.test.{ts,tsx}'],
+    setupFiles: ['test/setup.ts'],
+    testTimeout: 30_000,
+    hookTimeout: 120_000,
+  },
 });

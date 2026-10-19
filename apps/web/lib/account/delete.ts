@@ -37,7 +37,10 @@ export async function deleteAccount(deps: DeleteAccountDeps, body: unknown, now 
   try {
     await deps.beginDeletion(user.id);
   } catch {
-    return { status: 500, body: { error: 'DELETE_FAILED', message: 'Gagal memulai penghapusan akun. Tidak ada yang berubah; coba lagi.' } };
+    return {
+      status: 500,
+      body: { error: 'DELETE_FAILED', message: 'Gagal memulai penghapusan akun. Tidak ada yang berubah; coba lagi.' },
+    };
   }
   try {
     await deps.deleteAuthUser(user.id);
@@ -45,5 +48,8 @@ export async function deleteAccount(deps: DeleteAccountDeps, body: unknown, now 
     // Household sudah diarsipkan dan job sudah antre; mengulang endpoint aman (langkah 2 idempoten).
     return { status: 500, body: { error: 'DELETE_INCOMPLETE', message: 'Penghapusan belum selesai. Coba lagi.' } };
   }
-  return { status: 202, body: { status: 'accepted', message: 'Akun dihapus. Data dihapus bertahap di latar belakang.' } };
+  return {
+    status: 202,
+    body: { status: 'accepted', message: 'Akun dihapus. Data dihapus bertahap di latar belakang.' },
+  };
 }
