@@ -1,6 +1,6 @@
 # Tahap 3 — Wireframe
 
-> Status: **Draft (2026-10-19). Menunggu review.**
+> Status: **Disetujui (2026-10-19).** Semua usulan U-01 s/d U-22 dan default W-01 s/d W-24 diterima dan dicatat di Decision Log `PROJECT.md` sebagai D-47 s/d D-60.
 > Dasar: `PROJECT.md` (D-01 s/d D-46), `docs/02-domain-model.md`, `docs/03-database-design.md`, `db/schema.sql`.
 > Prototipe yang bisa diklik: [`docs/wireframes/index.html`](wireframes/index.html). Buka langsung di browser HP, tanpa build.
 
@@ -994,4 +994,22 @@ Alur lainnya (1, 2, 4 tanpa konfirmasi, 6, 8) sudah dirancang lengkap terhadap s
 
 ---
 
-**Langkah berikutnya:** review dokumen ini dan prototipe. Setelah U-xx dan pertanyaan blocking W-01 s/d W-06 diputuskan, keputusan dicatat di Decision Log, lalu Tahap 3 ditutup sebelum masuk Tahap 4.
+**Hasil review (2026-10-19):** semua default disetujui.
+
+| Usulan / pertanyaan | Keputusan |
+|---|---|
+| U-01 s/d U-22 | D-47 (rincian khusus: U-06 → D-55, U-10 → D-50, U-17 → D-59, U-18 → D-57, U-22 → D-58) |
+| W-01 | D-48 |
+| W-02 | D-49 |
+| W-03 | D-50 |
+| W-04 | D-51 |
+| W-05 | D-52 |
+| W-06 | D-53 |
+| W-07 | D-54 |
+| W-08, W-10 | D-55 |
+| W-09 | D-56 |
+| W-11 | D-57 |
+| W-14 | D-58 |
+| W-12, W-13, W-15 s/d W-24 | D-60 |
+
+Perubahan skema yang mengikuti keputusan ini (X-01 s/d X-04, plus kunci `app.config` dari D-50 dan D-55) **diterapkan di Tahap 4** saat `db/schema.sql` dipecah menjadi migration. X-05 s/d X-13 tetap kandidat non-blocking, dan dievaluasi saat implementasi.
