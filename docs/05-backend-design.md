@@ -1,6 +1,6 @@
 # Tahap 4a — Desain Backend
 
-> Status: **Draft untuk review.** Belum ada kode implementasi. Tahap 4b dimulai setelah dokumen ini disetujui.
+> Status: **Disetujui (2026-10-19).** Semua default Q-01 s/d Q-30 diterima dan dicatat di Decision Log `PROJECT.md` sebagai D-61 s/d D-72. Tahap 4b (implementasi) berikutnya.
 > Dasar: `PROJECT.md` (D-01 s/d D-60), `docs/02-domain-model.md`, `docs/03-database-design.md`, `db/schema.sql`, `db/tests/`, `docs/04-wireframe.md`.
 > Rujukan `§` tanpa nama dokumen mengacu ke `PROJECT.md`. "Desain fisik §n" mengacu ke `docs/03-database-design.md`. "Wireframe §n" mengacu ke `docs/04-wireframe.md`.
 
@@ -1286,4 +1286,21 @@ Setiap pertanyaan punya usulan default. Jawab "setuju semua" jika semua default 
 
 ---
 
-Setelah draft ini disetujui (atau dikoreksi), Tahap 4b dimulai: migration, RPC, worker dengan stub, tools, test, dan instruksi menjalankan secara lokal.
+**Hasil review (2026-10-19):** semua default disetujui.
+
+| Pertanyaan | Keputusan |
+|---|---|
+| Q-01, Q-17, Q-26 | D-61 |
+| Q-02 | D-62 |
+| Q-03, Q-12, Q-18, Q-28 | D-63 |
+| Q-04, Q-14, Q-30 | D-64 |
+| Q-05, Q-06 | D-65 |
+| Q-07 | D-66 |
+| Q-08 | D-67 |
+| Q-09, Q-15, Q-16 | D-68 |
+| Q-10 | D-69 |
+| Q-11, Q-21 | D-70 |
+| Q-13, Q-19, Q-20, Q-23, Q-27, Q-29 | D-71 |
+| Q-22, Q-24, Q-25 | D-72 |
+
+**Tambahan pada rencana migration (bagian 2.1)** karena Q-20 dan Q-27 disetujui: kolom `capture.error_code` (`blurry`, `not_a_receipt`, `unsupported`, `timeout`, `other`) dan `capture.captured_at timestamptz` (jam perangkat, dipakai sebagai dasar tanggal default label/screenshot). Keduanya masuk ke migration `…0230_hardening.sql`. Q-16: migration yang sama mengatur zona waktu database ke `Asia/Jakarta`.

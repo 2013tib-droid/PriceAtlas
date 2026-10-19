@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | Nama sementara | Price Intelligence (repo: PriceAtlas) |
-| Status | Tahap 4 (Backend): draft 4a menunggu review |
+| Status | Tahap 4a (desain backend) disetujui, siap masuk Tahap 4b (implementasi) |
 | Terakhir diperbarui | 2026-10-19 |
 
 ---
@@ -267,6 +267,18 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 | D-58 | Scan barcode di search | Ya, jika browser mendukung BarcodeDetector. Jika tidak, ikonnya disembunyikan. |
 | D-59 | Foto saat offline | Disimpan di perangkat dan diunggah otomatis saat ada sinyal. ID capture dibuat di klien. |
 | D-60 | Default UX lainnya | Satuan tampilan = satuan dasar. Tanpa notifikasi push, undo merge, foto produk, atau laporan produk global di MVP. Login: email OTP + Google. Screenshot pesanan marketplace = observasi. Sesi belanja wajib punya cabang. Sesi bisa diperpanjang +2 jam. Cache offline = produk yang pernah dibuka + 50 produk terbanyak data. Baris dengan 1 data tetap ikut urutan "lebih hemat di mana". Tanggal screenshot default = tanggal unggah dan bisa diubah. Rincian: W-12, W-13, W-15 s/d W-24 di `docs/04-wireframe.md`. |
+| D-61 | Arsitektur backend | Klien memanggil Supabase langsung (PostgREST untuk CRUD sederhana, RPC PostgreSQL untuk operasi bisnis) dengan JWT user. Route Handler Next.js hanya untuk operasi bersecret (hapus akun; Tanya di Tahap 6). Worker Node.js long-running dengan koneksi Postgres langsung. pg_cron untuk job SQL. Monorepo pnpm (`supabase/`, `apps/web`, `apps/worker`, `packages/*`). Hosting worker ditunda ke Tahap 7. Status unggahan memakai polling, bukan Realtime. Rincian: `docs/05-backend-design.md` §1. |
+| D-62 | Kolom `capture_item` | Sesuai `docs/05-backend-design.md` §2.2, termasuk `region`, `candidate_product_ids` (maks 5), lokasi dan seller per item, `transaction_date`, semua field harga, `extra`, `field_confidence`. |
+| D-63 | Turunan struk (D-23) | Ditegakkan di database: trigger turunan `receipt_line → price_record` + trigger konsistensi yang menolak perubahan angka langsung. Aturan turunan §4.3. Neto ≤ 0 tidak menghasilkan record. Diskon member di struk: harga dibayar = harga efektif (D-01), `price_basis = 'promo'`, dicatat di `extra.member_hint`. Parser memisahkan deskripsi item ke `raw_text` (dipakai sebagai teks alias). |
+| D-64 | PII dan hak akses | `receipt.pii` dan `processing_run.raw_*` tidak bisa dibaca `authenticated` (hak kolom). `audit_log` tidak menyimpan `pii`. `processing_run` select saja untuk user. `receipt` update hanya kolom header. Transisi `capture.status` dijaga trigger. `receipt.pii` dikosongkan bersama purge gambar 12 bulan. Ekspor data pribadi tidak di MVP. |
+| D-65 | Perbaikan merge dan fakta publik | Merge produk privat ke global tidak memindahkan barcode privat; matching barcode mengikuti `merged_into_id`. Penghapusan fakta publik dijalankan di `BEFORE DELETE`. Hapus akun mempertahankan fakta anonim (tautan dilepas dulu); opt-out tetap menarik semua fakta (D-51). |
+| D-66 | Kontrak `price_record.extra` | Kunci: `shipping_fee`, `shop_voucher`, `cashback`, `points`, `listing_title`, `listing_url`, `member_note`, `member_eligible` (snapshot kelayakan member saat record dibuat), `member_hint`, `note`. Kunci lain ditolak. Berlaku juga untuk `capture_item.extra`. |
+| D-67 | Visibility record baru | Saat insert, `visibility` selalu mengikuti `household.share_prices_public` (nilai dari klien diabaikan). Update manual per record tetap diizinkan, tetapi tidak dipakai UI. Flag household hanya diubah lewat RPC. |
+| D-68 | Hardening skema | `CHECK (store_id IS NOT NULL OR branch_id IS NULL)` di `receipt`, `capture`, `capture_item`. Ringkasan harga hanya menghitung mata uang default household. Zona waktu database `Asia/Jakarta` untuk MVP; job harian 17:05 UTC; RPC baru memakai `household.timezone`. |
+| D-69 | Storage | Bucket `captures` privat, maks 10 MB, jpeg/png/webp/heic. User hanya `SELECT` + `INSERT` di folder household-nya. Hapus file hanya oleh service role lewat Storage API. |
+| D-70 | Job dan konfigurasi | Jenis job baru: `delete_household`, `share_existing_prices`, `purge_storage_paths`. Kunci config operasional §5.6 (percobaan maks 3, timeout 300 dtk, backoff 30/120/600 dtk, fuzzy 0,5, unggahan yatim 24 jam, redaksi OCR 7 hari, perpanjang sesi 2 jam). Nilai confidence per tier adalah placeholder sampai uji OCR (D-16). |
+| D-71 | Aturan pipeline | Auto-save struk juga mensyaratkan confidence header toko dan tanggal ≥ ambang. Observasi tanpa harga yang berlaku ditolak (`NO_APPLICABLE_PRICE`); seri diurutkan normal → promo → member. Tambah `capture.error_code` dan `capture.captured_at`. Konfirmasi struk wajib memutuskan semua baris, dengan opsi "lewati". Duplikat hash tetap dicurigai di konfirmasi walaupun user memilih "Tetap unggah". |
+| D-72 | Lain-lain Tahap 4 | Merge global oleh sistem tetap satu transaksi di MVP. Satu sesi belanja aktif per household, ditegakkan oleh RPC. `db/schema.sql` menjadi snapshot hasil generate dari migration, dicek CI. |
 
 ---
 
@@ -303,7 +315,7 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 | 1 | Requirement | ✅ Selesai |
 | 2 | Database Design | ✅ Selesai ([domain model](docs/02-domain-model.md), [desain fisik](docs/03-database-design.md), [skema](db/schema.sql)) |
 | 3 | Wireframe | ✅ Selesai ([spesifikasi](docs/04-wireframe.md), [prototipe](docs/wireframes/index.html)) |
-| 4 | Backend | 📝 4a draft ([desain backend](docs/05-backend-design.md)), menunggu review |
+| 4 | Backend | 🔄 4a disetujui ([desain backend](docs/05-backend-design.md)), 4b berikutnya |
 | 5 | Frontend | — |
 | 6 | AI Integration (termasuk uji OCR, D-16) | — |
 | 7 | Production | — |
