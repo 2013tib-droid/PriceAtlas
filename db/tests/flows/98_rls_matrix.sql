@@ -213,9 +213,9 @@ declare
 begin
   select * into p from pg_proc where oid = p_oid;
   if p.proargnames is not null then
-    for i in 1 .. coalesce(array_length(p.proargtypes::oid[], 1), 0) loop
+    for i in 1 .. p.pronargs loop
       v_name := p.proargnames[i];
-      v_type := format_type((p.proargtypes::oid[])[i], null);
+      v_type := format_type(p.proargtypes[i - 1], null);   -- oidvector berbasis 0
       select expr into v_expr from test.rpc_param where name = v_name;
       if v_expr is null then
         raise exception 'GAGAL: parameter % pada %() belum dipetakan di 98_rls_matrix', v_name, p.proname;
@@ -248,7 +248,11 @@ begin
     begin
       execute v_sql into v_out;
     exception when others then
-      v_out := '';                                          -- NOT_FOUND / input ditolak = tidak bocor
+      -- Hanya penolakan yang sah (NOT_FOUND, input ditolak, hak) dianggap "tidak bocor".
+      if sqlstate not in ('PT404', '22023', '42501', 'PT403') then
+        raise exception 'GAGAL: RPC % sebagai B error tak terduga: % %', f.proname, sqlstate, sqlerrm;
+      end if;
+      v_out := '';
     end;
     select string_agg(id, ', ') into v_leak from test.a_ids where strpos(v_out, id) > 0;
     perform test.ok(v_leak is null, format('RPC %s: hasil untuk B tidak memuat id A%s', f.proname,
@@ -258,11 +262,12 @@ begin
     begin
       execute v_sql into v_out;
       if exists (select 1 from test.a_ids where strpos(v_out, id) > 0) then v_seen_a := v_seen_a + 1; end if;
-    exception when others then null;
+    exception when others then
+      raise notice 'info: % sebagai A → %', f.proname, sqlerrm;
     end;
     perform test.logout();
   end loop;
   perform test.logout();
-  perform test.ok(v_n = 0 or v_seen_a > 0,
+  perform test.ok(v_n = 0 or v_seen_a * 2 >= v_n,
                   format('matriks RPC tidak hampa: %s RPC baca, %s mengembalikan data A untuk A', v_n, v_seen_a));
 end $$;
