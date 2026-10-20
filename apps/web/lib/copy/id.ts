@@ -266,7 +266,7 @@ export const HOME_COPY = {
   newPrices: 'Harga baru masuk',
   needsCheck: '{n} perlu dicek',
   emptyTitle: 'Histori harga masih kosong',
-  emptyBody: 'Histori harga masih kosong. Setiap struk yang kamu foto menambah data pembanding.',
+  emptyBody: 'Setiap struk yang kamu foto menambah data pembanding.',
   emptyCards: {
     receipt: {
       title: 'Foto struk belanja terakhirmu',

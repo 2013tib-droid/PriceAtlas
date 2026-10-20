@@ -155,11 +155,11 @@ export function ShelfCheckSheet({
               </Button>
             ))}
           </div>
-          <div className="flex gap-2">
-            <Button variant="ghost" className="flex-1" onClick={() => press('clear')} disabled={!digits}>
+          <div className="flex flex-col gap-2">
+            <Button variant="ghost" onClick={() => press('clear')} disabled={!digits}>
               {SHELF_COPY.clear}
             </Button>
-            <Button asChild variant="secondary" className="flex-1">
+            <Button asChild variant="secondary" size="action">
               <Link href="/kamera?jenis=label">
                 <Camera aria-hidden />
                 {SHELF_COPY.saveLabel}

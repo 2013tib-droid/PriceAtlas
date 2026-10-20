@@ -5,19 +5,11 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { getSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { fromRpcError, toAppError } from './errors';
+import { RecentPriceSchema, type RecentPrice } from './rest-schemas';
+
+export { RecentPriceSchema, type RecentPrice };
 
 const VALIDATE_OUTPUT = process.env.NODE_ENV !== 'production';
-
-/** Baris "Harga baru masuk" (S-01) dari `price_record_view`. */
-export const RecentPriceSchema = z.object({
-  id: z.string(),
-  product_id: z.string(),
-  transaction_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-  effective_price: z.number(),
-  price_basis: z.enum(['normal', 'promo', 'member']),
-  store_name: z.string(),
-});
-export type RecentPrice = z.infer<typeof RecentPriceSchema>;
 
 export const RECENT_PRICES_LIMIT = 10;
 

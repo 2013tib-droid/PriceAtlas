@@ -13,7 +13,7 @@ import {
   WhereCheaperRowSchema,
 } from '@priceatlas/contracts';
 import { z } from 'zod';
-import { RecentPriceSchema } from '@/lib/data/rest';
+import { RecentPriceSchema } from '@/lib/data/rest-schemas';
 
 const RpcErrorFixture = z.object({
   error: z.object({
