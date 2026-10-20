@@ -320,6 +320,7 @@ pnpm --filter @priceatlas/web lint            # ESLint flat + jsx-a11y (D-80)
 pnpm --filter @priceatlas/web format:check    # Prettier (format: pnpm --filter @priceatlas/web format)
 pnpm --filter @priceatlas/web typecheck       # app + service worker (tsconfig.sw.json)
 pnpm --filter @priceatlas/web test            # L5a unit + L5b komponen (vitest, jsdom)
+pnpm --filter @priceatlas/web test:browser    # L5c browser (vitest browser mode + Chromium Playwright; PW_CHROMIUM_PATH opsional)
 pnpm --filter @priceatlas/web build && pnpm --filter @priceatlas/web check:bundle   # tanpa service role, anggaran JS
 pnpm --filter @priceatlas/web test:e2e        # Playwright (butuh Supabase lokal + env service role untuk test)
 ```
@@ -343,6 +344,10 @@ e2e memakai `next start` (Playwright menyalakannya), env `NEXT_PUBLIC_SUPABASE_*
 | `app/(app)/produk/*`, `features/product`, `features/sizes`, `features/cheaper` | M1: S-03 (+ S-03b `?sheet=cek-harga`), S-04 `/produk/ukuran?group=`, S-05 `/produk/hemat?id=\|group=` |
 | `app/(fullscreen)/kamera`, `features/scan`, `lib/media/barcode.ts` | Layar penuh tanpa tab bar; M1 hanya `jenis=barcode` (BarcodeDetector, D-58) |
 | `lib/data/queries.ts`, `lib/data/rest.ts` | Hook per RPC (`qk.rpc`, skema kontrak di dev/test) dan REST S-01 (`price_record_view`, hitung `capture`) |
+| `app/(fullscreen)/kamera` (`jenis=struk\|screenshot`), `features/capture` | M2: S-07 kamera struk (`<input capture>`), ThumbStrip, S-07b galeri, dialog duplikat U-10; sheet S-06 di `components/app/photo-sheet.tsx` (`?sheet=foto`) |
+| `lib/media/*` | M2: pipeline gambar §6 (pembaca EXIF/ukuran sendiri, aturan lewati §6.3, kompresi Web Worker/OffscreenCanvas, sha256, `capture_id`). Dimuat lewat dynamic import dari S-07. |
+| `lib/offline/outbox*.ts`, `uploader.ts`, `runner.ts` | M2: antrean foto IndexedDB (`outbox`, `outbox_blobs`) + state machine §5.4 + pemicu + kunci satu tab |
+| `app/(app)/unggahan`, `features/uploads`, `lib/data/captures.ts` | M2: S-08 (`/unggahan?jenis=`), S-09 (`/unggahan/detail?id=`), pemantau status global, hook R13/R14/W2/W3/signed URL |
 | `lib/offline/prefs.ts`, `lib/hooks/use-pref.ts` | 💾 di IndexedDB `prefs`: pencarian terakhir (8), baru dicek (150, untuk R5), toggle "Hanya harga normal" |
 
 ### 4.4 Fixture dan data e2e (M1)
@@ -351,3 +356,28 @@ e2e memakai `next start` (Playwright menyalakannya), env `NEXT_PUBLIC_SUPABASE_*
 |---|---|
 | `apps/web/test/fixtures/rpc.json` | Keluaran RPC **asli** dari database mode A (`test/fixtures/scenario.ts`: katalog seed + record harga Ani, Budi tanpa histori). Dipakai test komponen L5b. `test/fixtures.l3.test.ts` (butuh PostgreSQL, ikut `pnpm -r test`) memeriksa setiap keluaran lolos skema kontrak dan bentuknya sama dengan file yang di-commit. Setelah RPC/kontrak berubah: `UPDATE_FIXTURES=1 pnpm --filter @priceatlas/web exec vitest run test/fixtures.l3.test.ts`, lalu tinjau diff. |
 | `apps/web/e2e/support/seed.ts` | `supabase/seed.sql` hanya katalog. e2e alur 1–2 menambah histori harga untuk household user e2e lewat **service role di proses test** (bukan kode klien, D-61), lalu menunggu `price_summary` dari pg_cron (≤ 10 dtk). Migration tidak diubah. |
+
+### 4.5 Antrean foto, worker di e2e, dan mencoba unggah lokal (M2)
+
+**Alur di klien** (`docs/07` §5.4, §6): foto → `prepareImage` (EXIF → aturan lewati §6.3 → kompresi → sha256) → item + byte disimpan di IndexedDB `priceatlas:<user_id>` (`outbox`, `outbox_blobs`) → cek hash `capture_image` → unggah ke `captures/{household_id}/{capture_id}/{position}.{ext}` (`upsert: false`, JWT user) → `submit_capture` → byte dihapus → item dihapus setelah `list_captures` memuatnya. Antrean diproses saat app dibuka, saat `online`, saat tab kembali terlihat, setelah foto baru, dan dengan backoff 5 dtk / 30 dtk / 2 mnt / 10 mnt selama app terbuka; hanya satu tab (Web Locks). Melihat isi antrean: DevTools → Application → IndexedDB → `priceatlas:<user_id>` → `outbox`.
+
+**Mencoba dengan Supabase lokal (mode B):**
+
+```bash
+supabase start
+# apps/web/.env.local seperti §4.1
+DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres WORKER_DB_ROLE=service_role \
+STORAGE_BACKEND=supabase EXTRACTOR=stub NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 \
+SUPABASE_SERVICE_ROLE_KEY=<SERVICE_ROLE_KEY> pnpm --filter @priceatlas/worker start
+pnpm --filter @priceatlas/web dev
+```
+
+Lalu di app: tombol kamera → "Pilih dari galeri" → `apps/worker/test/fixtures/struk-aeon.jpg` → Selesai → tab Unggahan: dalam beberapa detik "Perlu dicek (1)". `struk-buram.jpg` → Gagal "Gambar buram atau terpotong."; `struk-alfamart-timeout.jpg` → gagal sementara 2× lalu selesai (backoff 30 dtk + 2 mnt). Fixture ini bukan JPEG sungguhan dan diunggah apa adanya (F-40), sehingga sha256 cocok dengan stub. Foto JPEG/PNG sungguhan tanpa fixture → worker `unsupported` (Gagal "Format gambar ini belum bisa dibaca.").
+
+Offline: DevTools → Network → Offline (atau mode pesawat di HP) → foto → S-08 "Menunggu sinyal" → online → terunggah otomatis. Service worker hanya aktif di build produksi atau `NEXT_PUBLIC_SW_DEV=1` (§4.1).
+
+**Worker di e2e (CI).** Job `supabase-e2e` menyalakan worker stub di latar (`pnpm --filter @priceatlas/worker start`, `EXTRACTOR=stub`, `WORKER_DB_ROLE=service_role`, `STORAGE_BACKEND=supabase`) sebelum Playwright, lalu mencetak log worker. e2e M2: `e2e/upload.spec.ts` (alur 3 sampai `needs_confirmation`, G buram + Ulangi, G timeout → retry otomatis) dan `e2e/offline-queue.spec.ts` (O, Chromium). Helper test `e2e/support/captures.ts` memakai service role **di proses test saja** (membaca capture, memundurkan waktu `processing_run` untuk melewati jeda backoff); migration dan logika worker tidak diubah.
+
+**Fixture R13/R14.** `apps/web/test/fixtures/scenario.ts` menjalankan pipeline worker asli (mode A, `LocalBlobStore`) untuk user Citra sampai setiap status capture, lalu menyimpan keluaran `list_captures`/`get_capture` di `rpc.json` (dibangkitkan ulang seperti §4.4).
+
+**Lingkungan tanpa Docker.** Jika `supabase start` tidak bisa (CDN image diblokir), e2e bisa dicoba terhadap tiruan kecil Supabase (auth OTP, subset PostgREST, Storage) di atas database mode A (`db/scripts/dev-db.sh priceatlas_e2e`) + worker mode A (`STORAGE_BACKEND=local`, `--dev-scheduler`), lalu `PW_NO_SERVER` tidak diisi dan `NEXT_PUBLIC_SUPABASE_*` menunjuk ke tiruan itu. Tiruan ini tidak di-commit (bukan pengganti Supabase asli); verifikasi resmi tetap job `supabase-e2e` (docs/07 §1.6).

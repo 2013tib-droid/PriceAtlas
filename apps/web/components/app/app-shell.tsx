@@ -7,8 +7,11 @@ import { useEffect, type ReactNode } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AUTH_COPY, APP_COPY } from '@/lib/copy/id';
 import { useAuth } from '@/lib/auth/session';
+import { useRememberAppPath } from '@/lib/hooks/last-app-path';
 import { useOnline } from '@/lib/hooks/use-online';
+import { UploadWatcher } from '@/features/uploads/upload-watcher';
 import { OfflineStrip } from './offline-strip';
+import { SwUpdateBanner } from './sw-update';
 import { TabBar } from './tab-bar';
 
 export function AuthGate({ children }: { children: ReactNode }) {
@@ -43,18 +46,21 @@ export function AuthGate({ children }: { children: ReactNode }) {
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
+  useRememberAppPath();
   return (
     <div className="flex min-h-dvh flex-col">
       <a href="#konten" className="sr-only focus:not-sr-only focus:p-2">
         {APP_COPY.skipToContent}
       </a>
       <OfflineStrip />
+      <SwUpdateBanner />
       <main
         id="konten"
         className="mx-auto w-full max-w-xl flex-1 pb-[calc(var(--spacing-tabbar)+env(safe-area-inset-bottom)+1rem)]"
       >
         <AuthGate>{children}</AuthGate>
       </main>
+      <UploadWatcher />
       <TabBar />
     </div>
   );

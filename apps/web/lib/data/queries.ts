@@ -22,9 +22,10 @@ import {
   type RpcInput,
   type WhereCheaperRow,
 } from '@priceatlas/contracts';
-import { useInfiniteQuery, useQuery, type QueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { z } from 'zod';
 import { useAuth } from '@/lib/auth/session';
+import { BADGE_IDLE_MS, listPollingActive, POLL_MS } from './captures';
 import { qk } from './query-keys';
 import { fetchNeedsCheckCount, fetchRecentPrices } from './rest';
 import { rpcCall } from './rpc';
@@ -182,11 +183,13 @@ export function useRecentPrices() {
   });
 }
 
+/** Badge Unggahan (§5.5): ikut 5 dtk selama R13 dipolling, selain itu tiap 60 dtk. */
 export function useNeedsCheckCount() {
+  const qc = useQueryClient();
   return useQuery({
     queryKey: ['rest', 'capture', 'needs_confirmation_count'],
     queryFn: fetchNeedsCheckCount,
     enabled: useSignedIn(),
-    refetchInterval: 60_000,
+    refetchInterval: () => (listPollingActive(qc) ? POLL_MS : BADGE_IDLE_MS),
   });
 }

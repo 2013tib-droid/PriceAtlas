@@ -4,8 +4,7 @@
 // U-19. Kolom search ada di SearchLayout.
 import { Camera, Clock, Search, ShoppingBasket } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
-import { PhotoSheet } from '@/components/app/photo-sheet';
+import { usePhotoSheet } from '@/components/app/photo-sheet';
 import { ErrorState, LoadingState } from '@/components/app/screen-state';
 import { BasisLabel, PriceText } from '@/components/price/price';
 import { productHref } from '@/components/product/product-card';
@@ -120,7 +119,7 @@ function NewPrices() {
 }
 
 export function HomeScreen() {
-  const [photoOpen, setPhotoOpen] = useState(false);
+  const photo = usePhotoSheet();
   const recentSearches = usePref<string[]>(PREF_KEYS.recentSearches, []);
   const viewed = usePref<string[]>(PREF_KEYS.viewed, []);
   const viewedIds = viewed.value.slice(0, RECENTLY_VIEWED_SHOWN);
@@ -167,7 +166,7 @@ export function HomeScreen() {
       ) : null}
 
       {isEmpty ? (
-        <EmptyHome onPhoto={() => setPhotoOpen(true)} />
+        <EmptyHome onPhoto={photo.open} />
       ) : (
         <>
           {viewedIds.length > 0 ? (
@@ -200,7 +199,6 @@ export function HomeScreen() {
           ) : null}
         </>
       )}
-      <PhotoSheet open={photoOpen} onOpenChange={setPhotoOpen} />
     </section>
   );
 }

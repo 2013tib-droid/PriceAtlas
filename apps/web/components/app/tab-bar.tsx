@@ -3,10 +3,11 @@
 import { Camera, Search, ShoppingBasket, Upload, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
 import { APP_COPY } from '@/lib/copy/id';
 import { cn } from '@/lib/utils';
-import { PhotoSheet } from './photo-sheet';
+import { useNeedsCheckCount } from '@/lib/data/queries';
+import { fill } from '@/lib/copy/id';
+import { PhotoSheet, usePhotoSheet } from './photo-sheet';
 
 export const TABS = [
   {
@@ -25,7 +26,7 @@ export const TABS = [
   { href: '/saya', label: APP_COPY.tabs.me, icon: User, match: (p: string) => p.startsWith('/saya') },
 ] as const;
 
-function TabLink({ tab, active }: { tab: (typeof TABS)[number]; active: boolean }) {
+function TabLink({ tab, active, badge = 0 }: { tab: (typeof TABS)[number]; active: boolean; badge?: number }) {
   const Icon = tab.icon;
   return (
     <li className="flex-1">
@@ -33,12 +34,21 @@ function TabLink({ tab, active }: { tab: (typeof TABS)[number]; active: boolean 
         href={tab.href}
         aria-current={active ? 'page' : undefined}
         className={cn(
-          'flex h-tabbar flex-col items-center justify-center gap-0.5 text-xs',
+          'relative flex h-tabbar flex-col items-center justify-center gap-0.5 text-xs',
           active ? 'font-semibold text-foreground' : 'text-muted-foreground',
         )}
       >
         <Icon aria-hidden className="size-6" strokeWidth={active ? 2.5 : 2} />
         {tab.label}
+        {badge > 0 ? (
+          <span
+            data-testid="uploads-badge"
+            className="absolute top-1.5 left-1/2 ml-2 min-w-5 rounded-full bg-danger px-1 text-center text-xs leading-5 font-semibold text-primary-foreground"
+          >
+            <span aria-hidden>{badge > 99 ? '99+' : badge}</span>
+            <span className="sr-only">{`, ${fill(APP_COPY.uploadsBadge, { n: badge })}`}</span>
+          </span>
+        ) : null}
       </Link>
     </li>
   );
@@ -46,7 +56,8 @@ function TabLink({ tab, active }: { tab: (typeof TABS)[number]; active: boolean 
 
 export function TabBar() {
   const pathname = usePathname() ?? '/';
-  const [photoOpen, setPhotoOpen] = useState(false);
+  const photo = usePhotoSheet();
+  const needsCheck = useNeedsCheckCount().data ?? 0;
   const [left, right] = [TABS.slice(0, 2), TABS.slice(2)];
   return (
     <nav
@@ -55,12 +66,12 @@ export function TabBar() {
     >
       <ul className="mx-auto flex max-w-xl items-stretch">
         {left.map((t) => (
-          <TabLink key={t.href} tab={t} active={t.match(pathname)} />
+          <TabLink key={t.href} tab={t} active={t.match(pathname)} badge={t.href === '/unggahan' ? needsCheck : 0} />
         ))}
         <li className="flex flex-1 items-center justify-center">
           <button
             type="button"
-            onClick={() => setPhotoOpen(true)}
+            onClick={photo.open}
             aria-label={APP_COPY.cameraLabel}
             className="flex size-14 -translate-y-3 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md"
           >
@@ -71,7 +82,7 @@ export function TabBar() {
           <TabLink key={t.href} tab={t} active={t.match(pathname)} />
         ))}
       </ul>
-      <PhotoSheet open={photoOpen} onOpenChange={setPhotoOpen} />
+      <PhotoSheet />
     </nav>
   );
 }

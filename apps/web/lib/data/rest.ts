@@ -37,6 +37,31 @@ export async function fetchRecentPrices(): Promise<RecentPrice[]> {
   return z.array(RecentPriceSchema).parse(rows);
 }
 
+/**
+ * Cek hash duplikat U-10 (docs/05 §3.3 S-07, §5.2 langkah 2):
+ * `capture_image?select=capture_id,created_at&sha256=in.(…)` (indeks capture_image_hash_idx; RLS
+ * menyaring household). Capture lain saja: capture ini sendiri bisa sudah terdaftar (W1 ulang).
+ */
+export async function fetchCaptureImagesBySha(
+  sha256s: string[],
+  excludeCaptureId: string,
+): Promise<{ capture_id: string; created_at: string }[]> {
+  let res;
+  try {
+    res = await client()
+      .from('capture_image')
+      .select('capture_id,created_at')
+      .in('sha256', sha256s)
+      .neq('capture_id', excludeCaptureId)
+      .order('created_at', { ascending: false })
+      .limit(5);
+  } catch (e) {
+    throw toAppError(e);
+  }
+  if (res.error) throw fromRpcError(res.error);
+  return (res.data ?? []) as { capture_id: string; created_at: string }[];
+}
+
 /** Badge "perlu dicek" (S-01): `capture?status=eq.needs_confirmation`, head + count=exact. */
 export async function fetchNeedsCheckCount(): Promise<number> {
   let res;

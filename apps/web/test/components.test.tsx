@@ -164,7 +164,7 @@ describe('S-00a Masuk', () => {
 describe('TabBar', () => {
   it('4 tab + tombol kamera di tengah, tab aktif ditandai', () => {
     nav.pathname = '/unggahan';
-    render(<TabBar />);
+    wrap(<TabBar />);
     const navEl = screen.getByRole('navigation', { name: 'Navigasi utama' });
     const items = within(navEl).getAllByRole('listitem');
     expect(items).toHaveLength(5);

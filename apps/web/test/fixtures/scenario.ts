@@ -2,8 +2,18 @@
 // (migration + seed + record di bawah), dipanggil sebagai user lewat PgRpcClient (JWT simulasi).
 // Dipakai test/fixtures.l3.test.ts: membangkitkan ulang `rpc.json` (UPDATE_FIXTURES=1) atau
 // memeriksa bahwa bentuk keluaran server sama dengan fixture yang di-commit.
+import { mkdtempSync, readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import type pg from 'pg';
 import { PgRpcClient, USERS, householdOf } from '@priceatlas/testkit';
+import { uploadAndSubmit } from '@priceatlas/worker/scripts/client-sim.ts';
+import { LocalBlobStore } from '@priceatlas/worker/src/adapters/local-blob-store.ts';
+import { createPool } from '@priceatlas/worker/src/db.ts';
+import { FixtureRegistry, StubAiMatcher, StubExtractor } from '@priceatlas/worker/src/extractors/stub.ts';
+import { setLogSink } from '@priceatlas/worker/src/log.ts';
+import { DEFAULT_FIXTURES_DIR } from '@priceatlas/worker/src/main.ts';
+import { processNextCapture } from '@priceatlas/worker/src/pipeline/process-capture.ts';
 
 export const IDS = {
   milo200: '70000000-0000-0000-0000-000000000200',
@@ -116,11 +126,61 @@ async function seedScenario(pool: pg.Pool): Promise<void> {
   await pool.query('select app.process_summary_queue()');
 }
 
+/**
+ * M2 (S-08/S-09): capture milik Citra di setiap status lewat pipeline worker ASLI (stub + fixture
+ * apps/worker/test/fixtures), supaya R13/R14 = keluaran server. Citra dipakai agar histori Ani/Budi
+ * (fixture M1) tidak berubah.
+ */
+async function seedCaptures(pool: pg.Pool, url: string) {
+  setLogSink(() => undefined);
+  const workerDb = createPool(url, { role: 'service_role', max: 2 });
+  const blob = new LocalBlobStore(mkdtempSync(join(tmpdir(), 'pa-web-fx-')), workerDb);
+  const fixtures = new FixtureRegistry(DEFAULT_FIXTURES_DIR);
+  const deps = {
+    db: workerDb,
+    blob,
+    extractor: new StubExtractor(fixtures),
+    ai: new StubAiMatcher(fixtures),
+    workerId: 'w-web-fixtures',
+  };
+  const submit = async (name: string) => {
+    const fx = fixtures.byName(name)!;
+    const images = fx.images!.map((f) => readFileSync(join(DEFAULT_FIXTURES_DIR, f)));
+    return (await uploadAndSubmit({ pool, blob, userId: USERS.c, kind: fx.output.kind, images })).captureId;
+  };
+  const skipBackoff = (id: string) =>
+    pool.query(
+      `update public.processing_run set started_at = started_at - interval '1 hour',
+              finished_at = finished_at - interval '1 hour' where capture_id = $1`,
+      [id],
+    );
+  try {
+    const needs = await submit('struk-aeon');
+    await processNextCapture(deps);
+    const failed = await submit('struk-buram');
+    await processNextCapture(deps);
+    // 2× gagal sementara lalu sukses (retry otomatis, backoff dilewati) → done.
+    const done = await submit('struk-alfamart-timeout');
+    for (let i = 0; i < 3; i++) {
+      await processNextCapture(deps);
+      await skipBackoff(done);
+    }
+    // Diklaim worker tanpa selesai → processing.
+    const processing = await submit('label-milo');
+    await workerDb.query(`select * from app.claim_next_capture('w-web-fixtures', 'stub', null, 'stub-1')`);
+    const uploaded = await submit('shopee-milo');
+    return { needs, failed, done, processing, uploaded };
+  } finally {
+    await workerDb.end();
+  }
+}
+
 export type Fixtures = { today: string; data: Record<string, unknown> };
 
 /** Bangun skenario lalu kumpulkan keluaran RPC (Ani = punya histori, Budi = kosong). */
-export async function collectFixtures(pool: pg.Pool): Promise<Fixtures> {
+export async function collectFixtures(pool: pg.Pool, url: string): Promise<Fixtures> {
   await seedScenario(pool);
+  const caps = await seedCaptures(pool, url);
   const ani = new PgRpcClient(pool, USERS.a);
   const budi = new PgRpcClient(pool, USERS.b);
   const data: Record<string, unknown> = {};
@@ -181,6 +241,18 @@ export async function collectFixtures(pool: pg.Pool): Promise<Fixtures> {
   await call('barcode_milo500', ani, 'find_product_by_barcode', { p_code: '8992696404441' });
   await call('barcode_via_merge', ani, 'find_product_by_barcode', { p_code: '9990000000012' });
   await call('barcode_unknown', ani, 'find_product_by_barcode', { p_code: '1234567890123' });
+
+  // M2: R13 (semua + filter jenis + kosong) dan R14 per status, termasuk gambar terhapus retensi.
+  const citra = new PgRpcClient(pool, USERS.c);
+  await call('captures_all', citra, 'list_captures', { p_limit: 50, p_kind: null });
+  await call('captures_receipt', citra, 'list_captures', { p_limit: 50, p_kind: 'receipt' });
+  await call('captures_empty', budi, 'list_captures', { p_limit: 50, p_kind: null });
+  for (const [k, id] of Object.entries(caps)) await call(`capture_${k}`, citra, 'get_capture', { p_capture_id: id });
+  await pool.query(`update public.capture_image set purged_at = now() where capture_id = $1`, [caps.done]);
+  await call('capture_purged', citra, 'get_capture', { p_capture_id: caps.done });
+  await call('capture_unknown', citra, 'get_capture', { p_capture_id: IDS.unknown });
+  await call('retry_not_failed', citra, 'retry_capture', { p_capture_id: caps.needs });
+  await call('delete_not_allowed', citra, 'delete_capture', { p_capture_id: caps.needs });
 
   // S-01 "Harga baru masuk": REST price_record_view (docs/05 §3.3), sebagai user (RLS).
   const recentSql = `select id, product_id, transaction_date, effective_price, price_basis, store_name

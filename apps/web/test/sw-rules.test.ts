@@ -31,7 +31,18 @@ describe('service worker', () => {
   });
 
   it('shell offline mencakup tab utama, cari + detail produk (§7.1), /masuk, dan /offline', () => {
-    expect(SHELL_ROUTES).toEqual(['/', '/cari', '/produk', '/unggahan', '/belanja', '/saya', '/masuk', '/offline']);
+    expect(SHELL_ROUTES).toEqual([
+      '/',
+      '/cari',
+      '/produk',
+      '/unggahan',
+      '/unggahan/detail',
+      '/kamera',
+      '/belanja',
+      '/saya',
+      '/masuk',
+      '/offline',
+    ]);
   });
 
   it('versi berubah jika daftar precache berubah', () => {

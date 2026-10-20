@@ -5,6 +5,8 @@ import { useState, type ReactNode } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/lib/auth/session';
 import { createQueryClient } from '@/lib/data/query-client';
+import { FlashToast } from '@/lib/flash';
+import { OutboxProvider } from '@/lib/offline/outbox-context';
 
 // Service worker mati di `next dev` kecuali NEXT_PUBLIC_SW_DEV=1 (docs/07 §11.5).
 const SW_DISABLED = process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_SW_DEV !== '1';
@@ -20,8 +22,11 @@ export function Providers({ children }: { children: ReactNode }) {
       reloadOnOnline={false}
     >
       <QueryClientProvider client={queryClient}>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <OutboxProvider>{children}</OutboxProvider>
+        </AuthProvider>
         <Toaster />
+        <FlashToast />
       </QueryClientProvider>
     </SerwistProvider>
   );

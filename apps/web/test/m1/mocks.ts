@@ -13,4 +13,7 @@ vi.mock('next/navigation', async () => {
     useSearchParams: () => h.nav.search,
   };
 });
-vi.mock('sonner', async (orig) => ({ ...(await orig<typeof import('sonner')>()), toast: vi.fn() }));
+vi.mock('sonner', async (orig) => ({
+  ...(await orig<typeof import('sonner')>()),
+  toast: Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn(), warning: vi.fn() }),
+}));

@@ -109,9 +109,33 @@ export function defaultRpc(fn: string, a: Record<string, unknown>): Res {
       const key = { '8992696404441': 'barcode_milo500', '9990000000012': 'barcode_via_merge' }[String(a.p_code)];
       return ok(fx(key ?? 'barcode_unknown'));
     }
+    // M2 (S-08/S-09): keluaran R13/R14 asli user Citra.
+    case 'list_captures': {
+      if (a.p_kind === 'receipt') return ok(fx('captures_receipt'));
+      const all = fx<{ kind: string }[]>('captures_all');
+      return ok(a.p_kind ? all.filter((c) => c.kind === a.p_kind) : all);
+    }
+    case 'get_capture': {
+      const key = Object.entries(captureIds()).find(([, id]) => id === a.p_capture_id)?.[0];
+      return key ? ok(fx(`capture_${key}`)) : errOf('capture_unknown');
+    }
+    case 'retry_capture':
+      return ok({ capture_id: a.p_capture_id, status: 'uploaded' });
+    case 'delete_capture':
+      return ok({ capture_id: a.p_capture_id, deleted: true });
+    case 'submit_capture':
+      return ok({ capture_id: a.p_capture_id, status: 'uploaded', created: true });
     default:
-      throw new Error(`RPC ${fn} tidak diharapkan di M1`);
+      throw new Error(`RPC ${fn} tidak diharapkan di M1/M2`);
   }
+}
+
+/** Id capture fixture per status (needs, failed, done, processing, uploaded). */
+export function captureIds(): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const k of ['needs', 'failed', 'done', 'processing', 'uploaded'])
+    out[k] = fx<{ capture: { id: string } }>(`capture_${k}`).capture.id;
+  return out;
 }
 
 export const state = {
@@ -119,6 +143,19 @@ export const state = {
   rest: {
     price_record_view: () => ok(fx('recent_prices')) as Res | Promise<Res>,
     capture: () => ({ data: null, error: null, count: 0 }) as Res & { count?: number },
+    capture_image: () => ok([]) as Res | Promise<Res>,
+  },
+  storage: {
+    upload: vi.fn(async (...args: [path: string, blob: Blob, opts?: unknown]) => ({
+      data: { path: args[0] },
+      error: null as unknown,
+    })),
+    createSignedUrl: vi.fn(async (path: string, seconds: number) => ({
+      data: { signedUrl: `https://supabase.test/storage/v1/object/sign/captures/${path}?expires=${seconds}` } as {
+        signedUrl: string;
+      } | null,
+      error: null as unknown,
+    })),
   },
 };
 
@@ -132,9 +169,15 @@ export const sb = {
     const o = await state.rpcOverride?.(fn, a);
     return o ?? defaultRpc(fn, a);
   }),
-  from: vi.fn((table: 'price_record_view' | 'capture') => {
+  storage: {
+    from: vi.fn(() => ({
+      upload: (path: string, blob: Blob, opts?: unknown) => state.storage.upload(path, blob, opts),
+      createSignedUrl: (path: string, seconds: number) => state.storage.createSignedUrl(path, seconds),
+    })),
+  },
+  from: vi.fn((table: 'price_record_view' | 'capture' | 'capture_image') => {
     const chain: Record<string, unknown> = {};
-    for (const m of ['select', 'eq', 'order', 'limit']) chain[m] = () => chain;
+    for (const m of ['select', 'eq', 'order', 'limit', 'in', 'neq']) chain[m] = () => chain;
     chain.then = (resolve: (v: unknown) => void, reject: (e: unknown) => void) =>
       Promise.resolve(state.rest[table]()).then(resolve, reject);
     return chain;
@@ -159,6 +202,15 @@ export async function resetHarness() {
   state.rpcOverride = null;
   state.rest.price_record_view = () => ok(fx('recent_prices'));
   state.rest.capture = () => ({ data: null, error: null, count: 0 });
+  state.rest.capture_image = () => ok([]);
+  state.storage.upload.mockImplementation(async (...args: [string, Blob, unknown?]) => ({
+    data: { path: args[0] },
+    error: null,
+  }));
+  state.storage.createSignedUrl.mockImplementation(async (path: string, seconds: number) => ({
+    data: { signedUrl: `https://supabase.test/storage/v1/object/sign/captures/${path}?expires=${seconds}` },
+    error: null,
+  }));
   setUrl('/');
   Object.defineProperty(navigator, 'onLine', { configurable: true, value: true });
   // Prefs per user: mulai bersih setiap test.
@@ -187,18 +239,25 @@ export function installDomPolyfills() {
   Element.prototype.releasePointerCapture ??= () => undefined;
   Element.prototype.hasPointerCapture ??= () => false;
   Element.prototype.scrollIntoView ??= () => undefined;
+  // URL.createObjectURL milik Node tidak menerima Blob jsdom (pratinjau foto S-07).
+  URL.createObjectURL = () => 'blob:test';
+  URL.revokeObjectURL = () => undefined;
 }
 
 export async function renderWithProviders(ui: ReactNode) {
   const { createQueryClient } = await import('@/lib/data/query-client');
   const { AuthProvider } = await import('@/lib/auth/session');
+  const { OutboxProvider } = await import('@/lib/offline/outbox-context');
   const qc = createQueryClient();
   qc.setDefaultOptions({ queries: { ...qc.getDefaultOptions().queries, retry: false } });
-  return render(
+  const view = render(
     <QueryClientProvider client={qc}>
-      <AuthProvider>{ui}</AuthProvider>
+      <AuthProvider>
+        <OutboxProvider>{ui}</OutboxProvider>
+      </AuthProvider>
     </QueryClientProvider>,
   );
+  return Object.assign(view, { qc });
 }
 
 /** Tanggal pembuatan fixture = "hari ini" (12:00 WIB) supaya tanggal relatif stabil. */

@@ -74,6 +74,28 @@ jobs:
       - name: Bundle klien tanpa service role + anggaran JS (docs/07 §11.6)
         run: pnpm --filter @priceatlas/web check:bundle
 
+  # docs/07 §11.4: L5c browser-only (kompresi nyata, EXIF, sha256, IndexedDB) di Chromium.
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Cache browser Playwright
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Chromium
+        run: pnpm --filter @priceatlas/web exec playwright install --with-deps chromium
+      - name: L5c (vitest browser mode, Playwright)
+        run: pnpm --filter @priceatlas/web test:browser
+
   # D-78, docs/07 §11.4: Supabase CLI asli (mode B). L4, db-types + cek drift, e2e Playwright.
   supabase-e2e:
     if: github.event_name != 'push' || github.ref == 'refs/heads/master'
@@ -159,8 +181,25 @@ jobs:
       - name: Browser Playwright (Chromium + WebKit)
         run: pnpm --filter @priceatlas/web exec playwright install --with-deps chromium webkit
 
-      - name: e2e Playwright (login OTP, shell offline, alur 1–2 cari & detail)
+      # M2 (docs/07 §11.3 alur 3, O, G): worker stub long-running selama e2e (logika worker tidak diubah).
+      - name: Worker stub di latar (EXTRACTOR=stub, WORKER_DB_ROLE=service_role, Storage Supabase)
+        run: |
+          nohup pnpm --filter @priceatlas/worker start > /tmp/worker.log 2>&1 &
+          echo $! > /tmp/worker.pid
+        env:
+          DATABASE_URL: ${{ env.SUPABASE_DB_URL }}
+          WORKER_DB_ROLE: service_role
+          STORAGE_BACKEND: supabase
+          EXTRACTOR: stub
+
+      - name: e2e Playwright (login OTP, shell offline, alur 1–2, alur 3 unggah struk, O antrean, G gagal)
         run: pnpm --filter @priceatlas/web test:e2e
+
+      - name: Log worker
+        if: always()
+        run: |
+          kill "$(cat /tmp/worker.pid)" 2>/dev/null || true
+          grep -v '"event":"job\.' /tmp/worker.log | tail -n 200 || true
 
       - name: Artefak jika gagal
         if: failure()
@@ -171,4 +210,5 @@ jobs:
             apps/web/playwright-report
             apps/web/test-results
             packages/db-types/src/database.ts
+            /tmp/worker.log
           if-no-files-found: ignore

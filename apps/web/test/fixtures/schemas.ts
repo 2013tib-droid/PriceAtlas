@@ -2,6 +2,8 @@
 // server lolos skema) dan test komponen (fixture divalidasi sebelum dipakai).
 import {
   BarcodeHitSchema,
+  CaptureDetailSchema,
+  CaptureListItemSchema,
   ChartPointSchema,
   ClientConfigSchema,
   CompareSizesRowSchema,
@@ -74,4 +76,16 @@ export const FIXTURE_SCHEMAS: Record<string, z.ZodType> = {
   barcode_unknown: BarcodeHitSchema,
   recent_prices: z.array(RecentPriceSchema),
   recent_prices_empty: z.array(RecentPriceSchema).length(0),
+  captures_all: z.array(CaptureListItemSchema).length(5),
+  captures_receipt: z.array(CaptureListItemSchema).length(3),
+  captures_empty: z.array(CaptureListItemSchema).length(0),
+  capture_needs: CaptureDetailSchema,
+  capture_failed: CaptureDetailSchema,
+  capture_done: CaptureDetailSchema,
+  capture_processing: CaptureDetailSchema,
+  capture_uploaded: CaptureDetailSchema,
+  capture_purged: CaptureDetailSchema,
+  capture_unknown: RpcErrorFixture,
+  retry_not_failed: RpcErrorFixture,
+  delete_not_allowed: RpcErrorFixture,
 };
