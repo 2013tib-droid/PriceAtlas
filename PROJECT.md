@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | Nama sementara | Price Intelligence (repo: PriceAtlas) |
-| Status | Tahap 5b M2 selesai, menunggu review; pertanyaan baru Q-72 s/d Q-75 (`docs/07-frontend-design.md` §13.6) |
+| Status | Tahap 5b M2 selesai dan disetujui; Q-72 s/d Q-75 diputuskan (D-86); berikutnya M3 (Konfirmasi) |
 | Terakhir diperbarui | 2026-10-20 |
 
 ---
@@ -292,6 +292,7 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 | D-83 | Login, bahasa, test | Login hanya dengan kode OTP 6 digit (tanpa magic link), template email Indonesia di `supabase/templates/`. UI hanya id-ID tanpa pustaka i18n, teks terpusat di `lib/copy/id.ts`. e2e Playwright memakai Supabase CLI di CI, profil Chromium dan WebKit. |
 | D-84 | Hasil review M0 | Pemilik proyek menyerahkan Q-65 s/d Q-67 ke usulan default (`docs/07-frontend-design.md` §13.4). Anggaran JS 200 kB tetap peringatan CI sampai M7, lalu diukur ulang (kandidat: `zod/mini` untuk validasi input `rpcCall`, skema per layar), tanpa mengubah kontrak. Data lokal (IndexedDB, antrean foto) hanya dihapus lewat aksi Keluar atau hapus akun; sesi kedaluwarsa hanya membersihkan cache di memori dan meminta login lagi. Input kode OTP satu kolom (`autocomplete="one-time-code"`), bukan 6 kotak. |
 | D-85 | Hasil M1: pertanyaan Q-68 s/d Q-71 | Pemilik proyek menerima usulan default (`docs/07-frontend-design.md` §13.5). Baris "Termurah sepanjang masa" tetap selalu tampil di kartu dan detail (D-02 harfiah, ditinjau di audit M7). SearchDock diuji di iPhone sungguhan; jika tertutup keyboard, posisinya mengikuti `visualViewport` di M7 (tanpa pustaka). Nama group untuk S-04/S-05 tetap diambil di klien lewat R4, tanpa mengubah R11. Tautan ke layar yang belum ada tetap berupa pesan/placeholder/nonaktif (tanpa 404) dan disambungkan per milestone: S-14 dengan kode barcode terisi (M3), S-16 (M5), S-19b (M6), S-20 (M7), kamera (M2/M4). |
+| D-86 | Hasil M2: pertanyaan Q-72 s/d Q-75 | Pemilik proyek menerima usulan default (`docs/07-frontend-design.md` §13.6). Fixture gambar worker tetap untuk M2; file yang tidak bisa didekode browser (HEIC di non-Safari, file rusak) diunggah apa adanya jika ≤ 10 MB dan tipenya diizinkan, worker yang menilai (F-40); fixture JPEG sungguhan dipertimbangkan di Tahap 6 bersama uji OCR (D-16). CSP `script-src` memakai `'unsafe-inline'` di MVP karena shell statis (F-44), ditinjau di Tahap 7 (hash skrip atau nonce). Dialog duplikat hash U-10 hanya menyebut tanggal di M2; nama toko ditinjau di M3 lewat R13 di cache, tanpa RPC baru (F-46). S-09 mengambil jumlah "perlu dicek" dan lokasi dari R13 di cache, tanpa mengubah R14 (F-41, pola Q-70); ditinjau di M3. |
 
 ---
 
@@ -329,7 +330,7 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 | 2 | Database Design | ✅ Selesai ([domain model](docs/02-domain-model.md), [desain fisik](docs/03-database-design.md), [skema](db/schema.sql)) |
 | 3 | Wireframe | ✅ Selesai ([spesifikasi](docs/04-wireframe.md), [prototipe](docs/wireframes/index.html)) |
 | 4 | Backend | ✅ Selesai ([desain backend](docs/05-backend-design.md), [menjalankan lokal](docs/06-local-dev.md)) |
-| 5 | Frontend | 🔄 5a disetujui ([desain frontend](docs/07-frontend-design.md)); 5b M0 selesai dan disetujui (D-84); M1 selesai, Q-68–Q-71 → D-85 ([hasil M1](docs/07-frontend-design.md#15-tahap-5b-m1-hasil-dan-temuan-baru-f-31-dst)); M2 selesai, menunggu review, Q-72–Q-75 ([hasil M2](docs/07-frontend-design.md#16-tahap-5b-m2-hasil-dan-temuan-baru-f-40-dst)); M3–M7 berikutnya |
+| 5 | Frontend | 🔄 5a disetujui ([desain frontend](docs/07-frontend-design.md)); 5b M0 selesai dan disetujui (D-84); M1 selesai, Q-68–Q-71 → D-85 ([hasil M1](docs/07-frontend-design.md#15-tahap-5b-m1-hasil-dan-temuan-baru-f-31-dst)); M2 selesai dan disetujui, Q-72–Q-75 → D-86 ([hasil M2](docs/07-frontend-design.md#16-tahap-5b-m2-hasil-dan-temuan-baru-f-40-dst)); M3–M7 berikutnya |
 | 6 | AI Integration (termasuk uji OCR, D-16) | — |
 | 7 | Production | — |
 
