@@ -99,7 +99,7 @@ test('alur 3: struk-aeon → perlu dicek → S-10 Benar / Ganti (S-14) / Bukan p
   const card = page.getByTestId('product-card').filter({ hasText: 'Indomie Goreng' });
   await expect(card).toContainText('Rp3.500');
   await expect(card).toContainText('AEON · AEON BSD');
-  await card.getByRole('link', { name: /Indomie Goreng/ }).click();
+  await card.getByRole('link', { name: /^Indomie Goreng/ }).click();
   await expect(page).toHaveURL(/\/produk\?id=/);
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Indomie Goreng');
   await expect(page.getByText('Rp3.500').first()).toBeVisible();
