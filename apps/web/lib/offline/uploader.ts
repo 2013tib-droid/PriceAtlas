@@ -151,6 +151,7 @@ export async function processItem(deps: UploaderDeps, input: OutboxItem): Promis
       const blob = await deps.store.getBlob(item.capture_id, part.position);
       if (!blob) return failed(deps, item, 'blob_missing', null, null);
       const path = storagePath(householdId, item.capture_id, part);
+      if (deps.stopped?.()) throw new OutboxStoppedError();
       const r = await withAuthRetry(deps, () => deps.upload(path, blob, part.content_type));
       if (!r.ok) {
         if (r.kind === 'permanent') return failed(deps, item, 'storage', r.code ?? null, r.message ?? null);

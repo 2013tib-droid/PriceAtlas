@@ -172,7 +172,9 @@ describe('S-08 Unggahan', () => {
     expect(within(local).getByText('Gagal diunggah')).toBeTruthy();
     expect(within(local).getByText(/Foto terlalu besar atau formatnya tidak didukung/)).toBeTruthy();
     await userEvent.setup().click(within(local).getByRole('button', { name: 'Coba lagi' }));
-    await waitFor(() => expect(state.storage.upload).toHaveBeenCalled());
+    await waitFor(() => expect(state.storage.upload).toHaveBeenCalledTimes(2));
+    // Tunggu antrean selesai supaya tidak ada proses yang tersisa ke test berikutnya.
+    await waitFor(() => expect(sb.rpc).toHaveBeenCalledWith('submit_capture', expect.anything()));
   });
 
   it('duplikat tertahan (cek tertunda saat offline): teks + Tetap unggah', async () => {
