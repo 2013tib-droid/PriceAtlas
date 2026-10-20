@@ -34,6 +34,12 @@ export function openUserDb(userId: string): Promise<UserDb> {
         db.createObjectStore('prefs');
         db.createObjectStore('context');
       },
+      // Hapus data (Keluar di tab lain, D-81) atau versi baru menunggu koneksi ini: tutup supaya
+      // deleteDB tidak tertahan selamanya; pemanggil berikutnya membuka koneksi baru.
+      blocking(_current, _next, event) {
+        (event.target as IDBDatabase).close();
+        if (open.get(userId) === p) open.delete(userId);
+      },
     });
     open.set(userId, p);
   }

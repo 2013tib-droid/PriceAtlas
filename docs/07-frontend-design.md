@@ -1,6 +1,6 @@
 # Tahap 5a — Desain Frontend
 
-> **Status: disetujui (2026-10-19).** Semua default Q-43 s/d Q-64 diterima dan dicatat sebagai D-78 s/d D-83. **Tahap 5b M0 selesai dan disetujui** (hasil dan temuan F-25 s/d F-30: §1.4; Q-65 s/d Q-67 diputuskan sebagai D-84: §13.4). **Tahap 5b M1 selesai, menunggu review** (hasil, temuan F-31 s/d F-39: §1.5; pertanyaan Q-68 s/d Q-71: §13.5, diputuskan sebagai D-85).
+> **Status: disetujui (2026-10-19).** Semua default Q-43 s/d Q-64 diterima dan dicatat sebagai D-78 s/d D-83. **Tahap 5b M0 selesai dan disetujui** (hasil dan temuan F-25 s/d F-30: §1.4; Q-65 s/d Q-67 diputuskan sebagai D-84: §13.4). **Tahap 5b M1 selesai** (hasil, temuan F-31 s/d F-39: §1.5; pertanyaan Q-68 s/d Q-71: §13.5, diputuskan sebagai D-85). **Tahap 5b M2 selesai, menunggu review** (hasil, temuan F-40 s/d F-47: §1.6; pertanyaan Q-72 s/d Q-75: §13.6).
 > Dasar: `PROJECT.md` (D-01 s/d D-77, terutama D-57–D-61 dan D-73–D-77), `docs/04-wireframe.md` + `docs/wireframes/index.html` (S-00a s/d S-20, alur 1–8, W-xx), `docs/05-backend-design.md` (R1–R21, W1–W18, §3.1, §4, §5, §7, §10), `docs/06-local-dev.md`, `packages/contracts`, `apps/web`.
 
 Dokumen ini tidak mengubah requirement, keputusan, skema, maupun RPC. Temuan baru ditulis sebagai **F-xx** (melanjutkan F-16 di `docs/05` §0.2), potensi masalah sebagai **P-xx**, dan pertanyaan sebagai **Q-43** dst. Setiap pertanyaan punya usulan default.
@@ -166,6 +166,51 @@ Karena tidak bisa dijalankan, setiap butir L4 diperiksa dari kode dan dokumentas
 | §11.1 L5b `jest-axe` | Dipakai di test komponen | Belum ditambahkan; aturan a11y dicek lewat query peran/label Testing Library (heading, region, dialog, `aria-label` harga/tren) | Menghindari dependensi baru; audit axe ada di M7. |
 | §3.3 S-05 → S-03 | "histori difilter ke toko itu" | Parameter `&toko=<store_id>` di `/produk` + chip "Hanya AEON · Tampilkan semua toko" | Slug Indonesia (D-79). |
 | S-04/S-05 parameter | `?group=` / `?id=` | Ditambah `jendela=semua`, `lingkup=group` (diganti lewat `router.replace`) | Toggle bisa dibagikan/kembali tanpa menumpuk riwayat. |
+
+### 1.6 Tahap 5b M2: hasil dan temuan baru (F-40 dst.)
+
+**Dasar.** PR #8 (D-84) dan PR #9 (M1 + D-85) sudah di-merge; branch M2 dibangun di atas `master`. Tidak ada perubahan skema, RPC, policy Storage, migration, logika worker, atau `db/tests/smoke.sql`.
+
+**Yang dibangun** (§5.3–§5.5, §6, §7, §12 baris M2):
+
+| Bagian | Isi |
+|---|---|
+| S-06 | Sheet "Foto apa?" lewat `?sheet=foto` (tombol kamera tab bar, kartu U-19 beranda, kosong S-08); urutan U-08 tanpa sesi: Struk, Label harga, Screenshot, Pilih dari galeri. Struk/galeri/screenshot membuka kamera bawaan/galeri langsung dari sheet (satu ketukan) dan menyerahkan file ke S-07 (`lib/media/handoff.ts`). Label tanpa sesi: pesan (S-12 di M3/M4, D-85). |
+| S-07 | `/kamera?jenis=struk\|screenshot` (`features/capture`): `<input capture="environment">` (D-82, Q-51), ThumbStrip (urutan ← →, hapus), "Tambah bagian", maks 10 bagian (D-81), ShutterBar bawah (galeri · shutter · Selesai, U-07), panduan kualitas. Setiap foto langsung disiapkan di latar; "Selesai" → antrean → kembali ke layar (app) sebelumnya + toast (U-11). Kamera label tetap placeholder (M4). |
+| S-07b | Dialog U-09: "N struk berbeda" / "1 struk panjang" / "Atur sendiri" (nomor per gambar); screenshot: "N screenshot berbeda" di urutan pertama. File ditolak (§8.2) atau HEIC > 10 MB (§6.4) diberi pesan. |
+| Pipeline gambar | `lib/media/*` (dimuat lewat dynamic import, tidak masuk bundle `/`): pembaca metadata buatan sendiri (`image-meta.ts`: magic bytes, ukuran piksel JPEG/PNG/WebP dari header, EXIF Orientation/DateTimeOriginal/OffsetTimeOriginal/GPS; tanpa dependensi), aturan §6.3 (`image-plan.ts`), kompresi Web Worker + OffscreenCanvas dengan cadangan thread utama (`compress*.ts`; 2560/2048 px, JPEG 0,88/0,85, screenshot PNG → JPEG 0,9, turun kualitas sampai ≤ 1,5 MB), sha256 `crypto.subtle` (cadangan JS tanpa secure context), `capture_id` dengan cadangan UUID v4 (P-10). `p_captured_at` §6.2 (ISO + offset). |
+| Antrean | `lib/offline/outbox-store.ts` (store `outbox` + `outbox_blobs`, `schemaVersion` P-12), `uploader.ts` (state machine §5.4: captured → uploading(i/n) → submitting → submitted / waiting_network / error; `upsert: false` dengan "sudah ada" = sukses; W1 idempoten; F-24 unggah ulang semua bagian; P-09 401 → refresh → sekali lagi; backoff 5 dtk/30 dtk/2 mnt/10 mnt), `runner.ts` (pemicu app dibuka, `online`, `visibilitychange`, foto baru, timer; satu tab lewat Web Locks, cadangan BroadcastChannel), `outbox-deps.ts` (Storage/RPC/REST dengan JWT user). Byte disimpan sampai W1 sukses; item dihapus setelah R13 memuat capture-nya. Peringatan > 50 MB (D-81). Background Sync tidak dipakai (P-03). |
+| Cek hash U-10 | REST `capture_image?sha256=in.(…)` (tanpa capture ini). Online: dialog di S-07 sebelum unggah ("Tetap unggah" / "Lihat yang lama"). Offline: dicek saat sinyal kembali; foto ditahan dan ditampilkan di S-08 dengan "Tetap unggah". |
+| S-08 | `/unggahan`: Menunggu sinyal (lokal; "Belum terunggah" saat online) → Perlu dicek → Sedang diproses → Selesai → Gagal; filter jenis `?jenis=`; R13 `staleTime 0` + polling 5 dtk hanya jika ada `uploaded`/`processing` dan tab terlihat (D-61, P-15); "Semua sudah dicek"; kosong + tombol kamera; teks §8.3 + "Ulangi" (W2); hapus item lokal (konfirmasi); teks "buka app untuk mengunggah" jika antrean > 1 jam (§5.8). |
+| S-09 | `/unggahan/detail?id=`: R14 (polling saat aktif), ImageCarousel (signed URL 300 dtk, kunci `['storage', …]` tidak di-persist, SW tidak menangani origin Supabase, P-14), StatusTimeline (unggah, percobaan ke-n, selesai), aksi per status (Hapus W3 dengan konfirmasi; bilah tak tentu; "Cek sekarang" nonaktif + pesan M3; daftar ringkas harga tersimpan; Foto ulang/Ulangi/Hapus menurut §8.3), gambar terhapus retensi, `INVALID_STATE`/`INVALID_TRANSITION`/`NOT_FOUND` §8.2. |
+| Global | `UploadWatcher` (perubahan status penting → `aria-live` + toast, badge dimuat ulang), badge tab Unggahan (count `needs_confirmation`, 5 dtk saat R13 dipolling, 60 dtk selain itu), `SwUpdateBanner` (P-12: "Versi baru tersedia · Muat ulang", ditunda selama antrean belum kosong), manifest §5.1 lengkap (shortcuts, `id`, kategori), CSP §11.6 (`lib/security/csp.ts`), `Permissions-Policy: camera=(self)` (sudah dari M0). `/kamera` dan `/unggahan/detail` masuk `SHELL_ROUTES`. |
+| Kontrak | `CaptureListItemSchema` (R13), `CaptureDetailSchema` (R14), `CaptureStatusSchema`, `CaptureErrorCodeSchema` di `packages/contracts` (output saja). |
+| Test | L5a `test/m2/{media,outbox,text}.test.ts` (aturan §6.3, EXIF, state machine dengan fake-indexeddb, backoff, pemicu, path, §8.3, F-24, P-09, CSP). L5b `test/m2/{capture,uploads}.test.tsx` (S-06…S-09 di setiap keadaan §7.3) dengan fixture R13/R14 **asli**: `test/fixtures/scenario.ts` kini menjalankan pipeline worker sungguhan (stub + fixture `apps/worker/test/fixtures`, user Citra) sampai `uploaded`/`processing`/`needs_confirmation`/`done`/`failed` + gambar `purged_at`, dan `fixtures.l3.test.ts` memeriksa bentuknya. L5c `test/browser/media.browser.test.ts` (vitest browser mode + Playwright, job CI baru `browser`): kompresi nyata, GPS hilang, orientasi, sha256, aturan lewati dengan fixture worker, IndexedDB nyata. e2e `e2e/upload.spec.ts` (alur 3 sampai `needs_confirmation`; G buram + Ulangi; G timeout → retry otomatis → selesai) dan `e2e/offline-queue.spec.ts` (O); worker stub dijalankan di job `supabase-e2e`. |
+
+| # | Temuan | Dampak | Penanganan / usulan | Ke |
+|---|---|---|---|---|
+| F-40 | **Fixture worker (`struk-aeon.jpg` dkk.) bukan JPEG sungguhan** (teks 42–54 byte berekstensi `.jpg`). Ukuran piksel tidak terbaca, jadi aturan lewati §6.3 secara harfiah **tidak** terpenuhi (syarat "sisi panjang ≤ batas" tidak bisa dibuktikan). | Tanpa penanganan, fixture dikompres (gagal decode) dan sha256 tidak cocok dengan stub. | Aturan §6.3 tidak diubah. File yang gagal didekode browser diunggah apa adanya jika ≤ 10 MB — perilaku §6.4/P-07 untuk HEIC, diberlakukan juga untuk file JPEG/PNG/WebP rusak (`planUndecodable`; worker yang menilai, mis. `unsupported`). Fixture lolos lewat jalur ini (diuji L5c + e2e: sha256 = fixture). Lihat **Q-72**. | Q-72 |
+| F-41 | R14 `get_capture` tidak memuat `needs_check_count` maupun nama toko/cabang (ada di R13). | S-09 "3 item perlu dicek" dan judul lokasi butuh data R13. | Diambil dari R13 di cache (S-08/pemantau global); jika tidak ada: "Ada item yang perlu dicek". Lihat **Q-75**. | Q-75 |
+| F-42 | **Kembali dari `/kamera` lewat `router.back()`** ke entri yang dibuat muat penuh (mis. pintasan manifest, `page.goto`) membuat Next 16 memuat ulang dokumen; saat offline, navigasi klien juga jatuh ke muat penuh (payload RSC tidak di-cache, P-14). Toast U-11 hilang. | "Selesai → kembali + toast" tidak andal. | Layar (app) terakhir disimpan di `sessionStorage`; S-07 `router.replace` ke sana. Toast "flash" disimpan sebentar di `sessionStorage` dan ditampilkan sekali di dokumen baru (`lib/flash.ts`). | selesai |
+| F-43 | `controllerchange` juga terjadi saat service worker pertama kali mengambil alih halaman (`clientsClaim`). | Jika banner P-12 memuat ulang pada setiap `controllerchange`, halaman pertama setelah login dimuat ulang di tengah aksi (ditemukan e2e). | Muat ulang hanya setelah user menekan "Muat ulang" (SKIP_WAITING). | selesai |
+| F-44 | CSP §11.6: skrip inline bootstrap Next butuh `'unsafe-inline'`; nonce memerlukan render dinamis per request, bertentangan dengan shell statis yang di-precache (D-79). | CSP tetap membatasi origin (connect/img/worker/frame), tetapi tidak melindungi dari XSS skrip inline. | `script-src 'self' 'unsafe-inline'` (+ `'unsafe-eval'` hanya `next dev`). Lihat **Q-73**. | Q-73 |
+| F-45 | Kompresi sukses di build produksi (Turbopack `new Worker(new URL(…))`) belum dijalankan e2e: fixture e2e tidak bisa didekode, jadi e2e hanya melalui jalur gagal-decode (worker → cadangan thread utama → apa adanya). Kompresi sukses diuji L5c (Vite). | Risiko kecil perbedaan bundling worker Turbopack vs Vite. | Diperiksa di HP sungguhan bersama pemeriksaan milestone; jika worker gagal dimuat, cadangan thread utama tetap berjalan. Ikut terjawab jika Q-72 memilih fixture JPEG sungguhan. | M2 HP |
+| F-46 | Dialog duplikat U-10 di wireframe menyebut toko ("pada 12 Okt (struk AEON BSD)"), tetapi REST `capture_image` hanya memberi `capture_id` + `created_at`. | Dialog hanya menyebut tanggal. | Tanggal saja; "Lihat yang lama" membuka S-09 capture lama. Lihat **Q-74**. | Q-74 |
+| F-47 | JS halaman `/` 359 KiB gzip (M1: 347 KiB). Tambahan dari antrean, pemantau unggahan, sheet foto di layout. Kode kompresi/EXIF tidak ada di bundle `/` (dicek di build). | Masih di atas 200 kB. | Tetap peringatan sampai M7 (D-84). Dependensi baru hanya dev: `@vitest/browser-playwright` (L5c) dan `@priceatlas/worker` (fixture L3 web). | D-84 |
+
+**Penyimpangan kecil dari dokumen ini (implementasi M2):**
+
+| Bagian | Dokumen | Implementasi | Alasan |
+|---|---|---|---|
+| S-06 → S-07 | Sheet memilih jenis, lalu kamera | Pilihan Struk/galeri/screenshot di sheet langsung membuka kamera bawaan/galeri; file diserahkan ke S-07 (di memori). `/kamera?jenis=struk` tetap bisa dibuka langsung (pintasan manifest). | U-08: satu ketukan dari sheet ke kamera; iOS butuh aktivasi user langsung untuk membuka `<input type=file>`. |
+| U-10 "Lihat yang lama" | Tidak dirinci | Foto baru tidak dibuang: tetap tertahan di antrean (S-08 "Tetap unggah"/"Hapus"), S-09 capture lama dibuka. | Tidak ada foto yang hilang tanpa keputusan eksplisit (D-20). |
+| P-15 polling | Satu tab pemimpin via BroadcastChannel | Polling hanya di tab yang terlihat (`visibilityState` + TanStack tidak mempolling di latar). Antrean memakai satu tab (Web Locks). | Tab yang terlihat praktis selalu satu; pemimpin terpisah menambah kode tanpa manfaat berarti. |
+| S-07 setelah "Selesai" | "kembali" | `router.replace` ke layar (app) terakhir (F-42) | Toast tetap tampil, tombol kembali tidak membuka kamera lagi. |
+| e2e O | Chromium + WebKit | Chromium saja | Butuh service worker + proxy putus (F-26), sama dengan test shell offline M0. Alur 3 dan G jalan di Chromium + WebKit. |
+| e2e G timeout | Backoff 30 dtk + 2 mnt | Helper test (service role) memundurkan waktu `processing_run` sebelumnya | Menghemat ±2,5 menit per profil; logika claim/backoff worker tidak diubah. |
+| §11.1 `jest-axe` | Test komponen | Belum (sama seperti M1) | Audit axe di M7. |
+
+**Mencoba lokal tanpa Supabase CLI** (lingkungan pembuatan ini: CDN image Docker diblokir). Seperti M1 (F-39), e2e M2 dicoba terhadap "Supabase tiruan" kecil yang tidak di-commit: auth OTP (JWT HS256), subset PostgREST (RPC + REST select/insert/update/count), Storage (unggah multipart, signed URL) di atas database mode A, plus worker mode A (`STORAGE_BACKEND=local`, `--dev-scheduler`). Hasil: login, shell offline, alur 1–2, alur 3, O, dan G lulus di Chromium (diulang 2×). WebKit dan Supabase asli diverifikasi di job `supabase-e2e`.
 
 ---
 
@@ -863,6 +908,15 @@ Setiap pertanyaan punya usulan default. Jawab "setuju semua" jika semua default 
 | Q-71 | Tujuan yang belum ada (F-35): barcode tidak dikenal, baris histori, "Atur" member, "Tanya", kamera label. | **Seperti implementasi M1** (pesan/placeholder/nonaktif, tanpa 404); tiap milestone menyambungkan tautannya: S-14 dengan kode barcode terisi (M3), S-16 (M5), S-19b (M6), S-20 (M7), kamera (M2/M4). |
 
 **Hasil review M1 (2026-10-20):** pemilik proyek menyetujui semua usulan default Q-68 s/d Q-71 → **D-85**.
+
+### 13.6 Pertanyaan baru dari M2
+
+| ID | Pertanyaan | Usulan default |
+|---|---|---|
+| Q-72 | Fixture gambar worker bukan JPEG sungguhan (F-40), sehingga e2e melewati jalur "tidak bisa didekode → apa adanya" alih-alih aturan lewati §6.3. Ganti fixture dengan JPEG kecil sungguhan (mis. 64×64, tanpa EXIF), atau tetap? | **Tetap untuk M2**; perilaku "gagal decode → apa adanya ≤ 10 MB" (sama dengan HEIC, P-07) disahkan untuk semua tipe yang diizinkan. Fixture JPEG sungguhan dipertimbangkan di Tahap 6 bersama uji OCR (D-16), karena fixture stub akan diganti gambar asli. |
+| Q-73 | CSP `script-src` memakai `'unsafe-inline'` (F-44). Terima untuk MVP? | **Ya untuk MVP.** Ditinjau di Tahap 7 (hosting): CSP berbasis hash skrip inline hasil build, atau nonce jika shell tidak lagi statis. |
+| Q-74 | Dialog duplikat U-10 hanya menyebut tanggal (F-46). Tambahkan toko? | **Tanggal saja di M2.** Di M3, jika S-10 sudah memuat R15, dialog bisa memakai R13 di cache untuk nama toko tanpa RPC baru. |
+| Q-75 | S-09 mengambil jumlah "perlu dicek" dan lokasi dari R13 di cache (F-41). Tetap di klien, atau tambah ke keluaran R14? | **Tetap di klien** (tanpa ubah RPC), pola sama dengan Q-70. Ditinjau di M3 saat S-10/S-11 dibuat. |
 
 ### 13.3 Bagian yang belum bisa dirancang penuh
 
