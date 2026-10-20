@@ -12,6 +12,8 @@ import { Button } from '@/components/ui/button';
 import { CAMERA_COPY, fill } from '@/lib/copy/id';
 import { useMyContext } from '@/lib/auth/context';
 import { formatBytes } from '@/lib/format';
+import { lastAppPath } from '@/lib/hooks/last-app-path';
+import { flashToast } from '@/lib/flash';
 import { useOnline } from '@/lib/hooks/use-online';
 import { useTimeZone } from '@/lib/hooks/use-time-zone';
 import { newCaptureId } from '@/lib/media/capture-id';
@@ -163,10 +165,9 @@ export function CaptureScreen({ kind }: { kind: 'receipt' | 'marketplace' }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [kind]);
 
-  const leave = () => {
-    if (typeof window !== 'undefined' && window.history.length > 1) router.back();
-    else router.replace('/');
-  };
+  // Kembali ke layar (app) sebelumnya lewat navigasi klien (toast tetap tampil, U-11); entri kamera
+  // diganti sehingga tombol kembali tidak membuka kamera lagi.
+  const leave = () => router.replace(lastAppPath());
 
   const move = (i: number, d: -1 | 1) =>
     setParts((ps) => {
@@ -243,7 +244,7 @@ export function CaptureScreen({ kind }: { kind: 'receipt' | 'marketplace' }) {
         : n > 1
           ? fill(CAMERA_COPY.toastScreenshots, { n })
           : CAMERA_COPY.toastScreenshot;
-    toast.success(msg);
+    flashToast('success', msg);
     leave();
   };
 

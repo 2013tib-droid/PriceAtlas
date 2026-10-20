@@ -4,6 +4,7 @@
 // S-08 ("Semua"), sehingga polling 5 dtk hanya satu. Item antrean lokal yang sudah terdaftar dihapus
 // setelah R13 memuatnya (§5.4 langkah 5).
 import type { CaptureListItem } from '@priceatlas/contracts';
+import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useCaptures } from '@/lib/data/captures';
@@ -11,6 +12,7 @@ import { useOutboxItems } from '@/lib/offline/outbox-context';
 import { statusAnnouncement } from './capture-text';
 
 export function UploadWatcher() {
+  const qc = useQueryClient();
   const captures = useCaptures(null);
   const { outbox, items } = useOutboxItems();
   const prev = useRef<Map<string, CaptureListItem['status']> | null>(null);
@@ -22,12 +24,14 @@ export function UploadWatcher() {
     const before = prev.current;
     prev.current = new Map(data.map((c) => [c.id, c.status]));
     if (!before) return; // muat pertama: tidak ada yang diumumkan
+    // Status berubah → badge Unggahan (count needs_confirmation) dimuat ulang bersama R13 (§5.5).
+    if (data.some((c) => before.get(c.id) !== c.status)) void qc.invalidateQueries({ queryKey: ['rest', 'capture'] });
     const said = data.map((c) => statusAnnouncement(before.get(c.id), c)).filter((m): m is string => Boolean(m));
     if (said.length === 0) return;
     for (const m of said) toast(m);
     // Teks live region mengikuti data dari server (sistem luar).
     setMessage(said.join(' '));
-  }, [captures.data]);
+  }, [captures.data, qc]);
 
   useEffect(() => {
     if (!outbox || !captures.data) return;

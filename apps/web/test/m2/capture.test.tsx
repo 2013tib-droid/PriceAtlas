@@ -99,7 +99,7 @@ describe('S-07 Kamera struk', () => {
     await u.click(screen.getByRole('button', { name: 'Hapus bagian 1' }));
     expect(screen.getAllByTestId('part')).toHaveLength(2);
     await u.click(screen.getByRole('button', { name: 'Selesai' }));
-    await waitFor(() => expect(nav.back).toHaveBeenCalled());
+    await waitFor(() => expect(nav.replace).toHaveBeenCalledWith('/'));
     expect(toast.success).toHaveBeenCalledWith('Struk diunggah. Kami kabari kalau perlu dicek.');
     await waitFor(() => expect(submitted()).toHaveLength(1));
     const sub = submitted()[0]!;
@@ -173,7 +173,7 @@ describe('S-07 Kamera struk', () => {
     expect(state.storage.upload).not.toHaveBeenCalled();
     await u.click(within(dialog).getByRole('button', { name: 'Tetap unggah' }));
     await waitFor(() => expect(submitted()).toHaveLength(1));
-    expect(nav.back).toHaveBeenCalled();
+    expect(nav.replace).toHaveBeenCalledWith('/');
   });
 
   it('duplikat: Lihat yang lama → S-09 capture lama; foto baru tetap ditahan di antrean', async () => {

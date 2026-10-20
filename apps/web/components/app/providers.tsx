@@ -5,6 +5,7 @@ import { useState, type ReactNode } from 'react';
 import { Toaster } from '@/components/ui/sonner';
 import { AuthProvider } from '@/lib/auth/session';
 import { createQueryClient } from '@/lib/data/query-client';
+import { FlashToast } from '@/lib/flash';
 import { OutboxProvider } from '@/lib/offline/outbox-context';
 
 // Service worker mati di `next dev` kecuali NEXT_PUBLIC_SW_DEV=1 (docs/07 §11.5).
@@ -25,6 +26,7 @@ export function Providers({ children }: { children: ReactNode }) {
           <OutboxProvider>{children}</OutboxProvider>
         </AuthProvider>
         <Toaster />
+        <FlashToast />
       </QueryClientProvider>
     </SerwistProvider>
   );
