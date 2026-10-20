@@ -151,6 +151,8 @@ commit;
 
 Ringkasan harga menyusul lewat antrean (`--dev-scheduler`, atau manual: `select app.process_summary_queue();` sebagai superuser).
 
+Dari UI (M3): S-08 "Perlu dicek" atau S-09 "Cek sekarang" membuka S-10 `/struk?id=` (struk) atau S-11 `/konfirmasi?capture=` (label/screenshot). Butuh mode B (§4); keputusan di UI menghasilkan panggilan yang sama dengan SQL di atas (`confirm_receipt`, `update_capture_item`, `confirm_capture_items`).
+
 ### 2.6 Fixture stub
 
 Fixture ada di `apps/worker/test/fixtures/` (dipakai juga oleh test L3). Satu fixture = satu file JSON + file gambar. Gambar dipetakan ke fixture lewat **sha256 gambar posisi 1**, sehingga isi file gambar menentukan hasil "OCR".
@@ -159,7 +161,7 @@ Fixture ada di `apps/worker/test/fixtures/` (dipakai juga oleh test L3). Satu fi
 |---|---|---|
 | `struk-aeon` | struk AEON BSD | `needs_confirmation`: Milo (barcode) auto-save dengan diskon member → promo + `member_hint`; Indomie dan SNACK (saran AI tier 4) perlu konfirmasi; pii terpisah |
 | `label-milo` | label harga | Milo 200 g (barcode, promo aktif) auto-accept jika toko diketahui (sesi/manual); Milo 3in1 harga member menunggu konfirmasi |
-| `shopee-milo` | screenshot marketplace | toko Shopee dari `store_hint`, seller global "Nestle Official Store", ongkir di `extra` |
+| `shopee-milo` | screenshot marketplace | toko Shopee dari `store_hint`, seller global "Nestle Official Store", ongkir di `extra`; tier fuzzy confidence 1 → **auto-save** (`done`). Unggahan kedua file yang sama = duplikat hash → `needs_confirmation` (D-71, dipakai e2e alur 5) |
 | `struk-buram` | struk | gagal permanen `blurry` |
 | `struk-alfamart-timeout` | struk Alfamart Serpong | 2× gagal sementara → retry otomatis dengan backoff (30 dtk, 2 mnt) → sukses dan auto-save penuh |
 
@@ -348,6 +350,11 @@ e2e memakai `next start` (Playwright menyalakannya), env `NEXT_PUBLIC_SUPABASE_*
 | `lib/media/*` | M2: pipeline gambar §6 (pembaca EXIF/ukuran sendiri, aturan lewati §6.3, kompresi Web Worker/OffscreenCanvas, sha256, `capture_id`). Dimuat lewat dynamic import dari S-07. |
 | `lib/offline/outbox*.ts`, `uploader.ts`, `runner.ts` | M2: antrean foto IndexedDB (`outbox`, `outbox_blobs`) + state machine §5.4 + pemicu + kunci satu tab |
 | `app/(app)/unggahan`, `features/uploads`, `lib/data/captures.ts` | M2: S-08 (`/unggahan?jenis=`), S-09 (`/unggahan/detail?id=`), pemantau status global, hook R13/R14/W2/W3/signed URL |
+| `app/(app)/struk`, `features/receipt` | M3: S-10 konfirmasi / detail struk (`/struk?id=`) |
+| `app/(app)/konfirmasi`, `features/observation` | M3: S-11 konfirmasi label & screenshot (`/konfirmasi?capture=`), antrean W18 `lib/confirm/item-patch.ts` |
+| `app/(app)/lokasi`, `features/location` | M3: S-12 pilih toko & cabang (`/lokasi?mode=manual\|koreksi&untuk=&kembali=`), hasil lewat `lib/confirm/location-handoff.ts` |
+| `features/picker`, `app/(app)/produk/baru`, `features/new-product` | M3: S-14 lapisan `?pilih=produk&untuk=…`, S-15 `/produk/baru` (react-hook-form + zod dari kontrak) |
+| `lib/data/confirm.ts`, `lib/confirm/*` | M3: hook R15/R16/R17/R21, W4/W5/W7/W8/W16/W17/W18, REST PATCH receipt + store/branch/category; logika baris, field ragu, beda ukuran, pemetaan error §8.2 |
 | `lib/offline/prefs.ts`, `lib/hooks/use-pref.ts` | 💾 di IndexedDB `prefs`: pencarian terakhir (8), baru dicek (150, untuk R5), toggle "Hanya harga normal" |
 
 ### 4.4 Fixture dan data e2e (M1)
@@ -381,3 +388,13 @@ Offline: DevTools → Network → Offline (atau mode pesawat di HP) → foto →
 **Fixture R13/R14.** `apps/web/test/fixtures/scenario.ts` menjalankan pipeline worker asli (mode A, `LocalBlobStore`) untuk user Citra sampai setiap status capture, lalu menyimpan keluaran `list_captures`/`get_capture` di `rpc.json` (dibangkitkan ulang seperti §4.4).
 
 **Lingkungan tanpa Docker.** Jika `supabase start` tidak bisa (CDN image diblokir), e2e bisa dicoba terhadap tiruan kecil Supabase (auth OTP, subset PostgREST, Storage) di atas database mode A (`db/scripts/dev-db.sh priceatlas_e2e`) + worker mode A (`STORAGE_BACKEND=local`, `--dev-scheduler`), lalu `PW_NO_SERVER` tidak diisi dan `NEXT_PUBLIC_SUPABASE_*` menunjuk ke tiruan itu. Tiruan ini tidak di-commit (bukan pengganti Supabase asli); verifikasi resmi tetap job `supabase-e2e` (docs/07 §1.6).
+
+### 4.6 Konfirmasi struk dan label dari UI (M3)
+
+**Alur** (`docs/07` §1.7): S-08 "Perlu dicek" → S-10 (struk) / S-11 (label, screenshot). S-10: Benar / Ganti (S-14, lapisan `?pilih=produk`) / Bukan produk / ⋯ bundle / Lewati → "Simpan N harga" (W4) → toast + "Ringkasan sedang diperbarui…" sampai `price_summary.refreshed_at` menyusul (pg_cron, ± 10 dtk). Toko belum dikenali / ubah toko → S-12 → kembali → `PATCH receipt` (filter `updated_at`). S-11: setiap perubahan harga/tanggal/lokasi/produk dikirim lewat W18 (jeda 600 ms) dan "Dihitung untukmu" diperbarui dari R16 `computed`; Simpan → W5.
+
+**Mencoba (mode B):** jalankan Supabase + worker stub + web seperti §4.5, unggah `struk-aeon.jpg` → tab Unggahan → "Perlu dicek" → S-10. Unggah file yang sama lagi → dialog "Foto ini sudah pernah diunggah … (struk AEON BSD)" → "Tetap unggah" → S-10 struk baru menampilkan banner duplikat. `shopee-milo.jpg` pertama tersimpan otomatis; unggah lagi → S-11 dengan ongkir sebagai info. Isi struk (R15) dan item (R16) tidak di-persist ke IndexedDB (DevTools → IndexedDB → `qcache` tidak memuat `get_receipt`/`get_capture_items`).
+
+**Fixture R15/R16/R17.** `apps/web/test/fixtures/scenario.ts` menjalankan pipeline worker asli (mode A) untuk Citra: struk-aeon, struk-aeon lagi (duplikat), struk tanpa toko + field ragu (fixture tambahan khusus web di `apps/web/test/fixtures/worker/`, digabung dengan fixture worker di folder sementara; fixture dan logika worker tidak diubah), label-milo, shopee-milo (auto-save + unggahan kedua), lalu memanggil R15/R16/R17/R21, W4/W5/W8/W17/W18 (sukses dan error) dan REST store/branch/category sebagai user. Dibangkitkan ulang seperti §4.4 (`UPDATE_FIXTURES=1 …`, lalu `prettier --write test/fixtures/rpc.json`).
+
+**e2e.** `e2e/confirm.spec.ts`: alur 3 (S-10 sampai harga tampil di S-02/S-03 dan S-10 mode tersimpan dari S-09), 3b (dialog U-10 → banner → buang), 5 (screenshot → S-11 → simpan). Jalan di job `supabase-e2e` (Chromium + WebKit) bersama worker stub. Data tambahan e2e hanya lewat helper test (`e2e/support/captures.ts`, service role di proses test).

@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | Nama sementara | Price Intelligence (repo: PriceAtlas) |
-| Status | Tahap 5b M2 selesai dan disetujui; Q-72 s/d Q-75 diputuskan (D-86); berikutnya M3 (Konfirmasi) |
+| Status | Tahap 5b M3 selesai, menunggu review (pertanyaan Q-76 s/d Q-79 di `docs/07-frontend-design.md` §13.7) |
 | Terakhir diperbarui | 2026-10-20 |
 
 ---
@@ -330,7 +330,7 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 | 2 | Database Design | ✅ Selesai ([domain model](docs/02-domain-model.md), [desain fisik](docs/03-database-design.md), [skema](db/schema.sql)) |
 | 3 | Wireframe | ✅ Selesai ([spesifikasi](docs/04-wireframe.md), [prototipe](docs/wireframes/index.html)) |
 | 4 | Backend | ✅ Selesai ([desain backend](docs/05-backend-design.md), [menjalankan lokal](docs/06-local-dev.md)) |
-| 5 | Frontend | 🔄 5a disetujui ([desain frontend](docs/07-frontend-design.md)); 5b M0 selesai dan disetujui (D-84); M1 selesai, Q-68–Q-71 → D-85 ([hasil M1](docs/07-frontend-design.md#15-tahap-5b-m1-hasil-dan-temuan-baru-f-31-dst)); M2 selesai dan disetujui, Q-72–Q-75 → D-86 ([hasil M2](docs/07-frontend-design.md#16-tahap-5b-m2-hasil-dan-temuan-baru-f-40-dst)); M3–M7 berikutnya |
+| 5 | Frontend | 🔄 5a disetujui ([desain frontend](docs/07-frontend-design.md)); 5b M0 selesai dan disetujui (D-84); M1 selesai, Q-68–Q-71 → D-85 ([hasil M1](docs/07-frontend-design.md#15-tahap-5b-m1-hasil-dan-temuan-baru-f-31-dst)); M2 selesai dan disetujui, Q-72–Q-75 → D-86 ([hasil M2](docs/07-frontend-design.md#16-tahap-5b-m2-hasil-dan-temuan-baru-f-40-dst)); M3 selesai, menunggu review, Q-76–Q-79 ([hasil M3](docs/07-frontend-design.md#17-tahap-5b-m3-hasil-dan-temuan-baru-f-49-dst)); M4–M7 berikutnya |
 | 6 | AI Integration (termasuk uji OCR, D-16) | — |
 | 7 | Production | — |
 
