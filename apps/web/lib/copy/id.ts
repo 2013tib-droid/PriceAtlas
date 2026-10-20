@@ -178,6 +178,10 @@ export const APP_COPY = {
     uploads: { title: 'Unggahan', body: 'Daftar foto struk, label, dan screenshot yang sedang diproses (M2).' },
     shopping: { title: 'Sesi belanja', body: 'Mulai belanja di satu cabang lalu foto label harga (M4).' },
     me: { title: 'Saya', body: 'Profil, program member, berbagi publik, dan privasi (M6).' },
+    member: {
+      title: 'Program member',
+      body: 'Tandai program member yang kamu ikuti supaya harga member ikut dihitung (M6).',
+    },
   },
   signedInAs: 'Masuk sebagai {email}',
   signOut: 'Keluar',
@@ -186,6 +190,211 @@ export const APP_COPY = {
     body: 'Halaman ini belum tersimpan di HP. Buka lagi saat online, atau kembali ke beranda.',
     home: 'Ke beranda',
   },
+} as const;
+
+/** Label dan teks harga bersama (wireframe §5.2, §5.3, U-05, U-15, D-15). */
+export const PRICE_COPY = {
+  basis: { normal: 'NORMAL', promo: 'PROMO', member: 'MEMBER' },
+  memberWithProgram: 'MEMBER · {program}',
+  memberNotCounted: 'MEMBER · tidak dihitung',
+  memberNotCountedPrice: 'MEMBER {price} · tidak dihitung',
+  bundle: 'BUNDLE · tidak dihitung',
+  promoQty: 'PROMO {n}+',
+  private: 'PRIBADI',
+  closed: '(tutup)',
+  noBranch: 'cabang tidak diketahui',
+  trend: {
+    down: '↓ turun {pct} vs 30 hari sebelumnya',
+    up: '↑ naik {pct} vs 30 hari sebelumnya',
+    flat: '→ stabil vs 30 hari sebelumnya',
+    notEnough: 'Tren: data belum cukup',
+  },
+  trendSpoken: {
+    down: 'turun {pct} persen dibanding 30 hari sebelumnya',
+    up: 'naik {pct} persen dibanding 30 hari sebelumnya',
+    flat: 'stabil dibanding 30 hari sebelumnya',
+  },
+  dataCount: '{n} data · terakhir {date}',
+  best90: 'Termurah 90 hari',
+  bestAll: 'Termurah sepanjang masa',
+  no90: 'Belum ada harga 90 hari terakhir',
+  lastRecorded: 'terakhir dicatat {age}',
+  online: 'belum termasuk ongkir',
+  onlineLong: 'harga belum termasuk ongkir',
+  memberHint: 'Ada harga member {store} {price} · tidak dihitung karena kamu belum terdaftar',
+  memberHintAction: 'Atur',
+  bundleOnly: 'Hanya ada {n} data bundle · tidak dipakai untuk harga terbaik',
+  noHistory: 'Belum ada data harga di historimu',
+  shelfCheck: 'Cek harga rak',
+  shelfCheckFor: 'Cek harga rak {name}',
+  perPack: '{price}/isi',
+} as const;
+
+/** Keadaan standar (wireframe §5.5, docs/07 §7.2 ScreenState). */
+export const STATE_COPY = {
+  loading: 'Memuat…',
+  retry: 'Coba lagi',
+  offlineNoData: 'Tidak ada sinyal, dan data ini belum tersimpan di HP. Buka lagi saat online.',
+  cachedLabel: 'data tersimpan, mungkin tidak terbaru',
+  back: 'Kembali',
+  summaryUpdating: 'Ringkasan sedang diperbarui…',
+} as const;
+
+/** SearchDock (U-02, D-58) dan S-02 Hasil cari. */
+export const SEARCH_COPY = {
+  label: 'Cari produk',
+  placeholder: 'Cari produk, mis. milo',
+  scan: 'Scan barcode',
+  clear: 'Hapus kata kunci',
+  minChars: 'Ketik minimal 2 huruf.',
+  title: 'Hasil cari',
+  resultCount: '{n} produk untuk "{q}"',
+  notFound: 'Tidak ada produk "{q}". Coba kata lain, scan barcode, atau foto labelnya.',
+  ask: 'Tanya: {q}',
+  askHint: 'Segera hadir',
+  groupBest: 'Paling hemat {per}: {size}',
+  groupBestPrice: '({price})',
+  compareSizes: 'Bandingkan ukuran',
+  ungrouped: 'Produk lain',
+} as const;
+
+/** S-01 Beranda (U-19). */
+export const HOME_COPY = {
+  title: 'Cari harga',
+  recentSearches: 'Pencarian terakhir',
+  recentlyViewed: 'Baru dicek',
+  newPrices: 'Harga baru masuk',
+  needsCheck: '{n} perlu dicek',
+  emptyTitle: 'Histori harga masih kosong',
+  emptyBody: 'Histori harga masih kosong. Setiap struk yang kamu foto menambah data pembanding.',
+  emptyCards: {
+    receipt: {
+      title: 'Foto struk belanja terakhirmu',
+      body: 'Cara tercepat mengisi histori: satu struk berisi banyak harga.',
+    },
+    session: { title: 'Lagi di toko? Mulai sesi belanja', body: 'Foto label harga, semua masuk ke cabang yang sama.' },
+    search: { title: 'Coba cari produk', body: 'Lihat produk di katalog dan cek harga rak.' },
+  },
+  newPricesFailed: 'Harga baru belum bisa dimuat.',
+} as const;
+
+/** S-03 Detail produk. */
+export const PRODUCT_COPY = {
+  notFound: 'Produk tidak ditemukan atau bukan milikmu.',
+  mergedToast: 'Produk ini sudah digabung ke {name}. Kami buka produk penggantinya.',
+  summary: 'Ringkasan harga',
+  lastPrice: 'Harga terakhir',
+  noData: 'Foto label atau struk yang memuat produk ini.',
+  trendHelp:
+    'Tren muncul setelah ada minimal {min} data di 30 hari terakhir dan {min} data di 30 hari sebelumnya. Sekarang: {cur} dan {prev}.',
+  chart: 'Grafik harga per satuan',
+  chartNormalOnly: 'Hanya harga normal',
+  chartEmpty: 'Belum ada titik harga untuk grafik.',
+  chartEmptyNormal: 'Belum ada harga normal untuk grafik.',
+  chartBestLine: 'garis putus-putus = termurah 90 hari',
+  chartTable: 'Lihat sebagai tabel',
+  chartTableCaption: 'Harga per satuan per tanggal transaksi',
+  chartSpoken: 'Grafik {n} harga per satuan dari {from} sampai {to}, terendah {min}, tertinggi {max}.',
+  colDate: 'Tanggal',
+  colUnit: 'Per satuan',
+  colLabel: 'Label',
+  whereCheaper: 'Lebih hemat di mana',
+  seeAll: 'Lihat semua',
+  otherSizes: 'Ukuran lain di group ini',
+  compare: 'Bandingkan',
+  thisProduct: 'ini',
+  history: 'Histori',
+  showVoid: 'Tampilkan yang dibatalkan',
+  filteredByStore: 'Hanya {store}',
+  clearFilter: 'Tampilkan semua toko',
+  loadMore: 'Muat lebih banyak',
+  historyEmpty: 'Belum ada histori.',
+  voided: 'dibatalkan',
+  source: { receipt: 'Struk', price_label: 'Label', marketplace: 'Screenshot' },
+  shipping: 'ongkir {price} (info)',
+  quantity: '{qty} × {price}',
+  normalWas: 'normal {price}',
+  more: 'Lainnya',
+  moreTitle: 'Aksi produk',
+  menu: { edit: 'Edit produk', merge: 'Gabungkan', split: 'Pisahkan', archive: 'Hapus produk' },
+  mergeGlobal: 'Produk katalog umum hanya bisa digabung oleh kurator.',
+  soonM5: 'Segera hadir',
+  offlineDetail: 'Detail lengkap butuh sinyal.',
+} as const;
+
+/** S-03b Cek harga rak (D-55, U-06). */
+export const SHELF_COPY = {
+  title: 'Cek harga rak',
+  description: 'Ketik harga di label rak. Tidak disimpan.',
+  inputLabel: 'Harga di rak',
+  inputLabelWeight: 'Harga per {unit} di rak',
+  placeholder: 'Rp0',
+  backspace: 'Hapus satu angka',
+  clear: 'Kosongkan',
+  cheaper: 'Lebih murah dari semua harga di historimu 90 hari terakhir.',
+  cheaperAll: 'Lebih murah dari semua harga di historimu.',
+  near: 'Mendekati harga terbaikmu.',
+  pricier: '{pct} lebih mahal dari termurahmu 90 hari',
+  pricierAll: '{pct} lebih mahal dari termurahmu sepanjang masa',
+  same: 'Sama dengan termurahmu 90 hari',
+  vsLastPricier: '{pct} lebih mahal dari harga terakhir',
+  vsLastCheaper: '{pct} lebih murah dari harga terakhir',
+  vsLastSame: 'Sama dengan harga terakhir',
+  otherSize: 'Ukuran {size} di historimu: {price} ({pct} lebih hemat per {unit})',
+  noComparison: 'Belum ada pembanding di historimu.',
+  saveLabel: 'Foto labelnya untuk disimpan',
+  close: 'Tutup',
+} as const;
+
+/** S-04 Bandingkan ukuran. */
+export const SIZES_COPY = {
+  title: 'Bandingkan ukuran',
+  subtitle: 'Harga terbaik per satuan',
+  window90: '90 hari',
+  windowAll: 'Sepanjang masa',
+  windowLabel: 'Jendela waktu',
+  best: 'paling hemat',
+  perDimension: { mass: 'per gram', volume: 'per ml', count: 'per buah', length: 'per meter' },
+  noData: 'Belum ada harga di historimu',
+  otherCurrency: 'ada data mata uang lain',
+  differentUnits: 'Tidak dibandingkan: satuan berbeda ({units})',
+  onlyOne: 'Baru ada satu ukuran di group ini.',
+  oldSku: 'data terakhir {date}',
+  empty90: 'Belum ada harga 90 hari terakhir untuk group ini.',
+  seeAllTime: 'Lihat sepanjang masa',
+} as const;
+
+/** S-05 Lebih hemat di mana (D-39). */
+export const CHEAPER_COPY = {
+  title: 'Lebih hemat di mana',
+  scopeLabel: 'Cakupan',
+  scopeProduct: 'Produk ini',
+  scopeGroup: 'Semua ukuran',
+  min: 'termurah {price}',
+  avg: 'rata-rata {price}',
+  count: '{n} data',
+  oneData: 'baru 1 data',
+  last: 'terakhir {date}',
+  successor: '{from} (tutup) → {to}',
+  empty90: 'Belum ada histori 90 hari.',
+  emptyAll: 'Belum ada histori di toko mana pun.',
+  seeAllTime: 'Lihat sepanjang masa?',
+  sortedBy: 'Diurutkan menurut rata-rata harga per satuan.',
+} as const;
+
+/** Scan barcode (D-58, docs/07 §5.7). */
+export const SCAN_COPY = {
+  title: 'Scan barcode',
+  hint: 'Arahkan kamera ke barcode di kemasan.',
+  starting: 'Menyalakan kamera…',
+  denied: 'Izin kamera ditolak. Izinkan kamera di pengaturan browser, atau cari dengan mengetik.',
+  unsupported: 'Browser ini belum bisa membaca barcode. Cari dengan mengetik.',
+  looking: 'Mencari produk {code}…',
+  notFound: 'Barcode {code} belum dikenal di katalogmu. Cari namanya atau foto labelnya.',
+  viaMerge: 'Barcode ini milik produk yang sudah digabung. Kami buka produk penggantinya.',
+  searchInstead: 'Cari dengan mengetik',
+  scanAgain: 'Scan lagi',
+  cameraSoon: 'Kamera untuk {kind} dibuat di milestone berikutnya.',
 } as const;
 
 /** Mengisi {nama} di teks. Nilai yang tidak ada dibiarkan apa adanya. */

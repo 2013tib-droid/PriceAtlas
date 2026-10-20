@@ -68,7 +68,9 @@ export class PgRpcClient {
     const r = await this.pool.query<{ names: string[] | null; types: string[]; retset: boolean; typtype: string }>(
       `select p.proargnames as names,
               array(select format_type(t, null) from unnest(p.proargtypes) t) as types,
-              p.proretset as retset, t.typtype
+              p.proretset as retset,
+              -- RETURNS TABLE (record + argmode 't') dibentuk seperti tipe komposit oleh PostgREST.
+              case when 't'::"char" = any(coalesce(p.proargmodes, '{}')) then 'c' else t.typtype end as typtype
          from pg_proc p join pg_type t on t.oid = p.prorettype
         where p.pronamespace = 'public'::regnamespace and p.proname = $1`,
       [fn],
@@ -76,6 +78,7 @@ export class PgRpcClient {
     const row = r.rows[0];
     if (!row) throw new Error(`RPC public.${fn} tidak ada`);
     const meta: FnMeta = {
+      // proargnames memuat juga kolom RETURNS TABLE; argumen input = proargtypes (urutan sama).
       args: row.types.map((type, i) => ({ name: row.names?.[i] ?? `$${i + 1}`, type })),
       retset: row.retset,
       composite: row.typtype === 'c',

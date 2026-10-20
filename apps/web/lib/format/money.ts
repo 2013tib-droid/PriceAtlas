@@ -44,3 +44,24 @@ export function formatPercent(value: number): string {
   if (!Number.isFinite(value)) return '–';
   return `${INT.format(Math.abs(value))}%`;
 }
+
+const SIZE = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 3 });
+
+export interface SizedProduct {
+  sale_mode: 'unit' | 'weight';
+  pack_count: number;
+  content_size: number | null;
+  content_unit: string;
+}
+
+/** Ukuran kemasan: "200 g", "10 × 35 g"; produk timbang: "per kg" (§5.1, D-17). */
+export function formatSize(p: SizedProduct): string {
+  if (p.sale_mode === 'weight' || p.content_size == null) return `per ${p.content_unit}`;
+  const size = `${SIZE.format(p.content_size)} ${p.content_unit}`;
+  return p.pack_count > 1 ? `${p.pack_count} × ${size}` : size;
+}
+
+/** Berat aktual produk timbang: "0,535 kg". */
+export function formatQuantity(value: number, unit: string): string {
+  return `${SIZE.format(value)} ${unit}`;
+}

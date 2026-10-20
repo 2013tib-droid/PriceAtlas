@@ -30,8 +30,8 @@ describe('service worker', () => {
     expect(shellCacheKey('https://app.example/produk?id=1')).toBe('https://app.example/produk');
   });
 
-  it('shell offline mencakup tab utama, /masuk, dan /offline', () => {
-    expect(SHELL_ROUTES).toEqual(['/', '/unggahan', '/belanja', '/saya', '/masuk', '/offline']);
+  it('shell offline mencakup tab utama, cari + detail produk (§7.1), /masuk, dan /offline', () => {
+    expect(SHELL_ROUTES).toEqual(['/', '/cari', '/produk', '/unggahan', '/belanja', '/saya', '/masuk', '/offline']);
   });
 
   it('versi berubah jika daftar precache berubah', () => {

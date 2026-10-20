@@ -1,0 +1,4358 @@
+{
+  "today": "2026-10-20",
+  "data": {
+    "context": {
+      "role": "owner",
+      "user_id": "00000000-0000-0000-0000-00000000000a",
+      "household": {
+        "id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "name": "ani",
+        "timezone": "Asia/Jakarta",
+        "default_currency": "IDR",
+        "share_prices_public": false
+      },
+      "program_ids": [],
+      "display_name": "ani"
+    },
+    "config": {
+      "trend_window_days": 30,
+      "session_extend_hours": 2,
+      "best_price_window_days": 90,
+      "image_retention_months": 12,
+      "near_best_threshold_pct": 5,
+      "auto_save_min_confidence": 0.9,
+      "trend_flat_threshold_pct": 2,
+      "trend_min_records_per_window": 2
+    },
+    "search_milo": [
+      {
+        "group": {
+          "id": "60000000-0000-0000-0000-000000000001",
+          "name": "Milo Original",
+          "best_by_dimension": {
+            "product_id": "70000000-0000-0000-0000-000000000200",
+            "unit_price": 90
+          }
+        },
+        "hints": {
+          "bundle_only_count": 0,
+          "member_not_counted": null
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000310",
+          "name": "Milo 3in1",
+          "status": "active",
+          "variant": "10 x 35 g",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 10,
+          "content_size": 35,
+          "content_unit": "g",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "summary": {
+          "best_90d": null,
+          "best_all": {
+            "date": "2026-05-23",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000002",
+              "name": "Alfamart",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": {
+              "id": "30000000-0000-0000-0000-000000000002",
+              "kind": "physical",
+              "name": "Alfamart Serpong",
+              "status": "open",
+              "is_private": false
+            },
+            "record_id": "78af8108-d48c-4e78-8f52-01675635ff86",
+            "unit_price": 91.428571,
+            "price_basis": "normal",
+            "effective_price": 32000,
+            "member_program_name": null
+          },
+          "trend_pct": null,
+          "record_count": 1,
+          "refreshed_at": "2026-10-20T08:51:23.513339+07:00",
+          "last_unit_price": 91.428571,
+          "trend_direction": null,
+          "last_effective_price": 32000,
+          "last_transaction_date": "2026-05-23"
+        },
+        "match_score": 1
+      },
+      {
+        "group": {
+          "id": "60000000-0000-0000-0000-000000000001",
+          "name": "Milo Original",
+          "best_by_dimension": {
+            "product_id": "70000000-0000-0000-0000-000000000200",
+            "unit_price": 90
+          }
+        },
+        "hints": {
+          "bundle_only_count": 1,
+          "member_not_counted": {
+            "date": "2026-10-15",
+            "record_id": "0584d565-66ff-460b-8c02-1ec92f02c3ba",
+            "store_name": "AEON",
+            "member_price": 17900,
+            "program_name": "AEON Member"
+          }
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000200",
+          "name": "Milo Original",
+          "status": "active",
+          "variant": "200 g",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 200,
+          "content_unit": "g",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "summary": {
+          "best_90d": {
+            "date": "2026-10-10",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000002",
+              "name": "Alfamart",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": null,
+            "record_id": "72752917-ce40-45bb-935c-d5168c5ed6bf",
+            "unit_price": 90,
+            "price_basis": "promo",
+            "effective_price": 18000,
+            "member_program_name": null
+          },
+          "best_all": {
+            "date": "2026-10-10",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000002",
+              "name": "Alfamart",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": null,
+            "record_id": "72752917-ce40-45bb-935c-d5168c5ed6bf",
+            "unit_price": 90,
+            "price_basis": "promo",
+            "effective_price": 18000,
+            "member_program_name": null
+          },
+          "trend_pct": -7.14,
+          "record_count": 9,
+          "refreshed_at": "2026-10-20T08:51:23.513339+07:00",
+          "last_unit_price": 97.5,
+          "trend_direction": "down",
+          "last_effective_price": 19500,
+          "last_transaction_date": "2026-10-17"
+        },
+        "match_score": 1
+      },
+      {
+        "group": {
+          "id": "60000000-0000-0000-0000-000000000001",
+          "name": "Milo Original",
+          "best_by_dimension": {
+            "product_id": "70000000-0000-0000-0000-000000000200",
+            "unit_price": 90
+          }
+        },
+        "hints": {
+          "bundle_only_count": 0,
+          "member_not_counted": null
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000500",
+          "name": "Milo Original",
+          "status": "active",
+          "variant": "500 g",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 500,
+          "content_unit": "g",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "summary": {
+          "best_90d": {
+            "date": "2026-10-15",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000001",
+              "name": "AEON",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": {
+              "id": "30000000-0000-0000-0000-000000000001",
+              "kind": "physical",
+              "name": "AEON BSD",
+              "status": "open",
+              "is_private": false
+            },
+            "record_id": "571885ca-a8ed-41c4-8c07-7b798983e34f",
+            "unit_price": 95,
+            "price_basis": "normal",
+            "effective_price": 47500,
+            "member_program_name": null
+          },
+          "best_all": {
+            "date": "2026-04-03",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000003",
+              "name": "Alfamidi",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": {
+              "id": "30000000-0000-0000-0000-000000000004",
+              "kind": "physical",
+              "name": "Alfamidi Ciputat",
+              "status": "open",
+              "is_private": false
+            },
+            "record_id": "c48c71ba-2fdd-428a-b19d-db21de36bf28",
+            "unit_price": 90,
+            "price_basis": "normal",
+            "effective_price": 45000,
+            "member_program_name": null
+          },
+          "trend_pct": null,
+          "record_count": 2,
+          "refreshed_at": "2026-10-20T08:51:23.513339+07:00",
+          "last_unit_price": 95,
+          "trend_direction": null,
+          "last_effective_price": 47500,
+          "last_transaction_date": "2026-10-15"
+        },
+        "match_score": 1
+      },
+      {
+        "group": {
+          "id": "60000000-0000-0000-0000-000000000001",
+          "name": "Milo Original",
+          "best_by_dimension": {
+            "product_id": "70000000-0000-0000-0000-000000000180",
+            "unit_price": 33.333333
+          }
+        },
+        "hints": {
+          "bundle_only_count": 0,
+          "member_not_counted": null
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000180",
+          "name": "Milo UHT",
+          "status": "active",
+          "variant": "180 ml",
+          "base_unit": "ml",
+          "dimension": "volume",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 180,
+          "content_unit": "ml",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "summary": {
+          "best_90d": {
+            "date": "2026-10-18",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000004",
+              "name": "Shopee",
+              "channel": "online",
+              "is_private": false
+            },
+            "branch": {
+              "id": "30000000-0000-0000-0000-000000000005",
+              "kind": "seller",
+              "name": "Nestle Official Store",
+              "status": "open",
+              "is_private": false
+            },
+            "record_id": "68a291cb-296f-41ba-bf08-c5141ecd5a65",
+            "unit_price": 33.333333,
+            "price_basis": "normal",
+            "effective_price": 6000,
+            "member_program_name": null
+          },
+          "best_all": {
+            "date": "2026-10-18",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000004",
+              "name": "Shopee",
+              "channel": "online",
+              "is_private": false
+            },
+            "branch": {
+              "id": "30000000-0000-0000-0000-000000000005",
+              "kind": "seller",
+              "name": "Nestle Official Store",
+              "status": "open",
+              "is_private": false
+            },
+            "record_id": "68a291cb-296f-41ba-bf08-c5141ecd5a65",
+            "unit_price": 33.333333,
+            "price_basis": "normal",
+            "effective_price": 6000,
+            "member_program_name": null
+          },
+          "trend_pct": null,
+          "record_count": 1,
+          "refreshed_at": "2026-10-20T08:51:23.513339+07:00",
+          "last_unit_price": 33.333333,
+          "trend_direction": null,
+          "last_effective_price": 6000,
+          "last_transaction_date": "2026-10-18"
+        },
+        "match_score": 1
+      },
+      {
+        "group": {
+          "id": "60000000-0000-0000-0000-000000000001",
+          "name": "Milo Original",
+          "best_by_dimension": {
+            "product_id": "70000000-0000-0000-0000-000000000200",
+            "unit_price": 90
+          }
+        },
+        "hints": {
+          "bundle_only_count": 0,
+          "member_not_counted": null
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000001000",
+          "name": "Milo Original",
+          "status": "active",
+          "variant": "1 kg",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 1,
+          "content_unit": "kg",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "summary": null,
+        "match_score": 1
+      }
+    ],
+    "search_indomie": [
+      {
+        "group": {
+          "id": "60000000-0000-0000-0000-000000000002",
+          "name": "Indomie Goreng",
+          "best_by_dimension": null
+        },
+        "hints": {
+          "bundle_only_count": 1,
+          "member_not_counted": null
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000085",
+          "name": "Indomie Goreng",
+          "status": "active",
+          "variant": "85 g",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Indofood",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 85,
+          "content_unit": "g",
+          "category_name": "Makanan",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000002"
+        },
+        "summary": null,
+        "match_score": 1
+      }
+    ],
+    "search_jeruk": [
+      {
+        "group": null,
+        "hints": {
+          "bundle_only_count": 0,
+          "member_not_counted": null
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-0000000000f1",
+          "name": "Jeruk Medan",
+          "status": "active",
+          "variant": null,
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "weight",
+          "brand_name": null,
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": null,
+          "content_unit": "kg",
+          "category_name": "Makanan",
+          "merged_into_id": null,
+          "product_group_id": null
+        },
+        "summary": {
+          "best_90d": {
+            "date": "2026-10-14",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000002",
+              "name": "Alfamart",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": {
+              "id": "30000000-0000-0000-0000-000000000002",
+              "kind": "physical",
+              "name": "Alfamart Serpong",
+              "status": "open",
+              "is_private": false
+            },
+            "record_id": "f31467b0-3456-4e23-b40e-a7b5dc6b9b24",
+            "unit_price": 45,
+            "price_basis": "normal",
+            "effective_price": 45000,
+            "member_program_name": null
+          },
+          "best_all": {
+            "date": "2026-10-14",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000002",
+              "name": "Alfamart",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": {
+              "id": "30000000-0000-0000-0000-000000000002",
+              "kind": "physical",
+              "name": "Alfamart Serpong",
+              "status": "open",
+              "is_private": false
+            },
+            "record_id": "f31467b0-3456-4e23-b40e-a7b5dc6b9b24",
+            "unit_price": 45,
+            "price_basis": "normal",
+            "effective_price": 45000,
+            "member_program_name": null
+          },
+          "trend_pct": null,
+          "record_count": 1,
+          "refreshed_at": "2026-10-20T08:51:23.513339+07:00",
+          "last_unit_price": 45,
+          "trend_direction": null,
+          "last_effective_price": 45000,
+          "last_transaction_date": "2026-10-14"
+        },
+        "match_score": 1
+      }
+    ],
+    "search_gula": [
+      {
+        "group": null,
+        "hints": {
+          "bundle_only_count": 0,
+          "member_not_counted": null
+        },
+        "product": {
+          "id": "a0000000-0000-0000-0000-000000000001",
+          "name": "Gula Pasir Curah",
+          "status": "active",
+          "variant": null,
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": null,
+          "is_private": true,
+          "pack_count": 1,
+          "content_size": 1,
+          "content_unit": "kg",
+          "category_name": "Makanan",
+          "merged_into_id": null,
+          "product_group_id": null
+        },
+        "summary": {
+          "best_90d": {
+            "date": "2026-10-08",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000003",
+              "name": "Alfamidi",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": {
+              "id": "30000000-0000-0000-0000-000000000004",
+              "kind": "physical",
+              "name": "Alfamidi Ciputat",
+              "status": "open",
+              "is_private": false
+            },
+            "record_id": "8f853992-fc1a-43d9-a1b2-861a6a83d756",
+            "unit_price": 16.5,
+            "price_basis": "normal",
+            "effective_price": 16500,
+            "member_program_name": null
+          },
+          "best_all": {
+            "date": "2026-10-08",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000003",
+              "name": "Alfamidi",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": {
+              "id": "30000000-0000-0000-0000-000000000004",
+              "kind": "physical",
+              "name": "Alfamidi Ciputat",
+              "status": "open",
+              "is_private": false
+            },
+            "record_id": "8f853992-fc1a-43d9-a1b2-861a6a83d756",
+            "unit_price": 16.5,
+            "price_basis": "normal",
+            "effective_price": 16500,
+            "member_program_name": null
+          },
+          "trend_pct": null,
+          "record_count": 1,
+          "refreshed_at": "2026-10-20T08:51:23.513339+07:00",
+          "last_unit_price": 16.5,
+          "trend_direction": null,
+          "last_effective_price": 16500,
+          "last_transaction_date": "2026-10-08"
+        },
+        "match_score": 1
+      }
+    ],
+    "search_none": [],
+    "search_milo_empty": [
+      {
+        "group": {
+          "id": "60000000-0000-0000-0000-000000000001",
+          "name": "Milo Original",
+          "best_by_dimension": null
+        },
+        "hints": {
+          "bundle_only_count": 0,
+          "member_not_counted": null
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000310",
+          "name": "Milo 3in1",
+          "status": "active",
+          "variant": "10 x 35 g",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 10,
+          "content_size": 35,
+          "content_unit": "g",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "summary": null,
+        "match_score": 1
+      },
+      {
+        "group": {
+          "id": "60000000-0000-0000-0000-000000000001",
+          "name": "Milo Original",
+          "best_by_dimension": null
+        },
+        "hints": {
+          "bundle_only_count": 0,
+          "member_not_counted": null
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000200",
+          "name": "Milo Original",
+          "status": "active",
+          "variant": "200 g",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 200,
+          "content_unit": "g",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "summary": null,
+        "match_score": 1
+      },
+      {
+        "group": {
+          "id": "60000000-0000-0000-0000-000000000001",
+          "name": "Milo Original",
+          "best_by_dimension": null
+        },
+        "hints": {
+          "bundle_only_count": 0,
+          "member_not_counted": null
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000500",
+          "name": "Milo Original",
+          "status": "active",
+          "variant": "500 g",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 500,
+          "content_unit": "g",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "summary": null,
+        "match_score": 1
+      },
+      {
+        "group": {
+          "id": "60000000-0000-0000-0000-000000000001",
+          "name": "Milo Original",
+          "best_by_dimension": null
+        },
+        "hints": {
+          "bundle_only_count": 0,
+          "member_not_counted": null
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000001000",
+          "name": "Milo Original",
+          "status": "active",
+          "variant": "1 kg",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 1,
+          "content_unit": "kg",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "summary": null,
+        "match_score": 1
+      },
+      {
+        "group": {
+          "id": "60000000-0000-0000-0000-000000000001",
+          "name": "Milo Original",
+          "best_by_dimension": null
+        },
+        "hints": {
+          "bundle_only_count": 0,
+          "member_not_counted": null
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000180",
+          "name": "Milo UHT",
+          "status": "active",
+          "variant": "180 ml",
+          "base_unit": "ml",
+          "dimension": "volume",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 180,
+          "content_unit": "ml",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "summary": null,
+        "match_score": 1
+      }
+    ],
+    "cards_viewed": [
+      {
+        "group": {
+          "id": "60000000-0000-0000-0000-000000000001",
+          "name": "Milo Original",
+          "best_by_dimension": {
+            "product_id": "70000000-0000-0000-0000-000000000180",
+            "unit_price": 33.333333
+          }
+        },
+        "hints": {
+          "bundle_only_count": 0,
+          "member_not_counted": null
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000180",
+          "name": "Milo UHT",
+          "status": "active",
+          "variant": "180 ml",
+          "base_unit": "ml",
+          "dimension": "volume",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 180,
+          "content_unit": "ml",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "summary": {
+          "best_90d": {
+            "date": "2026-10-18",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000004",
+              "name": "Shopee",
+              "channel": "online",
+              "is_private": false
+            },
+            "branch": {
+              "id": "30000000-0000-0000-0000-000000000005",
+              "kind": "seller",
+              "name": "Nestle Official Store",
+              "status": "open",
+              "is_private": false
+            },
+            "record_id": "68a291cb-296f-41ba-bf08-c5141ecd5a65",
+            "unit_price": 33.333333,
+            "price_basis": "normal",
+            "effective_price": 6000,
+            "member_program_name": null
+          },
+          "best_all": {
+            "date": "2026-10-18",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000004",
+              "name": "Shopee",
+              "channel": "online",
+              "is_private": false
+            },
+            "branch": {
+              "id": "30000000-0000-0000-0000-000000000005",
+              "kind": "seller",
+              "name": "Nestle Official Store",
+              "status": "open",
+              "is_private": false
+            },
+            "record_id": "68a291cb-296f-41ba-bf08-c5141ecd5a65",
+            "unit_price": 33.333333,
+            "price_basis": "normal",
+            "effective_price": 6000,
+            "member_program_name": null
+          },
+          "trend_pct": null,
+          "record_count": 1,
+          "refreshed_at": "2026-10-20T08:51:23.513339+07:00",
+          "last_unit_price": 33.333333,
+          "trend_direction": null,
+          "last_effective_price": 6000,
+          "last_transaction_date": "2026-10-18"
+        }
+      },
+      {
+        "group": {
+          "id": "60000000-0000-0000-0000-000000000001",
+          "name": "Milo Original",
+          "best_by_dimension": {
+            "product_id": "70000000-0000-0000-0000-000000000200",
+            "unit_price": 90
+          }
+        },
+        "hints": {
+          "bundle_only_count": 1,
+          "member_not_counted": {
+            "date": "2026-10-15",
+            "record_id": "0584d565-66ff-460b-8c02-1ec92f02c3ba",
+            "store_name": "AEON",
+            "member_price": 17900,
+            "program_name": "AEON Member"
+          }
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000200",
+          "name": "Milo Original",
+          "status": "active",
+          "variant": "200 g",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 200,
+          "content_unit": "g",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "summary": {
+          "best_90d": {
+            "date": "2026-10-10",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000002",
+              "name": "Alfamart",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": null,
+            "record_id": "72752917-ce40-45bb-935c-d5168c5ed6bf",
+            "unit_price": 90,
+            "price_basis": "promo",
+            "effective_price": 18000,
+            "member_program_name": null
+          },
+          "best_all": {
+            "date": "2026-10-10",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000002",
+              "name": "Alfamart",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": null,
+            "record_id": "72752917-ce40-45bb-935c-d5168c5ed6bf",
+            "unit_price": 90,
+            "price_basis": "promo",
+            "effective_price": 18000,
+            "member_program_name": null
+          },
+          "trend_pct": -7.14,
+          "record_count": 9,
+          "refreshed_at": "2026-10-20T08:51:23.513339+07:00",
+          "last_unit_price": 97.5,
+          "trend_direction": "down",
+          "last_effective_price": 19500,
+          "last_transaction_date": "2026-10-17"
+        }
+      },
+      {
+        "group": null,
+        "hints": {
+          "bundle_only_count": 0,
+          "member_not_counted": null
+        },
+        "product": {
+          "id": "a0000000-0000-0000-0000-000000000001",
+          "name": "Gula Pasir Curah",
+          "status": "active",
+          "variant": null,
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": null,
+          "is_private": true,
+          "pack_count": 1,
+          "content_size": 1,
+          "content_unit": "kg",
+          "category_name": "Makanan",
+          "merged_into_id": null,
+          "product_group_id": null
+        },
+        "summary": {
+          "best_90d": {
+            "date": "2026-10-08",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000003",
+              "name": "Alfamidi",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": {
+              "id": "30000000-0000-0000-0000-000000000004",
+              "kind": "physical",
+              "name": "Alfamidi Ciputat",
+              "status": "open",
+              "is_private": false
+            },
+            "record_id": "8f853992-fc1a-43d9-a1b2-861a6a83d756",
+            "unit_price": 16.5,
+            "price_basis": "normal",
+            "effective_price": 16500,
+            "member_program_name": null
+          },
+          "best_all": {
+            "date": "2026-10-08",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000003",
+              "name": "Alfamidi",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": {
+              "id": "30000000-0000-0000-0000-000000000004",
+              "kind": "physical",
+              "name": "Alfamidi Ciputat",
+              "status": "open",
+              "is_private": false
+            },
+            "record_id": "8f853992-fc1a-43d9-a1b2-861a6a83d756",
+            "unit_price": 16.5,
+            "price_basis": "normal",
+            "effective_price": 16500,
+            "member_program_name": null
+          },
+          "trend_pct": null,
+          "record_count": 1,
+          "refreshed_at": "2026-10-20T08:51:23.513339+07:00",
+          "last_unit_price": 16.5,
+          "trend_direction": null,
+          "last_effective_price": 16500,
+          "last_transaction_date": "2026-10-08"
+        }
+      }
+    ],
+    "detail_milo200": {
+      "card": {
+        "group": {
+          "id": "60000000-0000-0000-0000-000000000001",
+          "name": "Milo Original",
+          "best_by_dimension": {
+            "product_id": "70000000-0000-0000-0000-000000000200",
+            "unit_price": 90
+          }
+        },
+        "hints": {
+          "bundle_only_count": 1,
+          "member_not_counted": {
+            "date": "2026-10-15",
+            "record_id": "0584d565-66ff-460b-8c02-1ec92f02c3ba",
+            "store_name": "AEON",
+            "member_price": 17900,
+            "program_name": "AEON Member"
+          }
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000200",
+          "name": "Milo Original",
+          "status": "active",
+          "variant": "200 g",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 200,
+          "content_unit": "g",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "summary": {
+          "best_90d": {
+            "date": "2026-10-10",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000002",
+              "name": "Alfamart",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": null,
+            "record_id": "72752917-ce40-45bb-935c-d5168c5ed6bf",
+            "unit_price": 90,
+            "price_basis": "promo",
+            "effective_price": 18000,
+            "member_program_name": null
+          },
+          "best_all": {
+            "date": "2026-10-10",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000002",
+              "name": "Alfamart",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": null,
+            "record_id": "72752917-ce40-45bb-935c-d5168c5ed6bf",
+            "unit_price": 90,
+            "price_basis": "promo",
+            "effective_price": 18000,
+            "member_program_name": null
+          },
+          "trend_pct": -7.14,
+          "record_count": 9,
+          "refreshed_at": "2026-10-20T08:51:23.513339+07:00",
+          "last_unit_price": 97.5,
+          "trend_direction": "down",
+          "last_effective_price": 19500,
+          "last_transaction_date": "2026-10-17"
+        }
+      },
+      "last_record": {
+        "date": "2026-10-17",
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000001",
+          "name": "AEON",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000001",
+          "kind": "physical",
+          "name": "AEON BSD",
+          "status": "open",
+          "is_private": false
+        },
+        "record_id": "af9b02ca-b1df-457b-b8c6-36e14bcfddad",
+        "price_basis": "normal",
+        "effective_price": 19500
+      },
+      "redirect_to": null,
+      "trend_windows": {
+        "cur_n": 6,
+        "prev_n": 2,
+        "cur_avg": 97.5,
+        "prev_avg": 105
+      },
+      "group_sizes_count": 5
+    },
+    "detail_milo500": {
+      "card": {
+        "group": {
+          "id": "60000000-0000-0000-0000-000000000001",
+          "name": "Milo Original",
+          "best_by_dimension": {
+            "product_id": "70000000-0000-0000-0000-000000000200",
+            "unit_price": 90
+          }
+        },
+        "hints": {
+          "bundle_only_count": 0,
+          "member_not_counted": null
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000500",
+          "name": "Milo Original",
+          "status": "active",
+          "variant": "500 g",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 500,
+          "content_unit": "g",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "summary": {
+          "best_90d": {
+            "date": "2026-10-15",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000001",
+              "name": "AEON",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": {
+              "id": "30000000-0000-0000-0000-000000000001",
+              "kind": "physical",
+              "name": "AEON BSD",
+              "status": "open",
+              "is_private": false
+            },
+            "record_id": "571885ca-a8ed-41c4-8c07-7b798983e34f",
+            "unit_price": 95,
+            "price_basis": "normal",
+            "effective_price": 47500,
+            "member_program_name": null
+          },
+          "best_all": {
+            "date": "2026-04-03",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000003",
+              "name": "Alfamidi",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": {
+              "id": "30000000-0000-0000-0000-000000000004",
+              "kind": "physical",
+              "name": "Alfamidi Ciputat",
+              "status": "open",
+              "is_private": false
+            },
+            "record_id": "c48c71ba-2fdd-428a-b19d-db21de36bf28",
+            "unit_price": 90,
+            "price_basis": "normal",
+            "effective_price": 45000,
+            "member_program_name": null
+          },
+          "trend_pct": null,
+          "record_count": 2,
+          "refreshed_at": "2026-10-20T08:51:23.513339+07:00",
+          "last_unit_price": 95,
+          "trend_direction": null,
+          "last_effective_price": 47500,
+          "last_transaction_date": "2026-10-15"
+        }
+      },
+      "last_record": {
+        "date": "2026-10-15",
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000001",
+          "name": "AEON",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000001",
+          "kind": "physical",
+          "name": "AEON BSD",
+          "status": "open",
+          "is_private": false
+        },
+        "record_id": "571885ca-a8ed-41c4-8c07-7b798983e34f",
+        "price_basis": "normal",
+        "effective_price": 47500
+      },
+      "redirect_to": null,
+      "trend_windows": {
+        "cur_n": 1,
+        "prev_n": 0,
+        "cur_avg": 95,
+        "prev_avg": null
+      },
+      "group_sizes_count": 5
+    },
+    "detail_milo3in1": {
+      "card": {
+        "group": {
+          "id": "60000000-0000-0000-0000-000000000001",
+          "name": "Milo Original",
+          "best_by_dimension": {
+            "product_id": "70000000-0000-0000-0000-000000000200",
+            "unit_price": 90
+          }
+        },
+        "hints": {
+          "bundle_only_count": 0,
+          "member_not_counted": null
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000310",
+          "name": "Milo 3in1",
+          "status": "active",
+          "variant": "10 x 35 g",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 10,
+          "content_size": 35,
+          "content_unit": "g",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "summary": {
+          "best_90d": null,
+          "best_all": {
+            "date": "2026-05-23",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000002",
+              "name": "Alfamart",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": {
+              "id": "30000000-0000-0000-0000-000000000002",
+              "kind": "physical",
+              "name": "Alfamart Serpong",
+              "status": "open",
+              "is_private": false
+            },
+            "record_id": "78af8108-d48c-4e78-8f52-01675635ff86",
+            "unit_price": 91.428571,
+            "price_basis": "normal",
+            "effective_price": 32000,
+            "member_program_name": null
+          },
+          "trend_pct": null,
+          "record_count": 1,
+          "refreshed_at": "2026-10-20T08:51:23.513339+07:00",
+          "last_unit_price": 91.428571,
+          "trend_direction": null,
+          "last_effective_price": 32000,
+          "last_transaction_date": "2026-05-23"
+        }
+      },
+      "last_record": {
+        "date": "2026-05-23",
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000002",
+          "name": "Alfamart",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000002",
+          "kind": "physical",
+          "name": "Alfamart Serpong",
+          "status": "open",
+          "is_private": false
+        },
+        "record_id": "78af8108-d48c-4e78-8f52-01675635ff86",
+        "price_basis": "normal",
+        "effective_price": 32000
+      },
+      "redirect_to": null,
+      "trend_windows": {
+        "cur_n": 0,
+        "prev_n": 0,
+        "cur_avg": null,
+        "prev_avg": null
+      },
+      "group_sizes_count": 5
+    },
+    "detail_miloUht": {
+      "card": {
+        "group": {
+          "id": "60000000-0000-0000-0000-000000000001",
+          "name": "Milo Original",
+          "best_by_dimension": {
+            "product_id": "70000000-0000-0000-0000-000000000180",
+            "unit_price": 33.333333
+          }
+        },
+        "hints": {
+          "bundle_only_count": 0,
+          "member_not_counted": null
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000180",
+          "name": "Milo UHT",
+          "status": "active",
+          "variant": "180 ml",
+          "base_unit": "ml",
+          "dimension": "volume",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 180,
+          "content_unit": "ml",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "summary": {
+          "best_90d": {
+            "date": "2026-10-18",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000004",
+              "name": "Shopee",
+              "channel": "online",
+              "is_private": false
+            },
+            "branch": {
+              "id": "30000000-0000-0000-0000-000000000005",
+              "kind": "seller",
+              "name": "Nestle Official Store",
+              "status": "open",
+              "is_private": false
+            },
+            "record_id": "68a291cb-296f-41ba-bf08-c5141ecd5a65",
+            "unit_price": 33.333333,
+            "price_basis": "normal",
+            "effective_price": 6000,
+            "member_program_name": null
+          },
+          "best_all": {
+            "date": "2026-10-18",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000004",
+              "name": "Shopee",
+              "channel": "online",
+              "is_private": false
+            },
+            "branch": {
+              "id": "30000000-0000-0000-0000-000000000005",
+              "kind": "seller",
+              "name": "Nestle Official Store",
+              "status": "open",
+              "is_private": false
+            },
+            "record_id": "68a291cb-296f-41ba-bf08-c5141ecd5a65",
+            "unit_price": 33.333333,
+            "price_basis": "normal",
+            "effective_price": 6000,
+            "member_program_name": null
+          },
+          "trend_pct": null,
+          "record_count": 1,
+          "refreshed_at": "2026-10-20T08:51:23.513339+07:00",
+          "last_unit_price": 33.333333,
+          "trend_direction": null,
+          "last_effective_price": 6000,
+          "last_transaction_date": "2026-10-18"
+        }
+      },
+      "last_record": {
+        "date": "2026-10-18",
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000004",
+          "name": "Shopee",
+          "channel": "online",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000005",
+          "kind": "seller",
+          "name": "Nestle Official Store",
+          "status": "open",
+          "is_private": false
+        },
+        "record_id": "68a291cb-296f-41ba-bf08-c5141ecd5a65",
+        "price_basis": "normal",
+        "effective_price": 6000
+      },
+      "redirect_to": null,
+      "trend_windows": {
+        "cur_n": 1,
+        "prev_n": 0,
+        "cur_avg": 33.333333,
+        "prev_avg": null
+      },
+      "group_sizes_count": 5
+    },
+    "detail_indomie": {
+      "card": {
+        "group": {
+          "id": "60000000-0000-0000-0000-000000000002",
+          "name": "Indomie Goreng",
+          "best_by_dimension": null
+        },
+        "hints": {
+          "bundle_only_count": 1,
+          "member_not_counted": null
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000085",
+          "name": "Indomie Goreng",
+          "status": "active",
+          "variant": "85 g",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Indofood",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 85,
+          "content_unit": "g",
+          "category_name": "Makanan",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000002"
+        },
+        "summary": null
+      },
+      "last_record": {
+        "date": "2026-10-16",
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000002",
+          "name": "Alfamart",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000002",
+          "kind": "physical",
+          "name": "Alfamart Serpong",
+          "status": "open",
+          "is_private": false
+        },
+        "record_id": "e027e470-e65b-4b9e-b08b-2541778ffe38",
+        "price_basis": "normal",
+        "effective_price": 15000
+      },
+      "redirect_to": null,
+      "trend_windows": {
+        "cur_n": 0,
+        "prev_n": 0,
+        "cur_avg": null,
+        "prev_avg": null
+      },
+      "group_sizes_count": 1
+    },
+    "detail_jeruk": {
+      "card": {
+        "group": null,
+        "hints": {
+          "bundle_only_count": 0,
+          "member_not_counted": null
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-0000000000f1",
+          "name": "Jeruk Medan",
+          "status": "active",
+          "variant": null,
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "weight",
+          "brand_name": null,
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": null,
+          "content_unit": "kg",
+          "category_name": "Makanan",
+          "merged_into_id": null,
+          "product_group_id": null
+        },
+        "summary": {
+          "best_90d": {
+            "date": "2026-10-14",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000002",
+              "name": "Alfamart",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": {
+              "id": "30000000-0000-0000-0000-000000000002",
+              "kind": "physical",
+              "name": "Alfamart Serpong",
+              "status": "open",
+              "is_private": false
+            },
+            "record_id": "f31467b0-3456-4e23-b40e-a7b5dc6b9b24",
+            "unit_price": 45,
+            "price_basis": "normal",
+            "effective_price": 45000,
+            "member_program_name": null
+          },
+          "best_all": {
+            "date": "2026-10-14",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000002",
+              "name": "Alfamart",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": {
+              "id": "30000000-0000-0000-0000-000000000002",
+              "kind": "physical",
+              "name": "Alfamart Serpong",
+              "status": "open",
+              "is_private": false
+            },
+            "record_id": "f31467b0-3456-4e23-b40e-a7b5dc6b9b24",
+            "unit_price": 45,
+            "price_basis": "normal",
+            "effective_price": 45000,
+            "member_program_name": null
+          },
+          "trend_pct": null,
+          "record_count": 1,
+          "refreshed_at": "2026-10-20T08:51:23.513339+07:00",
+          "last_unit_price": 45,
+          "trend_direction": null,
+          "last_effective_price": 45000,
+          "last_transaction_date": "2026-10-14"
+        }
+      },
+      "last_record": {
+        "date": "2026-10-14",
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000002",
+          "name": "Alfamart",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000002",
+          "kind": "physical",
+          "name": "Alfamart Serpong",
+          "status": "open",
+          "is_private": false
+        },
+        "record_id": "f31467b0-3456-4e23-b40e-a7b5dc6b9b24",
+        "price_basis": "normal",
+        "effective_price": 45000
+      },
+      "redirect_to": null,
+      "trend_windows": {
+        "cur_n": 1,
+        "prev_n": 0,
+        "cur_avg": 45,
+        "prev_avg": null
+      },
+      "group_sizes_count": 0
+    },
+    "detail_gula": {
+      "card": {
+        "group": null,
+        "hints": {
+          "bundle_only_count": 0,
+          "member_not_counted": null
+        },
+        "product": {
+          "id": "a0000000-0000-0000-0000-000000000001",
+          "name": "Gula Pasir Curah",
+          "status": "active",
+          "variant": null,
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": null,
+          "is_private": true,
+          "pack_count": 1,
+          "content_size": 1,
+          "content_unit": "kg",
+          "category_name": "Makanan",
+          "merged_into_id": null,
+          "product_group_id": null
+        },
+        "summary": {
+          "best_90d": {
+            "date": "2026-10-08",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000003",
+              "name": "Alfamidi",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": {
+              "id": "30000000-0000-0000-0000-000000000004",
+              "kind": "physical",
+              "name": "Alfamidi Ciputat",
+              "status": "open",
+              "is_private": false
+            },
+            "record_id": "8f853992-fc1a-43d9-a1b2-861a6a83d756",
+            "unit_price": 16.5,
+            "price_basis": "normal",
+            "effective_price": 16500,
+            "member_program_name": null
+          },
+          "best_all": {
+            "date": "2026-10-08",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000003",
+              "name": "Alfamidi",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": {
+              "id": "30000000-0000-0000-0000-000000000004",
+              "kind": "physical",
+              "name": "Alfamidi Ciputat",
+              "status": "open",
+              "is_private": false
+            },
+            "record_id": "8f853992-fc1a-43d9-a1b2-861a6a83d756",
+            "unit_price": 16.5,
+            "price_basis": "normal",
+            "effective_price": 16500,
+            "member_program_name": null
+          },
+          "trend_pct": null,
+          "record_count": 1,
+          "refreshed_at": "2026-10-20T08:51:23.513339+07:00",
+          "last_unit_price": 16.5,
+          "trend_direction": null,
+          "last_effective_price": 16500,
+          "last_transaction_date": "2026-10-08"
+        }
+      },
+      "last_record": {
+        "date": "2026-10-08",
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000003",
+          "name": "Alfamidi",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000004",
+          "kind": "physical",
+          "name": "Alfamidi Ciputat",
+          "status": "open",
+          "is_private": false
+        },
+        "record_id": "8f853992-fc1a-43d9-a1b2-861a6a83d756",
+        "price_basis": "normal",
+        "effective_price": 16500
+      },
+      "redirect_to": null,
+      "trend_windows": {
+        "cur_n": 1,
+        "prev_n": 0,
+        "cur_avg": 16.5,
+        "prev_avg": null
+      },
+      "group_sizes_count": 0
+    },
+    "detail_milo1kg": {
+      "card": {
+        "group": {
+          "id": "60000000-0000-0000-0000-000000000001",
+          "name": "Milo Original",
+          "best_by_dimension": {
+            "product_id": "70000000-0000-0000-0000-000000000200",
+            "unit_price": 90
+          }
+        },
+        "hints": {
+          "bundle_only_count": 0,
+          "member_not_counted": null
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000001000",
+          "name": "Milo Original",
+          "status": "active",
+          "variant": "1 kg",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 1,
+          "content_unit": "kg",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "summary": null
+      },
+      "last_record": null,
+      "redirect_to": null,
+      "trend_windows": {
+        "cur_n": 0,
+        "prev_n": 0,
+        "cur_avg": null,
+        "prev_avg": null
+      },
+      "group_sizes_count": 5
+    },
+    "detail_miloDup": {
+      "card": {
+        "group": {
+          "id": "60000000-0000-0000-0000-000000000001",
+          "name": "Milo Original",
+          "best_by_dimension": {
+            "product_id": "70000000-0000-0000-0000-000000000200",
+            "unit_price": 90
+          }
+        },
+        "hints": {
+          "bundle_only_count": 1,
+          "member_not_counted": {
+            "date": "2026-10-15",
+            "record_id": "0584d565-66ff-460b-8c02-1ec92f02c3ba",
+            "store_name": "AEON",
+            "member_price": 17900,
+            "program_name": "AEON Member"
+          }
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000200",
+          "name": "Milo Original",
+          "status": "active",
+          "variant": "200 g",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 200,
+          "content_unit": "g",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "summary": {
+          "best_90d": {
+            "date": "2026-10-10",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000002",
+              "name": "Alfamart",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": null,
+            "record_id": "72752917-ce40-45bb-935c-d5168c5ed6bf",
+            "unit_price": 90,
+            "price_basis": "promo",
+            "effective_price": 18000,
+            "member_program_name": null
+          },
+          "best_all": {
+            "date": "2026-10-10",
+            "store": {
+              "id": "20000000-0000-0000-0000-000000000002",
+              "name": "Alfamart",
+              "channel": "offline",
+              "is_private": false
+            },
+            "branch": null,
+            "record_id": "72752917-ce40-45bb-935c-d5168c5ed6bf",
+            "unit_price": 90,
+            "price_basis": "promo",
+            "effective_price": 18000,
+            "member_program_name": null
+          },
+          "trend_pct": -7.14,
+          "record_count": 9,
+          "refreshed_at": "2026-10-20T08:51:23.513339+07:00",
+          "last_unit_price": 97.5,
+          "trend_direction": "down",
+          "last_effective_price": 19500,
+          "last_transaction_date": "2026-10-17"
+        }
+      },
+      "last_record": {
+        "date": "2026-10-17",
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000001",
+          "name": "AEON",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000001",
+          "kind": "physical",
+          "name": "AEON BSD",
+          "status": "open",
+          "is_private": false
+        },
+        "record_id": "af9b02ca-b1df-457b-b8c6-36e14bcfddad",
+        "price_basis": "normal",
+        "effective_price": 19500
+      },
+      "redirect_to": "70000000-0000-0000-0000-000000000200",
+      "trend_windows": {
+        "cur_n": 6,
+        "prev_n": 2,
+        "cur_avg": 97.5,
+        "prev_avg": 105
+      },
+      "group_sizes_count": 5
+    },
+    "detail_unknown": {
+      "error": {
+        "message": "NOT_FOUND",
+        "code": "PT404",
+        "details": "{\"product_id\": \"99999999-0000-0000-0000-000000000000\"}",
+        "hint": "Data tidak ditemukan."
+      }
+    },
+    "chart_milo200": [
+      {
+        "date": "2026-08-21",
+        "record_id": "0f93e182-767b-4cd5-bb61-3664edb5649b",
+        "unit_price": 102.5,
+        "price_basis": "normal"
+      },
+      {
+        "date": "2026-09-05",
+        "record_id": "8ba9495a-26a3-4c1b-b160-dc68769e3750",
+        "unit_price": 105,
+        "price_basis": "normal"
+      },
+      {
+        "date": "2026-09-10",
+        "record_id": "3c0d1441-bab9-4e4f-a9fc-cb798791b535",
+        "unit_price": 105,
+        "price_basis": "normal"
+      },
+      {
+        "date": "2026-09-25",
+        "record_id": "ca2a9d76-371c-4974-852c-d59d04c1b375",
+        "unit_price": 100,
+        "price_basis": "normal"
+      },
+      {
+        "date": "2026-09-30",
+        "record_id": "78d66218-d31d-45a0-baa0-d454adfae54d",
+        "unit_price": 100,
+        "price_basis": "normal"
+      },
+      {
+        "date": "2026-10-05",
+        "record_id": "9be2901e-a2a4-414a-a6df-285e645c9406",
+        "unit_price": 92.5,
+        "price_basis": "promo"
+      },
+      {
+        "date": "2026-10-10",
+        "record_id": "72752917-ce40-45bb-935c-d5168c5ed6bf",
+        "unit_price": 90,
+        "price_basis": "promo"
+      },
+      {
+        "date": "2026-10-15",
+        "record_id": "0584d565-66ff-460b-8c02-1ec92f02c3ba",
+        "unit_price": 105,
+        "price_basis": "normal"
+      },
+      {
+        "date": "2026-10-17",
+        "record_id": "af9b02ca-b1df-457b-b8c6-36e14bcfddad",
+        "unit_price": 97.5,
+        "price_basis": "normal"
+      }
+    ],
+    "chart_milo200_normal": [
+      {
+        "date": "2026-08-21",
+        "record_id": "0f93e182-767b-4cd5-bb61-3664edb5649b",
+        "unit_price": 102.5,
+        "price_basis": "normal"
+      },
+      {
+        "date": "2026-09-05",
+        "record_id": "8ba9495a-26a3-4c1b-b160-dc68769e3750",
+        "unit_price": 105,
+        "price_basis": "normal"
+      },
+      {
+        "date": "2026-09-10",
+        "record_id": "3c0d1441-bab9-4e4f-a9fc-cb798791b535",
+        "unit_price": 105,
+        "price_basis": "normal"
+      },
+      {
+        "date": "2026-09-25",
+        "record_id": "ca2a9d76-371c-4974-852c-d59d04c1b375",
+        "unit_price": 100,
+        "price_basis": "normal"
+      },
+      {
+        "date": "2026-09-30",
+        "record_id": "78d66218-d31d-45a0-baa0-d454adfae54d",
+        "unit_price": 100,
+        "price_basis": "normal"
+      },
+      {
+        "date": "2026-10-05",
+        "record_id": "9be2901e-a2a4-414a-a6df-285e645c9406",
+        "unit_price": 99.5,
+        "price_basis": "normal"
+      },
+      {
+        "date": "2026-10-10",
+        "record_id": "72752917-ce40-45bb-935c-d5168c5ed6bf",
+        "unit_price": 97.5,
+        "price_basis": "normal"
+      },
+      {
+        "date": "2026-10-15",
+        "record_id": "0584d565-66ff-460b-8c02-1ec92f02c3ba",
+        "unit_price": 105,
+        "price_basis": "normal"
+      },
+      {
+        "date": "2026-10-17",
+        "record_id": "af9b02ca-b1df-457b-b8c6-36e14bcfddad",
+        "unit_price": 97.5,
+        "price_basis": "normal"
+      }
+    ],
+    "chart_jeruk": [
+      {
+        "date": "2026-10-14",
+        "record_id": "f31467b0-3456-4e23-b40e-a7b5dc6b9b24",
+        "unit_price": 45,
+        "price_basis": "normal"
+      }
+    ],
+    "history_milo200": [
+      {
+        "id": "af9b02ca-b1df-457b-b8c6-36e14bcfddad",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000001",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 97.5,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "AEON BSD",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 19500,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 19500,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-10-17",
+        "member_program_id": null,
+        "normal_unit_price": 97.5,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      },
+      {
+        "id": "0584d565-66ff-460b-8c02-1ec92f02c3ba",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000001",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 105,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "AEON BSD",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": 17900,
+        "normal_price": 21000,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 21000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-10-15",
+        "member_program_id": "40000000-0000-0000-0000-000000000001",
+        "normal_unit_price": 105,
+        "promo_valid_until": null,
+        "member_not_counted": true,
+        "member_program_name": "AEON Member"
+      },
+      {
+        "id": "17d814f6-d373-4920-9bc6-61c3576c9c8e",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000001",
+        "is_bundle": true,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 175,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "AEON BSD",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 35000,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 35000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-10-13",
+        "member_program_id": null,
+        "normal_unit_price": 175,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      },
+      {
+        "id": "72752917-ce40-45bb-935c-d5168c5ed6bf",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000002",
+        "branch_id": null,
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "Alfamart",
+        "unit_price": 90,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": null,
+        "price_basis": "promo",
+        "promo_price": 18000,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 19500,
+        "actual_weight": null,
+        "branch_status": null,
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 18000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-10-10",
+        "member_program_id": null,
+        "normal_unit_price": 97.5,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      },
+      {
+        "id": "9be2901e-a2a4-414a-a6df-285e645c9406",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000002",
+        "branch_id": "30000000-0000-0000-0000-000000000002",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "Alfamart",
+        "unit_price": 92.5,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "Alfamart Serpong",
+        "price_basis": "promo",
+        "promo_price": 18500,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 19900,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": 2,
+        "store_channel": "offline",
+        "effective_price": 18500,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-10-05",
+        "member_program_id": null,
+        "normal_unit_price": 99.5,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      }
+    ],
+    "history_milo200_page2": [
+      {
+        "id": "78d66218-d31d-45a0-baa0-d454adfae54d",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000001",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 100,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "AEON BSD",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 20000,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 20000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-09-30",
+        "member_program_id": null,
+        "normal_unit_price": 100,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      },
+      {
+        "id": "ca2a9d76-371c-4974-852c-d59d04c1b375",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000001",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 100,
+        "updated_at": "2026-10-20T08:51:23.502297+07:00",
+        "visibility": "private",
+        "branch_name": "AEON BSD",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 20000,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 20000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-09-25",
+        "member_program_id": null,
+        "normal_unit_price": 100,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      },
+      {
+        "id": "3c0d1441-bab9-4e4f-a9fc-cb798791b535",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000001",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 105,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "AEON BSD",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 21000,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 21000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-09-10",
+        "member_program_id": null,
+        "normal_unit_price": 105,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      },
+      {
+        "id": "8ba9495a-26a3-4c1b-b160-dc68769e3750",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000001",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 105,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "AEON BSD",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 21000,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 21000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-09-05",
+        "member_program_id": null,
+        "normal_unit_price": 105,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      },
+      {
+        "id": "0f93e182-767b-4cd5-bb61-3664edb5649b",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000003",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 102.5,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "AEON Lama",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 20500,
+        "actual_weight": null,
+        "branch_status": "closed",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 20500,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-08-21",
+        "member_program_id": null,
+        "normal_unit_price": 102.5,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      }
+    ],
+    "history_milo200_void": [
+      {
+        "id": "af9b02ca-b1df-457b-b8c6-36e14bcfddad",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000001",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 97.5,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "AEON BSD",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 19500,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 19500,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-10-17",
+        "member_program_id": null,
+        "normal_unit_price": 97.5,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      },
+      {
+        "id": "0584d565-66ff-460b-8c02-1ec92f02c3ba",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000001",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 105,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "AEON BSD",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": 17900,
+        "normal_price": 21000,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 21000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-10-15",
+        "member_program_id": "40000000-0000-0000-0000-000000000001",
+        "normal_unit_price": 105,
+        "promo_valid_until": null,
+        "member_not_counted": true,
+        "member_program_name": "AEON Member"
+      },
+      {
+        "id": "17d814f6-d373-4920-9bc6-61c3576c9c8e",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000001",
+        "is_bundle": true,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 175,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "AEON BSD",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 35000,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 35000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-10-13",
+        "member_program_id": null,
+        "normal_unit_price": 175,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      },
+      {
+        "id": "394fa828-0b9d-42fa-a464-07f2982f2ea4",
+        "extra": {},
+        "status": "void",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000001",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 75,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "AEON BSD",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 15000,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 15000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-10-12",
+        "member_program_id": null,
+        "normal_unit_price": 75,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      },
+      {
+        "id": "72752917-ce40-45bb-935c-d5168c5ed6bf",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000002",
+        "branch_id": null,
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "Alfamart",
+        "unit_price": 90,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": null,
+        "price_basis": "promo",
+        "promo_price": 18000,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 19500,
+        "actual_weight": null,
+        "branch_status": null,
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 18000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-10-10",
+        "member_program_id": null,
+        "normal_unit_price": 97.5,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      },
+      {
+        "id": "9be2901e-a2a4-414a-a6df-285e645c9406",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000002",
+        "branch_id": "30000000-0000-0000-0000-000000000002",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "Alfamart",
+        "unit_price": 92.5,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "Alfamart Serpong",
+        "price_basis": "promo",
+        "promo_price": 18500,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 19900,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": 2,
+        "store_channel": "offline",
+        "effective_price": 18500,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-10-05",
+        "member_program_id": null,
+        "normal_unit_price": 99.5,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      },
+      {
+        "id": "78d66218-d31d-45a0-baa0-d454adfae54d",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000001",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 100,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "AEON BSD",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 20000,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 20000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-09-30",
+        "member_program_id": null,
+        "normal_unit_price": 100,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      },
+      {
+        "id": "ca2a9d76-371c-4974-852c-d59d04c1b375",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000001",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 100,
+        "updated_at": "2026-10-20T08:51:23.502297+07:00",
+        "visibility": "private",
+        "branch_name": "AEON BSD",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 20000,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 20000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-09-25",
+        "member_program_id": null,
+        "normal_unit_price": 100,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      },
+      {
+        "id": "3c0d1441-bab9-4e4f-a9fc-cb798791b535",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000001",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 105,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "AEON BSD",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 21000,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 21000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-09-10",
+        "member_program_id": null,
+        "normal_unit_price": 105,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      },
+      {
+        "id": "8ba9495a-26a3-4c1b-b160-dc68769e3750",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000001",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 105,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "AEON BSD",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 21000,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 21000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-09-05",
+        "member_program_id": null,
+        "normal_unit_price": 105,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      },
+      {
+        "id": "0f93e182-767b-4cd5-bb61-3664edb5649b",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000003",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 102.5,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "AEON Lama",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 20500,
+        "actual_weight": null,
+        "branch_status": "closed",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 20500,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-08-21",
+        "member_program_id": null,
+        "normal_unit_price": 102.5,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      }
+    ],
+    "history_milo200_aeon": [
+      {
+        "id": "af9b02ca-b1df-457b-b8c6-36e14bcfddad",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000001",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 97.5,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "AEON BSD",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 19500,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 19500,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-10-17",
+        "member_program_id": null,
+        "normal_unit_price": 97.5,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      },
+      {
+        "id": "0584d565-66ff-460b-8c02-1ec92f02c3ba",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000001",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 105,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "AEON BSD",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": 17900,
+        "normal_price": 21000,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 21000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-10-15",
+        "member_program_id": "40000000-0000-0000-0000-000000000001",
+        "normal_unit_price": 105,
+        "promo_valid_until": null,
+        "member_not_counted": true,
+        "member_program_name": "AEON Member"
+      },
+      {
+        "id": "17d814f6-d373-4920-9bc6-61c3576c9c8e",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000001",
+        "is_bundle": true,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 175,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "AEON BSD",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 35000,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 35000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-10-13",
+        "member_program_id": null,
+        "normal_unit_price": 175,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      },
+      {
+        "id": "78d66218-d31d-45a0-baa0-d454adfae54d",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000001",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 100,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "AEON BSD",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 20000,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 20000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-09-30",
+        "member_program_id": null,
+        "normal_unit_price": 100,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      },
+      {
+        "id": "ca2a9d76-371c-4974-852c-d59d04c1b375",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000001",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 100,
+        "updated_at": "2026-10-20T08:51:23.502297+07:00",
+        "visibility": "private",
+        "branch_name": "AEON BSD",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 20000,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 20000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-09-25",
+        "member_program_id": null,
+        "normal_unit_price": 100,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      },
+      {
+        "id": "3c0d1441-bab9-4e4f-a9fc-cb798791b535",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000001",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 105,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "AEON BSD",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 21000,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 21000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-09-10",
+        "member_program_id": null,
+        "normal_unit_price": 105,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      },
+      {
+        "id": "8ba9495a-26a3-4c1b-b160-dc68769e3750",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000001",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 105,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "AEON BSD",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 21000,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 21000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-09-05",
+        "member_program_id": null,
+        "normal_unit_price": 105,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      },
+      {
+        "id": "0f93e182-767b-4cd5-bb61-3664edb5649b",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "branch_id": "30000000-0000-0000-0000-000000000003",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "receipt_id": null,
+        "store_name": "AEON",
+        "unit_price": 102.5,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "AEON Lama",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 20500,
+        "actual_weight": null,
+        "branch_status": "closed",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 20500,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-08-21",
+        "member_program_id": null,
+        "normal_unit_price": 102.5,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      }
+    ],
+    "history_jeruk": [
+      {
+        "id": "f31467b0-3456-4e23-b40e-a7b5dc6b9b24",
+        "extra": {},
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000002",
+        "branch_id": "30000000-0000-0000-0000-000000000002",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-0000000000f1",
+        "receipt_id": null,
+        "store_name": "Alfamart",
+        "unit_price": 45,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "Alfamart Serpong",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "price_label",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 45000,
+        "actual_weight": 0.535,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "offline",
+        "effective_price": 45000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-10-14",
+        "member_program_id": null,
+        "normal_unit_price": 45,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      }
+    ],
+    "history_miloUht": [
+      {
+        "id": "68a291cb-296f-41ba-bf08-c5141ecd5a65",
+        "extra": {
+          "shipping_fee": 10000
+        },
+        "status": "active",
+        "currency": "IDR",
+        "quantity": 1,
+        "store_id": "20000000-0000-0000-0000-000000000004",
+        "branch_id": "30000000-0000-0000-0000-000000000005",
+        "is_bundle": false,
+        "capture_id": null,
+        "created_at": "2026-10-20T08:51:23.483119+07:00",
+        "created_by": null,
+        "match_tier": null,
+        "product_id": "70000000-0000-0000-0000-000000000180",
+        "receipt_id": null,
+        "store_name": "Shopee",
+        "unit_price": 33.333333,
+        "updated_at": "2026-10-20T08:51:23.483119+07:00",
+        "visibility": "private",
+        "branch_name": "Nestle Official Store",
+        "price_basis": "normal",
+        "promo_price": null,
+        "source_type": "marketplace",
+        "household_id": "2b79642d-67c6-4664-9ea6-99d99f6d6eda",
+        "member_price": null,
+        "normal_price": 6000,
+        "actual_weight": null,
+        "branch_status": "open",
+        "match_outcome": null,
+        "promo_min_qty": null,
+        "store_channel": "online",
+        "effective_price": 6000,
+        "receipt_line_id": null,
+        "match_confidence": null,
+        "promo_valid_from": null,
+        "transaction_date": "2026-10-18",
+        "member_program_id": null,
+        "normal_unit_price": 33.333333333333336,
+        "promo_valid_until": null,
+        "member_not_counted": false,
+        "member_program_name": null
+      }
+    ],
+    "sizes_milo_90d": [
+      {
+        "date": "2026-10-10",
+        "rank": 1,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000002",
+          "name": "Alfamart",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": null,
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000200",
+          "name": "Milo Original",
+          "status": "active",
+          "variant": "200 g",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 200,
+          "content_unit": "g",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "currency": "IDR",
+        "has_data": true,
+        "dimension": "mass",
+        "unit_price": 90,
+        "pct_vs_best": 0,
+        "price_basis": "promo",
+        "other_currency": false,
+        "per_pack_price": null,
+        "effective_price": 18000,
+        "last_transaction_date": "2026-10-17"
+      },
+      {
+        "date": "2026-10-15",
+        "rank": 2,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000001",
+          "name": "AEON",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000001",
+          "kind": "physical",
+          "name": "AEON BSD",
+          "status": "open",
+          "is_private": false
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000500",
+          "name": "Milo Original",
+          "status": "active",
+          "variant": "500 g",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 500,
+          "content_unit": "g",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "currency": "IDR",
+        "has_data": true,
+        "dimension": "mass",
+        "unit_price": 95,
+        "pct_vs_best": 5.6,
+        "price_basis": "normal",
+        "other_currency": false,
+        "per_pack_price": null,
+        "effective_price": 47500,
+        "last_transaction_date": "2026-10-15"
+      },
+      {
+        "date": null,
+        "rank": null,
+        "store": null,
+        "branch": null,
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000310",
+          "name": "Milo 3in1",
+          "status": "active",
+          "variant": "10 x 35 g",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 10,
+          "content_size": 35,
+          "content_unit": "g",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "currency": "IDR",
+        "has_data": false,
+        "dimension": "mass",
+        "unit_price": null,
+        "pct_vs_best": null,
+        "price_basis": null,
+        "other_currency": false,
+        "per_pack_price": null,
+        "effective_price": null,
+        "last_transaction_date": "2026-05-23"
+      },
+      {
+        "date": null,
+        "rank": null,
+        "store": null,
+        "branch": null,
+        "product": {
+          "id": "70000000-0000-0000-0000-000000001000",
+          "name": "Milo Original",
+          "status": "active",
+          "variant": "1 kg",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 1,
+          "content_unit": "kg",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "currency": "IDR",
+        "has_data": false,
+        "dimension": "mass",
+        "unit_price": null,
+        "pct_vs_best": null,
+        "price_basis": null,
+        "other_currency": false,
+        "per_pack_price": null,
+        "effective_price": null,
+        "last_transaction_date": null
+      },
+      {
+        "date": "2026-10-18",
+        "rank": 1,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000004",
+          "name": "Shopee",
+          "channel": "online",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000005",
+          "kind": "seller",
+          "name": "Nestle Official Store",
+          "status": "open",
+          "is_private": false
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000180",
+          "name": "Milo UHT",
+          "status": "active",
+          "variant": "180 ml",
+          "base_unit": "ml",
+          "dimension": "volume",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 180,
+          "content_unit": "ml",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "currency": "IDR",
+        "has_data": true,
+        "dimension": "volume",
+        "unit_price": 33.333333,
+        "pct_vs_best": 0,
+        "price_basis": "normal",
+        "other_currency": false,
+        "per_pack_price": null,
+        "effective_price": 6000,
+        "last_transaction_date": "2026-10-18"
+      }
+    ],
+    "sizes_milo_all": [
+      {
+        "date": "2026-10-10",
+        "rank": 1,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000002",
+          "name": "Alfamart",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": null,
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000200",
+          "name": "Milo Original",
+          "status": "active",
+          "variant": "200 g",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 200,
+          "content_unit": "g",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "currency": "IDR",
+        "has_data": true,
+        "dimension": "mass",
+        "unit_price": 90,
+        "pct_vs_best": 0,
+        "price_basis": "promo",
+        "other_currency": false,
+        "per_pack_price": null,
+        "effective_price": 18000,
+        "last_transaction_date": "2026-10-17"
+      },
+      {
+        "date": "2026-04-03",
+        "rank": 1,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000003",
+          "name": "Alfamidi",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000004",
+          "kind": "physical",
+          "name": "Alfamidi Ciputat",
+          "status": "open",
+          "is_private": false
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000500",
+          "name": "Milo Original",
+          "status": "active",
+          "variant": "500 g",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 500,
+          "content_unit": "g",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "currency": "IDR",
+        "has_data": true,
+        "dimension": "mass",
+        "unit_price": 90,
+        "pct_vs_best": 0,
+        "price_basis": "normal",
+        "other_currency": false,
+        "per_pack_price": null,
+        "effective_price": 45000,
+        "last_transaction_date": "2026-10-15"
+      },
+      {
+        "date": "2026-05-23",
+        "rank": 3,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000002",
+          "name": "Alfamart",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000002",
+          "kind": "physical",
+          "name": "Alfamart Serpong",
+          "status": "open",
+          "is_private": false
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000310",
+          "name": "Milo 3in1",
+          "status": "active",
+          "variant": "10 x 35 g",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 10,
+          "content_size": 35,
+          "content_unit": "g",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "currency": "IDR",
+        "has_data": true,
+        "dimension": "mass",
+        "unit_price": 91.428571,
+        "pct_vs_best": 1.6,
+        "price_basis": "normal",
+        "other_currency": false,
+        "per_pack_price": 3200,
+        "effective_price": 32000,
+        "last_transaction_date": "2026-05-23"
+      },
+      {
+        "date": null,
+        "rank": null,
+        "store": null,
+        "branch": null,
+        "product": {
+          "id": "70000000-0000-0000-0000-000000001000",
+          "name": "Milo Original",
+          "status": "active",
+          "variant": "1 kg",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 1,
+          "content_unit": "kg",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "currency": "IDR",
+        "has_data": false,
+        "dimension": "mass",
+        "unit_price": null,
+        "pct_vs_best": null,
+        "price_basis": null,
+        "other_currency": false,
+        "per_pack_price": null,
+        "effective_price": null,
+        "last_transaction_date": null
+      },
+      {
+        "date": "2026-10-18",
+        "rank": 1,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000004",
+          "name": "Shopee",
+          "channel": "online",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000005",
+          "kind": "seller",
+          "name": "Nestle Official Store",
+          "status": "open",
+          "is_private": false
+        },
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000180",
+          "name": "Milo UHT",
+          "status": "active",
+          "variant": "180 ml",
+          "base_unit": "ml",
+          "dimension": "volume",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 180,
+          "content_unit": "ml",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "currency": "IDR",
+        "has_data": true,
+        "dimension": "volume",
+        "unit_price": 33.333333,
+        "pct_vs_best": 0,
+        "price_basis": "normal",
+        "other_currency": false,
+        "per_pack_price": null,
+        "effective_price": 6000,
+        "last_transaction_date": "2026-10-18"
+      }
+    ],
+    "sizes_milo_empty": [
+      {
+        "date": null,
+        "rank": null,
+        "store": null,
+        "branch": null,
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000200",
+          "name": "Milo Original",
+          "status": "active",
+          "variant": "200 g",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 200,
+          "content_unit": "g",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "currency": "IDR",
+        "has_data": false,
+        "dimension": "mass",
+        "unit_price": null,
+        "pct_vs_best": null,
+        "price_basis": null,
+        "other_currency": false,
+        "per_pack_price": null,
+        "effective_price": null,
+        "last_transaction_date": null
+      },
+      {
+        "date": null,
+        "rank": null,
+        "store": null,
+        "branch": null,
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000310",
+          "name": "Milo 3in1",
+          "status": "active",
+          "variant": "10 x 35 g",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 10,
+          "content_size": 35,
+          "content_unit": "g",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "currency": "IDR",
+        "has_data": false,
+        "dimension": "mass",
+        "unit_price": null,
+        "pct_vs_best": null,
+        "price_basis": null,
+        "other_currency": false,
+        "per_pack_price": null,
+        "effective_price": null,
+        "last_transaction_date": null
+      },
+      {
+        "date": null,
+        "rank": null,
+        "store": null,
+        "branch": null,
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000500",
+          "name": "Milo Original",
+          "status": "active",
+          "variant": "500 g",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 500,
+          "content_unit": "g",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "currency": "IDR",
+        "has_data": false,
+        "dimension": "mass",
+        "unit_price": null,
+        "pct_vs_best": null,
+        "price_basis": null,
+        "other_currency": false,
+        "per_pack_price": null,
+        "effective_price": null,
+        "last_transaction_date": null
+      },
+      {
+        "date": null,
+        "rank": null,
+        "store": null,
+        "branch": null,
+        "product": {
+          "id": "70000000-0000-0000-0000-000000001000",
+          "name": "Milo Original",
+          "status": "active",
+          "variant": "1 kg",
+          "base_unit": "g",
+          "dimension": "mass",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 1,
+          "content_unit": "kg",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "currency": "IDR",
+        "has_data": false,
+        "dimension": "mass",
+        "unit_price": null,
+        "pct_vs_best": null,
+        "price_basis": null,
+        "other_currency": false,
+        "per_pack_price": null,
+        "effective_price": null,
+        "last_transaction_date": null
+      },
+      {
+        "date": null,
+        "rank": null,
+        "store": null,
+        "branch": null,
+        "product": {
+          "id": "70000000-0000-0000-0000-000000000180",
+          "name": "Milo UHT",
+          "status": "active",
+          "variant": "180 ml",
+          "base_unit": "ml",
+          "dimension": "volume",
+          "sale_mode": "unit",
+          "brand_name": "Nestle",
+          "is_private": false,
+          "pack_count": 1,
+          "content_size": 180,
+          "content_unit": "ml",
+          "category_name": "Minuman",
+          "merged_into_id": null,
+          "product_group_id": "60000000-0000-0000-0000-000000000001"
+        },
+        "currency": "IDR",
+        "has_data": false,
+        "dimension": "volume",
+        "unit_price": null,
+        "pct_vs_best": null,
+        "price_basis": null,
+        "other_currency": false,
+        "per_pack_price": null,
+        "effective_price": null,
+        "last_transaction_date": null
+      }
+    ],
+    "sizes_unknown": {
+      "error": {
+        "message": "NOT_FOUND",
+        "code": "PT404",
+        "details": "{\"product_group_id\": \"99999999-0000-0000-0000-000000000000\"}",
+        "hint": "Data tidak ditemukan."
+      }
+    },
+    "cheaper_milo200_90": [
+      {
+        "n": 1,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000002",
+          "name": "Alfamart",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": null,
+        "currency": "IDR",
+        "dimension": "mass",
+        "is_online": false,
+        "last_date": "2026-10-10",
+        "avg_unit_price": 90,
+        "min_unit_price": 90,
+        "successor_branch": null
+      },
+      {
+        "n": 1,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000002",
+          "name": "Alfamart",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000002",
+          "kind": "physical",
+          "name": "Alfamart Serpong",
+          "status": "open",
+          "is_private": false
+        },
+        "currency": "IDR",
+        "dimension": "mass",
+        "is_online": false,
+        "last_date": "2026-10-05",
+        "avg_unit_price": 92.5,
+        "min_unit_price": 92.5,
+        "successor_branch": null
+      },
+      {
+        "n": 6,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000001",
+          "name": "AEON",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000001",
+          "kind": "physical",
+          "name": "AEON BSD",
+          "status": "open",
+          "is_private": false
+        },
+        "currency": "IDR",
+        "dimension": "mass",
+        "is_online": false,
+        "last_date": "2026-10-17",
+        "avg_unit_price": 102.083333,
+        "min_unit_price": 97.5,
+        "successor_branch": null
+      },
+      {
+        "n": 1,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000001",
+          "name": "AEON",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000003",
+          "kind": "physical",
+          "name": "AEON Lama",
+          "status": "closed",
+          "is_private": false
+        },
+        "currency": "IDR",
+        "dimension": "mass",
+        "is_online": false,
+        "last_date": "2026-08-21",
+        "avg_unit_price": 102.5,
+        "min_unit_price": 102.5,
+        "successor_branch": {
+          "id": "30000000-0000-0000-0000-000000000001",
+          "kind": "physical",
+          "name": "AEON BSD",
+          "status": "open",
+          "is_private": false
+        }
+      }
+    ],
+    "cheaper_milo200_all": [
+      {
+        "n": 1,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000002",
+          "name": "Alfamart",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": null,
+        "currency": "IDR",
+        "dimension": "mass",
+        "is_online": false,
+        "last_date": "2026-10-10",
+        "avg_unit_price": 90,
+        "min_unit_price": 90,
+        "successor_branch": null
+      },
+      {
+        "n": 1,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000002",
+          "name": "Alfamart",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000002",
+          "kind": "physical",
+          "name": "Alfamart Serpong",
+          "status": "open",
+          "is_private": false
+        },
+        "currency": "IDR",
+        "dimension": "mass",
+        "is_online": false,
+        "last_date": "2026-10-05",
+        "avg_unit_price": 92.5,
+        "min_unit_price": 92.5,
+        "successor_branch": null
+      },
+      {
+        "n": 6,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000001",
+          "name": "AEON",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000001",
+          "kind": "physical",
+          "name": "AEON BSD",
+          "status": "open",
+          "is_private": false
+        },
+        "currency": "IDR",
+        "dimension": "mass",
+        "is_online": false,
+        "last_date": "2026-10-17",
+        "avg_unit_price": 102.083333,
+        "min_unit_price": 97.5,
+        "successor_branch": null
+      },
+      {
+        "n": 1,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000001",
+          "name": "AEON",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000003",
+          "kind": "physical",
+          "name": "AEON Lama",
+          "status": "closed",
+          "is_private": false
+        },
+        "currency": "IDR",
+        "dimension": "mass",
+        "is_online": false,
+        "last_date": "2026-08-21",
+        "avg_unit_price": 102.5,
+        "min_unit_price": 102.5,
+        "successor_branch": {
+          "id": "30000000-0000-0000-0000-000000000001",
+          "kind": "physical",
+          "name": "AEON BSD",
+          "status": "open",
+          "is_private": false
+        }
+      }
+    ],
+    "cheaper_group_90": [
+      {
+        "n": 1,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000002",
+          "name": "Alfamart",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": null,
+        "currency": "IDR",
+        "dimension": "mass",
+        "is_online": false,
+        "last_date": "2026-10-10",
+        "avg_unit_price": 90,
+        "min_unit_price": 90,
+        "successor_branch": null
+      },
+      {
+        "n": 1,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000002",
+          "name": "Alfamart",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000002",
+          "kind": "physical",
+          "name": "Alfamart Serpong",
+          "status": "open",
+          "is_private": false
+        },
+        "currency": "IDR",
+        "dimension": "mass",
+        "is_online": false,
+        "last_date": "2026-10-05",
+        "avg_unit_price": 92.5,
+        "min_unit_price": 92.5,
+        "successor_branch": null
+      },
+      {
+        "n": 7,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000001",
+          "name": "AEON",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000001",
+          "kind": "physical",
+          "name": "AEON BSD",
+          "status": "open",
+          "is_private": false
+        },
+        "currency": "IDR",
+        "dimension": "mass",
+        "is_online": false,
+        "last_date": "2026-10-17",
+        "avg_unit_price": 101.071429,
+        "min_unit_price": 95,
+        "successor_branch": null
+      },
+      {
+        "n": 1,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000001",
+          "name": "AEON",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000003",
+          "kind": "physical",
+          "name": "AEON Lama",
+          "status": "closed",
+          "is_private": false
+        },
+        "currency": "IDR",
+        "dimension": "mass",
+        "is_online": false,
+        "last_date": "2026-08-21",
+        "avg_unit_price": 102.5,
+        "min_unit_price": 102.5,
+        "successor_branch": {
+          "id": "30000000-0000-0000-0000-000000000001",
+          "kind": "physical",
+          "name": "AEON BSD",
+          "status": "open",
+          "is_private": false
+        }
+      },
+      {
+        "n": 1,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000004",
+          "name": "Shopee",
+          "channel": "online",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000005",
+          "kind": "seller",
+          "name": "Nestle Official Store",
+          "status": "open",
+          "is_private": false
+        },
+        "currency": "IDR",
+        "dimension": "volume",
+        "is_online": true,
+        "last_date": "2026-10-18",
+        "avg_unit_price": 33.333333,
+        "min_unit_price": 33.333333,
+        "successor_branch": null
+      }
+    ],
+    "cheaper_group_all": [
+      {
+        "n": 1,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000002",
+          "name": "Alfamart",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": null,
+        "currency": "IDR",
+        "dimension": "mass",
+        "is_online": false,
+        "last_date": "2026-10-10",
+        "avg_unit_price": 90,
+        "min_unit_price": 90,
+        "successor_branch": null
+      },
+      {
+        "n": 1,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000003",
+          "name": "Alfamidi",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000004",
+          "kind": "physical",
+          "name": "Alfamidi Ciputat",
+          "status": "open",
+          "is_private": false
+        },
+        "currency": "IDR",
+        "dimension": "mass",
+        "is_online": false,
+        "last_date": "2026-04-03",
+        "avg_unit_price": 90,
+        "min_unit_price": 90,
+        "successor_branch": null
+      },
+      {
+        "n": 2,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000002",
+          "name": "Alfamart",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000002",
+          "kind": "physical",
+          "name": "Alfamart Serpong",
+          "status": "open",
+          "is_private": false
+        },
+        "currency": "IDR",
+        "dimension": "mass",
+        "is_online": false,
+        "last_date": "2026-10-05",
+        "avg_unit_price": 91.964286,
+        "min_unit_price": 91.428571,
+        "successor_branch": null
+      },
+      {
+        "n": 7,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000001",
+          "name": "AEON",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000001",
+          "kind": "physical",
+          "name": "AEON BSD",
+          "status": "open",
+          "is_private": false
+        },
+        "currency": "IDR",
+        "dimension": "mass",
+        "is_online": false,
+        "last_date": "2026-10-17",
+        "avg_unit_price": 101.071429,
+        "min_unit_price": 95,
+        "successor_branch": null
+      },
+      {
+        "n": 1,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000001",
+          "name": "AEON",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000003",
+          "kind": "physical",
+          "name": "AEON Lama",
+          "status": "closed",
+          "is_private": false
+        },
+        "currency": "IDR",
+        "dimension": "mass",
+        "is_online": false,
+        "last_date": "2026-08-21",
+        "avg_unit_price": 102.5,
+        "min_unit_price": 102.5,
+        "successor_branch": {
+          "id": "30000000-0000-0000-0000-000000000001",
+          "kind": "physical",
+          "name": "AEON BSD",
+          "status": "open",
+          "is_private": false
+        }
+      },
+      {
+        "n": 1,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000004",
+          "name": "Shopee",
+          "channel": "online",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000005",
+          "kind": "seller",
+          "name": "Nestle Official Store",
+          "status": "open",
+          "is_private": false
+        },
+        "currency": "IDR",
+        "dimension": "volume",
+        "is_online": true,
+        "last_date": "2026-10-18",
+        "avg_unit_price": 33.333333,
+        "min_unit_price": 33.333333,
+        "successor_branch": null
+      }
+    ],
+    "cheaper_milo3in1_90": [],
+    "cheaper_milo3in1_all": [
+      {
+        "n": 1,
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000002",
+          "name": "Alfamart",
+          "channel": "offline",
+          "is_private": false
+        },
+        "branch": {
+          "id": "30000000-0000-0000-0000-000000000002",
+          "kind": "physical",
+          "name": "Alfamart Serpong",
+          "status": "open",
+          "is_private": false
+        },
+        "currency": "IDR",
+        "dimension": "mass",
+        "is_online": false,
+        "last_date": "2026-05-23",
+        "avg_unit_price": 91.428571,
+        "min_unit_price": 91.428571,
+        "successor_branch": null
+      }
+    ],
+    "barcode_milo500": {
+      "via_merge": false,
+      "product_id": "70000000-0000-0000-0000-000000000500"
+    },
+    "barcode_via_merge": {
+      "via_merge": true,
+      "product_id": "70000000-0000-0000-0000-000000000200"
+    },
+    "barcode_unknown": null,
+    "recent_prices": [
+      {
+        "id": "68a291cb-296f-41ba-bf08-c5141ecd5a65",
+        "product_id": "70000000-0000-0000-0000-000000000180",
+        "store_name": "Shopee",
+        "price_basis": "normal",
+        "effective_price": 6000,
+        "transaction_date": "2026-10-18"
+      },
+      {
+        "id": "af9b02ca-b1df-457b-b8c6-36e14bcfddad",
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "store_name": "AEON",
+        "price_basis": "normal",
+        "effective_price": 19500,
+        "transaction_date": "2026-10-17"
+      },
+      {
+        "id": "e027e470-e65b-4b9e-b08b-2541778ffe38",
+        "product_id": "70000000-0000-0000-0000-000000000085",
+        "store_name": "Alfamart",
+        "price_basis": "normal",
+        "effective_price": 15000,
+        "transaction_date": "2026-10-16"
+      },
+      {
+        "id": "0584d565-66ff-460b-8c02-1ec92f02c3ba",
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "store_name": "AEON",
+        "price_basis": "normal",
+        "effective_price": 21000,
+        "transaction_date": "2026-10-15"
+      },
+      {
+        "id": "571885ca-a8ed-41c4-8c07-7b798983e34f",
+        "product_id": "70000000-0000-0000-0000-000000000500",
+        "store_name": "AEON",
+        "price_basis": "normal",
+        "effective_price": 47500,
+        "transaction_date": "2026-10-15"
+      },
+      {
+        "id": "f31467b0-3456-4e23-b40e-a7b5dc6b9b24",
+        "product_id": "70000000-0000-0000-0000-0000000000f1",
+        "store_name": "Alfamart",
+        "price_basis": "normal",
+        "effective_price": 45000,
+        "transaction_date": "2026-10-14"
+      },
+      {
+        "id": "17d814f6-d373-4920-9bc6-61c3576c9c8e",
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "store_name": "AEON",
+        "price_basis": "normal",
+        "effective_price": 35000,
+        "transaction_date": "2026-10-13"
+      },
+      {
+        "id": "72752917-ce40-45bb-935c-d5168c5ed6bf",
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "store_name": "Alfamart",
+        "price_basis": "promo",
+        "effective_price": 18000,
+        "transaction_date": "2026-10-10"
+      },
+      {
+        "id": "8f853992-fc1a-43d9-a1b2-861a6a83d756",
+        "product_id": "a0000000-0000-0000-0000-000000000001",
+        "store_name": "Alfamidi",
+        "price_basis": "normal",
+        "effective_price": 16500,
+        "transaction_date": "2026-10-08"
+      },
+      {
+        "id": "9be2901e-a2a4-414a-a6df-285e645c9406",
+        "product_id": "70000000-0000-0000-0000-000000000200",
+        "store_name": "Alfamart",
+        "price_basis": "promo",
+        "effective_price": 18500,
+        "transaction_date": "2026-10-05"
+      }
+    ],
+    "recent_prices_empty": []
+  }
+}
