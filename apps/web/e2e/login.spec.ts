@@ -24,7 +24,7 @@ test('login OTP: email → kode (generateLink) → R1 → beranda', async ({ pag
   await expect(page.getByRole('navigation', { name: 'Navigasi utama' })).toBeVisible();
 
   // R1 dimuat (household dibuat trigger signup) dan sesi bertahan setelah reload (cookie @supabase/ssr).
-  await page.getByRole('link', { name: 'Cari' }).click();
+  await page.getByRole('link', { name: 'Saya' }).click();
   await expect(page.getByTestId('signed-in-as')).toContainText(email);
   await page.reload();
   await expect(page.getByTestId('signed-in-as')).toContainText(email);
@@ -32,6 +32,7 @@ test('login OTP: email → kode (generateLink) → R1 → beranda', async ({ pag
   // Sudah login membuka /masuk → kembali ke beranda.
   await page.goto('/masuk');
   await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole('heading', { name: 'Cari harga' })).toBeVisible();
 
   // Keluar → /masuk, dan halaman (app) kembali dialihkan.
   await page.getByRole('link', { name: 'Saya' }).click();
@@ -62,5 +63,6 @@ test('email OTP berisi kode 6 digit berbahasa Indonesia, tanpa magic link (F-20,
   await page.getByLabel('Kode 6 angka').fill(otp);
   await page.getByRole('button', { name: 'Masuk' }).click();
   await expect(page).toHaveURL(/\/$/);
+  await page.getByRole('link', { name: 'Saya' }).click();
   await expect(page.getByTestId('signed-in-as')).toContainText(email);
 });

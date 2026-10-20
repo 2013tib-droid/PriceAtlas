@@ -41,7 +41,7 @@ test('tanpa sesi: /masuk dan shell tab terbuka offline, SW tidak menyimpan Supab
       for (const req of await (await caches.open(name)).keys()) urls.push(req.url);
     return urls;
   });
-  for (const p of ['/', '/unggahan', '/belanja', '/saya', '/masuk', '/offline']) {
+  for (const p of ['/', '/cari', '/produk', '/unggahan', '/belanja', '/saya', '/masuk', '/offline']) {
     expect(cached, p).toContain(`${proxy.url}${p}`);
   }
   expect(cached.filter((u) => /\/(rest|storage|auth)\/v1\/|\/api\//.test(u))).toEqual([]);
@@ -58,7 +58,7 @@ test('tanpa sesi: /masuk dan shell tab terbuka offline, SW tidak menyimpan Supab
   await expect(page.getByRole('button', { name: 'Kirim kode' })).toBeDisabled();
 
   // Route yang tidak ada di cache → /offline.
-  await page.goto(`${proxy.url}/produk?id=1`);
+  await page.goto(`${proxy.url}/produk/ukuran?group=1`);
   await expect(page.getByRole('heading', { name: 'Halaman ini butuh sinyal' })).toBeVisible();
 });
 
@@ -72,6 +72,8 @@ test('setelah login: shell (app) terbuka offline dengan strip offline', async ({
   await expect(page.getByRole('heading', { name: 'Masukkan kode' })).toBeVisible();
   await page.getByLabel('Kode 6 angka').fill(await generateEmailOtp(email));
   await page.getByRole('button', { name: 'Masuk' }).click();
+  await expect(page.getByRole('heading', { name: 'Cari harga' })).toBeVisible();
+  await page.getByRole('link', { name: 'Saya' }).click();
   await expect(page.getByTestId('signed-in-as')).toContainText(email);
   await waitForShellCache(page);
 
@@ -79,8 +81,9 @@ test('setelah login: shell (app) terbuka offline dengan strip offline', async ({
   for (const [path, heading] of [
     ['/unggahan', 'Unggahan'],
     ['/belanja', 'Sesi belanja'],
-    ['/saya', 'Saya'],
     ['/', 'Cari harga'],
+    ['/cari?q=milo', 'Hasil cari'],
+    ['/saya', 'Saya'],
   ] as const) {
     await page.goto(`${proxy.url}${path}`);
     await expect(page.getByRole('heading', { name: heading })).toBeVisible();

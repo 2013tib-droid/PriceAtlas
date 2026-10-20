@@ -69,3 +69,22 @@ export function formatDuration(ms: number): string {
   const m = totalMin % 60;
   return h > 0 ? `${h}j ${m}m` : `${m}m`;
 }
+
+const MONTH_YEAR_FMT = new Intl.DateTimeFormat('id-ID', { month: 'short', year: 'numeric', timeZone: 'UTC' });
+
+/** Mar 2026 — bulan dan tahun dari string `date` (catatan shrinkflation S-04). */
+export function formatMonthYear(isoDate: string): string {
+  return MONTH_YEAR_FMT.format(new Date(dayNumber(isoDate) * 86_400_000));
+}
+
+/**
+ * Umur data untuk "terakhir dicatat …" (S-02, harga hanya sepanjang masa):
+ * < 7 hari seperti tanggal transaksi, lalu "20 hari lalu", "5 bln lalu", "2 thn lalu".
+ */
+export function formatAge(isoDate: string, timeZone: string, now: Date = new Date()): string {
+  const diff = daysBetween(todayInZone(timeZone, now), isoDate);
+  if (diff < 7) return formatTransactionDate(isoDate, timeZone, now);
+  if (diff < 30) return `${diff} hari lalu`;
+  if (diff < 365) return `${Math.floor(diff / 30)} bln lalu`;
+  return `${Math.floor(diff / 365)} thn lalu`;
+}

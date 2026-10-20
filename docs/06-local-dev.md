@@ -339,3 +339,15 @@ e2e memakai `next start` (Playwright menyalakannya), env `NEXT_PUBLIC_SUPABASE_*
 | `lib/format` | Rupiah, harga per satuan, tanggal di zona household |
 | `lib/data/query-client.ts`, `lib/offline/db.ts` | TanStack Query + persist ke IndexedDB `priceatlas:<user_id>` (data struk tidak di-persist) |
 | `app/sw.ts`, `app/serwist/[path]/route.ts`, `lib/offline/sw-rules.ts` | Service worker Serwist (`/serwist/sw.js`): precache aset, shell network-first + `/offline`; Supabase, `/api`, `/auth` tidak pernah di-cache |
+| `app/(app)/(cari)`, `features/search`, `features/home` | M1: S-01 + S-02 berbagi `SearchLayout` (SearchDock tetap terpasang; `q` ditulis ke URL setelah 250 ms) |
+| `app/(app)/produk/*`, `features/product`, `features/sizes`, `features/cheaper` | M1: S-03 (+ S-03b `?sheet=cek-harga`), S-04 `/produk/ukuran?group=`, S-05 `/produk/hemat?id=\|group=` |
+| `app/(fullscreen)/kamera`, `features/scan`, `lib/media/barcode.ts` | Layar penuh tanpa tab bar; M1 hanya `jenis=barcode` (BarcodeDetector, D-58) |
+| `lib/data/queries.ts`, `lib/data/rest.ts` | Hook per RPC (`qk.rpc`, skema kontrak di dev/test) dan REST S-01 (`price_record_view`, hitung `capture`) |
+| `lib/offline/prefs.ts`, `lib/hooks/use-pref.ts` | 💾 di IndexedDB `prefs`: pencarian terakhir (8), baru dicek (150, untuk R5), toggle "Hanya harga normal" |
+
+### 4.4 Fixture dan data e2e (M1)
+
+| Bagian | Isi |
+|---|---|
+| `apps/web/test/fixtures/rpc.json` | Keluaran RPC **asli** dari database mode A (`test/fixtures/scenario.ts`: katalog seed + record harga Ani, Budi tanpa histori). Dipakai test komponen L5b. `test/fixtures.l3.test.ts` (butuh PostgreSQL, ikut `pnpm -r test`) memeriksa setiap keluaran lolos skema kontrak dan bentuknya sama dengan file yang di-commit. Setelah RPC/kontrak berubah: `UPDATE_FIXTURES=1 pnpm --filter @priceatlas/web exec vitest run test/fixtures.l3.test.ts`, lalu tinjau diff. |
+| `apps/web/e2e/support/seed.ts` | `supabase/seed.sql` hanya katalog. e2e alur 1–2 menambah histori harga untuk household user e2e lewat **service role di proses test** (bukan kode klien, D-61), lalu menunggu `price_summary` dari pg_cron (≤ 10 dtk). Migration tidak diubah. |

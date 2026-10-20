@@ -11,7 +11,7 @@ import { useOnline } from '@/lib/hooks/use-online';
 import { OfflineStrip } from './offline-strip';
 import { TabBar } from './tab-bar';
 
-function AuthGate({ children }: { children: ReactNode }) {
+export function AuthGate({ children }: { children: ReactNode }) {
   const auth = useAuth();
   const online = useOnline();
   const router = useRouter();

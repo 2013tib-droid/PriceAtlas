@@ -1,6 +1,6 @@
 # Tahap 5a — Desain Frontend
 
-> **Status: disetujui (2026-10-19).** Semua default Q-43 s/d Q-64 diterima dan dicatat sebagai D-78 s/d D-83. **Tahap 5b M0 selesai dan disetujui** (hasil dan temuan F-25 s/d F-30: §1.4; Q-65 s/d Q-67 diputuskan sebagai D-84: §13.4).
+> **Status: disetujui (2026-10-19).** Semua default Q-43 s/d Q-64 diterima dan dicatat sebagai D-78 s/d D-83. **Tahap 5b M0 selesai dan disetujui** (hasil dan temuan F-25 s/d F-30: §1.4; Q-65 s/d Q-67 diputuskan sebagai D-84: §13.4). **Tahap 5b M1 selesai, menunggu review** (hasil, temuan F-31 s/d F-39: §1.5; pertanyaan Q-68 s/d Q-71: §13.5, diputuskan sebagai D-85).
 > Dasar: `PROJECT.md` (D-01 s/d D-77, terutama D-57–D-61 dan D-73–D-77), `docs/04-wireframe.md` + `docs/wireframes/index.html` (S-00a s/d S-20, alur 1–8, W-xx), `docs/05-backend-design.md` (R1–R21, W1–W18, §3.1, §4, §5, §7, §10), `docs/06-local-dev.md`, `packages/contracts`, `apps/web`.
 
 Dokumen ini tidak mengubah requirement, keputusan, skema, maupun RPC. Temuan baru ditulis sebagai **F-xx** (melanjutkan F-16 di `docs/05` §0.2), potensi masalah sebagai **P-xx**, dan pertanyaan sebagai **Q-43** dst. Setiap pertanyaan punya usulan default.
@@ -118,6 +118,54 @@ Karena tidak bisa dijalankan, setiap butir L4 diperiksa dari kode dan dokumentas
 | §11.6 CSP | Header CSP | Belum. `Referrer-Policy`, `Permissions-Policy`, `nosniff` sudah | CSP butuh daftar domain Storage dan nonce skrip Next; dibuat bersama unggahan di M2. |
 | §11.4 job `browser` (L5c) | Job baru | Belum dibuat | Belum ada kode browser-only (kompresi, EXIF) sampai M2. |
 | §4.3 kunci query | `['rpc', name, input]` | Sama; `RPC_INPUTS` (skema input semua RPC) ditambahkan ke `packages/contracts` dan dicek terhadap argumen fungsi SQL di L2 | Satu pintu validasi input untuk `rpcCall`. |
+
+### 1.5 Tahap 5b M1: hasil dan temuan baru (F-31 dst.)
+
+**Dasar.** PR #8 (D-84) belum di-merge saat M1 dikerjakan, jadi branch M1 dibangun di atas `claude/priceatlas-5b-m0-decisions` dan ikut memuat commit D-84. Tidak ada perubahan skema, RPC, migration, atau `db/tests/smoke.sql`.
+
+**Yang dibangun** (§7, §12 baris M1):
+
+| Bagian | Isi |
+|---|---|
+| Komponen | `SearchDock` (U-02, ikon scan hanya jika BarcodeDetector + `ean_13`, D-58), `ProductCard` (semua keadaan S-02), `GroupHeader` ("Paling hemat per gram: 200 g (Rp90/g)", per dimensi, U-03), `PriceText`/`UnitPrice` (aria-label "90 rupiah per gram")/`PriceLabel`/`BasisLabel`/`TrendText` (teks + aria-label)/`DataCount`/`StoreLine`, `QueryState` + `LoadingState`/`EmptyState`/`ErrorState`/`OfflineState`, `StickyAction`, `HistoryRow`, `Segmented` (radio asli) |
+| Layar | S-01 `/`, S-02 `/cari?q=`, S-03 `/produk?id=` (+ `&toko=` filter histori dari S-05, + S-03b `&sheet=cek-harga`), S-04 `/produk/ukuran?group=` (`&jendela=semua`), S-05 `/produk/hemat?id=\|group=` (`&lingkup=group`, `&jendela=semua`), scan `/kamera?jenis=barcode` |
+| Data | Hook per RPC di `lib/data/queries.ts` (kunci `qk.rpc`, staleTime/persist §4.3, output divalidasi skema kontrak di dev/test). R8 memakai `useInfiniteQuery` dengan cursor `(transaction_date, id)`, 20 baris per halaman. REST S-01 di `lib/data/rest.ts`. 💾 `prefs`: pencarian terakhir (8), baru dicek (150, siap untuk R5 di M7), toggle "Hanya harga normal". |
+| Kontrak | Skema output baru di `packages/contracts`: `ChartPointSchema` (R9), `ClientConfigSchema` (R2), `BarcodeHitSchema` (R6); field yang dipakai UI ditambahkan ke skema yang ada (`product.status/product_group_id`, `last_record.effective_price/price_basis`, `price_record_view.actual_weight/promo_*/store_channel/branch_status/created_at`, `compare_sizes.price_basis`). Semua dicek terhadap keluaran RPC asli (lihat test di bawah). |
+| Shell offline | `/cari` dan `/produk` masuk `SHELL_ROUTES` (§7.1 kolom Offline). Data saat offline: cache persist TanStack (yang pernah dimuat) + label "data tersimpan, mungkin tidak terbaru"; cache R5 + search offline tetap M7. |
+| Test | L5a/L5b: `test/m1/*` (81 test) untuk setiap layar di setiap keadaan §7.3, fixture `test/fixtures/rpc.json` = keluaran RPC **asli** mode A (`test/fixtures/scenario.ts`) yang divalidasi zod kontrak; `test/fixtures.l3.test.ts` gagal jika bentuk keluaran server menyimpang dari fixture. e2e `e2e/search-detail.spec.ts` (alur 1–2, Chromium + WebKit di `supabase-e2e`). |
+
+**Enam pertanyaan inti (wireframe §8.1) di UI M1** — semuanya diperiksa e2e alur 1–2:
+
+| # | Pertanyaan | Jawaban di UI | Ketukan |
+|---|---|---|---|
+| 1 | Termurah? | Kartu S-02: "Rp18.000 PROMO" (90 hari) + "Termurah sepanjang masa: …" | ketik → 0 |
+| 2 | Toko & cabang? | Kartu: "Alfamart · cabang tidak diketahui · 10 Okt 2026" (D-28) | 0 |
+| 3 | Naik/turun? | Kartu: "↓ turun 9% vs 30 hari sebelumnya" atau "Tren: data belum cukup" + "5 data · terakhir 3 hari lalu" (D-15, D-44, D-54); S-03 grafik + penjelasan jendela | 0 (+1) |
+| 4 | Per gram? | Kartu: "Rp90/g"; harga di rak: S-03b | 0 (+1) |
+| 5 | 500 g vs 200 g? | Header group S-02 "Paling hemat per gram: 200 g (Rp90/g)"; S-04 peringkat + "+6%" | 0 / 1 |
+| 6 | Lebih hemat di mana? | S-03 "Lebih hemat di mana" 3 teratas; S-05 lengkap, toggle produk/group (D-39) | 1 / 2 |
+
+| # | Temuan | Dampak | Penanganan / usulan | Ke |
+|---|---|---|---|---|
+| F-31 | `PgRpcClient` (`packages/testkit`) mengembalikan baris RPC `RETURNS TABLE` (R9 `price_chart`) sebagai teks, bukan objek seperti PostgREST. | Fixture/test L3 untuk R9 tidak sama dengan produksi. | Diperbaiki di testkit (kode test saja): fungsi dengan argmode `t` dibentuk seperti tipe komposit. | selesai |
+| F-32 | `supabase/seed.sql` hanya katalog; tidak ada histori harga untuk user e2e. Ringkasan harga baru ada setelah antrean pg_cron (≤ 10 dtk). | e2e alur 1–2 butuh histori, tren, beberapa toko. | `e2e/support/seed.ts`: record harga untuk household user e2e lewat service role **di proses test**, lalu menunggu `price_summary`. Migration dan seed tidak diubah. | selesai |
+| F-33 | R11 `compare_sizes` tidak mengembalikan nama group. | S-04 (dan S-05 mode group tanpa `id`) butuh satu panggilan R4 tambahan untuk judul. | Diambil dari kartu SKU pertama (sama seperti tool AI `bandingkan_ukuran`). Lihat **Q-70**. | Q-70 |
+| F-34 | "Ringkasan sedang diperbarui" (§7.2 `SummaryUpdating`) didesain untuk setelah mutasi; M1 belum punya mutasi. | Keadaan khusus S-03 tetap perlu terlihat jika antrean D-31 belum jalan. | S-03 membandingkan `updated_at` histori halaman pertama dengan `summary.refreshed_at`. Komponen mutasi (M3/M5) memakai pola yang sama. | selesai |
+| F-35 | Beberapa tujuan tautan M1 baru dibuat di milestone lain: S-14 (barcode tidak dikenal → produk baru, M3), S-16 (tap baris histori, M5), S-19b (`Atur` member, M6), S-20 (`Tanya: …`, M7), kamera struk/label (M2/M4), menu ⋯ (M5). | Tautan ke 404 membingungkan. | Barcode tidak dikenal: pesan + "Scan lagi"/"Cari dengan mengetik". Baris histori tidak bisa di-tap. `/saya/member` placeholder. Baris Tanya tampil nonaktif "Segera hadir". `/kamera?jenis=struk\|label` placeholder. Menu ⋯ berisi aksi nonaktif (+ teks D-30 untuk produk global). Lihat **Q-71**. | Q-71 |
+| F-36 | JS halaman `/` 347 KiB gzip (M0: 335 KiB). | Masih di atas 200 kB. | Tetap peringatan sampai M7 (D-84). Tidak ada dependensi baru selain `zod` langsung (versi sama dengan `packages/contracts`, satu salinan di bundle) dan `@priceatlas/db-types` (tipe saja). | D-84 |
+| F-37 | `interactive-widget=resizes-content` (supaya SearchDock tetap di atas keyboard virtual) didukung Chrome Android, tetapi tidak Safari iOS. | Di iPhone keyboard bisa menutupi kolom search di bawah (U-02). | Diuji di perangkat sungguhan; jika perlu, posisi dock mengikuti `visualViewport`. Lihat **Q-69**. | Q-69 |
+| F-38 | BarcodeDetector tidak ada di Chromium Linux maupun WebKit (runner CI). | Scan barcode tidak bisa diuji e2e; ikon scan tersembunyi di e2e (sesuai D-58). | L5b dengan BarcodeDetector + `getUserMedia` tiruan (terbaca, `via_merge`, tidak dikenal, izin ditolak, tidak didukung). Kamera palsu e2e (`--use-file-for-fake-video-capture`) di M4. | M4 |
+| F-39 | Lingkungan pembuatan M1: `supabase start` tetap tidak bisa (CDN image). | e2e tidak bisa dijalankan apa adanya di sini. | e2e dicoba lokal terhadap database mode A lewat Supabase tiruan kecil (auth OTP + PostgREST RPC/REST, tidak di-commit): login, shell offline, dan alur 1–2 lulus di Chromium. WebKit dan Supabase asli diverifikasi di job `supabase-e2e`. | selesai |
+
+**Penyimpangan kecil dari dokumen ini (implementasi M1):**
+
+| Bagian | Dokumen | Implementasi | Alasan |
+|---|---|---|---|
+| §7.1 route `/` dan `/cari` | Dua layar | Dua route dalam grup `(app)/(cari)` dengan layout bersama `SearchLayout` | SearchDock tidak di-mount ulang saat beranda → hasil cari, sehingga fokus dan keyboard tidak hilang. Debounce 250 ms dilakukan saat menulis `q` ke URL (`router.replace`), S-02 membaca `q` dari URL. |
+| §7.1 `/kamera` | Layar penuh tanpa tab bar | Grup `(fullscreen)` dengan penjaga sesi yang sama (`AuthGate`) | Sesuai tabel; M1 hanya `jenis=barcode`. |
+| §11.1 L5b `jest-axe` | Dipakai di test komponen | Belum ditambahkan; aturan a11y dicek lewat query peran/label Testing Library (heading, region, dialog, `aria-label` harga/tren) | Menghindari dependensi baru; audit axe ada di M7. |
+| §3.3 S-05 → S-03 | "histori difilter ke toko itu" | Parameter `&toko=<store_id>` di `/produk` + chip "Hanya AEON · Tampilkan semua toko" | Slug Indonesia (D-79). |
+| S-04/S-05 parameter | `?group=` / `?id=` | Ditambah `jendela=semua`, `lingkup=group` (diganti lewat `router.replace`) | Toggle bisa dibagikan/kembali tanpa menumpuk riwayat. |
 
 ---
 
@@ -804,6 +852,17 @@ Setiap pertanyaan punya usulan default. Jawab "setuju semua" jika semua default 
 | Q-67 | Input kode OTP: satu kolom (implementasi M0) atau 6 kotak (§7.3)? | **Satu kolom** (autofill + a11y lebih andal). |
 
 **Hasil review M0 (2026-10-20):** pemilik proyek menyerahkan ketiga pertanyaan ke usulan default. Q-65, Q-66, Q-67 → **D-84**.
+
+### 13.5 Pertanyaan baru dari M1
+
+| ID | Pertanyaan | Usulan default |
+|---|---|---|
+| Q-68 | Kartu S-02 dan S-03 selalu menampilkan baris "Termurah sepanjang masa", juga saat record-nya sama dengan termurah 90 hari (teks berulang). Tetap, atau diringkas (mis. "= termurah sepanjang masa")? | **Tetap tampil** (D-02 harfiah: dua angka selalu terlihat). Ditinjau di audit M7 bersama tata letak kartu. |
+| Q-69 | SearchDock di iOS Safari bisa tertutup keyboard (F-37). | **Uji di iPhone sungguhan**; jika tertutup, dock mengikuti `visualViewport` (tanpa pustaka) di M7. |
+| Q-70 | R11 tidak memuat nama group (F-33). Tetap R4 tambahan di klien, atau tambah `group_name` ke keluaran R11? | **Tetap di klien** (tanpa ubah RPC). Satu panggilan kecil, di-cache 30 dtk. Ditinjau ulang jika S-04 terasa lambat. |
+| Q-71 | Tujuan yang belum ada (F-35): barcode tidak dikenal, baris histori, "Atur" member, "Tanya", kamera label. | **Seperti implementasi M1** (pesan/placeholder/nonaktif, tanpa 404); tiap milestone menyambungkan tautannya: S-14 dengan kode barcode terisi (M3), S-16 (M5), S-19b (M6), S-20 (M7), kamera (M2/M4). |
+
+**Hasil review M1 (2026-10-20):** pemilik proyek menyetujui semua usulan default Q-68 s/d Q-71 → **D-85**.
 
 ### 13.3 Bagian yang belum bisa dirancang penuh
 

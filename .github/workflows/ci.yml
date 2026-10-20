@@ -159,7 +159,7 @@ jobs:
       - name: Browser Playwright (Chromium + WebKit)
         run: pnpm --filter @priceatlas/web exec playwright install --with-deps chromium webkit
 
-      - name: e2e Playwright (login OTP, shell offline)
+      - name: e2e Playwright (login OTP, shell offline, alur 1–2 cari & detail)
         run: pnpm --filter @priceatlas/web test:e2e
 
       - name: Artefak jika gagal

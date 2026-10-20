@@ -40,6 +40,8 @@ export const ProductLiteSchema = z.looseObject({
   is_private: z.boolean(),
   brand_name: z.string().nullable(),
   category_name: z.string().nullable(),
+  status: z.enum(['active', 'merged', 'archived']),
+  product_group_id: Uuid.nullable(),
 });
 
 export const ProductCardSchema = z.looseObject({
@@ -61,7 +63,9 @@ export const ProductCardSchema = z.looseObject({
     refreshed_at: Timestamp,
   }).nullable(),
   hints: z.looseObject({
-    member_not_counted: z.looseObject({ member_price: Num, program_name: z.string(), store_name: z.string() }).nullable(),
+    member_not_counted: z
+      .looseObject({ member_price: Num, program_name: z.string(), store_name: z.string(), record_id: Uuid, date: IsoDate })
+      .nullable(),
     bundle_only_count: Num,
   }),
 });
@@ -81,10 +85,14 @@ export type PriceTrend = z.infer<typeof PriceTrendSchema>;
 export const ProductDetailSchema = z.looseObject({
   redirect_to: Uuid.nullable(),
   card: ProductCardSchema,
-  last_record: z.looseObject({ store: StoreRefSchema, branch: BranchRefSchema.nullable(), date: IsoDate }).nullable(),
+  last_record: z.looseObject({
+    record_id: Uuid, store: StoreRefSchema, branch: BranchRefSchema.nullable(), date: IsoDate,
+    effective_price: Num, price_basis: z.enum(['normal', 'promo', 'member']),
+  }).nullable(),
   trend_windows: z.looseObject({ cur_n: Num, prev_n: Num, cur_avg: Num.nullable(), prev_avg: Num.nullable() }),
   group_sizes_count: Num,
 });
+export type ProductDetail = z.infer<typeof ProductDetailSchema>;
 
 export const PriceRecordViewSchema = z.looseObject({
   id: Uuid,
@@ -95,8 +103,12 @@ export const PriceRecordViewSchema = z.looseObject({
   transaction_date: IsoDate,
   currency: z.string(),
   quantity: Num,
+  actual_weight: Num.nullable(),
   normal_price: Num.nullable(),
   promo_price: Num.nullable(),
+  promo_min_qty: Num.nullable(),
+  promo_valid_from: IsoDate.nullable(),
+  promo_valid_until: IsoDate.nullable(),
   member_price: Num.nullable(),
   effective_price: Num,
   price_basis: z.enum(['normal', 'promo', 'member']),
@@ -105,26 +117,51 @@ export const PriceRecordViewSchema = z.looseObject({
   status: z.enum(['active', 'void']),
   extra: PriceExtraSchema,
   store_name: z.string(),
+  store_channel: z.enum(['offline', 'online']),
   branch_name: z.string().nullable(),
+  branch_status: z.enum(['open', 'closed']).nullable(),
   member_program_name: z.string().nullable(),
   member_not_counted: z.boolean(),
   normal_unit_price: Num.nullable(),
+  created_at: Timestamp,
   updated_at: Timestamp,
 });
+export type PriceRecordView = z.infer<typeof PriceRecordViewSchema>;
+
+/** R9 price_chart: satu titik per record aktif non-bundle (D-08, D-33). */
+export const ChartPointSchema = z.looseObject({
+  date: IsoDate, unit_price: Num, price_basis: z.enum(['normal', 'promo', 'member']), record_id: Uuid,
+});
+export type ChartPoint = z.infer<typeof ChartPointSchema>;
+
+/** R2 get_client_config: hanya kunci whitelist app.config. */
+export const ClientConfigSchema = z.looseObject({
+  best_price_window_days: Num, trend_window_days: Num, trend_min_records_per_window: Num,
+  trend_flat_threshold_pct: Num, auto_save_min_confidence: Num, near_best_threshold_pct: Num,
+  session_extend_hours: Num, image_retention_months: Num,
+});
+export type ClientConfig = z.infer<typeof ClientConfigSchema>;
+
+/** R6 find_product_by_barcode (D-58): null jika tidak dikenal. */
+export const BarcodeHitSchema = z.looseObject({ product_id: Uuid, via_merge: z.boolean() }).nullable();
+export type BarcodeHit = z.infer<typeof BarcodeHitSchema>;
 
 export const CompareSizesRowSchema = z.looseObject({
   product: ProductLiteSchema, dimension: z.string(), currency: z.string(),
-  unit_price: Num.nullable(), effective_price: Num.nullable(), per_pack_price: Num.nullable(),
+  unit_price: Num.nullable(), effective_price: Num.nullable(), price_basis: z.enum(['normal', 'promo', 'member']).nullable(),
+  per_pack_price: Num.nullable(),
   store: StoreRefSchema.nullable(), branch: BranchRefSchema.nullable(), date: IsoDate.nullable(),
   last_transaction_date: IsoDate.nullable(), rank: Num.nullable(), pct_vs_best: Num.nullable(),
   has_data: z.boolean(), other_currency: z.boolean(),
 });
+export type CompareSizesRow = z.infer<typeof CompareSizesRowSchema>;
 
 export const WhereCheaperRowSchema = z.looseObject({
   dimension: z.string(), currency: z.string(), store: StoreRefSchema, branch: BranchRefSchema.nullable(),
   successor_branch: BranchRefSchema.nullable(), min_unit_price: Num, avg_unit_price: Num, n: Num,
   last_date: IsoDate, is_online: z.boolean(),
 });
+export type WhereCheaperRow = z.infer<typeof WhereCheaperRowSchema>;
 
 // ---------------------------------------------------------------------------
 // Input RPC tulis (§3.2, §4)

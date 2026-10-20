@@ -9,7 +9,7 @@ export function hasSupabase(): boolean {
   return Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
-function admin() {
+export function admin() {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!key) throw new Error('SUPABASE_SERVICE_ROLE_KEY belum diisi (supabase status -o env)');
   return createClient(SUPABASE_URL, key, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -21,11 +21,16 @@ export function uniqueEmail(tag: string): string {
 
 /** Kode OTP 6 digit terbaru lewat admin generateLink (tanpa membaca email). */
 export async function generateEmailOtp(email: string): Promise<string> {
+  return (await generateEmailOtpForUser(email)).otp;
+}
+
+/** Sama dengan generateEmailOtp, ditambah id user (untuk menyiapkan data household-nya). */
+export async function generateEmailOtpForUser(email: string): Promise<{ otp: string; userId: string }> {
   const { data, error } = await admin().auth.admin.generateLink({ type: 'magiclink', email });
   if (error) throw error;
   const otp = data.properties?.email_otp;
   if (!otp || !/^\d{6}$/.test(otp)) throw new Error(`email_otp tidak berbentuk 6 digit: ${otp}`);
-  return otp;
+  return { otp, userId: data.user.id };
 }
 
 export interface MailpitMessage {

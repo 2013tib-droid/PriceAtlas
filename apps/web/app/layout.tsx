@@ -20,6 +20,8 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
+  // Keyboard virtual mengecilkan viewport: SearchDock (U-02) tetap terlihat di atas keyboard.
+  interactiveWidget: 'resizes-content',
   themeColor: '#1f2937',
 };
 
