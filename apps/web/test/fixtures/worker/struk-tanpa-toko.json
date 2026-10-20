@@ -1,0 +1,20 @@
+{
+  "images": ["struk-tanpa-toko.jpg"],
+  "raw_text": "TOKO MAKMUR JAYA\n14/10/2026\nMILO ORI 200G      1 x 21.000   21.000\nGULA PASIR 1KG     1 x 16.000   16.000\nTOTAL                           37.000",
+  "output": {
+    "kind": "receipt",
+    "store_hint": { "name": "TOKO MAKMUR JAYA" },
+    "header": {
+      "transaction_date": "2026-10-14",
+      "total_amount": 37000,
+      "payment_method": "tunai",
+      "field_confidence": { "store": 0.4, "date": 0.62, "total": 0.98 }
+    },
+    "lines": [
+      { "line_no": 1, "line_type": "product", "raw_text": "MILO ORI 200G", "quantity": 1, "unit_amount": 21000, "line_amount": 21000, "barcode": "8992696404442", "parse_confidence": 0.98 },
+      { "line_no": 2, "line_type": "product", "raw_text": "GULA PASIR 1KG", "quantity": 1, "unit_amount": 16000, "line_amount": 16000, "parse_confidence": 0.9 }
+    ],
+    "adjustments": [{ "kind": "points", "description": "POIN", "points": 37 }]
+  },
+  "usage": { "inputTokens": 0, "outputTokens": 0, "costUsd": 0 }
+}
