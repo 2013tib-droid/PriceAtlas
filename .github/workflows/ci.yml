@@ -74,6 +74,28 @@ jobs:
       - name: Bundle klien tanpa service role + anggaran JS (docs/07 §11.6)
         run: pnpm --filter @priceatlas/web check:bundle
 
+  # docs/07 §11.4: L5c browser-only (kompresi nyata, EXIF, sha256, IndexedDB) di Chromium.
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Cache browser Playwright
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+      - name: Chromium
+        run: pnpm --filter @priceatlas/web exec playwright install --with-deps chromium
+      - name: L5c (vitest browser mode, Playwright)
+        run: pnpm --filter @priceatlas/web test:browser
+
   # D-78, docs/07 §11.4: Supabase CLI asli (mode B). L4, db-types + cek drift, e2e Playwright.
   supabase-e2e:
     if: github.event_name != 'push' || github.ref == 'refs/heads/master'

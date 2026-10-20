@@ -13,7 +13,8 @@
     "lint": "eslint --max-warnings 0 .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check:bundle": "bash scripts/check-client-bundle.sh"
+    "check:bundle": "bash scripts/check-client-bundle.sh",
+    "test:browser": "vitest run --config vitest.browser.config.ts"
   },
   "dependencies": {
     "@priceatlas/contracts": "workspace:*",
@@ -51,6 +52,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
+    "@vitest/browser-playwright": "4.1.12",
     "esbuild": "0.28.2",
     "eslint": "^9.39.5",
     "eslint-config-next": "16.4.2",
