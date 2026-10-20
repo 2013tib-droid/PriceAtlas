@@ -45,7 +45,11 @@ test('O: offline → antrean → "Menunggu sinyal" → online → terunggah', as
   await page.getByTestId('input-gallery').setInputFiles(fixture('struk-aeon'));
   await expect(page.getByTestId('part')).not.toContainText('Menyiapkan');
   await page.getByRole('button', { name: 'Selesai' }).click();
-  await expect(page.getByText('Foto disimpan di HP. Akan diunggah saat ada sinyal.').first()).toBeVisible();
+  // Setelah tersimpan di IndexedDB, S-07 kembali ke layar (app) sebelumnya (shell dari service worker).
+  await expect(page).not.toHaveURL(/\/kamera/);
+  await expect(
+    page.locator('[data-sonner-toast]', { hasText: 'Foto disimpan di HP. Akan diunggah saat ada sinyal.' }),
+  ).toBeVisible();
 
   await page.goto(`${proxy.url}/unggahan`);
   const local = page.getByRole('region', { name: 'Menunggu sinyal (1)' });
