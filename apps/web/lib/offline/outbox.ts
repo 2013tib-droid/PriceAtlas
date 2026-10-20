@@ -29,11 +29,13 @@ export function createOutbox(
 ): Outbox {
   const listeners = new Set<Listener>();
   const bc = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(`priceatlas-outbox:${userId}`) : null;
+  let closed = false;
   const notify = (broadcast: Msg | null = { type: 'changed' }) => {
+    if (closed) return;
     for (const l of listeners) l();
     if (broadcast) bc?.postMessage(broadcast);
   };
-  const fullDeps: UploaderDeps = { ...deps, store, onChange: () => notify() };
+  const fullDeps: UploaderDeps = { ...deps, store, onChange: () => notify(), stopped: () => closed };
   const runner = new OutboxRunner({
     store,
     deps: fullDeps,
@@ -95,6 +97,7 @@ export function createOutbox(
       return () => listeners.delete(fn);
     },
     stop() {
+      closed = true;
       runner.stop();
       detach();
       bc?.close();

@@ -17,8 +17,9 @@ let pool: pg.Pool;
 let fresh: Fixtures;
 
 beforeAll(async () => {
-  pool = newPool(buildTestDb('priceatlas_l3_web_fixtures'));
-  fresh = await collectFixtures(pool);
+  const url = buildTestDb('priceatlas_l3_web_fixtures');
+  pool = newPool(url);
+  fresh = await collectFixtures(pool, url);
   if (process.env.UPDATE_FIXTURES) writeFileSync(FILE, `${JSON.stringify(fresh, null, 2)}\n`);
 });
 afterAll(async () => {

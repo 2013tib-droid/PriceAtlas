@@ -41,6 +41,7 @@
   "devDependencies": {
     "@playwright/test": "^1.64.1",
     "@priceatlas/testkit": "workspace:*",
+    "@priceatlas/worker": "workspace:*",
     "@tailwindcss/postcss": "^4.3.3",
     "@testing-library/dom": "^10.4.2",
     "@testing-library/react": "^16.3.3",

@@ -44,6 +44,15 @@ export interface UploaderDeps {
   isOnline(): boolean;
   now(): number;
   onChange?(item: OutboxItem): void;
+  /** true setelah antrean dihentikan (keluar akun): langkah yang sedang berjalan tidak menulis lagi. */
+  stopped?(): boolean;
+}
+
+export class OutboxStoppedError extends Error {
+  constructor() {
+    super('outbox stopped');
+    this.name = 'OutboxStoppedError';
+  }
 }
 
 /** Item yang boleh diproses runner. `force` (online/fokus/foto baru) mengabaikan jadwal backoff. */
@@ -59,6 +68,7 @@ export function isHeld(item: OutboxItem): boolean {
 }
 
 async function save(deps: UploaderDeps, item: OutboxItem, patch: Partial<OutboxItem>): Promise<OutboxItem> {
+  if (deps.stopped?.()) throw new OutboxStoppedError();
   const next = { ...item, ...patch };
   await deps.store.put(next);
   deps.onChange?.(next);

@@ -2,7 +2,7 @@
 // terlihat, setelah foto baru, dan timer backoff selama app terbuka. Satu tab saja yang memproses
 // (Web Locks; cadangan BroadcastChannel). Background Sync tidak dipakai (P-03).
 import type { OutboxItem, OutboxStore } from './outbox-store';
-import { isEligible, nextWake, processItem, type UploaderDeps } from './uploader';
+import { isEligible, nextWake, OutboxStoppedError, processItem, type UploaderDeps } from './uploader';
 
 export type Trigger = 'open' | 'online' | 'visible' | 'enqueued' | 'timer' | 'manual';
 
@@ -89,7 +89,12 @@ export class OutboxRunner {
     const { items } = await this.o.store.list();
     for (const item of items) {
       if (this.stopped || !isEligible(item, this.o.deps.now(), force)) continue;
-      await processItem(this.o.deps, item);
+      try {
+        await processItem(this.o.deps, item);
+      } catch (e) {
+        if (e instanceof OutboxStoppedError) return;
+        throw e;
+      }
       if (!this.o.deps.isOnline()) force = false;
     }
   }

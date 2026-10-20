@@ -80,6 +80,9 @@ importers:
       '@priceatlas/testkit':
         specifier: workspace:*
         version: link:../../packages/testkit
+      '@priceatlas/worker':
+        specifier: workspace:*
+        version: link:../worker
       '@tailwindcss/postcss':
         specifier: ^4.3.3
         version: 4.3.3
