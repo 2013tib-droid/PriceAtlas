@@ -309,6 +309,7 @@ async function collectAll(pool: pg.Pool, w: Worker): Promise<Fixtures> {
   const labelCapture = await w.submit('label-milo');
   await w.process();
   await call('items_label', citra, 'get_capture_items', { p_capture_id: labelCapture });
+  await call('capture_label', citra, 'get_capture', { p_capture_id: labelCapture });
   await call('items_unknown', citra, 'get_capture_items', { p_capture_id: IDS.unknown });
   type Item = { id: string; updated_at: string };
   const [label1, label2] = data.items_label as Item[];
@@ -355,6 +356,7 @@ async function collectAll(pool: pg.Pool, w: Worker): Promise<Fixtures> {
   const shopeeDup = await w.submit('shopee-milo');
   await w.process();
   await call('items_shopee_pending', citra, 'get_capture_items', { p_capture_id: shopeeDup });
+  await call('capture_shopee', citra, 'get_capture', { p_capture_id: shopeeDup });
   const shopeeItem = (data.items_shopee_pending as Item[])[0]!;
   await call('confirm_items_shopee', citra, 'confirm_capture_items', {
     p_capture_id: shopeeDup,
@@ -410,6 +412,22 @@ async function collectAll(pool: pg.Pool, w: Worker): Promise<Fixtures> {
     ),
   );
   data.recent_prices_empty = (await budi.asUser(`select 1 from (${recentSql}) r`)).rows;
+
+  // S-12 / S-15: REST baca (docs/05 §3.3 S-12), sebagai user (RLS).
+  const rows = async (sql: string, client = citra) =>
+    (await client.asUser<{ j: Record<string, unknown> }>(`select to_jsonb(r) as j from (${sql}) r`)).rows.map(
+      (r) => r.j,
+    );
+  data.rest_stores = await rows(
+    `select id, name, channel, household_id from public.store where status = 'active' order by name limit 50`,
+  );
+  data.rest_branches_aeon = await rows(
+    `select id, name, city, region, kind, status, household_id, store_id from public.branch
+      where store_id = '${IDS.aeon}' order by status, name`,
+  );
+  data.rest_categories = await rows(
+    `select id, name, household_id from public.category where archived_at is null order by name`,
+  );
 
   const today = (
     await pool.query<{ d: string }>(`select app.household_today($1)::text as d`, [await householdOf(pool, USERS.a)])

@@ -5,7 +5,7 @@
       "role": "owner",
       "user_id": "00000000-0000-0000-0000-00000000000a",
       "household": {
-        "id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "name": "ani",
         "timezone": "Asia/Jakarta",
         "default_currency": "IDR",
@@ -72,7 +72,7 @@
               "status": "open",
               "is_private": false
             },
-            "record_id": "aa78cce1-5137-45a5-bfda-f0f47a3b38a6",
+            "record_id": "e276d4ef-8fdc-4e39-a26b-ccade05c27aa",
             "unit_price": 91.428571,
             "price_basis": "normal",
             "effective_price": 32000,
@@ -80,7 +80,7 @@
           },
           "trend_pct": null,
           "record_count": 1,
-          "refreshed_at": "2026-10-20T22:41:02.245844+07:00",
+          "refreshed_at": "2026-10-20T22:48:31.191025+07:00",
           "last_unit_price": 91.428571,
           "trend_direction": null,
           "last_effective_price": 32000,
@@ -101,7 +101,7 @@
           "bundle_only_count": 1,
           "member_not_counted": {
             "date": "2026-10-15",
-            "record_id": "bb2e67cb-9862-4355-9050-b185697eb168",
+            "record_id": "9e5a9bdc-16c7-4d4c-9346-600dbd28ce49",
             "store_name": "AEON",
             "member_price": 17900,
             "program_name": "AEON Member"
@@ -134,7 +134,7 @@
               "is_private": false
             },
             "branch": null,
-            "record_id": "91dfe2f1-6067-43ca-963b-16ca1ccf0125",
+            "record_id": "07c84a2d-1041-4f7f-99e6-1b000b29cc3b",
             "unit_price": 90,
             "price_basis": "promo",
             "effective_price": 18000,
@@ -149,7 +149,7 @@
               "is_private": false
             },
             "branch": null,
-            "record_id": "91dfe2f1-6067-43ca-963b-16ca1ccf0125",
+            "record_id": "07c84a2d-1041-4f7f-99e6-1b000b29cc3b",
             "unit_price": 90,
             "price_basis": "promo",
             "effective_price": 18000,
@@ -157,7 +157,7 @@
           },
           "trend_pct": -7.14,
           "record_count": 9,
-          "refreshed_at": "2026-10-20T22:41:02.245844+07:00",
+          "refreshed_at": "2026-10-20T22:48:31.191025+07:00",
           "last_unit_price": 97.5,
           "trend_direction": "down",
           "last_effective_price": 19500,
@@ -211,7 +211,7 @@
               "status": "open",
               "is_private": false
             },
-            "record_id": "1d17bd1b-00b7-4c4e-b609-ec4ff98c0268",
+            "record_id": "778d1aa5-f7bf-4bf5-9c86-6f9bd9033016",
             "unit_price": 95,
             "price_basis": "normal",
             "effective_price": 47500,
@@ -232,7 +232,7 @@
               "status": "open",
               "is_private": false
             },
-            "record_id": "dc614e95-2bc4-4155-b848-ffc4f20f2ae5",
+            "record_id": "c680054d-c2ba-46ac-88d0-353ce0fd7c7f",
             "unit_price": 90,
             "price_basis": "normal",
             "effective_price": 45000,
@@ -240,7 +240,7 @@
           },
           "trend_pct": null,
           "record_count": 2,
-          "refreshed_at": "2026-10-20T22:41:02.245844+07:00",
+          "refreshed_at": "2026-10-20T22:48:31.191025+07:00",
           "last_unit_price": 95,
           "trend_direction": null,
           "last_effective_price": 47500,
@@ -294,7 +294,7 @@
               "status": "open",
               "is_private": false
             },
-            "record_id": "9185ce17-c301-4488-aafa-6bf675dc173e",
+            "record_id": "afb7c341-5146-4755-b367-17765564bb8b",
             "unit_price": 33.333333,
             "price_basis": "normal",
             "effective_price": 6000,
@@ -315,7 +315,7 @@
               "status": "open",
               "is_private": false
             },
-            "record_id": "9185ce17-c301-4488-aafa-6bf675dc173e",
+            "record_id": "afb7c341-5146-4755-b367-17765564bb8b",
             "unit_price": 33.333333,
             "price_basis": "normal",
             "effective_price": 6000,
@@ -323,7 +323,7 @@
           },
           "trend_pct": null,
           "record_count": 1,
-          "refreshed_at": "2026-10-20T22:41:02.245844+07:00",
+          "refreshed_at": "2026-10-20T22:48:31.191025+07:00",
           "last_unit_price": 33.333333,
           "trend_direction": null,
           "last_effective_price": 6000,
@@ -437,7 +437,7 @@
               "status": "open",
               "is_private": false
             },
-            "record_id": "39daf561-8053-4602-9dc8-6c90443154dc",
+            "record_id": "c8025efd-bd75-46dc-a140-640a8c9863aa",
             "unit_price": 45,
             "price_basis": "normal",
             "effective_price": 45000,
@@ -458,7 +458,7 @@
               "status": "open",
               "is_private": false
             },
-            "record_id": "39daf561-8053-4602-9dc8-6c90443154dc",
+            "record_id": "c8025efd-bd75-46dc-a140-640a8c9863aa",
             "unit_price": 45,
             "price_basis": "normal",
             "effective_price": 45000,
@@ -466,7 +466,7 @@
           },
           "trend_pct": null,
           "record_count": 1,
-          "refreshed_at": "2026-10-20T22:41:02.245844+07:00",
+          "refreshed_at": "2026-10-20T22:48:31.191025+07:00",
           "last_unit_price": 45,
           "trend_direction": null,
           "last_effective_price": 45000,
@@ -515,7 +515,7 @@
               "status": "open",
               "is_private": false
             },
-            "record_id": "86b7b929-7127-4806-91e5-177e9b5c8386",
+            "record_id": "2b9c4fe5-8fac-4e6d-8593-9400a77c5cab",
             "unit_price": 16.5,
             "price_basis": "normal",
             "effective_price": 16500,
@@ -536,7 +536,7 @@
               "status": "open",
               "is_private": false
             },
-            "record_id": "86b7b929-7127-4806-91e5-177e9b5c8386",
+            "record_id": "2b9c4fe5-8fac-4e6d-8593-9400a77c5cab",
             "unit_price": 16.5,
             "price_basis": "normal",
             "effective_price": 16500,
@@ -544,7 +544,7 @@
           },
           "trend_pct": null,
           "record_count": 1,
-          "refreshed_at": "2026-10-20T22:41:02.245844+07:00",
+          "refreshed_at": "2026-10-20T22:48:31.191025+07:00",
           "last_unit_price": 16.5,
           "trend_direction": null,
           "last_effective_price": 16500,
@@ -753,7 +753,7 @@
               "status": "open",
               "is_private": false
             },
-            "record_id": "9185ce17-c301-4488-aafa-6bf675dc173e",
+            "record_id": "afb7c341-5146-4755-b367-17765564bb8b",
             "unit_price": 33.333333,
             "price_basis": "normal",
             "effective_price": 6000,
@@ -774,7 +774,7 @@
               "status": "open",
               "is_private": false
             },
-            "record_id": "9185ce17-c301-4488-aafa-6bf675dc173e",
+            "record_id": "afb7c341-5146-4755-b367-17765564bb8b",
             "unit_price": 33.333333,
             "price_basis": "normal",
             "effective_price": 6000,
@@ -782,7 +782,7 @@
           },
           "trend_pct": null,
           "record_count": 1,
-          "refreshed_at": "2026-10-20T22:41:02.245844+07:00",
+          "refreshed_at": "2026-10-20T22:48:31.191025+07:00",
           "last_unit_price": 33.333333,
           "trend_direction": null,
           "last_effective_price": 6000,
@@ -802,7 +802,7 @@
           "bundle_only_count": 1,
           "member_not_counted": {
             "date": "2026-10-15",
-            "record_id": "bb2e67cb-9862-4355-9050-b185697eb168",
+            "record_id": "9e5a9bdc-16c7-4d4c-9346-600dbd28ce49",
             "store_name": "AEON",
             "member_price": 17900,
             "program_name": "AEON Member"
@@ -835,7 +835,7 @@
               "is_private": false
             },
             "branch": null,
-            "record_id": "91dfe2f1-6067-43ca-963b-16ca1ccf0125",
+            "record_id": "07c84a2d-1041-4f7f-99e6-1b000b29cc3b",
             "unit_price": 90,
             "price_basis": "promo",
             "effective_price": 18000,
@@ -850,7 +850,7 @@
               "is_private": false
             },
             "branch": null,
-            "record_id": "91dfe2f1-6067-43ca-963b-16ca1ccf0125",
+            "record_id": "07c84a2d-1041-4f7f-99e6-1b000b29cc3b",
             "unit_price": 90,
             "price_basis": "promo",
             "effective_price": 18000,
@@ -858,7 +858,7 @@
           },
           "trend_pct": -7.14,
           "record_count": 9,
-          "refreshed_at": "2026-10-20T22:41:02.245844+07:00",
+          "refreshed_at": "2026-10-20T22:48:31.191025+07:00",
           "last_unit_price": 97.5,
           "trend_direction": "down",
           "last_effective_price": 19500,
@@ -904,7 +904,7 @@
               "status": "open",
               "is_private": false
             },
-            "record_id": "86b7b929-7127-4806-91e5-177e9b5c8386",
+            "record_id": "2b9c4fe5-8fac-4e6d-8593-9400a77c5cab",
             "unit_price": 16.5,
             "price_basis": "normal",
             "effective_price": 16500,
@@ -925,7 +925,7 @@
               "status": "open",
               "is_private": false
             },
-            "record_id": "86b7b929-7127-4806-91e5-177e9b5c8386",
+            "record_id": "2b9c4fe5-8fac-4e6d-8593-9400a77c5cab",
             "unit_price": 16.5,
             "price_basis": "normal",
             "effective_price": 16500,
@@ -933,7 +933,7 @@
           },
           "trend_pct": null,
           "record_count": 1,
-          "refreshed_at": "2026-10-20T22:41:02.245844+07:00",
+          "refreshed_at": "2026-10-20T22:48:31.191025+07:00",
           "last_unit_price": 16.5,
           "trend_direction": null,
           "last_effective_price": 16500,
@@ -955,7 +955,7 @@
           "bundle_only_count": 1,
           "member_not_counted": {
             "date": "2026-10-15",
-            "record_id": "bb2e67cb-9862-4355-9050-b185697eb168",
+            "record_id": "9e5a9bdc-16c7-4d4c-9346-600dbd28ce49",
             "store_name": "AEON",
             "member_price": 17900,
             "program_name": "AEON Member"
@@ -988,7 +988,7 @@
               "is_private": false
             },
             "branch": null,
-            "record_id": "91dfe2f1-6067-43ca-963b-16ca1ccf0125",
+            "record_id": "07c84a2d-1041-4f7f-99e6-1b000b29cc3b",
             "unit_price": 90,
             "price_basis": "promo",
             "effective_price": 18000,
@@ -1003,7 +1003,7 @@
               "is_private": false
             },
             "branch": null,
-            "record_id": "91dfe2f1-6067-43ca-963b-16ca1ccf0125",
+            "record_id": "07c84a2d-1041-4f7f-99e6-1b000b29cc3b",
             "unit_price": 90,
             "price_basis": "promo",
             "effective_price": 18000,
@@ -1011,7 +1011,7 @@
           },
           "trend_pct": -7.14,
           "record_count": 9,
-          "refreshed_at": "2026-10-20T22:41:02.245844+07:00",
+          "refreshed_at": "2026-10-20T22:48:31.191025+07:00",
           "last_unit_price": 97.5,
           "trend_direction": "down",
           "last_effective_price": 19500,
@@ -1033,7 +1033,7 @@
           "status": "open",
           "is_private": false
         },
-        "record_id": "b2943155-3759-4f3f-816c-9c6b594d41fc",
+        "record_id": "c13cce83-63c8-4746-8c02-1f0f4c0f00c3",
         "price_basis": "normal",
         "effective_price": 19500
       },
@@ -1093,7 +1093,7 @@
               "status": "open",
               "is_private": false
             },
-            "record_id": "1d17bd1b-00b7-4c4e-b609-ec4ff98c0268",
+            "record_id": "778d1aa5-f7bf-4bf5-9c86-6f9bd9033016",
             "unit_price": 95,
             "price_basis": "normal",
             "effective_price": 47500,
@@ -1114,7 +1114,7 @@
               "status": "open",
               "is_private": false
             },
-            "record_id": "dc614e95-2bc4-4155-b848-ffc4f20f2ae5",
+            "record_id": "c680054d-c2ba-46ac-88d0-353ce0fd7c7f",
             "unit_price": 90,
             "price_basis": "normal",
             "effective_price": 45000,
@@ -1122,7 +1122,7 @@
           },
           "trend_pct": null,
           "record_count": 2,
-          "refreshed_at": "2026-10-20T22:41:02.245844+07:00",
+          "refreshed_at": "2026-10-20T22:48:31.191025+07:00",
           "last_unit_price": 95,
           "trend_direction": null,
           "last_effective_price": 47500,
@@ -1144,7 +1144,7 @@
           "status": "open",
           "is_private": false
         },
-        "record_id": "1d17bd1b-00b7-4c4e-b609-ec4ff98c0268",
+        "record_id": "778d1aa5-f7bf-4bf5-9c86-6f9bd9033016",
         "price_basis": "normal",
         "effective_price": 47500
       },
@@ -1205,7 +1205,7 @@
               "status": "open",
               "is_private": false
             },
-            "record_id": "aa78cce1-5137-45a5-bfda-f0f47a3b38a6",
+            "record_id": "e276d4ef-8fdc-4e39-a26b-ccade05c27aa",
             "unit_price": 91.428571,
             "price_basis": "normal",
             "effective_price": 32000,
@@ -1213,7 +1213,7 @@
           },
           "trend_pct": null,
           "record_count": 1,
-          "refreshed_at": "2026-10-20T22:41:02.245844+07:00",
+          "refreshed_at": "2026-10-20T22:48:31.191025+07:00",
           "last_unit_price": 91.428571,
           "trend_direction": null,
           "last_effective_price": 32000,
@@ -1235,7 +1235,7 @@
           "status": "open",
           "is_private": false
         },
-        "record_id": "aa78cce1-5137-45a5-bfda-f0f47a3b38a6",
+        "record_id": "e276d4ef-8fdc-4e39-a26b-ccade05c27aa",
         "price_basis": "normal",
         "effective_price": 32000
       },
@@ -1295,7 +1295,7 @@
               "status": "open",
               "is_private": false
             },
-            "record_id": "9185ce17-c301-4488-aafa-6bf675dc173e",
+            "record_id": "afb7c341-5146-4755-b367-17765564bb8b",
             "unit_price": 33.333333,
             "price_basis": "normal",
             "effective_price": 6000,
@@ -1316,7 +1316,7 @@
               "status": "open",
               "is_private": false
             },
-            "record_id": "9185ce17-c301-4488-aafa-6bf675dc173e",
+            "record_id": "afb7c341-5146-4755-b367-17765564bb8b",
             "unit_price": 33.333333,
             "price_basis": "normal",
             "effective_price": 6000,
@@ -1324,7 +1324,7 @@
           },
           "trend_pct": null,
           "record_count": 1,
-          "refreshed_at": "2026-10-20T22:41:02.245844+07:00",
+          "refreshed_at": "2026-10-20T22:48:31.191025+07:00",
           "last_unit_price": 33.333333,
           "trend_direction": null,
           "last_effective_price": 6000,
@@ -1346,7 +1346,7 @@
           "status": "open",
           "is_private": false
         },
-        "record_id": "9185ce17-c301-4488-aafa-6bf675dc173e",
+        "record_id": "afb7c341-5146-4755-b367-17765564bb8b",
         "price_basis": "normal",
         "effective_price": 6000
       },
@@ -1404,7 +1404,7 @@
           "status": "open",
           "is_private": false
         },
-        "record_id": "ac3803a7-d3f3-4d9c-b015-0e878e5c21ff",
+        "record_id": "215dc3cb-2ad2-4dd4-9635-a7062b8acf17",
         "price_basis": "normal",
         "effective_price": 15000
       },
@@ -1457,7 +1457,7 @@
               "status": "open",
               "is_private": false
             },
-            "record_id": "39daf561-8053-4602-9dc8-6c90443154dc",
+            "record_id": "c8025efd-bd75-46dc-a140-640a8c9863aa",
             "unit_price": 45,
             "price_basis": "normal",
             "effective_price": 45000,
@@ -1478,7 +1478,7 @@
               "status": "open",
               "is_private": false
             },
-            "record_id": "39daf561-8053-4602-9dc8-6c90443154dc",
+            "record_id": "c8025efd-bd75-46dc-a140-640a8c9863aa",
             "unit_price": 45,
             "price_basis": "normal",
             "effective_price": 45000,
@@ -1486,7 +1486,7 @@
           },
           "trend_pct": null,
           "record_count": 1,
-          "refreshed_at": "2026-10-20T22:41:02.245844+07:00",
+          "refreshed_at": "2026-10-20T22:48:31.191025+07:00",
           "last_unit_price": 45,
           "trend_direction": null,
           "last_effective_price": 45000,
@@ -1508,7 +1508,7 @@
           "status": "open",
           "is_private": false
         },
-        "record_id": "39daf561-8053-4602-9dc8-6c90443154dc",
+        "record_id": "c8025efd-bd75-46dc-a140-640a8c9863aa",
         "price_basis": "normal",
         "effective_price": 45000
       },
@@ -1561,7 +1561,7 @@
               "status": "open",
               "is_private": false
             },
-            "record_id": "86b7b929-7127-4806-91e5-177e9b5c8386",
+            "record_id": "2b9c4fe5-8fac-4e6d-8593-9400a77c5cab",
             "unit_price": 16.5,
             "price_basis": "normal",
             "effective_price": 16500,
@@ -1582,7 +1582,7 @@
               "status": "open",
               "is_private": false
             },
-            "record_id": "86b7b929-7127-4806-91e5-177e9b5c8386",
+            "record_id": "2b9c4fe5-8fac-4e6d-8593-9400a77c5cab",
             "unit_price": 16.5,
             "price_basis": "normal",
             "effective_price": 16500,
@@ -1590,7 +1590,7 @@
           },
           "trend_pct": null,
           "record_count": 1,
-          "refreshed_at": "2026-10-20T22:41:02.245844+07:00",
+          "refreshed_at": "2026-10-20T22:48:31.191025+07:00",
           "last_unit_price": 16.5,
           "trend_direction": null,
           "last_effective_price": 16500,
@@ -1612,7 +1612,7 @@
           "status": "open",
           "is_private": false
         },
-        "record_id": "86b7b929-7127-4806-91e5-177e9b5c8386",
+        "record_id": "2b9c4fe5-8fac-4e6d-8593-9400a77c5cab",
         "price_basis": "normal",
         "effective_price": 16500
       },
@@ -1682,7 +1682,7 @@
           "bundle_only_count": 1,
           "member_not_counted": {
             "date": "2026-10-15",
-            "record_id": "bb2e67cb-9862-4355-9050-b185697eb168",
+            "record_id": "9e5a9bdc-16c7-4d4c-9346-600dbd28ce49",
             "store_name": "AEON",
             "member_price": 17900,
             "program_name": "AEON Member"
@@ -1715,7 +1715,7 @@
               "is_private": false
             },
             "branch": null,
-            "record_id": "91dfe2f1-6067-43ca-963b-16ca1ccf0125",
+            "record_id": "07c84a2d-1041-4f7f-99e6-1b000b29cc3b",
             "unit_price": 90,
             "price_basis": "promo",
             "effective_price": 18000,
@@ -1730,7 +1730,7 @@
               "is_private": false
             },
             "branch": null,
-            "record_id": "91dfe2f1-6067-43ca-963b-16ca1ccf0125",
+            "record_id": "07c84a2d-1041-4f7f-99e6-1b000b29cc3b",
             "unit_price": 90,
             "price_basis": "promo",
             "effective_price": 18000,
@@ -1738,7 +1738,7 @@
           },
           "trend_pct": -7.14,
           "record_count": 9,
-          "refreshed_at": "2026-10-20T22:41:02.245844+07:00",
+          "refreshed_at": "2026-10-20T22:48:31.191025+07:00",
           "last_unit_price": 97.5,
           "trend_direction": "down",
           "last_effective_price": 19500,
@@ -1760,7 +1760,7 @@
           "status": "open",
           "is_private": false
         },
-        "record_id": "b2943155-3759-4f3f-816c-9c6b594d41fc",
+        "record_id": "c13cce83-63c8-4746-8c02-1f0f4c0f00c3",
         "price_basis": "normal",
         "effective_price": 19500
       },
@@ -1784,55 +1784,55 @@
     "chart_milo200": [
       {
         "date": "2026-08-21",
-        "record_id": "f3d581ca-616e-4698-a074-2b12e83143a0",
+        "record_id": "1da17068-f9a7-4b95-804b-71bac799bdd9",
         "unit_price": 102.5,
         "price_basis": "normal"
       },
       {
         "date": "2026-09-05",
-        "record_id": "b8608d3c-3206-4045-b523-6e1daf85d216",
+        "record_id": "501cf19c-b174-4750-bc43-820162c639ed",
         "unit_price": 105,
         "price_basis": "normal"
       },
       {
         "date": "2026-09-10",
-        "record_id": "fcc82455-e0ee-4ae5-a503-b26cece6788c",
+        "record_id": "3280e235-0da6-4411-a5ae-203a7d32d142",
         "unit_price": 105,
         "price_basis": "normal"
       },
       {
         "date": "2026-09-25",
-        "record_id": "2afe8a1d-7884-4a19-8e1c-3fce8ae59e38",
+        "record_id": "8e2d25ec-1bf3-43fc-aac5-8a9b4af25142",
         "unit_price": 100,
         "price_basis": "normal"
       },
       {
         "date": "2026-09-30",
-        "record_id": "b8b41345-c856-49fb-9f5b-049f26af3912",
+        "record_id": "cc07ab4a-1e58-4c2a-9860-ce559d6ae8c5",
         "unit_price": 100,
         "price_basis": "normal"
       },
       {
         "date": "2026-10-05",
-        "record_id": "4e8566c7-d034-4961-bdcf-b1966c524a1c",
+        "record_id": "9f9f6bd8-5ad6-4145-ba21-ee80915ed123",
         "unit_price": 92.5,
         "price_basis": "promo"
       },
       {
         "date": "2026-10-10",
-        "record_id": "91dfe2f1-6067-43ca-963b-16ca1ccf0125",
+        "record_id": "07c84a2d-1041-4f7f-99e6-1b000b29cc3b",
         "unit_price": 90,
         "price_basis": "promo"
       },
       {
         "date": "2026-10-15",
-        "record_id": "bb2e67cb-9862-4355-9050-b185697eb168",
+        "record_id": "9e5a9bdc-16c7-4d4c-9346-600dbd28ce49",
         "unit_price": 105,
         "price_basis": "normal"
       },
       {
         "date": "2026-10-17",
-        "record_id": "b2943155-3759-4f3f-816c-9c6b594d41fc",
+        "record_id": "c13cce83-63c8-4746-8c02-1f0f4c0f00c3",
         "unit_price": 97.5,
         "price_basis": "normal"
       }
@@ -1840,55 +1840,55 @@
     "chart_milo200_normal": [
       {
         "date": "2026-08-21",
-        "record_id": "f3d581ca-616e-4698-a074-2b12e83143a0",
+        "record_id": "1da17068-f9a7-4b95-804b-71bac799bdd9",
         "unit_price": 102.5,
         "price_basis": "normal"
       },
       {
         "date": "2026-09-05",
-        "record_id": "b8608d3c-3206-4045-b523-6e1daf85d216",
+        "record_id": "501cf19c-b174-4750-bc43-820162c639ed",
         "unit_price": 105,
         "price_basis": "normal"
       },
       {
         "date": "2026-09-10",
-        "record_id": "fcc82455-e0ee-4ae5-a503-b26cece6788c",
+        "record_id": "3280e235-0da6-4411-a5ae-203a7d32d142",
         "unit_price": 105,
         "price_basis": "normal"
       },
       {
         "date": "2026-09-25",
-        "record_id": "2afe8a1d-7884-4a19-8e1c-3fce8ae59e38",
+        "record_id": "8e2d25ec-1bf3-43fc-aac5-8a9b4af25142",
         "unit_price": 100,
         "price_basis": "normal"
       },
       {
         "date": "2026-09-30",
-        "record_id": "b8b41345-c856-49fb-9f5b-049f26af3912",
+        "record_id": "cc07ab4a-1e58-4c2a-9860-ce559d6ae8c5",
         "unit_price": 100,
         "price_basis": "normal"
       },
       {
         "date": "2026-10-05",
-        "record_id": "4e8566c7-d034-4961-bdcf-b1966c524a1c",
+        "record_id": "9f9f6bd8-5ad6-4145-ba21-ee80915ed123",
         "unit_price": 99.5,
         "price_basis": "normal"
       },
       {
         "date": "2026-10-10",
-        "record_id": "91dfe2f1-6067-43ca-963b-16ca1ccf0125",
+        "record_id": "07c84a2d-1041-4f7f-99e6-1b000b29cc3b",
         "unit_price": 97.5,
         "price_basis": "normal"
       },
       {
         "date": "2026-10-15",
-        "record_id": "bb2e67cb-9862-4355-9050-b185697eb168",
+        "record_id": "9e5a9bdc-16c7-4d4c-9346-600dbd28ce49",
         "unit_price": 105,
         "price_basis": "normal"
       },
       {
         "date": "2026-10-17",
-        "record_id": "b2943155-3759-4f3f-816c-9c6b594d41fc",
+        "record_id": "c13cce83-63c8-4746-8c02-1f0f4c0f00c3",
         "unit_price": 97.5,
         "price_basis": "normal"
       }
@@ -1896,14 +1896,14 @@
     "chart_jeruk": [
       {
         "date": "2026-10-14",
-        "record_id": "39daf561-8053-4602-9dc8-6c90443154dc",
+        "record_id": "c8025efd-bd75-46dc-a140-640a8c9863aa",
         "unit_price": 45,
         "price_basis": "normal"
       }
     ],
     "history_milo200": [
       {
-        "id": "b2943155-3759-4f3f-816c-9c6b594d41fc",
+        "id": "c13cce83-63c8-4746-8c02-1f0f4c0f00c3",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -1912,20 +1912,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000001",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 97.5,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "AEON BSD",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 19500,
         "actual_weight": null,
@@ -1945,7 +1945,7 @@
         "member_program_name": null
       },
       {
-        "id": "bb2e67cb-9862-4355-9050-b185697eb168",
+        "id": "9e5a9bdc-16c7-4d4c-9346-600dbd28ce49",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -1954,20 +1954,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000001",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 105,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "AEON BSD",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": 17900,
         "normal_price": 21000,
         "actual_weight": null,
@@ -1987,7 +1987,7 @@
         "member_program_name": "AEON Member"
       },
       {
-        "id": "cf431bfc-b25f-4356-bb17-0c4920e6ecf4",
+        "id": "fd585569-35c8-4693-9277-cc191e32df48",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -1996,20 +1996,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000001",
         "is_bundle": true,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 175,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "AEON BSD",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 35000,
         "actual_weight": null,
@@ -2029,7 +2029,7 @@
         "member_program_name": null
       },
       {
-        "id": "91dfe2f1-6067-43ca-963b-16ca1ccf0125",
+        "id": "07c84a2d-1041-4f7f-99e6-1b000b29cc3b",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -2038,20 +2038,20 @@
         "branch_id": null,
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "Alfamart",
         "unit_price": 90,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": null,
         "price_basis": "promo",
         "promo_price": 18000,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 19500,
         "actual_weight": null,
@@ -2071,7 +2071,7 @@
         "member_program_name": null
       },
       {
-        "id": "4e8566c7-d034-4961-bdcf-b1966c524a1c",
+        "id": "9f9f6bd8-5ad6-4145-ba21-ee80915ed123",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -2080,20 +2080,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000002",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "Alfamart",
         "unit_price": 92.5,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "Alfamart Serpong",
         "price_basis": "promo",
         "promo_price": 18500,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 19900,
         "actual_weight": null,
@@ -2115,7 +2115,7 @@
     ],
     "history_milo200_page2": [
       {
-        "id": "b8b41345-c856-49fb-9f5b-049f26af3912",
+        "id": "cc07ab4a-1e58-4c2a-9860-ce559d6ae8c5",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -2124,20 +2124,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000001",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 100,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "AEON BSD",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 20000,
         "actual_weight": null,
@@ -2157,7 +2157,7 @@
         "member_program_name": null
       },
       {
-        "id": "2afe8a1d-7884-4a19-8e1c-3fce8ae59e38",
+        "id": "8e2d25ec-1bf3-43fc-aac5-8a9b4af25142",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -2166,20 +2166,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000001",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 100,
-        "updated_at": "2026-10-20T22:41:02.220401+07:00",
+        "updated_at": "2026-10-20T22:48:31.177652+07:00",
         "visibility": "private",
         "branch_name": "AEON BSD",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 20000,
         "actual_weight": null,
@@ -2199,7 +2199,7 @@
         "member_program_name": null
       },
       {
-        "id": "fcc82455-e0ee-4ae5-a503-b26cece6788c",
+        "id": "3280e235-0da6-4411-a5ae-203a7d32d142",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -2208,20 +2208,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000001",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 105,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "AEON BSD",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 21000,
         "actual_weight": null,
@@ -2241,7 +2241,7 @@
         "member_program_name": null
       },
       {
-        "id": "b8608d3c-3206-4045-b523-6e1daf85d216",
+        "id": "501cf19c-b174-4750-bc43-820162c639ed",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -2250,20 +2250,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000001",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 105,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "AEON BSD",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 21000,
         "actual_weight": null,
@@ -2283,7 +2283,7 @@
         "member_program_name": null
       },
       {
-        "id": "f3d581ca-616e-4698-a074-2b12e83143a0",
+        "id": "1da17068-f9a7-4b95-804b-71bac799bdd9",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -2292,20 +2292,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000003",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 102.5,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "AEON Lama",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 20500,
         "actual_weight": null,
@@ -2327,7 +2327,7 @@
     ],
     "history_milo200_void": [
       {
-        "id": "b2943155-3759-4f3f-816c-9c6b594d41fc",
+        "id": "c13cce83-63c8-4746-8c02-1f0f4c0f00c3",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -2336,20 +2336,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000001",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 97.5,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "AEON BSD",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 19500,
         "actual_weight": null,
@@ -2369,7 +2369,7 @@
         "member_program_name": null
       },
       {
-        "id": "bb2e67cb-9862-4355-9050-b185697eb168",
+        "id": "9e5a9bdc-16c7-4d4c-9346-600dbd28ce49",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -2378,20 +2378,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000001",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 105,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "AEON BSD",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": 17900,
         "normal_price": 21000,
         "actual_weight": null,
@@ -2411,7 +2411,7 @@
         "member_program_name": "AEON Member"
       },
       {
-        "id": "cf431bfc-b25f-4356-bb17-0c4920e6ecf4",
+        "id": "fd585569-35c8-4693-9277-cc191e32df48",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -2420,20 +2420,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000001",
         "is_bundle": true,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 175,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "AEON BSD",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 35000,
         "actual_weight": null,
@@ -2453,7 +2453,7 @@
         "member_program_name": null
       },
       {
-        "id": "4e367504-32e1-4b8c-99ec-cf4b5b68c7c1",
+        "id": "840efb24-1150-43d0-a1e4-449aedf2e816",
         "extra": {},
         "status": "void",
         "currency": "IDR",
@@ -2462,20 +2462,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000001",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 75,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "AEON BSD",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 15000,
         "actual_weight": null,
@@ -2495,7 +2495,7 @@
         "member_program_name": null
       },
       {
-        "id": "91dfe2f1-6067-43ca-963b-16ca1ccf0125",
+        "id": "07c84a2d-1041-4f7f-99e6-1b000b29cc3b",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -2504,20 +2504,20 @@
         "branch_id": null,
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "Alfamart",
         "unit_price": 90,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": null,
         "price_basis": "promo",
         "promo_price": 18000,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 19500,
         "actual_weight": null,
@@ -2537,7 +2537,7 @@
         "member_program_name": null
       },
       {
-        "id": "4e8566c7-d034-4961-bdcf-b1966c524a1c",
+        "id": "9f9f6bd8-5ad6-4145-ba21-ee80915ed123",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -2546,20 +2546,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000002",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "Alfamart",
         "unit_price": 92.5,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "Alfamart Serpong",
         "price_basis": "promo",
         "promo_price": 18500,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 19900,
         "actual_weight": null,
@@ -2579,7 +2579,7 @@
         "member_program_name": null
       },
       {
-        "id": "b8b41345-c856-49fb-9f5b-049f26af3912",
+        "id": "cc07ab4a-1e58-4c2a-9860-ce559d6ae8c5",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -2588,20 +2588,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000001",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 100,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "AEON BSD",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 20000,
         "actual_weight": null,
@@ -2621,7 +2621,7 @@
         "member_program_name": null
       },
       {
-        "id": "2afe8a1d-7884-4a19-8e1c-3fce8ae59e38",
+        "id": "8e2d25ec-1bf3-43fc-aac5-8a9b4af25142",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -2630,20 +2630,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000001",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 100,
-        "updated_at": "2026-10-20T22:41:02.220401+07:00",
+        "updated_at": "2026-10-20T22:48:31.177652+07:00",
         "visibility": "private",
         "branch_name": "AEON BSD",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 20000,
         "actual_weight": null,
@@ -2663,7 +2663,7 @@
         "member_program_name": null
       },
       {
-        "id": "fcc82455-e0ee-4ae5-a503-b26cece6788c",
+        "id": "3280e235-0da6-4411-a5ae-203a7d32d142",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -2672,20 +2672,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000001",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 105,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "AEON BSD",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 21000,
         "actual_weight": null,
@@ -2705,7 +2705,7 @@
         "member_program_name": null
       },
       {
-        "id": "b8608d3c-3206-4045-b523-6e1daf85d216",
+        "id": "501cf19c-b174-4750-bc43-820162c639ed",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -2714,20 +2714,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000001",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 105,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "AEON BSD",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 21000,
         "actual_weight": null,
@@ -2747,7 +2747,7 @@
         "member_program_name": null
       },
       {
-        "id": "f3d581ca-616e-4698-a074-2b12e83143a0",
+        "id": "1da17068-f9a7-4b95-804b-71bac799bdd9",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -2756,20 +2756,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000003",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 102.5,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "AEON Lama",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 20500,
         "actual_weight": null,
@@ -2791,7 +2791,7 @@
     ],
     "history_milo200_aeon": [
       {
-        "id": "b2943155-3759-4f3f-816c-9c6b594d41fc",
+        "id": "c13cce83-63c8-4746-8c02-1f0f4c0f00c3",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -2800,20 +2800,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000001",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 97.5,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "AEON BSD",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 19500,
         "actual_weight": null,
@@ -2833,7 +2833,7 @@
         "member_program_name": null
       },
       {
-        "id": "bb2e67cb-9862-4355-9050-b185697eb168",
+        "id": "9e5a9bdc-16c7-4d4c-9346-600dbd28ce49",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -2842,20 +2842,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000001",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 105,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "AEON BSD",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": 17900,
         "normal_price": 21000,
         "actual_weight": null,
@@ -2875,7 +2875,7 @@
         "member_program_name": "AEON Member"
       },
       {
-        "id": "cf431bfc-b25f-4356-bb17-0c4920e6ecf4",
+        "id": "fd585569-35c8-4693-9277-cc191e32df48",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -2884,20 +2884,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000001",
         "is_bundle": true,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 175,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "AEON BSD",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 35000,
         "actual_weight": null,
@@ -2917,7 +2917,7 @@
         "member_program_name": null
       },
       {
-        "id": "b8b41345-c856-49fb-9f5b-049f26af3912",
+        "id": "cc07ab4a-1e58-4c2a-9860-ce559d6ae8c5",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -2926,20 +2926,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000001",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 100,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "AEON BSD",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 20000,
         "actual_weight": null,
@@ -2959,7 +2959,7 @@
         "member_program_name": null
       },
       {
-        "id": "2afe8a1d-7884-4a19-8e1c-3fce8ae59e38",
+        "id": "8e2d25ec-1bf3-43fc-aac5-8a9b4af25142",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -2968,20 +2968,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000001",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 100,
-        "updated_at": "2026-10-20T22:41:02.220401+07:00",
+        "updated_at": "2026-10-20T22:48:31.177652+07:00",
         "visibility": "private",
         "branch_name": "AEON BSD",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 20000,
         "actual_weight": null,
@@ -3001,7 +3001,7 @@
         "member_program_name": null
       },
       {
-        "id": "fcc82455-e0ee-4ae5-a503-b26cece6788c",
+        "id": "3280e235-0da6-4411-a5ae-203a7d32d142",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -3010,20 +3010,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000001",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 105,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "AEON BSD",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 21000,
         "actual_weight": null,
@@ -3043,7 +3043,7 @@
         "member_program_name": null
       },
       {
-        "id": "b8608d3c-3206-4045-b523-6e1daf85d216",
+        "id": "501cf19c-b174-4750-bc43-820162c639ed",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -3052,20 +3052,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000001",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 105,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "AEON BSD",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 21000,
         "actual_weight": null,
@@ -3085,7 +3085,7 @@
         "member_program_name": null
       },
       {
-        "id": "f3d581ca-616e-4698-a074-2b12e83143a0",
+        "id": "1da17068-f9a7-4b95-804b-71bac799bdd9",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -3094,20 +3094,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000003",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000200",
         "receipt_id": null,
         "store_name": "AEON",
         "unit_price": 102.5,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "AEON Lama",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 20500,
         "actual_weight": null,
@@ -3129,7 +3129,7 @@
     ],
     "history_jeruk": [
       {
-        "id": "39daf561-8053-4602-9dc8-6c90443154dc",
+        "id": "c8025efd-bd75-46dc-a140-640a8c9863aa",
         "extra": {},
         "status": "active",
         "currency": "IDR",
@@ -3138,20 +3138,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000002",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-0000000000f1",
         "receipt_id": null,
         "store_name": "Alfamart",
         "unit_price": 45,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "Alfamart Serpong",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "price_label",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 45000,
         "actual_weight": 0.535,
@@ -3173,7 +3173,7 @@
     ],
     "history_miloUht": [
       {
-        "id": "9185ce17-c301-4488-aafa-6bf675dc173e",
+        "id": "afb7c341-5146-4755-b367-17765564bb8b",
         "extra": {
           "shipping_fee": 10000
         },
@@ -3184,20 +3184,20 @@
         "branch_id": "30000000-0000-0000-0000-000000000005",
         "is_bundle": false,
         "capture_id": null,
-        "created_at": "2026-10-20T22:41:02.203458+07:00",
+        "created_at": "2026-10-20T22:48:31.152664+07:00",
         "created_by": null,
         "match_tier": null,
         "product_id": "70000000-0000-0000-0000-000000000180",
         "receipt_id": null,
         "store_name": "Shopee",
         "unit_price": 33.333333,
-        "updated_at": "2026-10-20T22:41:02.203458+07:00",
+        "updated_at": "2026-10-20T22:48:31.152664+07:00",
         "visibility": "private",
         "branch_name": "Nestle Official Store",
         "price_basis": "normal",
         "promo_price": null,
         "source_type": "marketplace",
-        "household_id": "dcaba492-29d9-46b0-9ac7-0a639149e277",
+        "household_id": "6e1848a0-df30-4c07-9df5-559ff31f19e4",
         "member_price": null,
         "normal_price": 6000,
         "actual_weight": null,
@@ -4273,7 +4273,7 @@
     "barcode_unknown": null,
     "captures_all": [
       {
-        "id": "ede1eed4-c8d5-4ba7-bc22-c9195c5188d8",
+        "id": "bfd911de-9278-4fe5-9290-32b294205fd3",
         "date": "2026-10-20",
         "kind": "marketplace",
         "status": "uploaded",
@@ -4283,13 +4283,13 @@
         "store_name": null,
         "branch_name": null,
         "saved_count": 0,
-        "uploaded_at": "2026-10-20T22:41:02.450075+07:00",
+        "uploaded_at": "2026-10-20T22:48:31.371356+07:00",
         "error_message": null,
         "date_is_upload": true,
         "needs_check_count": 0
       },
       {
-        "id": "7b2c9fdd-3086-4a60-b3e5-66a715d8547d",
+        "id": "0d8089eb-001e-4fe8-9962-f5495d6ca344",
         "date": "2026-10-20",
         "kind": "price_label",
         "status": "processing",
@@ -4299,29 +4299,29 @@
         "store_name": null,
         "branch_name": null,
         "saved_count": 0,
-        "uploaded_at": "2026-10-20T22:41:02.435151+07:00",
+        "uploaded_at": "2026-10-20T22:48:31.35836+07:00",
         "error_message": null,
         "date_is_upload": true,
         "needs_check_count": 0
       },
       {
-        "id": "29c39fe2-a33e-4677-a7b7-7facf9bbb1ae",
+        "id": "0c13f2fc-b254-4257-8f44-df920fc7a09e",
         "date": "2026-10-14",
         "kind": "receipt",
         "status": "done",
         "attempts": 3,
         "error_code": null,
-        "receipt_id": "842fedcb-5974-4449-817b-81cea2a5ef85",
+        "receipt_id": "38ff51d9-4e24-4726-8e3d-e188d32a1b9c",
         "store_name": "Alfamart",
         "branch_name": "Alfamart Serpong",
         "saved_count": 1,
-        "uploaded_at": "2026-10-20T22:41:02.377681+07:00",
+        "uploaded_at": "2026-10-20T22:48:31.314081+07:00",
         "error_message": null,
         "date_is_upload": false,
         "needs_check_count": 0
       },
       {
-        "id": "d63ee29d-317f-4999-b8ac-9b3bffcb5799",
+        "id": "9253c7c3-a603-4725-a250-9f360d9a96f7",
         "date": "2026-10-20",
         "kind": "receipt",
         "status": "failed",
@@ -4331,23 +4331,23 @@
         "store_name": null,
         "branch_name": null,
         "saved_count": 0,
-        "uploaded_at": "2026-10-20T22:41:02.359369+07:00",
+        "uploaded_at": "2026-10-20T22:48:31.29658+07:00",
         "error_message": "Gambar buram atau tidak terbaca. Coba foto ulang.",
         "date_is_upload": true,
         "needs_check_count": 0
       },
       {
-        "id": "cc131913-fbce-4ad0-b814-72d84ca6a599",
+        "id": "94d7e028-089a-4009-97c3-fbb1ba93d8f9",
         "date": "2026-10-15",
         "kind": "receipt",
         "status": "needs_confirmation",
         "attempts": 1,
         "error_code": null,
-        "receipt_id": "bea446fb-d088-48e6-b2ca-a5f861725ee2",
+        "receipt_id": "abf1a742-cdbd-470f-acf0-5a5dc60e315f",
         "store_name": "AEON",
         "branch_name": "AEON BSD",
         "saved_count": 1,
-        "uploaded_at": "2026-10-20T22:41:02.274803+07:00",
+        "uploaded_at": "2026-10-20T22:48:31.221721+07:00",
         "error_message": null,
         "date_is_upload": false,
         "needs_check_count": 2
@@ -4355,23 +4355,23 @@
     ],
     "captures_receipt": [
       {
-        "id": "29c39fe2-a33e-4677-a7b7-7facf9bbb1ae",
+        "id": "0c13f2fc-b254-4257-8f44-df920fc7a09e",
         "date": "2026-10-14",
         "kind": "receipt",
         "status": "done",
         "attempts": 3,
         "error_code": null,
-        "receipt_id": "842fedcb-5974-4449-817b-81cea2a5ef85",
+        "receipt_id": "38ff51d9-4e24-4726-8e3d-e188d32a1b9c",
         "store_name": "Alfamart",
         "branch_name": "Alfamart Serpong",
         "saved_count": 1,
-        "uploaded_at": "2026-10-20T22:41:02.377681+07:00",
+        "uploaded_at": "2026-10-20T22:48:31.314081+07:00",
         "error_message": null,
         "date_is_upload": false,
         "needs_check_count": 0
       },
       {
-        "id": "d63ee29d-317f-4999-b8ac-9b3bffcb5799",
+        "id": "9253c7c3-a603-4725-a250-9f360d9a96f7",
         "date": "2026-10-20",
         "kind": "receipt",
         "status": "failed",
@@ -4381,23 +4381,23 @@
         "store_name": null,
         "branch_name": null,
         "saved_count": 0,
-        "uploaded_at": "2026-10-20T22:41:02.359369+07:00",
+        "uploaded_at": "2026-10-20T22:48:31.29658+07:00",
         "error_message": "Gambar buram atau tidak terbaca. Coba foto ulang.",
         "date_is_upload": true,
         "needs_check_count": 0
       },
       {
-        "id": "cc131913-fbce-4ad0-b814-72d84ca6a599",
+        "id": "94d7e028-089a-4009-97c3-fbb1ba93d8f9",
         "date": "2026-10-15",
         "kind": "receipt",
         "status": "needs_confirmation",
         "attempts": 1,
         "error_code": null,
-        "receipt_id": "bea446fb-d088-48e6-b2ca-a5f861725ee2",
+        "receipt_id": "abf1a742-cdbd-470f-acf0-5a5dc60e315f",
         "store_name": "AEON",
         "branch_name": "AEON BSD",
         "saved_count": 1,
-        "uploaded_at": "2026-10-20T22:41:02.274803+07:00",
+        "uploaded_at": "2026-10-20T22:48:31.221721+07:00",
         "error_message": null,
         "date_is_upload": false,
         "needs_check_count": 2
@@ -4407,10 +4407,10 @@
     "capture_needs": {
       "runs": [
         {
-          "id": "4bf92039-9710-44bf-840c-2654fda73dca",
+          "id": "6e21170f-5bfd-4726-aa22-157724243595",
           "status": "succeeded",
-          "started_at": "2026-10-20T22:41:02.288606+07:00",
-          "finished_at": "2026-10-20T22:41:02.32233+07:00",
+          "started_at": "2026-10-20T22:48:31.237118+07:00",
+          "finished_at": "2026-10-20T22:48:31.271288+07:00",
           "error_message": null
         }
       ],
@@ -4419,28 +4419,28 @@
           "sha256": "86a0948e6497d364a4938f97ad1594c198a4574776580cdef7410734aaf7c760",
           "position": 1,
           "purged_at": null,
-          "storage_path": "ac23ca64-2444-4db7-b535-08ff2ad14e60/cc131913-fbce-4ad0-b814-72d84ca6a599/1.jpg"
+          "storage_path": "574375bb-85c8-4470-b4a1-ccb43a9b6919/94d7e028-089a-4009-97c3-fbb1ba93d8f9/1.jpg"
         }
       ],
       "capture": {
-        "id": "cc131913-fbce-4ad0-b814-72d84ca6a599",
+        "id": "94d7e028-089a-4009-97c3-fbb1ba93d8f9",
         "kind": "receipt",
         "status": "needs_confirmation",
         "store_id": null,
         "branch_id": null,
         "error_code": null,
         "captured_at": null,
-        "uploaded_at": "2026-10-20T22:41:02.274803+07:00",
+        "uploaded_at": "2026-10-20T22:48:31.221721+07:00",
         "uploaded_by": "00000000-0000-0000-0000-00000000000c",
-        "household_id": "ac23ca64-2444-4db7-b535-08ff2ad14e60",
-        "processed_at": "2026-10-20T22:41:02.32233+07:00",
+        "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
+        "processed_at": "2026-10-20T22:48:31.271288+07:00",
         "error_message": null,
         "shopping_session_id": null
       },
-      "receipt_id": "bea446fb-d088-48e6-b2ca-a5f861725ee2",
+      "receipt_id": "abf1a742-cdbd-470f-acf0-5a5dc60e315f",
       "saved_records": [
         {
-          "id": "ce93fbe8-48e7-40a9-90ad-b5703ec92cb8",
+          "id": "388093aa-3f53-46f5-b4fc-0f1844b18e7b",
           "extra": {
             "member_hint": {
               "text": "DISC MEMBER",
@@ -4453,21 +4453,21 @@
           "store_id": "20000000-0000-0000-0000-000000000001",
           "branch_id": "30000000-0000-0000-0000-000000000001",
           "is_bundle": false,
-          "capture_id": "cc131913-fbce-4ad0-b814-72d84ca6a599",
-          "created_at": "2026-10-20T22:41:02.32233+07:00",
+          "capture_id": "94d7e028-089a-4009-97c3-fbb1ba93d8f9",
+          "created_at": "2026-10-20T22:48:31.271288+07:00",
           "created_by": null,
           "match_tier": "barcode",
           "product_id": "70000000-0000-0000-0000-000000000500",
-          "receipt_id": "bea446fb-d088-48e6-b2ca-a5f861725ee2",
+          "receipt_id": "abf1a742-cdbd-470f-acf0-5a5dc60e315f",
           "store_name": "AEON",
           "unit_price": 85,
-          "updated_at": "2026-10-20T22:41:02.32233+07:00",
+          "updated_at": "2026-10-20T22:48:31.271288+07:00",
           "visibility": "private",
           "branch_name": "AEON BSD",
           "price_basis": "promo",
           "promo_price": 42500,
           "source_type": "receipt",
-          "household_id": "ac23ca64-2444-4db7-b535-08ff2ad14e60",
+          "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
           "member_price": null,
           "normal_price": 45000,
           "actual_weight": null,
@@ -4476,7 +4476,7 @@
           "promo_min_qty": null,
           "store_channel": "offline",
           "effective_price": 42500,
-          "receipt_line_id": "5d4f66b1-fb18-45ef-8590-67a28d8151a5",
+          "receipt_line_id": "15c225f6-b176-4d3c-aed5-b6f2c4ccf3c3",
           "match_confidence": 1,
           "promo_valid_from": null,
           "transaction_date": "2026-10-15",
@@ -4491,10 +4491,10 @@
     "capture_failed": {
       "runs": [
         {
-          "id": "27d47b95-fbad-4393-8711-ef8c3d03ed5b",
+          "id": "c25d5d95-efce-4e9c-b54d-20750d59c87d",
           "status": "failed",
-          "started_at": "2026-10-20T22:41:02.364075+07:00",
-          "finished_at": "2026-10-20T22:41:02.36849+07:00",
+          "started_at": "2026-10-20T22:48:31.301258+07:00",
+          "finished_at": "2026-10-20T22:48:31.305476+07:00",
           "error_message": "Gambar buram atau tidak terbaca. Coba foto ulang."
         }
       ],
@@ -4503,21 +4503,21 @@
           "sha256": "e71fd121a40a66be1a5b9b7e3099d11544e0281520d5f89ada1605c81af15dfe",
           "position": 1,
           "purged_at": null,
-          "storage_path": "ac23ca64-2444-4db7-b535-08ff2ad14e60/d63ee29d-317f-4999-b8ac-9b3bffcb5799/1.jpg"
+          "storage_path": "574375bb-85c8-4470-b4a1-ccb43a9b6919/9253c7c3-a603-4725-a250-9f360d9a96f7/1.jpg"
         }
       ],
       "capture": {
-        "id": "d63ee29d-317f-4999-b8ac-9b3bffcb5799",
+        "id": "9253c7c3-a603-4725-a250-9f360d9a96f7",
         "kind": "receipt",
         "status": "failed",
         "store_id": null,
         "branch_id": null,
         "error_code": "blurry",
         "captured_at": null,
-        "uploaded_at": "2026-10-20T22:41:02.359369+07:00",
+        "uploaded_at": "2026-10-20T22:48:31.29658+07:00",
         "uploaded_by": "00000000-0000-0000-0000-00000000000c",
-        "household_id": "ac23ca64-2444-4db7-b535-08ff2ad14e60",
-        "processed_at": "2026-10-20T22:41:02.36849+07:00",
+        "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
+        "processed_at": "2026-10-20T22:48:31.305476+07:00",
         "error_message": "Gambar buram atau tidak terbaca. Coba foto ulang.",
         "shopping_session_id": null
       },
@@ -4527,24 +4527,24 @@
     "capture_done": {
       "runs": [
         {
-          "id": "2ec5f766-2463-42c4-84b2-9d1e8e2c907d",
+          "id": "c0d1696f-7ddd-40d1-8eec-9dd0c03940c3",
           "status": "failed",
-          "started_at": "2026-10-20T19:41:02.384479+07:00",
-          "finished_at": "2026-10-20T19:41:02.388318+07:00",
+          "started_at": "2026-10-20T19:48:31.317996+07:00",
+          "finished_at": "2026-10-20T19:48:31.321654+07:00",
           "error_message": "Gagal memproses sementara. Akan dicoba lagi."
         },
         {
-          "id": "8cfbd198-9ac5-4033-95bc-4813ce50e1f0",
+          "id": "63685ab8-8d28-478a-a408-b5473a736828",
           "status": "failed",
-          "started_at": "2026-10-20T20:41:02.394872+07:00",
-          "finished_at": "2026-10-20T20:41:02.403623+07:00",
+          "started_at": "2026-10-20T20:48:31.325536+07:00",
+          "finished_at": "2026-10-20T20:48:31.329205+07:00",
           "error_message": "Gagal memproses sementara. Akan dicoba lagi."
         },
         {
-          "id": "ffbfdef8-0dee-415f-b21d-c98334a9cedb",
+          "id": "ea93917b-fd4c-4258-b51b-fbf275383b3b",
           "status": "succeeded",
-          "started_at": "2026-10-20T21:41:02.408139+07:00",
-          "finished_at": "2026-10-20T21:41:02.420243+07:00",
+          "started_at": "2026-10-20T21:48:31.332642+07:00",
+          "finished_at": "2026-10-20T21:48:31.342116+07:00",
           "error_message": null
         }
       ],
@@ -4553,28 +4553,28 @@
           "sha256": "0fd382726489de6b325e67e315c01540a15a04a724c27a7d82bbe61347a98c4d",
           "position": 1,
           "purged_at": null,
-          "storage_path": "ac23ca64-2444-4db7-b535-08ff2ad14e60/29c39fe2-a33e-4677-a7b7-7facf9bbb1ae/1.jpg"
+          "storage_path": "574375bb-85c8-4470-b4a1-ccb43a9b6919/0c13f2fc-b254-4257-8f44-df920fc7a09e/1.jpg"
         }
       ],
       "capture": {
-        "id": "29c39fe2-a33e-4677-a7b7-7facf9bbb1ae",
+        "id": "0c13f2fc-b254-4257-8f44-df920fc7a09e",
         "kind": "receipt",
         "status": "done",
         "store_id": null,
         "branch_id": null,
         "error_code": null,
         "captured_at": null,
-        "uploaded_at": "2026-10-20T22:41:02.377681+07:00",
+        "uploaded_at": "2026-10-20T22:48:31.314081+07:00",
         "uploaded_by": "00000000-0000-0000-0000-00000000000c",
-        "household_id": "ac23ca64-2444-4db7-b535-08ff2ad14e60",
-        "processed_at": "2026-10-20T22:41:02.420243+07:00",
+        "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
+        "processed_at": "2026-10-20T22:48:31.342116+07:00",
         "error_message": null,
         "shopping_session_id": null
       },
-      "receipt_id": "842fedcb-5974-4449-817b-81cea2a5ef85",
+      "receipt_id": "38ff51d9-4e24-4726-8e3d-e188d32a1b9c",
       "saved_records": [
         {
-          "id": "b166b2c4-9c23-4569-8672-2d22ff3d5c11",
+          "id": "e7c1537d-41a3-4d86-8a71-cafa040c0a86",
           "extra": {},
           "status": "active",
           "currency": "IDR",
@@ -4582,21 +4582,21 @@
           "store_id": "20000000-0000-0000-0000-000000000002",
           "branch_id": "30000000-0000-0000-0000-000000000002",
           "is_bundle": false,
-          "capture_id": "29c39fe2-a33e-4677-a7b7-7facf9bbb1ae",
-          "created_at": "2026-10-20T22:41:02.420243+07:00",
+          "capture_id": "0c13f2fc-b254-4257-8f44-df920fc7a09e",
+          "created_at": "2026-10-20T22:48:31.342116+07:00",
           "created_by": null,
           "match_tier": "alias",
           "product_id": "70000000-0000-0000-0000-000000000085",
-          "receipt_id": "842fedcb-5974-4449-817b-81cea2a5ef85",
+          "receipt_id": "38ff51d9-4e24-4726-8e3d-e188d32a1b9c",
           "store_name": "Alfamart",
           "unit_price": 40,
-          "updated_at": "2026-10-20T22:41:02.420243+07:00",
+          "updated_at": "2026-10-20T22:48:31.342116+07:00",
           "visibility": "private",
           "branch_name": "Alfamart Serpong",
           "price_basis": "normal",
           "promo_price": null,
           "source_type": "receipt",
-          "household_id": "ac23ca64-2444-4db7-b535-08ff2ad14e60",
+          "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
           "member_price": null,
           "normal_price": 3400,
           "actual_weight": null,
@@ -4605,7 +4605,7 @@
           "promo_min_qty": null,
           "store_channel": "offline",
           "effective_price": 3400,
-          "receipt_line_id": "40511064-7c8d-4ab9-9ebe-31febc0ea6c9",
+          "receipt_line_id": "16e506ad-a6a7-4823-8e2f-5d2e5b48918f",
           "match_confidence": 0.95,
           "promo_valid_from": null,
           "transaction_date": "2026-10-14",
@@ -4620,9 +4620,9 @@
     "capture_processing": {
       "runs": [
         {
-          "id": "c6461a43-cbb7-4c5d-9c84-d0615ab2a35b",
+          "id": "8e7e22c8-9c6b-45f9-a845-b069bfe73e8a",
           "status": "running",
-          "started_at": "2026-10-20T22:41:02.440559+07:00",
+          "started_at": "2026-10-20T22:48:31.362788+07:00",
           "finished_at": null,
           "error_message": null
         }
@@ -4632,20 +4632,20 @@
           "sha256": "0901a686044416b7622e8f9a498b82ed8fc2d364dc2dbd7d507c8ffe27ef8d11",
           "position": 1,
           "purged_at": null,
-          "storage_path": "ac23ca64-2444-4db7-b535-08ff2ad14e60/7b2c9fdd-3086-4a60-b3e5-66a715d8547d/1.jpg"
+          "storage_path": "574375bb-85c8-4470-b4a1-ccb43a9b6919/0d8089eb-001e-4fe8-9962-f5495d6ca344/1.jpg"
         }
       ],
       "capture": {
-        "id": "7b2c9fdd-3086-4a60-b3e5-66a715d8547d",
+        "id": "0d8089eb-001e-4fe8-9962-f5495d6ca344",
         "kind": "price_label",
         "status": "processing",
         "store_id": null,
         "branch_id": null,
         "error_code": null,
         "captured_at": null,
-        "uploaded_at": "2026-10-20T22:41:02.435151+07:00",
+        "uploaded_at": "2026-10-20T22:48:31.35836+07:00",
         "uploaded_by": "00000000-0000-0000-0000-00000000000c",
-        "household_id": "ac23ca64-2444-4db7-b535-08ff2ad14e60",
+        "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
         "processed_at": null,
         "error_message": null,
         "shopping_session_id": null
@@ -4660,20 +4660,20 @@
           "sha256": "8a37c63b51f47f4aca648c472c99f14b56419c1a61e69fa5f64c80216c53d05f",
           "position": 1,
           "purged_at": null,
-          "storage_path": "ac23ca64-2444-4db7-b535-08ff2ad14e60/ede1eed4-c8d5-4ba7-bc22-c9195c5188d8/1.jpg"
+          "storage_path": "574375bb-85c8-4470-b4a1-ccb43a9b6919/bfd911de-9278-4fe5-9290-32b294205fd3/1.jpg"
         }
       ],
       "capture": {
-        "id": "ede1eed4-c8d5-4ba7-bc22-c9195c5188d8",
+        "id": "bfd911de-9278-4fe5-9290-32b294205fd3",
         "kind": "marketplace",
         "status": "uploaded",
         "store_id": null,
         "branch_id": null,
         "error_code": null,
         "captured_at": null,
-        "uploaded_at": "2026-10-20T22:41:02.450075+07:00",
+        "uploaded_at": "2026-10-20T22:48:31.371356+07:00",
         "uploaded_by": "00000000-0000-0000-0000-00000000000c",
-        "household_id": "ac23ca64-2444-4db7-b535-08ff2ad14e60",
+        "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
         "processed_at": null,
         "error_message": null,
         "shopping_session_id": null
@@ -4684,24 +4684,24 @@
     "capture_purged": {
       "runs": [
         {
-          "id": "2ec5f766-2463-42c4-84b2-9d1e8e2c907d",
+          "id": "c0d1696f-7ddd-40d1-8eec-9dd0c03940c3",
           "status": "failed",
-          "started_at": "2026-10-20T19:41:02.384479+07:00",
-          "finished_at": "2026-10-20T19:41:02.388318+07:00",
+          "started_at": "2026-10-20T19:48:31.317996+07:00",
+          "finished_at": "2026-10-20T19:48:31.321654+07:00",
           "error_message": "Gagal memproses sementara. Akan dicoba lagi."
         },
         {
-          "id": "8cfbd198-9ac5-4033-95bc-4813ce50e1f0",
+          "id": "63685ab8-8d28-478a-a408-b5473a736828",
           "status": "failed",
-          "started_at": "2026-10-20T20:41:02.394872+07:00",
-          "finished_at": "2026-10-20T20:41:02.403623+07:00",
+          "started_at": "2026-10-20T20:48:31.325536+07:00",
+          "finished_at": "2026-10-20T20:48:31.329205+07:00",
           "error_message": "Gagal memproses sementara. Akan dicoba lagi."
         },
         {
-          "id": "ffbfdef8-0dee-415f-b21d-c98334a9cedb",
+          "id": "ea93917b-fd4c-4258-b51b-fbf275383b3b",
           "status": "succeeded",
-          "started_at": "2026-10-20T21:41:02.408139+07:00",
-          "finished_at": "2026-10-20T21:41:02.420243+07:00",
+          "started_at": "2026-10-20T21:48:31.332642+07:00",
+          "finished_at": "2026-10-20T21:48:31.342116+07:00",
           "error_message": null
         }
       ],
@@ -4709,29 +4709,29 @@
         {
           "sha256": "0fd382726489de6b325e67e315c01540a15a04a724c27a7d82bbe61347a98c4d",
           "position": 1,
-          "purged_at": "2026-10-20T22:41:02.811524+07:00",
-          "storage_path": "ac23ca64-2444-4db7-b535-08ff2ad14e60/29c39fe2-a33e-4677-a7b7-7facf9bbb1ae/1.jpg"
+          "purged_at": "2026-10-20T22:48:31.730737+07:00",
+          "storage_path": "574375bb-85c8-4470-b4a1-ccb43a9b6919/0c13f2fc-b254-4257-8f44-df920fc7a09e/1.jpg"
         }
       ],
       "capture": {
-        "id": "29c39fe2-a33e-4677-a7b7-7facf9bbb1ae",
+        "id": "0c13f2fc-b254-4257-8f44-df920fc7a09e",
         "kind": "receipt",
         "status": "done",
         "store_id": null,
         "branch_id": null,
         "error_code": null,
         "captured_at": null,
-        "uploaded_at": "2026-10-20T22:41:02.377681+07:00",
+        "uploaded_at": "2026-10-20T22:48:31.314081+07:00",
         "uploaded_by": "00000000-0000-0000-0000-00000000000c",
-        "household_id": "ac23ca64-2444-4db7-b535-08ff2ad14e60",
-        "processed_at": "2026-10-20T22:41:02.420243+07:00",
+        "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
+        "processed_at": "2026-10-20T22:48:31.342116+07:00",
         "error_message": null,
         "shopping_session_id": null
       },
-      "receipt_id": "842fedcb-5974-4449-817b-81cea2a5ef85",
+      "receipt_id": "38ff51d9-4e24-4726-8e3d-e188d32a1b9c",
       "saved_records": [
         {
-          "id": "b166b2c4-9c23-4569-8672-2d22ff3d5c11",
+          "id": "e7c1537d-41a3-4d86-8a71-cafa040c0a86",
           "extra": {},
           "status": "active",
           "currency": "IDR",
@@ -4739,21 +4739,21 @@
           "store_id": "20000000-0000-0000-0000-000000000002",
           "branch_id": "30000000-0000-0000-0000-000000000002",
           "is_bundle": false,
-          "capture_id": "29c39fe2-a33e-4677-a7b7-7facf9bbb1ae",
-          "created_at": "2026-10-20T22:41:02.420243+07:00",
+          "capture_id": "0c13f2fc-b254-4257-8f44-df920fc7a09e",
+          "created_at": "2026-10-20T22:48:31.342116+07:00",
           "created_by": null,
           "match_tier": "alias",
           "product_id": "70000000-0000-0000-0000-000000000085",
-          "receipt_id": "842fedcb-5974-4449-817b-81cea2a5ef85",
+          "receipt_id": "38ff51d9-4e24-4726-8e3d-e188d32a1b9c",
           "store_name": "Alfamart",
           "unit_price": 40,
-          "updated_at": "2026-10-20T22:41:02.420243+07:00",
+          "updated_at": "2026-10-20T22:48:31.342116+07:00",
           "visibility": "private",
           "branch_name": "Alfamart Serpong",
           "price_basis": "normal",
           "promo_price": null,
           "source_type": "receipt",
-          "household_id": "ac23ca64-2444-4db7-b535-08ff2ad14e60",
+          "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
           "member_price": null,
           "normal_price": 3400,
           "actual_weight": null,
@@ -4762,7 +4762,7 @@
           "promo_min_qty": null,
           "store_channel": "offline",
           "effective_price": 3400,
-          "receipt_line_id": "40511064-7c8d-4ab9-9ebe-31febc0ea6c9",
+          "receipt_line_id": "16e506ad-a6a7-4823-8e2f-5d2e5b48918f",
           "match_confidence": 0.95,
           "promo_valid_from": null,
           "transaction_date": "2026-10-14",
@@ -4786,7 +4786,7 @@
       "error": {
         "message": "INVALID_TRANSITION",
         "code": "PT409",
-        "details": "{\"to\": \"uploaded\", \"from\": \"needs_confirmation\", \"capture_id\": \"cc131913-fbce-4ad0-b814-72d84ca6a599\"}",
+        "details": "{\"to\": \"uploaded\", \"from\": \"needs_confirmation\", \"capture_id\": \"94d7e028-089a-4009-97c3-fbb1ba93d8f9\"}",
         "hint": "Perubahan status ini tidak diizinkan."
       }
     },
@@ -4794,16 +4794,16 @@
       "error": {
         "message": "INVALID_STATE",
         "code": "PT409",
-        "details": "{\"status\": \"needs_confirmation\", \"capture_id\": \"cc131913-fbce-4ad0-b814-72d84ca6a599\"}",
+        "details": "{\"status\": \"needs_confirmation\", \"capture_id\": \"94d7e028-089a-4009-97c3-fbb1ba93d8f9\"}",
         "hint": "Status data tidak mengizinkan aksi ini."
       }
     },
     "receipt_aeon": {
       "lines": [
         {
-          "id": "5d4f66b1-fb18-45ef-8590-67a28d8151a5",
+          "id": "15c225f6-b176-4d3c-aed5-b6f2c4ccf3c3",
           "record": {
-            "id": "ce93fbe8-48e7-40a9-90ad-b5703ec92cb8",
+            "id": "388093aa-3f53-46f5-b4fc-0f1844b18e7b",
             "extra": {
               "member_hint": {
                 "text": "DISC MEMBER",
@@ -4816,21 +4816,21 @@
             "store_id": "20000000-0000-0000-0000-000000000001",
             "branch_id": "30000000-0000-0000-0000-000000000001",
             "is_bundle": false,
-            "capture_id": "cc131913-fbce-4ad0-b814-72d84ca6a599",
-            "created_at": "2026-10-20T22:41:02.32233+07:00",
+            "capture_id": "94d7e028-089a-4009-97c3-fbb1ba93d8f9",
+            "created_at": "2026-10-20T22:48:31.271288+07:00",
             "created_by": null,
             "match_tier": "barcode",
             "product_id": "70000000-0000-0000-0000-000000000500",
-            "receipt_id": "bea446fb-d088-48e6-b2ca-a5f861725ee2",
+            "receipt_id": "abf1a742-cdbd-470f-acf0-5a5dc60e315f",
             "store_name": "AEON",
             "unit_price": 85,
-            "updated_at": "2026-10-20T22:41:02.32233+07:00",
+            "updated_at": "2026-10-20T22:48:31.271288+07:00",
             "visibility": "private",
             "branch_name": "AEON BSD",
             "price_basis": "promo",
             "promo_price": 42500,
             "source_type": "receipt",
-            "household_id": "ac23ca64-2444-4db7-b535-08ff2ad14e60",
+            "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
             "member_price": null,
             "normal_price": 45000,
             "actual_weight": null,
@@ -4839,7 +4839,7 @@
             "promo_min_qty": null,
             "store_channel": "offline",
             "effective_price": 42500,
-            "receipt_line_id": "5d4f66b1-fb18-45ef-8590-67a28d8151a5",
+            "receipt_line_id": "15c225f6-b176-4d3c-aed5-b6f2c4ccf3c3",
             "match_confidence": 1,
             "promo_valid_from": null,
             "transaction_date": "2026-10-15",
@@ -4852,12 +4852,12 @@
           "line_no": 1,
           "attached": [
             {
-              "id": "7e6eae83-ade4-4e1c-af50-8b81050a68d8",
+              "id": "48151d2b-5bce-44c1-a17f-76cfd744af50",
               "line_no": 2,
               "quantity": null,
               "raw_text": "DISC MEMBER",
               "line_type": "discount",
-              "updated_at": "2026-10-20T22:41:02.32233+07:00",
+              "updated_at": "2026-10-20T22:48:31.271288+07:00",
               "line_amount": -5000
             }
           ],
@@ -4882,14 +4882,14 @@
             "merged_into_id": null,
             "product_group_id": "60000000-0000-0000-0000-000000000001"
           },
-          "updated_at": "2026-10-20T22:41:02.32233+07:00",
+          "updated_at": "2026-10-20T22:48:31.271288+07:00",
           "line_amount": 90000,
           "needs_check": false,
           "unit_amount": 45000,
           "match_confidence": 1
         },
         {
-          "id": "6d855de1-e4b4-46fc-bf33-ab4946c7fe4b",
+          "id": "613050a0-49e9-4234-bf02-03e127ae6e71",
           "record": null,
           "line_no": 3,
           "attached": [],
@@ -4914,14 +4914,14 @@
             "merged_into_id": null,
             "product_group_id": "60000000-0000-0000-0000-000000000002"
           },
-          "updated_at": "2026-10-20T22:41:02.32233+07:00",
+          "updated_at": "2026-10-20T22:48:31.271288+07:00",
           "line_amount": 17500,
           "needs_check": true,
           "unit_amount": 3500,
           "match_confidence": 0.563
         },
         {
-          "id": "96af9112-3d6b-4293-8f16-4275b89242b7",
+          "id": "62af7c0e-9aa6-434e-b578-b1f18c179d7f",
           "record": null,
           "line_no": 4,
           "attached": [],
@@ -4930,14 +4930,14 @@
           "line_type": "non_product",
           "match_tier": null,
           "suggestion": null,
-          "updated_at": "2026-10-20T22:41:02.32233+07:00",
+          "updated_at": "2026-10-20T22:48:31.271288+07:00",
           "line_amount": 200,
           "needs_check": false,
           "unit_amount": 200,
           "match_confidence": null
         },
         {
-          "id": "052dd63f-ea1b-4633-b87a-2b049221ecf7",
+          "id": "1bb0cffb-fe7f-45fb-9af4-f3288ae49511",
           "record": null,
           "line_no": 5,
           "attached": [],
@@ -4962,7 +4962,7 @@
             "merged_into_id": null,
             "product_group_id": "60000000-0000-0000-0000-000000000001"
           },
-          "updated_at": "2026-10-20T22:41:02.32233+07:00",
+          "updated_at": "2026-10-20T22:48:31.271288+07:00",
           "line_amount": 12000,
           "needs_check": true,
           "unit_amount": 12000,
@@ -4970,7 +4970,7 @@
         }
       ],
       "header": {
-        "id": "bea446fb-d088-48e6-b2ca-a5f861725ee2",
+        "id": "abf1a742-cdbd-470f-acf0-5a5dc60e315f",
         "store": {
           "id": "20000000-0000-0000-0000-000000000001",
           "name": "AEON",
@@ -4986,8 +4986,8 @@
         },
         "status": "draft",
         "currency": "IDR",
-        "capture_id": "cc131913-fbce-4ad0-b814-72d84ca6a599",
-        "updated_at": "2026-10-20T22:41:02.32233+07:00",
+        "capture_id": "94d7e028-089a-4009-97c3-fbb1ba93d8f9",
+        "updated_at": "2026-10-20T22:48:31.271288+07:00",
         "confirmed_at": null,
         "total_amount": 114700,
         "payment_method": "debit",
@@ -4999,7 +4999,7 @@
         {
           "position": 1,
           "purged_at": null,
-          "storage_path": "ac23ca64-2444-4db7-b535-08ff2ad14e60/cc131913-fbce-4ad0-b814-72d84ca6a599/1.jpg"
+          "storage_path": "574375bb-85c8-4470-b4a1-ccb43a9b6919/94d7e028-089a-4009-97c3-fbb1ba93d8f9/1.jpg"
         }
       ],
       "totals": {
@@ -5013,7 +5013,7 @@
         "text": "DISC MEMBER",
         "program_id": "40000000-0000-0000-0000-000000000001"
       },
-      "uploaded_at": "2026-10-20T22:41:02.274803+07:00",
+      "uploaded_at": "2026-10-20T22:48:31.221721+07:00",
       "field_confidence": {
         "date": 0.98,
         "store": 0.97,
@@ -5034,7 +5034,7 @@
       "error": {
         "message": "UNDECIDED_LINES",
         "code": "PT422",
-        "details": "{\"line_ids\": [\"6d855de1-e4b4-46fc-bf33-ab4946c7fe4b\", \"052dd63f-ea1b-4633-b87a-2b049221ecf7\"]}",
+        "details": "{\"line_ids\": [\"613050a0-49e9-4234-bf02-03e127ae6e71\", \"1bb0cffb-fe7f-45fb-9af4-f3288ae49511\"]}",
         "hint": "Masih ada baris yang belum diputuskan."
       }
     },
@@ -5046,9 +5046,9 @@
     "receipt_confirmed": {
       "lines": [
         {
-          "id": "5d4f66b1-fb18-45ef-8590-67a28d8151a5",
+          "id": "15c225f6-b176-4d3c-aed5-b6f2c4ccf3c3",
           "record": {
-            "id": "ce93fbe8-48e7-40a9-90ad-b5703ec92cb8",
+            "id": "388093aa-3f53-46f5-b4fc-0f1844b18e7b",
             "extra": {
               "member_hint": {
                 "text": "DISC MEMBER",
@@ -5061,21 +5061,21 @@
             "store_id": "20000000-0000-0000-0000-000000000001",
             "branch_id": "30000000-0000-0000-0000-000000000001",
             "is_bundle": false,
-            "capture_id": "cc131913-fbce-4ad0-b814-72d84ca6a599",
-            "created_at": "2026-10-20T22:41:02.32233+07:00",
+            "capture_id": "94d7e028-089a-4009-97c3-fbb1ba93d8f9",
+            "created_at": "2026-10-20T22:48:31.271288+07:00",
             "created_by": null,
             "match_tier": "barcode",
             "product_id": "70000000-0000-0000-0000-000000000500",
-            "receipt_id": "bea446fb-d088-48e6-b2ca-a5f861725ee2",
+            "receipt_id": "abf1a742-cdbd-470f-acf0-5a5dc60e315f",
             "store_name": "AEON",
             "unit_price": 85,
-            "updated_at": "2026-10-20T22:41:02.32233+07:00",
+            "updated_at": "2026-10-20T22:48:31.271288+07:00",
             "visibility": "private",
             "branch_name": "AEON BSD",
             "price_basis": "promo",
             "promo_price": 42500,
             "source_type": "receipt",
-            "household_id": "ac23ca64-2444-4db7-b535-08ff2ad14e60",
+            "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
             "member_price": null,
             "normal_price": 45000,
             "actual_weight": null,
@@ -5084,7 +5084,7 @@
             "promo_min_qty": null,
             "store_channel": "offline",
             "effective_price": 42500,
-            "receipt_line_id": "5d4f66b1-fb18-45ef-8590-67a28d8151a5",
+            "receipt_line_id": "15c225f6-b176-4d3c-aed5-b6f2c4ccf3c3",
             "match_confidence": 1,
             "promo_valid_from": null,
             "transaction_date": "2026-10-15",
@@ -5097,12 +5097,12 @@
           "line_no": 1,
           "attached": [
             {
-              "id": "7e6eae83-ade4-4e1c-af50-8b81050a68d8",
+              "id": "48151d2b-5bce-44c1-a17f-76cfd744af50",
               "line_no": 2,
               "quantity": null,
               "raw_text": "DISC MEMBER",
               "line_type": "discount",
-              "updated_at": "2026-10-20T22:41:02.32233+07:00",
+              "updated_at": "2026-10-20T22:48:31.271288+07:00",
               "line_amount": -5000
             }
           ],
@@ -5127,16 +5127,16 @@
             "merged_into_id": null,
             "product_group_id": "60000000-0000-0000-0000-000000000001"
           },
-          "updated_at": "2026-10-20T22:41:02.32233+07:00",
+          "updated_at": "2026-10-20T22:48:31.271288+07:00",
           "line_amount": 90000,
           "needs_check": false,
           "unit_amount": 45000,
           "match_confidence": 1
         },
         {
-          "id": "6d855de1-e4b4-46fc-bf33-ab4946c7fe4b",
+          "id": "613050a0-49e9-4234-bf02-03e127ae6e71",
           "record": {
-            "id": "1c5da167-3fb0-477f-88bf-6b36c741124d",
+            "id": "68f6259c-5023-46e7-a06f-373484ea8d8e",
             "extra": {},
             "status": "active",
             "currency": "IDR",
@@ -5144,21 +5144,21 @@
             "store_id": "20000000-0000-0000-0000-000000000001",
             "branch_id": "30000000-0000-0000-0000-000000000001",
             "is_bundle": false,
-            "capture_id": "cc131913-fbce-4ad0-b814-72d84ca6a599",
-            "created_at": "2026-10-20T22:41:02.897281+07:00",
+            "capture_id": "94d7e028-089a-4009-97c3-fbb1ba93d8f9",
+            "created_at": "2026-10-20T22:48:31.790117+07:00",
             "created_by": "00000000-0000-0000-0000-00000000000c",
             "match_tier": "fuzzy",
             "product_id": "70000000-0000-0000-0000-000000000085",
-            "receipt_id": "bea446fb-d088-48e6-b2ca-a5f861725ee2",
+            "receipt_id": "abf1a742-cdbd-470f-acf0-5a5dc60e315f",
             "store_name": "AEON",
             "unit_price": 41.176471,
-            "updated_at": "2026-10-20T22:41:02.897281+07:00",
+            "updated_at": "2026-10-20T22:48:31.790117+07:00",
             "visibility": "private",
             "branch_name": "AEON BSD",
             "price_basis": "normal",
             "promo_price": null,
             "source_type": "receipt",
-            "household_id": "ac23ca64-2444-4db7-b535-08ff2ad14e60",
+            "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
             "member_price": null,
             "normal_price": 3500,
             "actual_weight": null,
@@ -5167,7 +5167,7 @@
             "promo_min_qty": null,
             "store_channel": "offline",
             "effective_price": 3500,
-            "receipt_line_id": "6d855de1-e4b4-46fc-bf33-ab4946c7fe4b",
+            "receipt_line_id": "613050a0-49e9-4234-bf02-03e127ae6e71",
             "match_confidence": 0.563,
             "promo_valid_from": null,
             "transaction_date": "2026-10-15",
@@ -5200,14 +5200,14 @@
             "merged_into_id": null,
             "product_group_id": "60000000-0000-0000-0000-000000000002"
           },
-          "updated_at": "2026-10-20T22:41:02.32233+07:00",
+          "updated_at": "2026-10-20T22:48:31.271288+07:00",
           "line_amount": 17500,
           "needs_check": false,
           "unit_amount": 3500,
           "match_confidence": 0.563
         },
         {
-          "id": "96af9112-3d6b-4293-8f16-4275b89242b7",
+          "id": "62af7c0e-9aa6-434e-b578-b1f18c179d7f",
           "record": null,
           "line_no": 4,
           "attached": [],
@@ -5216,16 +5216,16 @@
           "line_type": "non_product",
           "match_tier": null,
           "suggestion": null,
-          "updated_at": "2026-10-20T22:41:02.32233+07:00",
+          "updated_at": "2026-10-20T22:48:31.271288+07:00",
           "line_amount": 200,
           "needs_check": false,
           "unit_amount": 200,
           "match_confidence": null
         },
         {
-          "id": "052dd63f-ea1b-4633-b87a-2b049221ecf7",
+          "id": "1bb0cffb-fe7f-45fb-9af4-f3288ae49511",
           "record": {
-            "id": "bf04bf02-25bc-432b-86d8-85b0f67b0454",
+            "id": "be58974d-8020-4441-bd24-6968bce6f85b",
             "extra": {},
             "status": "active",
             "currency": "IDR",
@@ -5233,21 +5233,21 @@
             "store_id": "20000000-0000-0000-0000-000000000001",
             "branch_id": "30000000-0000-0000-0000-000000000001",
             "is_bundle": false,
-            "capture_id": "cc131913-fbce-4ad0-b814-72d84ca6a599",
-            "created_at": "2026-10-20T22:41:02.897281+07:00",
+            "capture_id": "94d7e028-089a-4009-97c3-fbb1ba93d8f9",
+            "created_at": "2026-10-20T22:48:31.790117+07:00",
             "created_by": "00000000-0000-0000-0000-00000000000c",
             "match_tier": "ai",
             "product_id": "70000000-0000-0000-0000-000000000310",
-            "receipt_id": "bea446fb-d088-48e6-b2ca-a5f861725ee2",
+            "receipt_id": "abf1a742-cdbd-470f-acf0-5a5dc60e315f",
             "store_name": "AEON",
             "unit_price": 34.285714,
-            "updated_at": "2026-10-20T22:41:02.897281+07:00",
+            "updated_at": "2026-10-20T22:48:31.790117+07:00",
             "visibility": "private",
             "branch_name": "AEON BSD",
             "price_basis": "normal",
             "promo_price": null,
             "source_type": "receipt",
-            "household_id": "ac23ca64-2444-4db7-b535-08ff2ad14e60",
+            "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
             "member_price": null,
             "normal_price": 12000,
             "actual_weight": null,
@@ -5256,7 +5256,7 @@
             "promo_min_qty": null,
             "store_channel": "offline",
             "effective_price": 12000,
-            "receipt_line_id": "052dd63f-ea1b-4633-b87a-2b049221ecf7",
+            "receipt_line_id": "1bb0cffb-fe7f-45fb-9af4-f3288ae49511",
             "match_confidence": 0.62,
             "promo_valid_from": null,
             "transaction_date": "2026-10-15",
@@ -5289,7 +5289,7 @@
             "merged_into_id": null,
             "product_group_id": "60000000-0000-0000-0000-000000000001"
           },
-          "updated_at": "2026-10-20T22:41:02.32233+07:00",
+          "updated_at": "2026-10-20T22:48:31.271288+07:00",
           "line_amount": 12000,
           "needs_check": false,
           "unit_amount": 12000,
@@ -5297,7 +5297,7 @@
         }
       ],
       "header": {
-        "id": "bea446fb-d088-48e6-b2ca-a5f861725ee2",
+        "id": "abf1a742-cdbd-470f-acf0-5a5dc60e315f",
         "store": {
           "id": "20000000-0000-0000-0000-000000000001",
           "name": "AEON",
@@ -5313,9 +5313,9 @@
         },
         "status": "confirmed",
         "currency": "IDR",
-        "capture_id": "cc131913-fbce-4ad0-b814-72d84ca6a599",
-        "updated_at": "2026-10-20T22:41:02.897281+07:00",
-        "confirmed_at": "2026-10-20T22:41:02.897281+07:00",
+        "capture_id": "94d7e028-089a-4009-97c3-fbb1ba93d8f9",
+        "updated_at": "2026-10-20T22:48:31.790117+07:00",
+        "confirmed_at": "2026-10-20T22:48:31.790117+07:00",
         "total_amount": 114700,
         "payment_method": "debit",
         "subtotal_amount": null,
@@ -5326,7 +5326,7 @@
         {
           "position": 1,
           "purged_at": null,
-          "storage_path": "ac23ca64-2444-4db7-b535-08ff2ad14e60/cc131913-fbce-4ad0-b814-72d84ca6a599/1.jpg"
+          "storage_path": "574375bb-85c8-4470-b4a1-ccb43a9b6919/94d7e028-089a-4009-97c3-fbb1ba93d8f9/1.jpg"
         }
       ],
       "totals": {
@@ -5340,7 +5340,7 @@
         "text": "DISC MEMBER",
         "program_id": "40000000-0000-0000-0000-000000000001"
       },
-      "uploaded_at": "2026-10-20T22:41:02.274803+07:00",
+      "uploaded_at": "2026-10-20T22:48:31.221721+07:00",
       "field_confidence": {
         "date": 0.98,
         "store": 0.97,
@@ -5352,17 +5352,17 @@
     "receipt_duplicate": {
       "lines": [
         {
-          "id": "4c659fb5-e6e1-455c-9cc4-2052b4c9bb16",
+          "id": "9adfd92f-4b66-4ae9-aa55-78e3b49920b8",
           "record": null,
           "line_no": 1,
           "attached": [
             {
-              "id": "bed7816f-59cc-4f15-ab72-234c97337958",
+              "id": "cb862245-3c96-4af3-8a4b-8e897d180788",
               "line_no": 2,
               "quantity": null,
               "raw_text": "DISC MEMBER",
               "line_type": "discount",
-              "updated_at": "2026-10-20T22:41:02.954512+07:00",
+              "updated_at": "2026-10-20T22:48:31.841967+07:00",
               "line_amount": -5000
             }
           ],
@@ -5387,14 +5387,14 @@
             "merged_into_id": null,
             "product_group_id": "60000000-0000-0000-0000-000000000001"
           },
-          "updated_at": "2026-10-20T22:41:02.954512+07:00",
+          "updated_at": "2026-10-20T22:48:31.841967+07:00",
           "line_amount": 90000,
           "needs_check": true,
           "unit_amount": 45000,
           "match_confidence": 1
         },
         {
-          "id": "0030b52e-e1ab-4a7a-8b78-5e73fa95628f",
+          "id": "05eecd58-d45c-408c-ad11-5417888062b1",
           "record": null,
           "line_no": 3,
           "attached": [],
@@ -5419,14 +5419,14 @@
             "merged_into_id": null,
             "product_group_id": "60000000-0000-0000-0000-000000000002"
           },
-          "updated_at": "2026-10-20T22:41:02.954512+07:00",
+          "updated_at": "2026-10-20T22:48:31.841967+07:00",
           "line_amount": 17500,
           "needs_check": true,
           "unit_amount": 3500,
           "match_confidence": 0.98
         },
         {
-          "id": "d893421b-4b7f-4f70-9fe4-aa7257a24e3b",
+          "id": "953524a7-f02f-4215-af9e-b5c399ea6066",
           "record": null,
           "line_no": 4,
           "attached": [],
@@ -5435,14 +5435,14 @@
           "line_type": "non_product",
           "match_tier": null,
           "suggestion": null,
-          "updated_at": "2026-10-20T22:41:02.954512+07:00",
+          "updated_at": "2026-10-20T22:48:31.841967+07:00",
           "line_amount": 200,
           "needs_check": false,
           "unit_amount": 200,
           "match_confidence": null
         },
         {
-          "id": "792f9b55-0ab4-4073-a6fd-393af7ed086f",
+          "id": "3f46289a-899e-486d-b12c-62fc4980cd44",
           "record": null,
           "line_no": 5,
           "attached": [],
@@ -5467,7 +5467,7 @@
             "merged_into_id": null,
             "product_group_id": "60000000-0000-0000-0000-000000000001"
           },
-          "updated_at": "2026-10-20T22:41:02.954512+07:00",
+          "updated_at": "2026-10-20T22:48:31.841967+07:00",
           "line_amount": 12000,
           "needs_check": true,
           "unit_amount": 12000,
@@ -5475,7 +5475,7 @@
         }
       ],
       "header": {
-        "id": "49646425-b22f-46e1-bd7c-1288187a0872",
+        "id": "b8df05a9-4b17-4b4c-b6a0-3a6b7da8b10d",
         "store": {
           "id": "20000000-0000-0000-0000-000000000001",
           "name": "AEON",
@@ -5491,8 +5491,8 @@
         },
         "status": "draft",
         "currency": "IDR",
-        "capture_id": "768179e3-823b-43c4-aa1b-b5e95439dbbf",
-        "updated_at": "2026-10-20T22:41:02.954512+07:00",
+        "capture_id": "6c87aeaf-6d53-46e9-9a4f-06f3e8c5fe7b",
+        "updated_at": "2026-10-20T22:48:31.841967+07:00",
         "confirmed_at": null,
         "total_amount": 114700,
         "payment_method": "debit",
@@ -5504,7 +5504,7 @@
         {
           "position": 1,
           "purged_at": null,
-          "storage_path": "ac23ca64-2444-4db7-b535-08ff2ad14e60/768179e3-823b-43c4-aa1b-b5e95439dbbf/1.jpg"
+          "storage_path": "574375bb-85c8-4470-b4a1-ccb43a9b6919/6c87aeaf-6d53-46e9-9a4f-06f3e8c5fe7b/1.jpg"
         }
       ],
       "totals": {
@@ -5521,14 +5521,14 @@
           "is_private": false
         },
         "total": 114700,
-        "receipt_id": "bea446fb-d088-48e6-b2ca-a5f861725ee2"
+        "receipt_id": "abf1a742-cdbd-470f-acf0-5a5dc60e315f"
       },
       "adjustments": [],
       "member_hint": {
         "text": "DISC MEMBER",
         "program_id": "40000000-0000-0000-0000-000000000001"
       },
-      "uploaded_at": "2026-10-20T22:41:02.936373+07:00",
+      "uploaded_at": "2026-10-20T22:48:31.826248+07:00",
       "field_confidence": {
         "date": 0.98,
         "store": 0.97,
@@ -5541,14 +5541,14 @@
       "error": {
         "message": "DUPLICATE_DECISION_REQUIRED",
         "code": "PT409",
-        "details": "{\"duplicate_of\": \"bea446fb-d088-48e6-b2ca-a5f861725ee2\"}",
+        "details": "{\"duplicate_of\": \"abf1a742-cdbd-470f-acf0-5a5dc60e315f\"}",
         "hint": "Struk ini mirip struk lain. Pilih: simpan sebagai struk berbeda atau buang."
       }
     },
     "receipt_nostore": {
       "lines": [
         {
-          "id": "ed433b3f-1977-45ab-afc9-0dcd635858fc",
+          "id": "3d84d0fc-b5d8-4623-9c1a-bfce5cf32993",
           "record": null,
           "line_no": 1,
           "attached": [],
@@ -5573,14 +5573,14 @@
             "merged_into_id": null,
             "product_group_id": "60000000-0000-0000-0000-000000000001"
           },
-          "updated_at": "2026-10-20T22:41:02.996859+07:00",
+          "updated_at": "2026-10-20T22:48:31.880979+07:00",
           "line_amount": 21000,
           "needs_check": true,
           "unit_amount": 21000,
           "match_confidence": 1
         },
         {
-          "id": "14531937-b55b-44fa-a1cb-1d69d67bf14d",
+          "id": "5067923c-b541-41f3-b8ee-0f4b720c1df5",
           "record": null,
           "line_no": 2,
           "attached": [],
@@ -5589,7 +5589,7 @@
           "line_type": "product",
           "match_tier": null,
           "suggestion": null,
-          "updated_at": "2026-10-20T22:41:02.996859+07:00",
+          "updated_at": "2026-10-20T22:48:31.880979+07:00",
           "line_amount": 16000,
           "needs_check": true,
           "unit_amount": 16000,
@@ -5597,13 +5597,13 @@
         }
       ],
       "header": {
-        "id": "1b26570f-2418-4d04-84d6-eb202d1278c5",
+        "id": "855655e5-e8e4-4164-8bf7-e1f3d6f0fc51",
         "store": null,
         "branch": null,
         "status": "draft",
         "currency": "IDR",
-        "capture_id": "4d02c18c-ed8c-4410-9cc9-b60919d0bc01",
-        "updated_at": "2026-10-20T22:41:02.996859+07:00",
+        "capture_id": "fe7d1e00-d270-4413-9a86-de90370726a6",
+        "updated_at": "2026-10-20T22:48:31.880979+07:00",
         "confirmed_at": null,
         "total_amount": 37000,
         "payment_method": "tunai",
@@ -5615,7 +5615,7 @@
         {
           "position": 1,
           "purged_at": null,
-          "storage_path": "ac23ca64-2444-4db7-b535-08ff2ad14e60/4d02c18c-ed8c-4410-9cc9-b60919d0bc01/1.jpg"
+          "storage_path": "574375bb-85c8-4470-b4a1-ccb43a9b6919/fe7d1e00-d270-4413-9a86-de90370726a6/1.jpg"
         }
       ],
       "totals": {
@@ -5626,7 +5626,7 @@
       "duplicate": null,
       "adjustments": [
         {
-          "id": "a1e7a688-cc3b-4515-9aaf-292d9de9bbcb",
+          "id": "8e32ee3d-fa9a-44df-8c97-6c9b8ad0e012",
           "kind": "points",
           "amount": null,
           "points": 37,
@@ -5634,7 +5634,7 @@
         }
       ],
       "member_hint": null,
-      "uploaded_at": "2026-10-20T22:41:02.980603+07:00",
+      "uploaded_at": "2026-10-20T22:48:31.866041+07:00",
       "field_confidence": {
         "date": 0.62,
         "store": 0.4,
@@ -5646,13 +5646,13 @@
       "error": {
         "message": "RECEIPT_STORE_REQUIRED",
         "code": "PT422",
-        "details": "{\"receipt_id\": \"1b26570f-2418-4d04-84d6-eb202d1278c5\"}",
+        "details": "{\"receipt_id\": \"855655e5-e8e4-4164-8bf7-e1f3d6f0fc51\"}",
         "hint": "Pilih toko untuk struk ini."
       }
     },
     "items_shopee": [
       {
-        "id": "5238a9cb-7a7e-4b89-a609-f0572fe57323",
+        "id": "a1610e92-4945-4efe-beaa-b04f9fcf8de5",
         "extra": {
           "listing_url": "https://shopee.co.id/milo-original-500g",
           "shipping_fee": 9000,
@@ -5726,9 +5726,9 @@
             "product_group_id": "60000000-0000-0000-0000-000000000001"
           }
         ],
-        "capture_id": "ede1eed4-c8d5-4ba7-bc22-c9195c5188d8",
-        "created_at": "2026-10-20T22:41:02.843703+07:00",
-        "decided_at": "2026-10-20T22:41:02.843703+07:00",
+        "capture_id": "bfd911de-9278-4fe5-9290-32b294205fd3",
+        "created_at": "2026-10-20T22:48:31.757469+07:00",
+        "decided_at": "2026-10-20T22:48:31.757469+07:00",
         "decided_by": null,
         "match_tier": "fuzzy",
         "seller_ref": "nestle-official",
@@ -5749,16 +5749,16 @@
           "merged_into_id": null,
           "product_group_id": "60000000-0000-0000-0000-000000000001"
         },
-        "updated_at": "2026-10-20T22:41:02.843703+07:00",
+        "updated_at": "2026-10-20T22:48:31.757469+07:00",
         "needs_check": false,
         "promo_price": null,
         "seller_name": "Nestle Official Store",
-        "household_id": "ac23ca64-2444-4db7-b535-08ff2ad14e60",
+        "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
         "member_price": null,
         "normal_price": 47000,
         "promo_min_qty": null,
         "image_position": null,
-        "price_record_id": "cded3960-25c1-4c8a-8564-2cda4d07b1ba",
+        "price_record_id": "6681a983-ef2a-4b71-9625-d9c5098b21bf",
         "field_confidence": {
           "price": 0.99
         },
@@ -5777,7 +5777,7 @@
     ],
     "items_label": [
       {
-        "id": "6399fa80-1839-443a-90d1-5a6bb33f65a3",
+        "id": "8cbd4408-8ff2-43ee-a511-e2be4bed14c3",
         "extra": {},
         "region": {
           "h": 0.3,
@@ -5852,8 +5852,8 @@
             "product_group_id": "60000000-0000-0000-0000-000000000001"
           }
         ],
-        "capture_id": "152a68b4-bd94-4a24-b130-21d101d1accc",
-        "created_at": "2026-10-20T22:41:03.045587+07:00",
+        "capture_id": "e0c8f23f-7c57-4eee-a414-50726acaa807",
+        "created_at": "2026-10-20T22:48:31.922017+07:00",
         "decided_at": null,
         "decided_by": null,
         "match_tier": "barcode",
@@ -5875,11 +5875,11 @@
           "merged_into_id": null,
           "product_group_id": "60000000-0000-0000-0000-000000000001"
         },
-        "updated_at": "2026-10-20T22:41:03.045587+07:00",
+        "updated_at": "2026-10-20T22:48:31.922017+07:00",
         "needs_check": true,
         "promo_price": 17500,
         "seller_name": null,
-        "household_id": "ac23ca64-2444-4db7-b535-08ff2ad14e60",
+        "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
         "member_price": null,
         "normal_price": 19500,
         "promo_min_qty": null,
@@ -5902,7 +5902,7 @@
         ]
       },
       {
-        "id": "5f4bf007-976f-4001-a51b-84b6565e1e06",
+        "id": "1fd0c5e8-b404-493a-80c4-1d684db78e9b",
         "extra": {
           "member_note": "AEON Member 21000"
         },
@@ -5945,8 +5945,8 @@
             "product_group_id": "60000000-0000-0000-0000-000000000001"
           }
         ],
-        "capture_id": "152a68b4-bd94-4a24-b130-21d101d1accc",
-        "created_at": "2026-10-20T22:41:03.045587+07:00",
+        "capture_id": "e0c8f23f-7c57-4eee-a414-50726acaa807",
+        "created_at": "2026-10-20T22:48:31.922017+07:00",
         "decided_at": null,
         "decided_by": null,
         "match_tier": "fuzzy",
@@ -5968,11 +5968,11 @@
           "merged_into_id": null,
           "product_group_id": "60000000-0000-0000-0000-000000000001"
         },
-        "updated_at": "2026-10-20T22:41:03.045587+07:00",
+        "updated_at": "2026-10-20T22:48:31.922017+07:00",
         "needs_check": true,
         "promo_price": null,
         "seller_name": null,
-        "household_id": "ac23ca64-2444-4db7-b535-08ff2ad14e60",
+        "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
         "member_price": null,
         "normal_price": 23000,
         "promo_min_qty": null,
@@ -5990,6 +5990,42 @@
         "candidate_product_ids": ["70000000-0000-0000-0000-000000000310"]
       }
     ],
+    "capture_label": {
+      "runs": [
+        {
+          "id": "be30aba0-5679-426d-8d18-c94ba549be12",
+          "status": "succeeded",
+          "started_at": "2026-10-20T22:48:31.912219+07:00",
+          "finished_at": "2026-10-20T22:48:31.922017+07:00",
+          "error_message": null
+        }
+      ],
+      "images": [
+        {
+          "sha256": "0901a686044416b7622e8f9a498b82ed8fc2d364dc2dbd7d507c8ffe27ef8d11",
+          "position": 1,
+          "purged_at": null,
+          "storage_path": "574375bb-85c8-4470-b4a1-ccb43a9b6919/e0c8f23f-7c57-4eee-a414-50726acaa807/1.jpg"
+        }
+      ],
+      "capture": {
+        "id": "e0c8f23f-7c57-4eee-a414-50726acaa807",
+        "kind": "price_label",
+        "status": "needs_confirmation",
+        "store_id": null,
+        "branch_id": null,
+        "error_code": null,
+        "captured_at": null,
+        "uploaded_at": "2026-10-20T22:48:31.908252+07:00",
+        "uploaded_by": "00000000-0000-0000-0000-00000000000c",
+        "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
+        "processed_at": "2026-10-20T22:48:31.922017+07:00",
+        "error_message": null,
+        "shopping_session_id": null
+      },
+      "receipt_id": null,
+      "saved_records": []
+    },
     "items_unknown": {
       "error": {
         "message": "NOT_FOUND",
@@ -6002,7 +6038,7 @@
       "error": {
         "message": "STALE_WRITE",
         "code": "PT409",
-        "details": "{\"item_id\": \"6399fa80-1839-443a-90d1-5a6bb33f65a3\", \"updated_at\": \"2026-10-20T22:41:03.045587+07:00\"}",
+        "details": "{\"item_id\": \"8cbd4408-8ff2-43ee-a511-e2be4bed14c3\", \"updated_at\": \"2026-10-20T22:48:31.922017+07:00\"}",
         "hint": "Data sudah diubah di tempat lain. Muat ulang lalu coba lagi."
       }
     },
@@ -6010,12 +6046,12 @@
       "error": {
         "message": "STORE_REQUIRED",
         "code": "PT422",
-        "details": "{\"item_id\": \"6399fa80-1839-443a-90d1-5a6bb33f65a3\"}",
+        "details": "{\"item_id\": \"8cbd4408-8ff2-43ee-a511-e2be4bed14c3\"}",
         "hint": "Pilih toko untuk harga ini."
       }
     },
     "update_item_member_only": {
-      "id": "5f4bf007-976f-4001-a51b-84b6565e1e06",
+      "id": "1fd0c5e8-b404-493a-80c4-1d684db78e9b",
       "extra": {
         "member_note": "AEON Member 21000"
       },
@@ -6058,8 +6094,8 @@
           "product_group_id": "60000000-0000-0000-0000-000000000001"
         }
       ],
-      "capture_id": "152a68b4-bd94-4a24-b130-21d101d1accc",
-      "created_at": "2026-10-20T22:41:03.045587+07:00",
+      "capture_id": "e0c8f23f-7c57-4eee-a414-50726acaa807",
+      "created_at": "2026-10-20T22:48:31.922017+07:00",
       "decided_at": null,
       "decided_by": null,
       "match_tier": "fuzzy",
@@ -6081,11 +6117,11 @@
         "merged_into_id": null,
         "product_group_id": "60000000-0000-0000-0000-000000000001"
       },
-      "updated_at": "2026-10-20T22:41:03.068053+07:00",
+      "updated_at": "2026-10-20T22:48:31.948847+07:00",
       "needs_check": true,
       "promo_price": null,
       "seller_name": null,
-      "household_id": "ac23ca64-2444-4db7-b535-08ff2ad14e60",
+      "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
       "member_price": null,
       "normal_price": null,
       "promo_min_qty": null,
@@ -6103,7 +6139,7 @@
       "candidate_product_ids": ["70000000-0000-0000-0000-000000000310"]
     },
     "update_item_member_price": {
-      "id": "5f4bf007-976f-4001-a51b-84b6565e1e06",
+      "id": "1fd0c5e8-b404-493a-80c4-1d684db78e9b",
       "extra": {
         "member_note": "AEON Member 21000"
       },
@@ -6146,8 +6182,8 @@
           "product_group_id": "60000000-0000-0000-0000-000000000001"
         }
       ],
-      "capture_id": "152a68b4-bd94-4a24-b130-21d101d1accc",
-      "created_at": "2026-10-20T22:41:03.045587+07:00",
+      "capture_id": "e0c8f23f-7c57-4eee-a414-50726acaa807",
+      "created_at": "2026-10-20T22:48:31.922017+07:00",
       "decided_at": null,
       "decided_by": null,
       "match_tier": "fuzzy",
@@ -6169,11 +6205,11 @@
         "merged_into_id": null,
         "product_group_id": "60000000-0000-0000-0000-000000000001"
       },
-      "updated_at": "2026-10-20T22:41:03.077514+07:00",
+      "updated_at": "2026-10-20T22:48:31.960328+07:00",
       "needs_check": true,
       "promo_price": null,
       "seller_name": null,
-      "household_id": "ac23ca64-2444-4db7-b535-08ff2ad14e60",
+      "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
       "member_price": 21000,
       "normal_price": null,
       "promo_min_qty": null,
@@ -6194,12 +6230,12 @@
       "error": {
         "message": "NO_APPLICABLE_PRICE",
         "code": "PT422",
-        "details": "{\"item_id\": \"5f4bf007-976f-4001-a51b-84b6565e1e06\"}",
+        "details": "{\"item_id\": \"1fd0c5e8-b404-493a-80c4-1d684db78e9b\"}",
         "hint": "Tidak ada harga yang berlaku. Isi harga normal."
       }
     },
     "update_item_location": {
-      "id": "6399fa80-1839-443a-90d1-5a6bb33f65a3",
+      "id": "8cbd4408-8ff2-43ee-a511-e2be4bed14c3",
       "extra": {},
       "region": {
         "h": 0.3,
@@ -6274,8 +6310,8 @@
           "product_group_id": "60000000-0000-0000-0000-000000000001"
         }
       ],
-      "capture_id": "152a68b4-bd94-4a24-b130-21d101d1accc",
-      "created_at": "2026-10-20T22:41:03.045587+07:00",
+      "capture_id": "e0c8f23f-7c57-4eee-a414-50726acaa807",
+      "created_at": "2026-10-20T22:48:31.922017+07:00",
       "decided_at": null,
       "decided_by": null,
       "match_tier": "barcode",
@@ -6297,11 +6333,11 @@
         "merged_into_id": null,
         "product_group_id": "60000000-0000-0000-0000-000000000001"
       },
-      "updated_at": "2026-10-20T22:41:03.087683+07:00",
+      "updated_at": "2026-10-20T22:48:31.971246+07:00",
       "needs_check": true,
       "promo_price": 17500,
       "seller_name": null,
-      "household_id": "ac23ca64-2444-4db7-b535-08ff2ad14e60",
+      "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
       "member_price": null,
       "normal_price": 19500,
       "promo_min_qty": null,
@@ -6325,7 +6361,7 @@
     },
     "items_label_updated": [
       {
-        "id": "6399fa80-1839-443a-90d1-5a6bb33f65a3",
+        "id": "8cbd4408-8ff2-43ee-a511-e2be4bed14c3",
         "extra": {},
         "region": {
           "h": 0.3,
@@ -6400,8 +6436,8 @@
             "product_group_id": "60000000-0000-0000-0000-000000000001"
           }
         ],
-        "capture_id": "152a68b4-bd94-4a24-b130-21d101d1accc",
-        "created_at": "2026-10-20T22:41:03.045587+07:00",
+        "capture_id": "e0c8f23f-7c57-4eee-a414-50726acaa807",
+        "created_at": "2026-10-20T22:48:31.922017+07:00",
         "decided_at": null,
         "decided_by": null,
         "match_tier": "barcode",
@@ -6423,11 +6459,11 @@
           "merged_into_id": null,
           "product_group_id": "60000000-0000-0000-0000-000000000001"
         },
-        "updated_at": "2026-10-20T22:41:03.087683+07:00",
+        "updated_at": "2026-10-20T22:48:31.971246+07:00",
         "needs_check": true,
         "promo_price": 17500,
         "seller_name": null,
-        "household_id": "ac23ca64-2444-4db7-b535-08ff2ad14e60",
+        "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
         "member_price": null,
         "normal_price": 19500,
         "promo_min_qty": null,
@@ -6450,7 +6486,7 @@
         ]
       },
       {
-        "id": "5f4bf007-976f-4001-a51b-84b6565e1e06",
+        "id": "1fd0c5e8-b404-493a-80c4-1d684db78e9b",
         "extra": {
           "member_note": "AEON Member 21000"
         },
@@ -6493,8 +6529,8 @@
             "product_group_id": "60000000-0000-0000-0000-000000000001"
           }
         ],
-        "capture_id": "152a68b4-bd94-4a24-b130-21d101d1accc",
-        "created_at": "2026-10-20T22:41:03.045587+07:00",
+        "capture_id": "e0c8f23f-7c57-4eee-a414-50726acaa807",
+        "created_at": "2026-10-20T22:48:31.922017+07:00",
         "decided_at": null,
         "decided_by": null,
         "match_tier": "fuzzy",
@@ -6516,11 +6552,11 @@
           "merged_into_id": null,
           "product_group_id": "60000000-0000-0000-0000-000000000001"
         },
-        "updated_at": "2026-10-20T22:41:03.077514+07:00",
+        "updated_at": "2026-10-20T22:48:31.960328+07:00",
         "needs_check": true,
         "promo_price": null,
         "seller_name": null,
-        "household_id": "ac23ca64-2444-4db7-b535-08ff2ad14e60",
+        "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
         "member_price": 21000,
         "normal_price": null,
         "promo_min_qty": null,
@@ -6541,15 +6577,15 @@
     "confirm_items_ok": {
       "saved": [
         {
-          "item_id": "6399fa80-1839-443a-90d1-5a6bb33f65a3",
-          "price_record_id": "84b6786c-d139-4c8f-b761-29c2ab8b6906"
+          "item_id": "8cbd4408-8ff2-43ee-a511-e2be4bed14c3",
+          "price_record_id": "b8ae3825-1133-4411-baef-3ad8160e6dd5"
         }
       ],
       "remaining_pending": 0
     },
     "items_shopee_pending": [
       {
-        "id": "4ce34ab0-80e9-4f81-aba1-6e5f9a41c52f",
+        "id": "59d49a48-4deb-4738-81a1-d6c19858224c",
         "extra": {
           "listing_url": "https://shopee.co.id/milo-original-500g",
           "shipping_fee": 9000,
@@ -6623,8 +6659,8 @@
             "product_group_id": "60000000-0000-0000-0000-000000000001"
           }
         ],
-        "capture_id": "b669ef2f-ea20-4b84-a446-d7d6f2e1a40f",
-        "created_at": "2026-10-20T22:41:03.129755+07:00",
+        "capture_id": "7b9da34a-5e88-4c6a-b6b7-822a76786315",
+        "created_at": "2026-10-20T22:48:32.014776+07:00",
         "decided_at": null,
         "decided_by": null,
         "match_tier": "fuzzy",
@@ -6646,11 +6682,11 @@
           "merged_into_id": null,
           "product_group_id": "60000000-0000-0000-0000-000000000001"
         },
-        "updated_at": "2026-10-20T22:41:03.129755+07:00",
+        "updated_at": "2026-10-20T22:48:32.014776+07:00",
         "needs_check": true,
         "promo_price": null,
         "seller_name": "Nestle Official Store",
-        "household_id": "ac23ca64-2444-4db7-b535-08ff2ad14e60",
+        "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
         "member_price": null,
         "normal_price": 47000,
         "promo_min_qty": null,
@@ -6672,11 +6708,47 @@
         ]
       }
     ],
+    "capture_shopee": {
+      "runs": [
+        {
+          "id": "344baaaf-4743-473a-817d-a54317ee260c",
+          "status": "succeeded",
+          "started_at": "2026-10-20T22:48:32.006141+07:00",
+          "finished_at": "2026-10-20T22:48:32.014776+07:00",
+          "error_message": null
+        }
+      ],
+      "images": [
+        {
+          "sha256": "8a37c63b51f47f4aca648c472c99f14b56419c1a61e69fa5f64c80216c53d05f",
+          "position": 1,
+          "purged_at": null,
+          "storage_path": "574375bb-85c8-4470-b4a1-ccb43a9b6919/7b9da34a-5e88-4c6a-b6b7-822a76786315/1.jpg"
+        }
+      ],
+      "capture": {
+        "id": "7b9da34a-5e88-4c6a-b6b7-822a76786315",
+        "kind": "marketplace",
+        "status": "needs_confirmation",
+        "store_id": null,
+        "branch_id": null,
+        "error_code": null,
+        "captured_at": null,
+        "uploaded_at": "2026-10-20T22:48:32.001505+07:00",
+        "uploaded_by": "00000000-0000-0000-0000-00000000000c",
+        "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919",
+        "processed_at": "2026-10-20T22:48:32.014776+07:00",
+        "error_message": null,
+        "shopping_session_id": null
+      },
+      "receipt_id": null,
+      "saved_records": []
+    },
     "confirm_items_shopee": {
       "saved": [
         {
-          "item_id": "4ce34ab0-80e9-4f81-aba1-6e5f9a41c52f",
-          "price_record_id": "190605e7-bcbd-4f7b-ac8c-8010eeb5cf9a"
+          "item_id": "59d49a48-4deb-4738-81a1-d6c19858224c",
+          "price_record_id": "608228af-1673-4a67-9cf3-61566c7c952b"
         }
       ],
       "remaining_pending": 0
@@ -6734,7 +6806,7 @@
           "status": "open",
           "is_private": false
         },
-        "last_used": "2026-10-20T22:41:03.138023+07:00"
+        "last_used": "2026-10-20T22:48:32.024523+07:00"
       },
       {
         "store": {
@@ -6750,7 +6822,7 @@
           "status": "open",
           "is_private": false
         },
-        "last_used": "2026-10-20T22:41:03.100331+07:00"
+        "last_used": "2026-10-20T22:48:31.983343+07:00"
       },
       {
         "store": {
@@ -6766,7 +6838,7 @@
           "status": "open",
           "is_private": false
         },
-        "last_used": "2026-10-20T22:41:02.420243+07:00"
+        "last_used": "2026-10-20T22:48:31.342116+07:00"
       }
     ],
     "recent_locations_empty": [],
@@ -6785,7 +6857,7 @@
     },
     "create_product_ok": {
       "group": {
-        "id": "8f1ac00f-82d0-4601-a2e0-a3f6aee46562",
+        "id": "e63a55e8-23a4-4795-baaf-966c8b9c8089",
         "name": "Gula Aren Bubuk",
         "best_by_dimension": null
       },
@@ -6808,7 +6880,7 @@
         "content_unit": "g",
         "category_name": null,
         "merged_into_id": null,
-        "product_group_id": "8f1ac00f-82d0-4601-a2e0-a3f6aee46562"
+        "product_group_id": "e63a55e8-23a4-4795-baaf-966c8b9c8089"
       },
       "summary": null
     },
@@ -6830,7 +6902,7 @@
     },
     "recent_prices": [
       {
-        "id": "9185ce17-c301-4488-aafa-6bf675dc173e",
+        "id": "afb7c341-5146-4755-b367-17765564bb8b",
         "product_id": "70000000-0000-0000-0000-000000000180",
         "store_name": "Shopee",
         "price_basis": "normal",
@@ -6838,7 +6910,7 @@
         "transaction_date": "2026-10-18"
       },
       {
-        "id": "b2943155-3759-4f3f-816c-9c6b594d41fc",
+        "id": "c13cce83-63c8-4746-8c02-1f0f4c0f00c3",
         "product_id": "70000000-0000-0000-0000-000000000200",
         "store_name": "AEON",
         "price_basis": "normal",
@@ -6846,7 +6918,7 @@
         "transaction_date": "2026-10-17"
       },
       {
-        "id": "ac3803a7-d3f3-4d9c-b015-0e878e5c21ff",
+        "id": "215dc3cb-2ad2-4dd4-9635-a7062b8acf17",
         "product_id": "70000000-0000-0000-0000-000000000085",
         "store_name": "Alfamart",
         "price_basis": "normal",
@@ -6854,7 +6926,7 @@
         "transaction_date": "2026-10-16"
       },
       {
-        "id": "bb2e67cb-9862-4355-9050-b185697eb168",
+        "id": "9e5a9bdc-16c7-4d4c-9346-600dbd28ce49",
         "product_id": "70000000-0000-0000-0000-000000000200",
         "store_name": "AEON",
         "price_basis": "normal",
@@ -6862,7 +6934,7 @@
         "transaction_date": "2026-10-15"
       },
       {
-        "id": "1d17bd1b-00b7-4c4e-b609-ec4ff98c0268",
+        "id": "778d1aa5-f7bf-4bf5-9c86-6f9bd9033016",
         "product_id": "70000000-0000-0000-0000-000000000500",
         "store_name": "AEON",
         "price_basis": "normal",
@@ -6870,7 +6942,7 @@
         "transaction_date": "2026-10-15"
       },
       {
-        "id": "39daf561-8053-4602-9dc8-6c90443154dc",
+        "id": "c8025efd-bd75-46dc-a140-640a8c9863aa",
         "product_id": "70000000-0000-0000-0000-0000000000f1",
         "store_name": "Alfamart",
         "price_basis": "normal",
@@ -6878,7 +6950,7 @@
         "transaction_date": "2026-10-14"
       },
       {
-        "id": "cf431bfc-b25f-4356-bb17-0c4920e6ecf4",
+        "id": "fd585569-35c8-4693-9277-cc191e32df48",
         "product_id": "70000000-0000-0000-0000-000000000200",
         "store_name": "AEON",
         "price_basis": "normal",
@@ -6886,7 +6958,7 @@
         "transaction_date": "2026-10-13"
       },
       {
-        "id": "91dfe2f1-6067-43ca-963b-16ca1ccf0125",
+        "id": "07c84a2d-1041-4f7f-99e6-1b000b29cc3b",
         "product_id": "70000000-0000-0000-0000-000000000200",
         "store_name": "Alfamart",
         "price_basis": "promo",
@@ -6894,7 +6966,7 @@
         "transaction_date": "2026-10-10"
       },
       {
-        "id": "86b7b929-7127-4806-91e5-177e9b5c8386",
+        "id": "2b9c4fe5-8fac-4e6d-8593-9400a77c5cab",
         "product_id": "a0000000-0000-0000-0000-000000000001",
         "store_name": "Alfamidi",
         "price_basis": "normal",
@@ -6902,7 +6974,7 @@
         "transaction_date": "2026-10-08"
       },
       {
-        "id": "4e8566c7-d034-4961-bdcf-b1966c524a1c",
+        "id": "9f9f6bd8-5ad6-4145-ba21-ee80915ed123",
         "product_id": "70000000-0000-0000-0000-000000000200",
         "store_name": "Alfamart",
         "price_basis": "promo",
@@ -6910,6 +6982,97 @@
         "transaction_date": "2026-10-05"
       }
     ],
-    "recent_prices_empty": []
+    "recent_prices_empty": [],
+    "rest_stores": [
+      {
+        "id": "20000000-0000-0000-0000-000000000001",
+        "name": "AEON",
+        "channel": "offline",
+        "household_id": null
+      },
+      {
+        "id": "20000000-0000-0000-0000-000000000002",
+        "name": "Alfamart",
+        "channel": "offline",
+        "household_id": null
+      },
+      {
+        "id": "20000000-0000-0000-0000-000000000003",
+        "name": "Alfamidi",
+        "channel": "offline",
+        "household_id": null
+      },
+      {
+        "id": "20000000-0000-0000-0000-000000000004",
+        "name": "Shopee",
+        "channel": "online",
+        "household_id": null
+      },
+      {
+        "id": "c0000000-0000-0000-0000-000000000001",
+        "name": "Toko Makmur Jaya",
+        "channel": "offline",
+        "household_id": "574375bb-85c8-4470-b4a1-ccb43a9b6919"
+      }
+    ],
+    "rest_branches_aeon": [
+      {
+        "id": "30000000-0000-0000-0000-000000000003",
+        "city": "Tangerang",
+        "kind": "physical",
+        "name": "AEON Lama",
+        "region": null,
+        "status": "closed",
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "household_id": null
+      },
+      {
+        "id": "30000000-0000-0000-0000-000000000001",
+        "city": "Tangerang",
+        "kind": "physical",
+        "name": "AEON BSD",
+        "region": null,
+        "status": "open",
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "household_id": null
+      }
+    ],
+    "rest_categories": [
+      {
+        "id": "50d809b0-8623-41be-b4c0-3fe7096b60d9",
+        "name": "Bayi",
+        "household_id": null
+      },
+      {
+        "id": "01e28d59-5e29-4261-a979-8f2492483a6f",
+        "name": "Elektronik",
+        "household_id": null
+      },
+      {
+        "id": "edd54467-0275-478b-ad6d-d1262c50561d",
+        "name": "Kesehatan",
+        "household_id": null
+      },
+      {
+        "id": "fc7a7fb3-9d64-4022-b9bf-987cc84b008a",
+        "name": "Lainnya",
+        "household_id": null
+      },
+      {
+        "id": "98953313-5885-44bc-ac65-abcc050307cd",
+        "name": "Makanan",
+        "household_id": null
+      },
+      {
+        "id": "a9f96695-a3f9-40c1-a8f4-fb5d05a3f2ec",
+        "name": "Minuman",
+        "household_id": null
+      },
+      {
+        "id": "b54be2a0-eed0-411d-b3cc-38430a3fdf18",
+        "name": "Rumah Tangga",
+        "household_id": null
+      }
+    ]
   }
 }

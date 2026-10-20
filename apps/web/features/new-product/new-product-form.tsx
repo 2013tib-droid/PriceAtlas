@@ -131,12 +131,6 @@ export function NewProductForm({
   const brands = useNamedSearch('brand', v.brand ?? '');
   const groups = useNamedSearch('product_group', v.groupMode === 'existing' ? (v.name ?? '') : '');
 
-  // Satuan default per cara jual.
-  useEffect(() => {
-    const opts = v.sale_mode === 'weight' ? WEIGHT_UNIT_OPTIONS : UNIT_OPTIONS;
-    if (!opts.includes(v.content_unit as never)) setValue('content_unit', v.sale_mode === 'weight' ? 'kg' : 'g');
-  }, [v.sale_mode, v.content_unit, setValue]);
-
   const submit = handleSubmit((values) => {
     setServerError(null);
     create.mutate(
@@ -314,7 +308,11 @@ export function NewProductForm({
         <Segmented
           label={C.saleMode}
           value={v.sale_mode ?? 'unit'}
-          onChange={(m) => setValue('sale_mode', m, { shouldValidate: formState.isSubmitted })}
+          onChange={(m) => {
+            setValue('sale_mode', m, { shouldValidate: formState.isSubmitted });
+            // Satuan default per cara jual: kemasan per g, timbang harga per kg (wireframe S-15).
+            setValue('content_unit', m === 'weight' ? 'kg' : 'g');
+          }}
           options={[
             { value: 'unit', label: C.saleUnit },
             { value: 'weight', label: C.saleWeight },

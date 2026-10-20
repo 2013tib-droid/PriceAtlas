@@ -81,8 +81,9 @@ describe('S-08 Unggahan', () => {
     const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
     expect(headings).toEqual(['Perlu dicek (1)', 'Sedang diproses (2)', 'Selesai', 'Gagal (1)']);
     // M3: "Perlu dicek" langsung ke S-10 (struk, receipt_id dari R13).
-    const receiptId = fx<{ id: string; receipt_id: string }[]>('captures_all').find((c) => c.id === captureIds().needs)!
-      .receipt_id;
+    const receiptId = fx<{ id: string; receipt_id: string }[]>('captures_all').find(
+      (c) => c.id === captureIds().needs,
+    )!.receipt_id;
     expect(within(needs).getByRole('link').getAttribute('href')).toBe(`/struk?id=${receiptId}`);
     expect(sb.rpc).toHaveBeenCalledWith('list_captures', { p_limit: 50, p_kind: null });
   });
