@@ -1,6 +1,6 @@
 # Tahap 5a — Desain Frontend
 
-> **Status: disetujui (2026-10-19).** Semua default Q-43 s/d Q-64 diterima dan dicatat sebagai D-78 s/d D-83. **Tahap 5b M0 selesai, menunggu review** (hasil dan temuan F-25 s/d F-30: §1.4; pertanyaan Q-65 s/d Q-67: §13.4).
+> **Status: disetujui (2026-10-19).** Semua default Q-43 s/d Q-64 diterima dan dicatat sebagai D-78 s/d D-83. **Tahap 5b M0 selesai dan disetujui** (hasil dan temuan F-25 s/d F-30: §1.4; Q-65 s/d Q-67 diputuskan sebagai D-84: §13.4).
 > Dasar: `PROJECT.md` (D-01 s/d D-77, terutama D-57–D-61 dan D-73–D-77), `docs/04-wireframe.md` + `docs/wireframes/index.html` (S-00a s/d S-20, alur 1–8, W-xx), `docs/05-backend-design.md` (R1–R21, W1–W18, §3.1, §4, §5, §7, §10), `docs/06-local-dev.md`, `packages/contracts`, `apps/web`.
 
 Dokumen ini tidak mengubah requirement, keputusan, skema, maupun RPC. Temuan baru ditulis sebagai **F-xx** (melanjutkan F-16 di `docs/05` §0.2), potensi masalah sebagai **P-xx**, dan pertanyaan sebagai **Q-43** dst. Setiap pertanyaan punya usulan default.
@@ -802,6 +802,8 @@ Setiap pertanyaan punya usulan default. Jawab "setuju semua" jika semua default 
 | Q-65 | Anggaran JS 200 kB (F-27): halaman `/` 335 KiB gzip. Tindak lanjut? | **Tetap peringatan sampai M7** (anggaran performa ada di M7). Di M7 diukur ulang; kandidat: validasi input `rpcCall` memakai `zod/mini` atau skema dimuat per layar. Tidak mengubah kontrak. |
 | Q-66 | Data lokal saat sesi berakhir tanpa aksi Keluar (F-29). | **Hanya aksi Keluar/hapus akun yang menghapus IndexedDB** (dengan peringatan antrean, Q-61). Sesi kedaluwarsa: cache di memori dibersihkan, antrean foto tetap, user diminta login lagi. |
 | Q-67 | Input kode OTP: satu kolom (implementasi M0) atau 6 kotak (§7.3)? | **Satu kolom** (autofill + a11y lebih andal). |
+
+**Hasil review M0 (2026-10-20):** pemilik proyek menyerahkan ketiga pertanyaan ke usulan default. Q-65, Q-66, Q-67 → **D-84**.
 
 ### 13.3 Bagian yang belum bisa dirancang penuh
 
