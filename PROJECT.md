@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | Nama sementara | Price Intelligence (repo: PriceAtlas) |
-| Status | Tahap 5b M0 selesai, menunggu review |
+| Status | Tahap 5b M0 selesai dan disetujui, siap masuk M1 (Cari & detail harga) |
 | Terakhir diperbarui | 2026-10-19 |
 
 ---
@@ -290,6 +290,7 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 | D-81 | PWA dan offline | Serwist (spike di M0, cadangan workbox). SW tidak meng-cache REST/Storage/Auth. Antrean foto di IndexedDB diunggah dari halaman, bukan Background Sync. Mulai sesi belanja butuh online. Keluar/hapus akun menghapus data lokal (dengan peringatan jika antrean belum kosong). Ajakan pasang PWA di iOS + `storage.persist()`. Batas UI 10 bagian per struk, peringatan antrean > 50 MB. |
 | D-82 | Kamera dan gambar | Struk memakai kamera bawaan (`<input capture>`), label dan barcode memakai jendela bidik di app. Scan barcode disembunyikan jika BarcodeDetector tidak ada (D-58, tanpa polyfill di MVP). Kompresi di klien: sisi panjang 2560 px (struk) / 2048 px (lainnya), JPEG 0,85–0,88, target ≤ 1,5 MB, EXIF dibuang, aturan lewati kompresi; HEIC apa adanya di browser non-Safari, konversi di worker pada Tahap 6. |
 | D-83 | Login, bahasa, test | Login hanya dengan kode OTP 6 digit (tanpa magic link), template email Indonesia di `supabase/templates/`. UI hanya id-ID tanpa pustaka i18n, teks terpusat di `lib/copy/id.ts`. e2e Playwright memakai Supabase CLI di CI, profil Chromium dan WebKit. |
+| D-84 | Hasil review M0 | Pemilik proyek menyerahkan Q-65 s/d Q-67 ke usulan default (`docs/07-frontend-design.md` §13.4). Anggaran JS 200 kB tetap peringatan CI sampai M7, lalu diukur ulang (kandidat: `zod/mini` untuk validasi input `rpcCall`, skema per layar), tanpa mengubah kontrak. Data lokal (IndexedDB, antrean foto) hanya dihapus lewat aksi Keluar atau hapus akun; sesi kedaluwarsa hanya membersihkan cache di memori dan meminta login lagi. Input kode OTP satu kolom (`autocomplete="one-time-code"`), bukan 6 kotak. |
 
 ---
 
@@ -327,7 +328,7 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 | 2 | Database Design | ✅ Selesai ([domain model](docs/02-domain-model.md), [desain fisik](docs/03-database-design.md), [skema](db/schema.sql)) |
 | 3 | Wireframe | ✅ Selesai ([spesifikasi](docs/04-wireframe.md), [prototipe](docs/wireframes/index.html)) |
 | 4 | Backend | ✅ Selesai ([desain backend](docs/05-backend-design.md), [menjalankan lokal](docs/06-local-dev.md)) |
-| 5 | Frontend | 🔄 5a disetujui ([desain frontend](docs/07-frontend-design.md)); 5b M0 selesai, menunggu review (temuan F-25–F-30, pertanyaan Q-65–Q-67 di §1.4 dan §13.4); M1–M7 berikutnya |
+| 5 | Frontend | 🔄 5a disetujui ([desain frontend](docs/07-frontend-design.md)); 5b M0 selesai dan disetujui (D-84); M1–M7 berikutnya |
 | 6 | AI Integration (termasuk uji OCR, D-16) | — |
 | 7 | Production | — |
 
