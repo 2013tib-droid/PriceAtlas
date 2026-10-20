@@ -285,7 +285,9 @@ async function collectAll(pool: pg.Pool, w: Worker): Promise<Fixtures> {
   await call('confirm_receipt_ok', citra, 'confirm_receipt', {
     p_receipt_id: aeonReceipt,
     p_lines: needLines.map((l) =>
-      l.suggestion ? { line_id: l.id, action: 'accept' } : { line_id: l.id, action: 'replace', product_id: IDS.milo3in1 },
+      l.suggestion
+        ? { line_id: l.id, action: 'accept' }
+        : { line_id: l.id, action: 'replace', product_id: IDS.milo3in1 },
     ),
   });
   await call('receipt_confirmed', citra, 'get_receipt', { p_receipt_id: aeonReceipt });
@@ -325,6 +327,12 @@ async function collectAll(pool: pg.Pool, w: Worker): Promise<Fixtures> {
     p_patch: { normal_price: null, store_id: IDS.aeon },
     p_expected_updated_at: label2!.updated_at,
   });
+  // Harga member dengan program katalog; Citra bukan member → member tidak dihitung (D-27).
+  await call('update_item_member_price', citra, 'update_capture_item', {
+    p_item_id: label2!.id,
+    p_patch: { member_price: 21000, member_program_id: IDS.aeonMember },
+    p_expected_updated_at: (data.update_item_member_only as Item).updated_at,
+  });
   await call('confirm_items_no_price', citra, 'confirm_capture_items', {
     p_capture_id: labelCapture,
     p_items: [{ item_id: label2!.id, action: 'accept' }],
@@ -353,6 +361,7 @@ async function collectAll(pool: pg.Pool, w: Worker): Promise<Fixtures> {
     p_items: [{ item_id: shopeeItem.id, action: 'accept' }],
   });
 
+  await call('programs', citra, 'get_my_programs');
   // S-12: R17 setelah konfirmasi; toko/cabang privat baru (W17).
   await call('recent_locations', citra, 'recent_locations', { p_limit: 10 });
   await call('recent_locations_empty', budi, 'recent_locations', { p_limit: 10 });
@@ -360,7 +369,12 @@ async function collectAll(pool: pg.Pool, w: Worker): Promise<Fixtures> {
     p_store: { id: 'c0000000-0000-0000-0000-000000000001', name: 'Toko Makmur Jaya', channel: 'offline' },
   });
   await call('create_branch', citra, 'create_private_branch', {
-    p_branch: { id: 'c0000000-0000-0000-0000-000000000002', store_id: 'c0000000-0000-0000-0000-000000000001', name: 'Pasar Modern', city: 'Tangerang' },
+    p_branch: {
+      id: 'c0000000-0000-0000-0000-000000000002',
+      store_id: 'c0000000-0000-0000-0000-000000000001',
+      name: 'Pasar Modern',
+      city: 'Tangerang',
+    },
   });
   // S-15: W8 sukses, ukuran kosong untuk kemasan (23514), barcode tumpang tindih (23P01).
   const newProduct = {

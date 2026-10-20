@@ -11,8 +11,25 @@
       "field_confidence": { "store": 0.4, "date": 0.62, "total": 0.98 }
     },
     "lines": [
-      { "line_no": 1, "line_type": "product", "raw_text": "MILO ORI 200G", "quantity": 1, "unit_amount": 21000, "line_amount": 21000, "barcode": "8992696404442", "parse_confidence": 0.98 },
-      { "line_no": 2, "line_type": "product", "raw_text": "GULA PASIR 1KG", "quantity": 1, "unit_amount": 16000, "line_amount": 16000, "parse_confidence": 0.9 }
+      {
+        "line_no": 1,
+        "line_type": "product",
+        "raw_text": "MILO ORI 200G",
+        "quantity": 1,
+        "unit_amount": 21000,
+        "line_amount": 21000,
+        "barcode": "8992696404442",
+        "parse_confidence": 0.98
+      },
+      {
+        "line_no": 2,
+        "line_type": "product",
+        "raw_text": "GULA PASIR 1KG",
+        "quantity": 1,
+        "unit_amount": 16000,
+        "line_amount": 16000,
+        "parse_confidence": 0.9
+      }
     ],
     "adjustments": [{ "kind": "points", "description": "POIN", "points": 37 }]
   },

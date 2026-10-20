@@ -354,6 +354,13 @@ export const RecentLocationSchema = z.looseObject({
 });
 export type RecentLocation = z.infer<typeof RecentLocationSchema>;
 
+/** R21 get_my_programs (S-11 nama program member + "Saya member"; S-19b di M6). */
+export const MyProgramSchema = z.looseObject({
+  program_id: Uuid, program_name: z.string(), status: z.enum(['active', 'discontinued']), store: StoreRefSchema,
+  is_member: z.boolean(),
+});
+export type MyProgram = z.infer<typeof MyProgramSchema>;
+
 // ---------------------------------------------------------------------------
 // Input RPC tulis (§3.2, §4)
 // ---------------------------------------------------------------------------

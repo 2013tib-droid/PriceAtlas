@@ -12,13 +12,22 @@ export function SearchDock({
   onChange,
   onSubmit,
   inputRef,
+  placement = 'tabbar',
+  showScan = true,
+  label = SEARCH_COPY.label,
+  id = 'search-dock',
 }: {
   value: string;
   onChange: (value: string) => void;
   onSubmit: (value: string) => void;
   inputRef?: RefObject<HTMLInputElement | null>;
+  /** `bottom`: di lapisan layar penuh tanpa tab bar (S-14). */
+  placement?: 'tabbar' | 'bottom';
+  showScan?: boolean;
+  label?: string;
+  id?: string;
 }) {
-  const scan = useBarcodeSupport();
+  const scan = useBarcodeSupport() && showScan;
   return (
     <form
       role="search"
@@ -26,12 +35,16 @@ export function SearchDock({
         e.preventDefault();
         onSubmit(value);
       }}
-      className="fixed inset-x-0 bottom-[calc(var(--spacing-tabbar)+env(safe-area-inset-bottom))] z-20 border-t border-divider bg-surface px-3 py-2"
+      className={
+        placement === 'tabbar'
+          ? 'fixed inset-x-0 bottom-[calc(var(--spacing-tabbar)+env(safe-area-inset-bottom))] z-20 border-t border-divider bg-surface px-3 py-2'
+          : 'fixed inset-x-0 bottom-0 z-20 border-t border-divider bg-surface px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]'
+      }
     >
       <div className="mx-auto flex max-w-xl items-center gap-2">
         <div className="relative flex-1">
-          <label htmlFor="search-dock" className="sr-only">
-            {SEARCH_COPY.label}
+          <label htmlFor={id} className="sr-only">
+            {label}
           </label>
           <Search
             aria-hidden
@@ -39,7 +52,7 @@ export function SearchDock({
           />
           <input
             ref={inputRef}
-            id="search-dock"
+            id={id}
             type="search"
             inputMode="search"
             enterKeyHint="search"
