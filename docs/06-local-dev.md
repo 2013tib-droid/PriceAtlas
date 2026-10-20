@@ -1,8 +1,8 @@
-# Tahap 4b — Menjalankan Backend Secara Lokal
+# Menjalankan PriceAtlas Secara Lokal (backend Tahap 4b, frontend Tahap 5b)
 
 > Dasar: `docs/05-backend-design.md` (§1.4 penjadwalan, §1.5 struktur repo, §5 pipeline, §7.7 rahasia, §8 test).
 > Dua mode: **A** (PostgreSQL biasa + stub, tanpa Supabase) dan **B** (Supabase CLI).
-> Tidak ada UI (Tahap 5) dan tidak ada OCR/AI sungguhan (Tahap 6): extractor dan matcher AI memakai **stub berbasis fixture**.
+> Tidak ada OCR/AI sungguhan (Tahap 6): extractor dan matcher AI memakai **stub berbasis fixture**. Frontend (`apps/web`, Tahap 5b) butuh mode B: lihat §4.
 
 ---
 
@@ -10,7 +10,7 @@
 
 | Alat | Versi | Mode |
 |---|---|---|
-| PostgreSQL server + klien (`psql`, `pg_dump`) | 16 (paket contrib, untuk `pg_trgm`, `btree_gist`, `dblink`) | A |
+| PostgreSQL server + klien (`psql`, `pg_dump`) | **17** (D-78; paket contrib, untuk `pg_trgm`, `btree_gist`, `dblink`). `pg_dump` harus versi mayor yang sama dengan server (snapshot dan `00_baseline_equivalence`). | A |
 | Node.js | ≥ 22 | A, B |
 | pnpm | 10 (`corepack enable`) | A, B |
 | Supabase CLI + Docker | terbaru | B |
@@ -37,10 +37,12 @@ db/schema.sql          snapshot hasil generate dari migration (D-72) — jangan 
 db/tests/              harness SQL (L1): run.sh, build_db.sh, smoke.sql (43 test lama), flows/*
 db/scripts/            dev-db.sh, snapshot.sh, privileges.sh, gen_inventory_test.sh
 apps/worker/           worker Node.js: pipeline capture + job (stub extractor, fixture di test/fixtures)
-apps/web/              scaffold Next.js: hanya POST /api/account/delete
+apps/web/              PWA Next.js 16 (Tahap 5b): /masuk, layout (app), service worker; POST /api/account/delete
 packages/contracts/    zod: input/output RPC, kode error, kontrak extra, unitPrice()
 packages/ai-tools/     6 tool AI (skema + handler ke RPC), belum disambungkan ke Claude
 packages/testkit/      utilitas test: DB uji + klien RPC ala PostgREST dengan JWT simulasi
+packages/l4/           test L4 terhadap Supabase CLI (run.sh): hak akses, Storage, PTnnn → HTTP, OTP, worker
+packages/db-types/     tipe database hasil `supabase gen types` (dibangkitkan + dicek drift di CI)
 ```
 
 ---
@@ -181,7 +183,7 @@ Gambar tanpa fixture → `PermanentError('unsupported')`. Untuk fixture baru: bu
 ```bash
 bash db/tests/run.sh                  # L1: smoke (43, tidak diubah) + flows/*, satu DB baru per file
 bash db/tests/run.sh 70_              # hanya flow yang namanya memuat "70_"
-pnpm -r --workspace-concurrency=1 test   # L2 + L3 (membangun DB uji sendiri: priceatlas_l2_*, priceatlas_l3_*)
+pnpm -r --workspace-concurrency=1 test   # L2 + L3 + L5a/L5b web (membangun DB uji sendiri: priceatlas_l2_*, priceatlas_l3_*)
 pnpm -r typecheck
 bash db/scripts/snapshot.sh --check   # db/schema.sql tanpa drift
 bash scripts/check-secrets.sh
@@ -192,20 +194,21 @@ Setelah mengubah migration:
 ```bash
 bash db/scripts/snapshot.sh                 # tulis ulang db/schema.sql
 bash db/scripts/gen_inventory_test.sh       # tulis ulang whitelist hak akses 99_*, lalu TINJAU diff-nya
+pnpm --filter @priceatlas/db-types gen      # butuh mode B (§3.5); CI memeriksa drift
 ```
 
-Test L1 `60_public_share.sql` dan `70_capture_pipeline.sql` membuka sesi kedua lewat `dblink` ke database yang sama (`dbname=… user=postgres`, koneksi socket lokal). Server harus mengizinkan koneksi lokal itu tanpa kata sandi (default image Docker `postgres` dan paket Ubuntu dengan `peer` untuk user `postgres`).
+Test L1 `60_public_share.sql` dan `70_capture_pipeline.sql` membuka sesi kedua lewat `dblink` ke database yang sama (`dbname=… user=postgres`, koneksi socket lokal). Server harus mengizinkan koneksi lokal itu tanpa kata sandi (default image Docker `postgres` dan paket Ubuntu dengan `peer` untuk user `postgres`). Socket dicari di direktori default libpq server itu: jika biner PostgreSQL berasal dari paket lain (mis. biner portabel yang memakai `/tmp`), jalankan server dengan `-k /var/run/postgresql,/tmp`.
 
 ---
 
 ## 3. Mode B — Supabase CLI
 
-> Belum dijalankan di lingkungan pembuatan Tahap 4b (tanpa Docker). Langkah di bawah mengikuti dokumentasi Supabase CLI; perbedaan yang ditemukan saat dijalankan dicatat sebagai pertanyaan baru (lihat Q-42 di `docs/05-backend-design.md`).
+> Diverifikasi otomatis oleh job CI `supabase-e2e` (D-78, Tahap 5b M0): `supabase start`, test L4, `supabase gen types` + cek drift, dan e2e Playwright. Lingkungan cloud pembuatan M0 tidak bisa menarik image Docker (CDN registry diblokir), jadi langkah ini belum pernah dijalankan di sana; temuan dari CI dicatat sebagai F-25 dst. di `docs/07-frontend-design.md` §1.4.
 
 ### 3.1 Menyalakan Supabase lokal
 
 ```bash
-supabase start          # menerapkan supabase/migrations/* lalu supabase/seed.sql
+supabase start          # PostgreSQL 17 (D-78); menerapkan supabase/migrations/* lalu supabase/seed.sql
 supabase status -o env  # API_URL, ANON_KEY, SERVICE_ROLE_KEY, DB_URL
 ```
 
@@ -213,7 +216,8 @@ Perbedaan dengan mode A:
 - Stub **tidak** dipakai: `auth`, `storage`, role, dan default privileges asli dari Supabase.
 - `pg_cron` tersedia, jadi migration 0900 membuat jadwal. Worker **tidak** perlu `--dev-scheduler`.
 - Bucket `captures` didefinisikan di `supabase/config.toml` dan di migration 0150 (idempoten).
-- Login: email OTP lewat Inbucket (`http://localhost:54324`), Google lewat `GOOGLE_OAUTH_CLIENT_ID/SECRET` di env.
+- Login: email OTP berisi **kode 6 digit saja** (template Indonesia `supabase/templates/otp.html`, F-20, D-83). Email lokal ditangkap **Mailpit** (`[local_smtp]`, F-18): UI di `http://127.0.0.1:54324`, API `GET /api/v1/messages`.
+- Google **mati** secara default (F-21). Untuk mencobanya: isi `GOOGLE_OAUTH_CLIENT_ID/SECRET`, lalu `SUPABASE_AUTH_EXTERNAL_GOOGLE_ENABLED=true supabase start`. Jangan memakai `env(...)` untuk nilai boolean di `config.toml`: nilai kosong membuat CLI gagal membaca config.
 
 ### 3.2 `.env` untuk mode B
 
@@ -222,9 +226,12 @@ NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<ANON_KEY>
 SUPABASE_SERVICE_ROLE_KEY=<SERVICE_ROLE_KEY>      # server-only
 DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres   # koneksi sesi (LISTEN)
+WORKER_DB_ROLE=service_role                        # F-22: hak worker sama dengan mode A dan produksi
 STORAGE_BACKEND=supabase
 EXTRACTOR=stub
 ```
+
+`WORKER_DB_ROLE=service_role` membuat worker terhubung sebagai `postgres` lalu berganti role lewat parameter startup `-c role=service_role` (`apps/worker/src/db.ts`). Tanpa itu worker berjalan sebagai pemilik objek dan bug hak akses worker bisa lolos (F-22). Test L4 memeriksa bahwa `postgres` bisa memakai `service_role` di database Supabase. Apakah pooler produksi (Supavisor) meneruskan parameter startup itu diperiksa di Tahap 7; jika tidak, ganti ke `SET ROLE` setelah connect.
 
 ### 3.3 Alur manual
 
@@ -257,9 +264,78 @@ Job `delete_household` lalu dikerjakan worker (hapus file Storage, cascade data,
 ### 3.5 Tipe database
 
 ```bash
-pnpm --filter @priceatlas/db-types gen     # supabase gen types typescript --local
+pnpm --filter @priceatlas/db-types gen     # supabase gen types typescript --local --schema public
 ```
 
-### 3.6 Test L4 (opsional, manual)
+File hasil di-commit. Job CI `supabase-e2e` membangkitkan ulang dan gagal jika berbeda (F-19, D-78): setelah mengubah migration, jalankan perintah ini lalu commit.
 
-Belum diotomasi di Tahap 4b. Yang perlu dicek manual: policy Storage asli (unggah ke folder household lain ditolak, hapus oleh user ditolak), pemetaan error `PTnnn` → HTTP oleh PostgREST, OTP lewat Inbucket, dan default privileges asli (jalankan `db/tests/flows/99_privilege_inventory.sql` terhadap database Supabase lokal setelah `create schema test` + `\i db/tests/lib/privilege_inventory.sql`).
+### 3.6 Test L4
+
+Diotomasi di job CI `supabase-e2e` (D-78). Manual, setelah `supabase start`:
+
+```bash
+set -a; source <(supabase status -o env); set +a
+export NEXT_PUBLIC_SUPABASE_URL=$API_URL NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON_KEY \
+       SUPABASE_SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY SUPABASE_DB_URL=$DB_URL
+pnpm --filter @priceatlas/l4 test:l4
+```
+
+| Bagian | Isi |
+|---|---|
+| SQL | `db/tests/flows/99_privilege_inventory.sql` terhadap DB Supabase asli (default privileges asli); `packages/l4/sql/l4_supabase.sql`: `postgres` bisa memakai `service_role` (F-22), zona waktu `Asia/Jakarta`, bucket + policy `captures`, 6 jadwal pg_cron, trigger signup, extension di schema `extensions` |
+| HTTP | OTP lewat Mailpit (subjek + isi template, kode salah ditolak, R1 setelah login); `PT404/409/422` → HTTP + `parseRpcError`; anon tidak bisa RPC; policy Storage (folder sendiri/lain, kedalaman path, upsert, baca user lain, signed URL, hapus oleh user, tipe file); worker `--once` dengan `WORKER_DB_ROLE=service_role` sampai `needs_confirmation` |
+
+---
+
+## 4. Frontend (`apps/web`, Tahap 5b)
+
+Frontend butuh Supabase asli (Auth, PostgREST, Storage), jadi jalankan **mode B** dulu (§3). Arsitektur: `docs/07-frontend-design.md` (D-79–D-83).
+
+### 4.1 Menjalankan
+
+```bash
+supabase start
+cat > apps/web/.env.local <<ENV
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<ANON_KEY dari supabase status>
+SUPABASE_SERVICE_ROLE_KEY=<SERVICE_ROLE_KEY>     # hanya Route Handler /api/account/delete
+ENV
+pnpm --filter @priceatlas/web dev                # http://localhost:3000 → /masuk
+```
+
+Login: ketik email di `/masuk`, ambil kode 6 digit dari Mailpit (`http://127.0.0.1:54324`), ketik di app. User baru otomatis mendapat household (trigger signup). Google mati di lokal kecuali diaktifkan (§3.1).
+
+Service worker **mati** di `next dev` (cache membingungkan saat develop). Untuk mencobanya: `NEXT_PUBLIC_SW_DEV=1 pnpm --filter @priceatlas/web dev`, atau build produksi:
+
+```bash
+pnpm --filter @priceatlas/web build && pnpm --filter @priceatlas/web start
+```
+
+Menguji di HP sungguhan butuh HTTPS (kamera, `crypto.randomUUID`, service worker; P-10): `pnpm --filter @priceatlas/web dev --experimental-https` atau tunnel HTTPS.
+
+### 4.2 Pemeriksaan
+
+```bash
+pnpm --filter @priceatlas/web lint            # ESLint flat + jsx-a11y (D-80)
+pnpm --filter @priceatlas/web format:check    # Prettier (format: pnpm --filter @priceatlas/web format)
+pnpm --filter @priceatlas/web typecheck       # app + service worker (tsconfig.sw.json)
+pnpm --filter @priceatlas/web test            # L5a unit + L5b komponen (vitest, jsdom)
+pnpm --filter @priceatlas/web build && pnpm --filter @priceatlas/web check:bundle   # tanpa service role, anggaran JS
+pnpm --filter @priceatlas/web test:e2e        # Playwright (butuh Supabase lokal + env service role untuk test)
+```
+
+e2e memakai `next start` (Playwright menyalakannya), env `NEXT_PUBLIC_SUPABASE_*` dan `SUPABASE_SERVICE_ROLE_KEY` (hanya proses test, untuk `auth.admin.generateLink`), dan `MAILPIT_URL`. Tanpa `SUPABASE_SERVICE_ROLE_KEY`, test yang butuh Supabase dilewati; test shell offline tanpa sesi tetap jalan. Browser lain: `PW_CHROMIUM_PATH=<path chromium>`.
+
+### 4.3 Peta `apps/web`
+
+| Path | Isi |
+|---|---|
+| `proxy.ts`, `lib/auth/proxy-rules.ts` | Segarkan sesi (`getClaims`), alihkan **navigasi dokumen** tanpa sesi ke `/masuk?next=`. Permintaan non-navigasi (precache service worker) mendapat shell statis apa adanya. |
+| `app/auth/callback/route.ts` | PKCE Google (D-79). Tidak memakai service role. |
+| `app/(auth)/masuk`, `features/auth` | S-00a: email → kode 6 digit → R1 → `?next` |
+| `app/(app)/layout.tsx`, `components/app` | Penjaga sesi di klien, `TabBar`, `OfflineStrip`, sheet foto (kerangka) |
+| `lib/data/rpc.ts` | `rpcCall`: validasi input `RPC_INPUTS` (contracts) → `supabase.rpc` → `parseRpcError` → `AppError` |
+| `lib/copy/id.ts` | Semua teks UI + pesan untuk setiap `ErrorCode`, SQLSTATE, Route, `capture.error_code` |
+| `lib/format` | Rupiah, harga per satuan, tanggal di zona household |
+| `lib/data/query-client.ts`, `lib/offline/db.ts` | TanStack Query + persist ke IndexedDB `priceatlas:<user_id>` (data struk tidak di-persist) |
+| `app/sw.ts`, `app/serwist/[path]/route.ts`, `lib/offline/sw-rules.ts` | Service worker Serwist (`/serwist/sw.js`): precache aset, shell network-first + `/offline`; Supabase, `/api`, `/auth` tidak pernah di-cache |

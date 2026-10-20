@@ -3,8 +3,15 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "exports": { ".": "./src/database.ts" },
+  "exports": {
+    ".": "./src/database.ts"
+  },
   "scripts": {
-    "gen": "supabase gen types typescript --local --schema public > src/database.ts"
+    "gen": "supabase gen types typescript --local --schema public > src/database.ts && prettier --write src/database.ts",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "prettier": "^3.9.10",
+    "typescript": "5.9.3"
   }
 }

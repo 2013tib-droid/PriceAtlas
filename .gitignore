@@ -8,3 +8,5 @@ dist/
 supabase/.branches/
 supabase/.temp/
 next-env.d.ts
+test-results/
+playwright-report/

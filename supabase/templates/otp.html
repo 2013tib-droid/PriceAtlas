@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kode masuk PriceAtlas</title>
+  </head>
+  <!-- F-20, D-83: hanya kode 6 digit. Tidak ada tautan magic link (P-05: di iOS tautan
+       membuka Safari, bukan PWA yang terpasang). -->
+  <body style="margin:0;padding:24px;background:#ffffff;color:#1a1a1a;font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;">
+    <h1 style="font-size:20px;margin:0 0 16px;">Kode masuk PriceAtlas</h1>
+    <p style="font-size:16px;margin:0 0 8px;">Ketik kode ini di aplikasi untuk masuk:</p>
+    <p style="font-size:32px;font-weight:700;letter-spacing:6px;margin:0 0 16px;" data-otp="{{ .Token }}">{{ .Token }}</p>
+    <p style="font-size:14px;margin:0 0 8px;">Kode berlaku 10 menit dan hanya bisa dipakai sekali.</p>
+    <p style="font-size:14px;margin:0;color:#4a4a4a;">Jika kamu tidak meminta kode ini, abaikan email ini. Jangan berikan kode ini kepada siapa pun.</p>
+  </body>
+</html>

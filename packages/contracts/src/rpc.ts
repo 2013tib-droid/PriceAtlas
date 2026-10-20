@@ -264,3 +264,74 @@ export const RPC_NAMES = {
   ],
   serviceRole: ['begin_account_deletion'],
 } as const;
+
+// ---------------------------------------------------------------------------
+// R1 konteks user (S-00a setelah login, docs/07 §3.5)
+// ---------------------------------------------------------------------------
+export const MyContextSchema = z.looseObject({
+  user_id: Uuid,
+  display_name: z.string().nullable(),
+  household: z.looseObject({
+    id: Uuid, name: z.string(), default_currency: z.string(), timezone: z.string(), share_prices_public: z.boolean(),
+  }),
+  role: z.string().nullable(),
+  program_ids: z.array(Uuid),
+});
+export type MyContext = z.infer<typeof MyContextSchema>;
+
+// ---------------------------------------------------------------------------
+// Input semua RPC klien (rpcCall di apps/web memvalidasi lewat peta ini, docs/07 §3.4).
+// Test sql-equivalence memastikan kuncinya = RPC_NAMES.read + write dan argumennya
+// ada di fungsi SQL.
+// ---------------------------------------------------------------------------
+const NoArgs = z.object({});
+const CaptureIdInput = z.object({ p_capture_id: Uuid });
+
+export const RPC_INPUTS = {
+  get_my_context: NoArgs,
+  get_client_config: NoArgs,
+  search_products: SearchProductsInput,
+  get_product_cards: z.object({ p_ids: z.array(Uuid).max(50) }),
+  get_offline_cache: z.object({ p_viewed_ids: z.array(Uuid).max(150).optional(), p_top: z.number().int().min(0).max(200).optional() }),
+  find_product_by_barcode: z.object({ p_code: z.string().min(1).max(64), p_store_id: Uuid.nullish() }),
+  get_product_detail: ProductIdInput,
+  price_history: PriceHistoryInput,
+  price_chart: PriceTrendInput,
+  price_trend: PriceTrendInput,
+  compare_sizes: CompareSizesInput,
+  where_cheaper: WhereCheaperInput,
+  list_captures: z.object({
+    p_limit: z.number().int().min(1).max(100).optional(), p_before: Timestamp.nullish(),
+    p_kind: z.enum(['receipt', 'price_label', 'marketplace']).nullish(),
+  }),
+  get_capture: CaptureIdInput,
+  get_receipt: z.object({ p_receipt_id: Uuid }),
+  get_capture_items: CaptureIdInput,
+  recent_locations: z.object({ p_limit: z.number().int().min(1).max(50).optional() }),
+  get_active_session: NoArgs,
+  merge_product_preview: MergeProductInput,
+  price_record_detail: z.object({ p_id: Uuid }),
+  get_my_programs: NoArgs,
+  submit_capture: SubmitCaptureInput,
+  retry_capture: CaptureIdInput,
+  delete_capture: CaptureIdInput,
+  confirm_receipt: ConfirmReceiptInput,
+  confirm_capture_items: ConfirmCaptureItemsInput,
+  correct_price_record: CorrectPriceRecordInput,
+  correct_receipt_line: CorrectReceiptLineInput,
+  create_private_product: CreatePrivateProductInput,
+  move_price_records: MovePriceRecordsInput,
+  merge_product: MergeProductInput,
+  start_shopping_session: StartSessionInput,
+  extend_shopping_session: SessionInput,
+  end_shopping_session: SessionInput,
+  set_share_prices_public: SetSharePricesPublicInput,
+  share_existing_prices: NoArgs,
+  set_program_membership: SetProgramMembershipInput,
+  create_private_store: CreatePrivateStoreInput,
+  create_private_branch: CreatePrivateBranchInput,
+  update_capture_item: UpdateCaptureItemInput,
+} as const satisfies Record<(typeof RPC_NAMES)['read' | 'write'][number], z.ZodType>;
+
+export type RpcName = keyof typeof RPC_INPUTS;
+export type RpcInput<N extends RpcName> = z.input<(typeof RPC_INPUTS)[N]>;

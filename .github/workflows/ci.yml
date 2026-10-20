@@ -3,13 +3,16 @@ name: CI
 on:
   push:
   pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 19 * * *' # nightly 02:17 WIB: supabase-e2e terhadap image Supabase terbaru yang di-pin CLI
 
 jobs:
   test:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16
+        image: postgres:17
         env:
           POSTGRES_PASSWORD: postgres
         ports: ["5432:5432"]
@@ -24,14 +27,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Klien PostgreSQL 16
+      - name: Klien PostgreSQL 17
         run: |
           sudo install -d /usr/share/postgresql-common/pgdg
           sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
           echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
           sudo apt-get update -q
-          sudo apt-get install -y -q postgresql-client-16
-          echo "/usr/lib/postgresql/16/bin" >> "$GITHUB_PATH"
+          sudo apt-get install -y -q postgresql-client-17
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
 
       - name: Rahasia tidak masuk repo
         run: bash scripts/check-secrets.sh
@@ -57,8 +60,115 @@ jobs:
       - name: Typecheck
         run: pnpm -r typecheck
 
-      - name: Test TypeScript (L2 + L3)
+      - name: Lint + format apps/web (ESLint jsx-a11y, Prettier; D-80)
+        run: |
+          pnpm --filter @priceatlas/web lint
+          pnpm --filter @priceatlas/web format:check
+
+      - name: Test TypeScript (L2 + L3 + L5a/L5b web)
         run: pnpm -r --workspace-concurrency=1 test
 
-      - name: Build apps/web (route handler)
+      - name: Build apps/web (next build, service worker Serwist)
         run: pnpm --filter @priceatlas/web build
+
+      - name: Bundle klien tanpa service role + anggaran JS (docs/07 §11.6)
+        run: pnpm --filter @priceatlas/web check:bundle
+
+  # D-78, docs/07 §11.4: Supabase CLI asli (mode B). L4, db-types + cek drift, e2e Playwright.
+  supabase-e2e:
+    if: github.event_name != 'push' || github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      SUPABASE_CLI_VERSION: 2.121.0
+      # Layanan yang tidak dipakai test dimatikan supaya start lebih cepat dan image lebih sedikit.
+      SUPABASE_EXCLUDE: studio,edge-runtime,logflare,vector,realtime,imgproxy,supavisor
+      MAILPIT_URL: http://127.0.0.1:54324
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: ${{ env.SUPABASE_CLI_VERSION }}
+
+      - name: Cache image Docker Supabase
+        id: images
+        uses: actions/cache@v4
+        with:
+          path: /tmp/supabase-images.tar
+          # Key tidak boleh memuat koma; ganti v1 jika SUPABASE_EXCLUDE diubah.
+          key: supabase-images-v1-${{ runner.os }}-${{ env.SUPABASE_CLI_VERSION }}-${{ hashFiles('supabase/config.toml') }}
+
+      - name: Muat image dari cache
+        if: steps.images.outputs.cache-hit == 'true'
+        run: docker load -i /tmp/supabase-images.tar
+
+      - name: supabase start (PostgreSQL 17, migration + seed)
+        id: start
+        run: supabase start -x "$SUPABASE_EXCLUDE"
+
+      - name: Env dari supabase status
+        run: |
+          supabase status -o env > /tmp/sb.env
+          echo "Variabel tersedia:"; sed 's/=.*//' /tmp/sb.env
+          set -a; source /tmp/sb.env; set +a
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=${API_URL}"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${ANON_KEY:-$PUBLISHABLE_KEY}"
+            echo "SUPABASE_SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY:-$SECRET_KEY}"
+            echo "SUPABASE_DB_URL=${DB_URL}"
+          } >> "$GITHUB_ENV"
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: L4 — hak akses, Storage, PTnnn → HTTP, OTP Mailpit, worker service_role
+        run: pnpm --filter @priceatlas/l4 test:l4
+
+      - name: packages/db-types dibangkitkan + cek drift (F-19)
+        run: |
+          pnpm --filter @priceatlas/db-types gen
+          pnpm --filter @priceatlas/db-types typecheck
+          if ! git diff --exit-code -- packages/db-types; then
+            echo "::error::packages/db-types/src/database.ts berbeda dari 'supabase gen types'. Jalankan 'pnpm --filter @priceatlas/db-types gen' lalu commit."
+            exit 1
+          fi
+
+      - name: Simpan image untuk cache
+        if: always() && steps.start.outcome == 'success' && steps.images.outputs.cache-hit != 'true'
+        run: docker save $(docker images --format '{{.Repository}}:{{.Tag}}' | grep -v '<none>') -o /tmp/supabase-images.tar
+
+      - name: Build apps/web terhadap Supabase lokal
+        run: pnpm --filter @priceatlas/web build
+
+      - name: Bundle klien tidak memuat nilai service role key
+        run: pnpm --filter @priceatlas/web check:bundle
+
+      - name: Cache browser Playwright
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Browser Playwright (Chromium + WebKit)
+        run: pnpm --filter @priceatlas/web exec playwright install --with-deps chromium webkit
+
+      - name: e2e Playwright (login OTP, shell offline)
+        run: pnpm --filter @priceatlas/web test:e2e
+
+      - name: Artefak jika gagal
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: supabase-e2e
+          path: |
+            apps/web/playwright-report
+            apps/web/test-results
+            packages/db-types/src/database.ts
+          if-no-files-found: ignore

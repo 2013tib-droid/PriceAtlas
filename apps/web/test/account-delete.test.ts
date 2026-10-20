@@ -28,7 +28,11 @@ describe('deleteAccount (logika route)', () => {
   });
   it.each([
     ['tanpa sesi', { getUser: async () => null }, { confirm: ACCOUNT_DELETE_CONFIRMATION }],
-    ['login lebih dari 15 menit', { getUser: async () => ({ id: USERS.a, last_sign_in_at: '2026-10-19T09:40:00Z' }) }, { confirm: ACCOUNT_DELETE_CONFIRMATION }],
+    [
+      'login lebih dari 15 menit',
+      { getUser: async () => ({ id: USERS.a, last_sign_in_at: '2026-10-19T09:40:00Z' }) },
+      { confirm: ACCOUNT_DELETE_CONFIRMATION },
+    ],
     ['tanpa teks konfirmasi', {}, {}],
     ['teks konfirmasi salah', {}, { confirm: 'hapus' }],
   ])('%s → REAUTH_REQUIRED tanpa perubahan', async (_l, over, body) => {
@@ -37,13 +41,24 @@ describe('deleteAccount (logika route)', () => {
     expect(calls).toEqual([]);
   });
   it('gagal di langkah 2 → tidak ada perubahan', async () => {
-    const { deps, calls } = fakes({ beginDeletion: async () => { throw new Error('db'); } });
-    expect(await deleteAccount(deps, { confirm: ACCOUNT_DELETE_CONFIRMATION }, now)).toMatchObject({ status: 500, body: { error: 'DELETE_FAILED' } });
+    const { deps, calls } = fakes({
+      beginDeletion: async () => {
+        throw new Error('db');
+      },
+    });
+    expect(await deleteAccount(deps, { confirm: ACCOUNT_DELETE_CONFIRMATION }, now)).toMatchObject({
+      status: 500,
+      body: { error: 'DELETE_FAILED' },
+    });
     expect(calls).toEqual([]);
   });
   it('gagal di langkah 3 → bisa diulang', async () => {
     let fail = true;
-    const { deps } = fakes({ deleteAuthUser: async () => { if (fail) throw new Error('auth'); } });
+    const { deps } = fakes({
+      deleteAuthUser: async () => {
+        if (fail) throw new Error('auth');
+      },
+    });
     expect((await deleteAccount(deps, { confirm: ACCOUNT_DELETE_CONFIRMATION }, now)).status).toBe(500);
     fail = false;
     expect((await deleteAccount(deps, { confirm: ACCOUNT_DELETE_CONFIRMATION }, now)).status).toBe(202);
@@ -77,7 +92,10 @@ describe('deleteAccount terhadap database lokal', () => {
     expect(h.rows[0].archived_at).not.toBeNull();
     const m = await admin.query('select count(*)::int as n from public.household_member where household_id = $1', [hh]);
     expect(m.rows[0].n).toBe(0);
-    const j = await admin.query(`select count(*)::int as n from app.job where kind = 'delete_household' and payload ->> 'household_id' = $1`, [hh]);
+    const j = await admin.query(
+      `select count(*)::int as n from app.job where kind = 'delete_household' and payload ->> 'household_id' = $1`,
+      [hh],
+    );
     expect(j.rows[0].n).toBe(1);
   });
 
@@ -85,8 +103,12 @@ describe('deleteAccount terhadap database lokal', () => {
     const c = await admin.connect();
     try {
       await c.query('begin');
-      await c.query(`select set_config('request.jwt.claims', $1, true), set_config('role', 'authenticated', true)`, [JSON.stringify({ sub: USERS.b })]);
-      await expect(c.query('select public.begin_account_deletion($1)', [USERS.b])).rejects.toMatchObject({ code: '42501' });
+      await c.query(`select set_config('request.jwt.claims', $1, true), set_config('role', 'authenticated', true)`, [
+        JSON.stringify({ sub: USERS.b }),
+      ]);
+      await expect(c.query('select public.begin_account_deletion($1)', [USERS.b])).rejects.toMatchObject({
+        code: '42501',
+      });
     } finally {
       await c.query('rollback');
       c.release();

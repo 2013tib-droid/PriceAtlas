@@ -12,7 +12,8 @@ max_rows = 1000
 [db]
 port = 54322
 shadow_port = 54320
-major_version = 16
+# D-78: Supabase hanya menyediakan 15/17 (F-17). Mode A dan CI juga memakai 17.
+major_version = 17
 
 [db.seed]
 enabled = true
@@ -22,7 +23,9 @@ sql_paths = ["./seed.sql"]
 enabled = true
 port = 54323
 
-[inbucket]
+# F-18: Mailpit (pengganti [inbucket] yang usang). UI + API di http://127.0.0.1:54324
+# (test L4 membaca email OTP lewat /api/v1/...).
+[local_smtp]
 enabled = true
 port = 54324
 
@@ -40,12 +43,16 @@ allowed_mime_types = ["image/jpeg", "image/png", "image/webp", "image/heic"]
 [auth]
 enabled = true
 site_url = "http://localhost:3000"
-additional_redirect_urls = ["http://localhost:3000/auth/callback"]
+additional_redirect_urls = ["http://localhost:3000/auth/callback", "http://127.0.0.1:3000/auth/callback"]
 jwt_expiry = 3600
 enable_refresh_token_rotation = true
 enable_signup = true
 
-# D-60: login email OTP + Google.
+# Lokal/CI saja: default CLI 2 email/jam terlalu kecil untuk test L4 + e2e.
+[auth.rate_limit]
+email_sent = 30
+
+# D-60, D-83: login email OTP (kode 6 digit saja, tanpa magic link) + Google.
 [auth.email]
 enable_signup = true
 enable_confirmations = false
@@ -53,8 +60,22 @@ double_confirm_changes = true
 otp_length = 6
 otp_expiry = 600
 
+# F-20, D-83: template Indonesia yang hanya berisi kode {{ .Token }}. Login OTP user lama
+# memakai magic_link; signup lewat OTP (user baru) memakai confirmation.
+[auth.email.template.magic_link]
+subject = "Kode masuk PriceAtlas: {{ .Token }}"
+content_path = "./supabase/templates/otp.html"
+
+[auth.email.template.confirmation]
+subject = "Kode masuk PriceAtlas: {{ .Token }}"
+content_path = "./supabase/templates/otp.html"
+
+# F-21: mati secara default (lokal dan CI tidak punya kunci Google). env(...) tidak bisa
+# dipakai untuk boolean: nilai kosong membuat CLI gagal membaca config. Untuk mencoba Google
+# di lokal: isi GOOGLE_OAUTH_CLIENT_ID/SECRET lalu jalankan dengan
+# SUPABASE_AUTH_EXTERNAL_GOOGLE_ENABLED=true supabase start
 [auth.external.google]
-enabled = true
+enabled = false
 client_id = "env(GOOGLE_OAUTH_CLIENT_ID)"
 secret = "env(GOOGLE_OAUTH_SECRET)"
 redirect_uri = ""
