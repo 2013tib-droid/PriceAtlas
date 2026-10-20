@@ -1,7 +1,18 @@
 // Aturan service worker yang bisa diuji unit (dipakai app/sw.ts, docs/07 §5.2).
 
 /** Route shell yang harus terbuka offline (docs/07 §7.1 kolom "Offline"). */
-export const SHELL_ROUTES = ['/', '/cari', '/produk', '/unggahan', '/belanja', '/saya', '/masuk', '/offline'] as const;
+export const SHELL_ROUTES = [
+  '/',
+  '/cari',
+  '/produk',
+  '/unggahan',
+  '/unggahan/detail',
+  '/kamera',
+  '/belanja',
+  '/saya',
+  '/masuk',
+  '/offline',
+] as const;
 
 /** Path same-origin yang tidak pernah ditangani SW: API, auth callback, SW itu sendiri. */
 const NEVER_CACHE_PATH = /^\/(api|auth|serwist)(\/|$)/;
