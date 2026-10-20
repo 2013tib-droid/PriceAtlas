@@ -107,7 +107,10 @@ describe('S-10 keputusan baris → p_lines W4 (docs/05 §3.3, §4.1)', () => {
     const d = { [indomie!.id]: { action: 'accept' as const }, [snack!.id]: { action: 'non_product' as const } };
     expect(savedCountAfter(r, d)).toBe(2);
     expect(savedCountAfter(r, { ...d, [auto.id]: { action: 'skip' as const } })).toBe(1);
-    expect(affectedProductIds(r, d).sort()).toEqual([auto.record!.product_id, indomie!.suggestion!.id].sort());
+    expect(affectedProductIds(r, d)).toEqual([indomie!.suggestion!.id]);
+    expect(affectedProductIds(r, { ...d, [auto.id]: { action: 'skip' as const } }).sort()).toEqual(
+      [auto.record!.product_id, indomie!.suggestion!.id].sort(),
+    );
   });
 
   it(`"Benarkan semua saran" hanya jika ≥ ${ACCEPT_ALL_MIN} item perlu dicek punya saran (U-12)`, () => {
@@ -438,5 +441,21 @@ describe('S-12 hasil dikembalikan ke layar asal (kembali=)', () => {
     expect(safeBack('//evil.example')).toBe('/unggahan');
     expect(safeBack('https://evil.example')).toBe('/unggahan');
     expect(safeBack(null)).toBe('/unggahan');
+  });
+});
+
+describe('Q-74 (D-86): dialog duplikat hash menyebut toko dari R13 di cache, tanpa RPC baru', () => {
+  it('capture struk lama ada di R13 cache → "… (struk AEON BSD)"; tidak ada → tanggal saja', async () => {
+    const { QueryClient } = await import('@tanstack/react-query');
+    const { duplicateDate } = await import('@/features/capture/duplicate-dialog');
+    const list =
+      fx<{ id: string; kind: string; store_name: string | null; branch_name: string | null }[]>('captures_all');
+    const receiptRow = list.find((c) => c.kind === 'receipt' && c.branch_name)!;
+    const qc = new QueryClient();
+    qc.setQueryData(['rpc', 'list_captures', { p_limit: 50, p_kind: null }], list);
+    const at = '2026-10-20T05:00:00Z';
+    const withStore = duplicateDate({ capture_id: receiptRow.id, created_at: at }, 'Asia/Jakarta', qc);
+    expect(withStore).toMatch(new RegExp(`\\(struk ${receiptRow.branch_name}\\)$`));
+    expect(duplicateDate({ capture_id: 'lain', created_at: at }, 'Asia/Jakarta', qc)).not.toMatch(/struk/);
   });
 });

@@ -17,12 +17,11 @@ export function duplicateDate(match: DuplicateMatch | undefined, timeZone: strin
   if (!match) return '';
   const date = formatTransactionDate(todayInZone(timeZone, new Date(match.created_at)), timeZone);
   const listed = qc ? findListedCapture(qc, match.capture_id) : undefined;
-  const store = [
-    listed?.store_name,
-    listed?.branch_name && listed.branch_name !== listed.store_name ? listed.branch_name : null,
-  ]
-    .filter(Boolean)
-    .join(' ');
+  // "AEON BSD" sudah memuat nama toko; selain itu "Toko Cabang".
+  const store =
+    listed?.branch_name && listed.store_name && listed.branch_name.startsWith(listed.store_name)
+      ? listed.branch_name
+      : [listed?.store_name, listed?.branch_name].filter(Boolean).join(' ');
   return listed?.kind === 'receipt' && store ? fill(DUPLICATE_COPY.dateWithStore, { date, store }) : date;
 }
 

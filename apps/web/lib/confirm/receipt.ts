@@ -85,13 +85,17 @@ export function savedCountAfter(r: ReceiptDetail, d: Decisions): number {
   return n;
 }
 
-/** Produk yang harganya berubah karena W4 (invalidasi + SummaryUpdating). */
+/**
+ * Produk yang ringkasannya berubah karena W4 (invalidasi + SummaryUpdating): hanya baris yang
+ * diputuskan. Record auto-save tanpa keputusan tidak ditulis ulang, jadi ringkasannya tidak dihitung
+ * ulang (menunggunya membuat "sedang diperbarui" tidak pernah selesai).
+ */
 export function affectedProductIds(r: ReceiptDetail, d: Decisions): string[] {
   const ids = new Set<string>();
   for (const l of r.lines) {
-    if (l.record) ids.add(l.record.product_id);
     const dec = d[l.id];
     if (!isValidDecision(l, dec)) continue;
+    if (l.record) ids.add(l.record.product_id);
     if (dec.action === 'accept' && l.suggestion) ids.add(l.suggestion.id);
     if (dec.action === 'replace' && dec.product) ids.add(dec.product.id);
   }
