@@ -90,11 +90,19 @@ export class OutboxStore {
 
   /** Item + byte disimpan dalam satu transaksi, sebelum apa pun dikirim (§5.4 langkah 1). */
   async add(item: OutboxItem, blobs: Map<number, Blob>): Promise<void> {
+    // Byte dibaca dulu: transaksi IndexedDB selesai otomatis jika menunggu operasi lain.
+    const parts = await Promise.all(
+      [...blobs].map(async ([position, blob]) => ({
+        capture_id: item.capture_id,
+        position,
+        data: await blob.arrayBuffer(),
+        type: blob.type,
+      })),
+    );
     const db = await this.db();
     const tx = db.transaction(['outbox', 'outbox_blobs'], 'readwrite');
     await tx.objectStore('outbox').put(item as never);
-    for (const [position, blob] of blobs)
-      await tx.objectStore('outbox_blobs').put({ capture_id: item.capture_id, position, blob });
+    for (const p of parts) await tx.objectStore('outbox_blobs').put(p);
     await tx.done;
   }
 
@@ -125,7 +133,10 @@ export class OutboxStore {
 
   async getBlob(captureId: string, position: number): Promise<Blob | null> {
     const db = await this.db();
-    return (await db.get('outbox_blobs', [captureId, position]))?.blob ?? null;
+    const row = await db.get('outbox_blobs', [captureId, position]);
+    if (!row) return null;
+    if (row.data) return new Blob([row.data], { type: row.type ?? '' });
+    return row.blob ?? null;
   }
 
   async deleteBlobs(captureId: string): Promise<void> {

@@ -7,7 +7,12 @@ const VERSION = 1;
 
 interface PriceAtlasDB extends DBSchema {
   outbox: { key: string; value: { capture_id: string; schemaVersion: number } & Record<string, unknown> };
-  outbox_blobs: { key: [string, number]; value: { capture_id: string; position: number; blob: Blob } };
+  // Byte disimpan sebagai ArrayBuffer (+ tipe), bukan Blob: WebKit menolak Blob di IndexedDB pada
+  // sesi ephemeral (Playwright, mode privat). `blob` hanya untuk data lama.
+  outbox_blobs: {
+    key: [string, number];
+    value: { capture_id: string; position: number; data?: ArrayBuffer; type?: string; blob?: Blob };
+  };
   offline_cards: { key: string; value: { id: string; card: unknown; synced_at: number } };
   qcache: { key: string; value: unknown };
   prefs: { key: string; value: unknown };

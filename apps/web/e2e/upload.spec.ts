@@ -8,6 +8,15 @@ import { hasSupabase } from './support/supabase';
 
 test.skip(!hasSupabase(), 'butuh Supabase lokal + worker (job CI supabase-e2e)');
 
+/** Selesai berhasil: tidak ada pesan gagal simpan (diagnosis lebih jelas) dan toast U-11 tampil. */
+async function expectSaved(page: Page) {
+  const saved = page.getByText('Struk diunggah. Kami kabari kalau perlu dicek.');
+  const failed = page.getByText(/Foto belum bisa disimpan di HP|Foto terlalu besar atau formatnya/);
+  await expect(saved.or(failed)).toBeVisible();
+  await expect(failed).toHaveCount(0);
+  await expect(saved).toBeVisible();
+}
+
 /** S-07 dari URL langsung: satu gambar galeri → Selesai → kembali + toast (U-11). */
 async function uploadFromCamera(page: Page, name: string) {
   await page.goto('/kamera?jenis=struk');
@@ -16,7 +25,7 @@ async function uploadFromCamera(page: Page, name: string) {
   await expect(page.getByTestId('part')).toHaveCount(1);
   await expect(page.getByTestId('part')).not.toContainText('Menyiapkan');
   await page.getByRole('button', { name: 'Selesai' }).click();
-  await expect(page.getByText('Struk diunggah. Kami kabari kalau perlu dicek.')).toBeVisible();
+  await expectSaved(page);
 }
 
 test('alur 3: galeri struk-aeon → antrean → Storage → W1 → worker → polling S-08 → perlu dicek', async ({
@@ -35,7 +44,7 @@ test('alur 3: galeri struk-aeon → antrean → Storage → W1 → worker → po
   await expect(page.getByTestId('part')).toHaveCount(1);
   await expect(page.getByTestId('part')).not.toContainText('Menyiapkan');
   await page.getByRole('button', { name: 'Selesai' }).click();
-  await expect(page.getByText('Struk diunggah. Kami kabari kalau perlu dicek.')).toBeVisible();
+  await expectSaved(page);
   await expect(page).not.toHaveURL(/\/kamera/);
 
   // S-08: polling R13 (5 dtk) sampai worker selesai → "Perlu dicek".
