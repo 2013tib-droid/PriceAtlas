@@ -1,6 +1,6 @@
 # Tahap 5a — Desain Frontend
 
-> **Status: disetujui (2026-10-19).** Semua default Q-43 s/d Q-64 diterima dan dicatat sebagai D-78 s/d D-83. **Tahap 5b M0 selesai dan disetujui** (hasil dan temuan F-25 s/d F-30: §1.4; Q-65 s/d Q-67 diputuskan sebagai D-84: §13.4). **Tahap 5b M1 selesai, menunggu review** (hasil, temuan F-31 s/d F-39: §1.5; pertanyaan Q-68 s/d Q-71: §13.5).
+> **Status: disetujui (2026-10-19).** Semua default Q-43 s/d Q-64 diterima dan dicatat sebagai D-78 s/d D-83. **Tahap 5b M0 selesai dan disetujui** (hasil dan temuan F-25 s/d F-30: §1.4; Q-65 s/d Q-67 diputuskan sebagai D-84: §13.4). **Tahap 5b M1 selesai, menunggu review** (hasil, temuan F-31 s/d F-39: §1.5; pertanyaan Q-68 s/d Q-71: §13.5, diputuskan sebagai D-85).
 > Dasar: `PROJECT.md` (D-01 s/d D-77, terutama D-57–D-61 dan D-73–D-77), `docs/04-wireframe.md` + `docs/wireframes/index.html` (S-00a s/d S-20, alur 1–8, W-xx), `docs/05-backend-design.md` (R1–R21, W1–W18, §3.1, §4, §5, §7, §10), `docs/06-local-dev.md`, `packages/contracts`, `apps/web`.
 
 Dokumen ini tidak mengubah requirement, keputusan, skema, maupun RPC. Temuan baru ditulis sebagai **F-xx** (melanjutkan F-16 di `docs/05` §0.2), potensi masalah sebagai **P-xx**, dan pertanyaan sebagai **Q-43** dst. Setiap pertanyaan punya usulan default.
@@ -861,6 +861,8 @@ Setiap pertanyaan punya usulan default. Jawab "setuju semua" jika semua default 
 | Q-69 | SearchDock di iOS Safari bisa tertutup keyboard (F-37). | **Uji di iPhone sungguhan**; jika tertutup, dock mengikuti `visualViewport` (tanpa pustaka) di M7. |
 | Q-70 | R11 tidak memuat nama group (F-33). Tetap R4 tambahan di klien, atau tambah `group_name` ke keluaran R11? | **Tetap di klien** (tanpa ubah RPC). Satu panggilan kecil, di-cache 30 dtk. Ditinjau ulang jika S-04 terasa lambat. |
 | Q-71 | Tujuan yang belum ada (F-35): barcode tidak dikenal, baris histori, "Atur" member, "Tanya", kamera label. | **Seperti implementasi M1** (pesan/placeholder/nonaktif, tanpa 404); tiap milestone menyambungkan tautannya: S-14 dengan kode barcode terisi (M3), S-16 (M5), S-19b (M6), S-20 (M7), kamera (M2/M4). |
+
+**Hasil review M1 (2026-10-20):** pemilik proyek menyetujui semua usulan default Q-68 s/d Q-71 → **D-85**.
 
 ### 13.3 Bagian yang belum bisa dirancang penuh
 
