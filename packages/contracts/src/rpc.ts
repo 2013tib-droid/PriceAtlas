@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { PriceExtraSchema } from './extra.ts';
+import { CaptureKindSchema } from './parsed.ts';
 
 // Kontrak RPC (docs/05 §3.2). Input = parameter RPC PostgreSQL (nama p_*).
 // Output dibuat longgar (passthrough) untuk field tambahan, tetapi field yang
@@ -162,6 +163,60 @@ export const WhereCheaperRowSchema = z.looseObject({
   last_date: IsoDate, is_online: z.boolean(),
 });
 export type WhereCheaperRow = z.infer<typeof WhereCheaperRowSchema>;
+
+// ---------------------------------------------------------------------------
+// R13 list_captures · R14 get_capture (S-08, S-09; docs/05 §3.3)
+// ---------------------------------------------------------------------------
+export const CaptureStatusSchema = z.enum(['uploaded', 'processing', 'needs_confirmation', 'done', 'failed']);
+/** capture.error_code (D-71). */
+export const CaptureErrorCodeSchema = z.enum(['blurry', 'not_a_receipt', 'unsupported', 'timeout', 'other']);
+
+export const CaptureListItemSchema = z.looseObject({
+  id: Uuid,
+  kind: CaptureKindSchema,
+  status: CaptureStatusSchema,
+  store_name: z.string().nullable(),
+  branch_name: z.string().nullable(),
+  date: IsoDate,
+  date_is_upload: z.boolean(),
+  needs_check_count: Num,
+  saved_count: Num,
+  error_message: z.string().nullable(),
+  error_code: CaptureErrorCodeSchema.nullable(),
+  attempts: Num,
+  uploaded_at: Timestamp,
+  receipt_id: Uuid.nullable(),
+});
+export type CaptureListItem = z.infer<typeof CaptureListItemSchema>;
+
+export const CaptureDetailSchema = z.looseObject({
+  capture: z.looseObject({
+    id: Uuid,
+    kind: CaptureKindSchema,
+    status: CaptureStatusSchema,
+    store_id: Uuid.nullable(),
+    branch_id: Uuid.nullable(),
+    shopping_session_id: Uuid.nullable(),
+    uploaded_at: Timestamp,
+    processed_at: Timestamp.nullable(),
+    captured_at: Timestamp.nullable(),
+    error_message: z.string().nullable(),
+    error_code: CaptureErrorCodeSchema.nullable(),
+  }),
+  images: z.array(z.looseObject({
+    position: Num, storage_path: z.string(), purged_at: Timestamp.nullable(), sha256: z.string(),
+  })),
+  runs: z.array(z.looseObject({
+    id: Uuid,
+    status: z.enum(['running', 'succeeded', 'failed']),
+    started_at: Timestamp,
+    finished_at: Timestamp.nullable(),
+    error_message: z.string().nullable(),
+  })),
+  receipt_id: Uuid.nullable(),
+  saved_records: z.array(PriceRecordViewSchema),
+});
+export type CaptureDetail = z.infer<typeof CaptureDetailSchema>;
 
 // ---------------------------------------------------------------------------
 // Input RPC tulis (§3.2, §4)
