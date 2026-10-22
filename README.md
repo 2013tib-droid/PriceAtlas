@@ -8,7 +8,7 @@ keputusan: [`PROJECT.md`](PROJECT.md).
 | 2 Database | [`docs/02-domain-model.md`](docs/02-domain-model.md), [`docs/03-database-design.md`](docs/03-database-design.md) |
 | 3 Wireframe | [`docs/04-wireframe.md`](docs/04-wireframe.md) |
 | 4 Backend | [`docs/05-backend-design.md`](docs/05-backend-design.md) (desain + implementasi 4b), [`docs/06-local-dev.md`](docs/06-local-dev.md) (menjalankan lokal) |
-| 5 Frontend | [`docs/07-frontend-design.md`](docs/07-frontend-design.md) (desain 5a disetujui; 5b M0 selesai dan disetujui, §1.4; M1 selesai, §1.5; M2 selesai dan disetujui (D-86), §1.6; M3 selesai, menunggu review, §1.7), [`docs/06-local-dev.md`](docs/06-local-dev.md) §4 (menjalankan frontend) |
+| 5 Frontend | [`docs/07-frontend-design.md`](docs/07-frontend-design.md) (desain 5a disetujui; 5b M0 selesai dan disetujui, §1.4; M1 selesai, §1.5; M2 selesai dan disetujui (D-86), §1.6; M3 selesai dan disetujui (D-87), §1.7), [`docs/06-local-dev.md`](docs/06-local-dev.md) §4 (menjalankan frontend) |
 
 ## Isi repo (Tahap 5b M3)
 

@@ -1,6 +1,6 @@
 # Tahap 5a — Desain Frontend
 
-> **Status: disetujui (2026-10-19).** Semua default Q-43 s/d Q-64 diterima dan dicatat sebagai D-78 s/d D-83. **Tahap 5b M0 selesai dan disetujui** (hasil dan temuan F-25 s/d F-30: §1.4; Q-65 s/d Q-67 diputuskan sebagai D-84: §13.4). **Tahap 5b M1 selesai** (hasil, temuan F-31 s/d F-39: §1.5; pertanyaan Q-68 s/d Q-71: §13.5, diputuskan sebagai D-85). **Tahap 5b M2 selesai dan disetujui** (hasil, temuan F-40 s/d F-48: §1.6; pertanyaan Q-72 s/d Q-75: §13.6, diputuskan sebagai D-86). **Tahap 5b M3 selesai, menunggu review** (hasil, temuan F-49 s/d F-59: §1.7; pertanyaan Q-76 s/d Q-79: §13.7).
+> **Status: disetujui (2026-10-19).** Semua default Q-43 s/d Q-64 diterima dan dicatat sebagai D-78 s/d D-83. **Tahap 5b M0 selesai dan disetujui** (hasil dan temuan F-25 s/d F-30: §1.4; Q-65 s/d Q-67 diputuskan sebagai D-84: §13.4). **Tahap 5b M1 selesai** (hasil, temuan F-31 s/d F-39: §1.5; pertanyaan Q-68 s/d Q-71: §13.5, diputuskan sebagai D-85). **Tahap 5b M2 selesai dan disetujui** (hasil, temuan F-40 s/d F-48: §1.6; pertanyaan Q-72 s/d Q-75: §13.6, diputuskan sebagai D-86). **Tahap 5b M3 selesai dan disetujui** (hasil, temuan F-49 s/d F-59: §1.7; pertanyaan Q-76 s/d Q-79: §13.7, diputuskan sebagai D-87).
 > Dasar: `PROJECT.md` (D-01 s/d D-77, terutama D-57–D-61 dan D-73–D-77), `docs/04-wireframe.md` + `docs/wireframes/index.html` (S-00a s/d S-20, alur 1–8, W-xx), `docs/05-backend-design.md` (R1–R21, W1–W18, §3.1, §4, §5, §7, §10), `docs/06-local-dev.md`, `packages/contracts`, `apps/web`.
 
 Dokumen ini tidak mengubah requirement, keputusan, skema, maupun RPC. Temuan baru ditulis sebagai **F-xx** (melanjutkan F-16 di `docs/05` §0.2), potensi masalah sebagai **P-xx**, dan pertanyaan sebagai **Q-43** dst. Setiap pertanyaan punya usulan default.
@@ -974,6 +974,8 @@ Setiap pertanyaan punya usulan default. Jawab "setuju semua" jika semua default 
 | Q-77 | Harga member dari label tanpa toko tersimpan sebagai `member_note` (F-57). Biarkan user mengisi ulang di S-11, atau worker/W18 memetakan ulang program saat toko dipilih? | **User mengisi ulang di S-11** di MVP (sudah ada: editor + pemilih program). Pemetaan ulang otomatis ditinjau bersama uji OCR (Tahap 6), karena butuh perubahan RPC. |
 | Q-78 | Fixture `shopee-milo` di-auto-save (F-50), sehingga e2e alur 5 mencapai S-11 lewat unggahan kedua (duplikat hash). Tetap, atau tambah fixture screenshot yang confidence-nya rendah? | **Tetap untuk M3** (fixture dan logika worker tidak diubah). Fixture screenshot ber-confidence rendah dipertimbangkan di Tahap 6 bersama fixture asli (D-16, Q-72). |
 | Q-79 | S-10 mode tersimpan: koreksi baris kecil lewat W7 di S-10 (M3), atau semua koreksi lewat S-16 (M5)? (F-52) | **Keduanya**: editor kecil W7 di S-10 tetap; di M5 baris di-tap membuka S-16 untuk koreksi lengkap (produk, bundle, batalkan). |
+
+**Hasil review M3 (2026-10-22):** pemilik proyek menyetujui semua usulan default Q-76 s/d Q-79 → **D-87**.
 
 ### 13.3 Bagian yang belum bisa dirancang penuh
 
