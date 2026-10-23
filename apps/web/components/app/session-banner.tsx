@@ -30,21 +30,32 @@ import {
 /** Ketukan jam banner: durasi per menit cukup; kedaluwarsa paling lambat 15 dtk terlambat. */
 export const BANNER_TICK_MS = 15_000;
 
-/** Ingat sesi aktif terakhir (prefs) supaya S-13 bisa menulis "berakhir otomatis" (D-43). */
-function useRememberActiveSession(active: ActiveSession | null, items: readonly OutboxItem[]) {
+/**
+ * Ingat sesi aktif terakhir (prefs) supaya S-13 bisa menulis "berakhir otomatis" (D-43). R18 tanpa sesi
+ * sebelum `expires_at` sesi yang diingat = sesi itu diakhiri lebih awal (W13, mungkin di perangkat
+ * lain) → dilupakan, supaya tidak muncul pemberitahuan "berakhir otomatis" yang keliru.
+ */
+function useRememberActiveSession(
+  data: ActiveSession | null | undefined,
+  active: ActiveSession | null,
+  items: readonly OutboxItem[],
+  now: number,
+) {
   const remembered = usePref<RememberedSession | null>(PREF_KEYS.lastSession, null);
   const next = active
     ? rememberSession(active, localSessionItems(items, active.session.id, active.labels).length)
     : null;
   const key = next ? `${next.id}|${next.expires_at}|${next.label_count}` : null;
-  const prevKey = remembered.value
-    ? `${remembered.value.id}|${remembered.value.expires_at}|${remembered.value.label_count}`
-    : null;
+  const prev = remembered.value;
+  const prevKey = prev ? `${prev.id}|${prev.expires_at}|${prev.label_count}` : null;
+  const endedEarly = data === null && prev !== null && Date.parse(prev.expires_at) > now;
   const { update, ready } = remembered;
   useEffect(() => {
     // Disimpan ke IndexedDB (sistem luar); tidak ada state React yang diubah di sini.
-    if (ready && next && key !== prevKey) void update(() => next);
-  }, [ready, key, prevKey, next, update]);
+    if (!ready) return;
+    if (next && key !== prevKey) void update(() => next);
+    else if (endedEarly) void update(() => null);
+  }, [ready, key, prevKey, next, endedEarly, update]);
 }
 
 export function SessionBanner() {
@@ -52,7 +63,7 @@ export function SessionBanner() {
   const { items } = useOutboxItems();
   const now = useNow(BANNER_TICK_MS);
   const active = activeOrNull(data, now);
-  useRememberActiveSession(active, items);
+  useRememberActiveSession(data, active, items, now);
   if (!active) return null;
   const clock = sessionClock(active.session, now);
   const place = sessionPlace(active);

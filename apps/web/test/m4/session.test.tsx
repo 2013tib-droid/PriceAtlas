@@ -386,3 +386,19 @@ describe('S-06 dengan sesi aktif (U-08)', () => {
     expect(nav.replace).toHaveBeenCalledWith('/kamera?jenis=label');
   });
 });
+
+describe('Sesi yang diingat (D-43, F-62)', () => {
+  it('R18 tanpa sesi sebelum expires_at yang diingat (diakhiri di perangkat lain) → dilupakan', async () => {
+    const s = fx<ActiveSession>('session_start');
+    await writePref(ID.user, PREF_KEYS.lastSession, {
+      id: s.session.id,
+      place: 'AEON BSD',
+      expires_at: s.session.expires_at,
+      label_count: 2,
+    });
+    clockAt(s.session.started_at, 30 * MIN);
+    withSession(null);
+    await renderWithProviders(<SessionBanner />);
+    await waitFor(async () => expect(await readPref(ID.user, PREF_KEYS.lastSession, 'x')).toBe('x'));
+  });
+});
