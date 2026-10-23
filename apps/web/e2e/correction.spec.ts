@@ -138,8 +138,10 @@ test('alur 6c: merge produk privat → katalog (S-17) dan split sederhana (S-18)
   await page.goto(`/produk/pisah?id=${P.milo500}`);
   await expect(page.getByText('Produk katalog umum: hanya data harga milikmu yang dipindah.')).toBeVisible();
   await page.getByTestId('split-create').click();
-  await expect(page.getByLabel('Nama')).toHaveValue('Milo Original');
-  await page.getByLabel('Nama').fill('Milo Original Rak Bawah');
+  // Locator unik: label "Nama" juga cocok dengan radio group "Sama dengan nama".
+  const name = page.getByRole('textbox', { name: 'Nama', exact: true });
+  await expect(name).toHaveValue('Milo Original');
+  await name.fill('Milo Original Rak Bawah');
   await page.getByRole('button', { name: 'Simpan produk' }).click();
   await expect(page.getByTestId('split-screen')).toHaveAttribute('data-step', '2');
   await expect(page.getByTestId('split-records').getByRole('checkbox')).toHaveCount(1);
