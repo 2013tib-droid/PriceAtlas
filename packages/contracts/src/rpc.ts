@@ -400,6 +400,113 @@ export const EndedSessionSchema = SessionTimesSchema.extend({ ended_at: Timestam
 export type EndedSession = z.infer<typeof EndedSessionSchema>;
 
 // ---------------------------------------------------------------------------
+// R19 merge_product_preview · R20 price_record_detail · W6 · W7 · W9 · W10
+// (S-15 edit, S-16, S-17, S-18; docs/05 §3.3, §4.3–§4.5). Output saja.
+// ---------------------------------------------------------------------------
+/** price_record_view lengkap (R20, W6, W7): asal data dan matching untuk S-16. */
+export const PriceRecordFullSchema = PriceRecordViewSchema.extend({
+  capture_id: Uuid.nullable(),
+  receipt_id: Uuid.nullable(),
+  receipt_line_id: Uuid.nullable(),
+  member_program_id: Uuid.nullable(),
+  match_tier: MatchTier.nullable(),
+  match_confidence: Num.nullable(),
+  match_outcome: z.enum(['auto', 'confirmed', 'corrected']).nullable(),
+});
+export type PriceRecordFull = z.infer<typeof PriceRecordFullSchema>;
+
+/** Entri audit_log (trigger app.audit_row: update/delete oleh user; merge_product: merge). */
+export const AuditEntrySchema = z.looseObject({
+  id: Num,
+  entity_type: z.string(),
+  action: z.enum(['update', 'delete', 'merge']),
+  actor_id: Uuid.nullable(),
+  before: z.record(z.string(), z.unknown()).nullable(),
+  after: z.record(z.string(), z.unknown()).nullable(),
+  created_at: Timestamp,
+});
+export type AuditEntry = z.infer<typeof AuditEntrySchema>;
+
+/** R20: record + baris struk (record struk) + header struk + gambar sumber + riwayat audit. */
+export const PriceRecordDetailSchema = z.looseObject({
+  record: PriceRecordFullSchema,
+  receipt_line: z
+    .looseObject({
+      id: Uuid,
+      receipt_id: Uuid,
+      line_no: Num,
+      raw_text: z.string().nullable(),
+      quantity: Num.nullable(),
+      unit_amount: Num.nullable(),
+      line_amount: Num,
+      updated_at: Timestamp,
+      attached: z.array(
+        z.looseObject({
+          id: Uuid,
+          line_type: ReceiptLineTypeOut,
+          raw_text: z.string().nullable(),
+          quantity: Num.nullable(),
+          line_amount: Num,
+        }),
+      ),
+    })
+    .nullable(),
+  receipt_header: z
+    .looseObject({
+      id: Uuid,
+      status: ReceiptStatusSchema,
+      transaction_date: IsoDate.nullable(),
+      transaction_time: z.string().nullable(),
+      total_amount: Num.nullable(),
+      store: StoreRefSchema.nullable(),
+      branch: BranchJsonSchema.nullable(),
+      updated_at: Timestamp,
+    })
+    .nullable(),
+  /** Gambar sumber (posisi item, atau posisi 1); `purged_at` terisi = dihapus retensi (D-32). */
+  image: z.looseObject({ storage_path: z.string(), position: Num, purged_at: Timestamp.nullable() }).nullable(),
+  history: z.array(AuditEntrySchema),
+});
+export type PriceRecordDetail = z.infer<typeof PriceRecordDetailSchema>;
+
+/** W7 correct_receipt_line: baris + baris yang menempel + record turunannya (null jika tidak ada lagi). */
+export const CorrectReceiptLineResultSchema = z.looseObject({
+  line: z.looseObject({ id: Uuid, updated_at: Timestamp, line_type: ReceiptLineTypeOut }),
+  attached: z.array(z.looseObject({ id: Uuid, line_type: ReceiptLineTypeOut })),
+  record: PriceRecordFullSchema.nullable(),
+});
+export type CorrectReceiptLineResult = z.infer<typeof CorrectReceiptLineResultSchema>;
+
+/** R19: alasan tidak bisa digabung (null = bisa). `already_merged` = sukses (docs/05 §4.4). */
+export const MergeReasonSchema = z.enum([
+  'same_product',
+  'already_merged',
+  'source_global',
+  'source_not_active',
+  'target_not_active',
+  'target_other_household',
+]);
+export type MergeReason = z.infer<typeof MergeReasonSchema>;
+
+export const MergePreviewSchema = z.looseObject({
+  can_merge: z.boolean(),
+  reason: MergeReasonSchema.nullable(),
+  counts: z.looseObject({ price_records: Num, aliases: Num, barcodes: Num, barcodes_kept: Num }),
+  size_mismatch: z.boolean(),
+  dimension_mismatch: z.boolean(),
+  from: ProductLiteSchema,
+  into: ProductLiteSchema,
+});
+export type MergePreview = z.infer<typeof MergePreviewSchema>;
+
+/** W9 move_price_records: record yang sudah di target dilewati (idempoten). */
+export const MovePriceRecordsResultSchema = z.looseObject({ moved_count: Num, target_product_id: Uuid });
+export type MovePriceRecordsResult = z.infer<typeof MovePriceRecordsResultSchema>;
+
+/** W10 merge_product: `returns void` → null. */
+export const MergeProductResultSchema = z.null();
+
+// ---------------------------------------------------------------------------
 // Input RPC tulis (§3.2, §4)
 // ---------------------------------------------------------------------------
 export const SubmitCaptureInput = z.object({

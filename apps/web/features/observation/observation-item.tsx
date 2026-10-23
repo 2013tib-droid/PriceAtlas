@@ -15,7 +15,7 @@ import { isDoubtfulMatch } from '@/lib/confirm/receipt';
 import { sizeMismatch } from '@/lib/confirm/size';
 import { CONFIRM_COPY, fill, ITEMS_COPY as C, PRICE_COPY } from '@/lib/copy/id';
 import { useSignedUrl } from '@/lib/data/captures';
-import { formatRupiah, formatSize, formatTransactionDate } from '@/lib/format';
+import { formatRupiah, formatSize, formatTransactionDate, parsePrice } from '@/lib/format';
 import { productTitle } from '@/lib/format/product';
 import { cn } from '@/lib/utils';
 
@@ -59,13 +59,7 @@ export function CropImage({ path, region, label }: { path: string | null; region
 type PriceField = 'normal_price' | 'promo_price' | 'member_price';
 
 const toText = (v: number | null | undefined) => (v == null ? '' : String(v));
-/** "19.500" / "19500" / "" → 19500 / null. */
-export function parsePrice(s: string): number | null {
-  const t = s.replace(/[^\d,]/g, '').replace(',', '.');
-  if (!t) return null;
-  const n = Number(t);
-  return Number.isFinite(n) ? n : null;
-}
+export { parsePrice };
 
 function PriceInput({
   id,

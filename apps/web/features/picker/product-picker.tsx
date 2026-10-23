@@ -3,6 +3,8 @@
 // di atas S-10/S-11/S-15. SearchDock terisi raw_text / judul listing, saran + kandidat (≤ 5) dari
 // R15/R16, hasil R3, "+ Buat produk baru" → S-15 (lapisan `&baru=1`). Peringatan beda ukuran dihitung
 // di klien dan tidak memblokir. RLS sudah membatasi ke produk global + privat sendiri.
+// Mode target merge (S-17) / tujuan split (S-18): judul sendiri, produk sumber disembunyikan
+// (`exclude`), tanpa "+ Buat produk baru" jika `allowCreate` false.
 import { ArrowLeft, Plus } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState } from 'react';
@@ -83,6 +85,12 @@ export interface ProductPickerProps {
   suggestion?: ProductLite | null;
   candidates?: readonly ProductLite[];
   onPick: (p: ProductLite) => void;
+  /** Judul lapisan (default "Pilih produk"). */
+  title?: string;
+  /** Produk yang tidak boleh dipilih (mode target merge: produk sumber). */
+  exclude?: readonly string[];
+  /** "+ Buat produk baru" (default ada). */
+  allowCreate?: boolean;
   /** Lapisan S-15 (`&baru=1`). */
   createOpen: boolean;
   onCreateOpen: () => void;
@@ -107,7 +115,10 @@ export function ProductPicker(props: ProductPickerProps) {
 }
 
 function PickerBody(props: ProductPickerProps) {
-  const { onClose, initialQuery, contextText, barcode, suggestion, candidates = [], onPick } = props;
+  const { onClose, initialQuery, contextText, barcode, candidates = [], onPick } = props;
+  const exclude = new Set(props.exclude ?? []);
+  const allowCreate = props.allowCreate ?? true;
+  const suggestion = props.suggestion && !exclude.has(props.suggestion.id) ? props.suggestion : null;
   const [value, setValue] = useState(initialQuery);
   const [query, setQuery] = useState(initialQuery);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -122,21 +133,21 @@ function PickerBody(props: ProductPickerProps) {
 
   const search = useSearch(query);
   const q = normalizeQuery(query);
-  const others = candidates.filter((c) => c.id !== suggestion?.id).slice(0, MAX_CANDIDATES);
-  const results = (search.data ?? []).map((r) => r.product);
+  const others = candidates.filter((c) => c.id !== suggestion?.id && !exclude.has(c.id)).slice(0, MAX_CANDIDATES);
+  const results = (search.data ?? []).map((r) => r.product).filter((p) => !exclude.has(p.id));
 
   return (
     <>
       <header className="sticky top-0 z-10 flex items-center gap-2 border-b border-divider bg-surface px-2 py-2">
-        <Button variant="ghost" size="icon" onClick={props.createOpen ? props.onCreateClose : onClose}>
+        <Button variant="ghost" size="icon" onClick={props.createOpen && allowCreate ? props.onCreateClose : onClose}>
           <ArrowLeft aria-hidden />
           <span className="sr-only">{PICKER_COPY.close}</span>
         </Button>
         <DialogPrimitive.Title className="text-lg font-semibold">
-          {props.createOpen ? null : PICKER_COPY.title}
+          {props.createOpen && allowCreate ? null : (props.title ?? PICKER_COPY.title)}
         </DialogPrimitive.Title>
       </header>
-      {props.createOpen ? (
+      {props.createOpen && allowCreate ? (
         <div className="mx-auto w-full max-w-xl p-4">
           <NewProductForm
             initialName={q || contextText || ''}
@@ -201,10 +212,12 @@ function PickerBody(props: ProductPickerProps) {
                 ))}
               </ul>
             )}
-            <Button variant="secondary" size="action" onClick={props.onCreateOpen}>
-              <Plus aria-hidden />
-              {PICKER_COPY.create}
-            </Button>
+            {allowCreate ? (
+              <Button variant="secondary" size="action" onClick={props.onCreateOpen}>
+                <Plus aria-hidden />
+                {PICKER_COPY.create}
+              </Button>
+            ) : null}
           </section>
           <SearchDock
             id="picker-search"

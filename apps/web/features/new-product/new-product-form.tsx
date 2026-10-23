@@ -3,6 +3,7 @@
 // CreatePrivateProductInput, lib/confirm/product-form.ts), pratinjau ukuran dengan unitPrice()
 // kontrak, kemasan / multipack / timbang, brand & group baru atau yang ada, "Produk serupa sudah
 // ada" (R3), W8 dengan id dari klien. Error 23514 (ukuran), 23P01 (barcode), 23505 (= sukses) §8.2.
+// Produk timbang: kode PLU dengan pemilih toko (F-55, M5).
 // Produk baru selalu PRIBADI (D-29).
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { ProductCard } from '@priceatlas/contracts';
@@ -16,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Segmented } from '@/components/ui/segmented';
 import { productError } from '@/lib/confirm/errors';
 import {
+  codeType,
   defaultProductForm,
   parseDecimal,
   previewUnitPrice,
@@ -27,7 +29,7 @@ import {
 } from '@/lib/confirm/product-form';
 import type { ProductLite } from '@/lib/confirm/receipt';
 import { fill, NEW_PRODUCT_COPY as C } from '@/lib/copy/id';
-import { useCategories, useCreateProduct, useNamedSearch } from '@/lib/data/confirm';
+import { useCategories, useCreateProduct, useNamedSearch, useStores } from '@/lib/data/confirm';
 import { MIN_QUERY, normalizeQuery, useSearch } from '@/lib/data/queries';
 import { formatRupiah, formatSize, formatUnitPrice } from '@/lib/format';
 import { productTitle } from '@/lib/format/product';
@@ -92,12 +94,18 @@ function Preview({ v }: { v: ProductFormValues }) {
 export function NewProductForm({
   initialName = '',
   initialBarcode,
+  initialValues,
+  productId: fixedId,
   onCreated,
   onUseExisting,
   onCancel,
 }: {
   initialName?: string;
   initialBarcode?: string;
+  /** Isian awal tambahan (S-18: salinan produk asal). */
+  initialValues?: Partial<ProductFormValues>;
+  /** Id dari pemanggil yang sudah disimpan (S-18 T1: tetap sama walau halaman dimuat ulang). */
+  productId?: string;
   onCreated: (card: ProductCard) => void;
   /** "Produk serupa sudah ada" → pakai produk itu (dari S-14); tanpa ini: buka detail. */
   onUseExisting?: (p: ProductLite) => void;
@@ -105,13 +113,13 @@ export function NewProductForm({
 }) {
   const uid = useId();
   // Id dari klien (idempoten): tetap sama saat simpan diulang setelah gagal.
-  const [productId] = useState(newCaptureId);
+  const [productId] = useState(() => fixedId ?? newCaptureId());
   const create = useCreateProduct();
   const categories = useCategories();
   const [serverError, setServerError] = useState<string | null>(null);
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
-    defaultValues: defaultProductForm({ name: initialName, barcode: initialBarcode }),
+    defaultValues: { ...defaultProductForm({ name: initialName, barcode: initialBarcode }), ...initialValues },
     mode: 'onTouched',
   });
   const { register, control, handleSubmit, setValue, setError, setFocus, formState } = form;
@@ -129,6 +137,8 @@ export function NewProductForm({
   const similarList = normalizeQuery(similarQ).length >= MIN_QUERY ? (similar.data ?? []).slice(0, 3) : [];
 
   const brands = useNamedSearch('brand', v.brand ?? '');
+  // Toko untuk PLU (F-55): hanya dimuat jika produk timbang.
+  const stores = useStores('', v.sale_mode === 'weight');
   const groups = useNamedSearch('product_group', v.groupMode === 'existing' ? (v.name ?? '') : '');
 
   const submit = handleSubmit((values) => {
@@ -386,30 +396,72 @@ export function NewProductForm({
 
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-1 text-sm font-medium">{C.barcodes}</legend>
-        {barcodes.fields.map((f, i) => (
-          <div key={f.id} className="flex flex-col gap-1">
-            <div className="flex items-center gap-2">
-              <label htmlFor={`${uid}-bc-${i}`} className="sr-only">
-                {fill(C.barcodeLabel, { n: i + 1 })}
-              </label>
-              <Input
-                id={`${uid}-bc-${i}`}
-                inputMode="numeric"
-                autoComplete="off"
-                aria-invalid={Boolean(errors.barcodes?.[i]?.code)}
-                aria-describedby={errors.barcodes?.[i]?.code ? err(`bc-${i}`) : undefined}
-                {...register(`barcodes.${i}.code` as const)}
-              />
-              {barcodes.fields.length > 1 ? (
-                <Button variant="ghost" size="icon" onClick={() => barcodes.remove(i)}>
-                  <Trash2 aria-hidden />
-                  <span className="sr-only">{fill(C.barcodeRemove, { n: i + 1 })}</span>
-                </Button>
+        {v.sale_mode === 'weight' ? <p className="text-sm text-muted-foreground">{C.pluHelp}</p> : null}
+        {barcodes.fields.map((f, i) => {
+          const plu = codeType(v, v.barcodes?.[i] ?? {}) === 'plu';
+          return (
+            <div key={f.id} className="flex flex-col gap-1">
+              {v.sale_mode === 'weight' ? (
+                <div className="flex gap-2">
+                  <label htmlFor={`${uid}-bt-${i}`} className="sr-only">
+                    {fill(C.codeType, { n: i + 1 })}
+                  </label>
+                  <select
+                    id={`${uid}-bt-${i}`}
+                    className="h-touch rounded-lg border border-border bg-surface px-2"
+                    {...register(`barcodes.${i}.code_type` as const)}
+                  >
+                    <option value="gtin">{C.gtin}</option>
+                    <option value="plu">{C.plu}</option>
+                  </select>
+                  {plu ? (
+                    <>
+                      <label htmlFor={`${uid}-bs-${i}`} className="sr-only">
+                        {fill(C.pluStore, { n: i + 1 })}
+                      </label>
+                      <select
+                        id={`${uid}-bs-${i}`}
+                        className="h-touch flex-1 rounded-lg border border-border bg-surface px-2"
+                        aria-invalid={Boolean(errors.barcodes?.[i]?.store_id)}
+                        {...register(`barcodes.${i}.store_id` as const)}
+                      >
+                        <option value="">{C.pluStorePick}</option>
+                        {(stores.data ?? []).map((st) => (
+                          <option key={st.id} value={st.id}>
+                            {st.name}
+                          </option>
+                        ))}
+                      </select>
+                    </>
+                  ) : null}
+                </div>
               ) : null}
+              <div className="flex items-center gap-2">
+                <label htmlFor={`${uid}-bc-${i}`} className="sr-only">
+                  {fill(C.barcodeLabel, { n: i + 1 })}
+                </label>
+                <Input
+                  id={`${uid}-bc-${i}`}
+                  inputMode="numeric"
+                  autoComplete="off"
+                  aria-invalid={Boolean(errors.barcodes?.[i]?.code)}
+                  aria-describedby={errors.barcodes?.[i]?.code ? err(`bc-${i}`) : undefined}
+                  {...register(`barcodes.${i}.code` as const)}
+                />
+                {barcodes.fields.length > 1 ? (
+                  <Button variant="ghost" size="icon" onClick={() => barcodes.remove(i)}>
+                    <Trash2 aria-hidden />
+                    <span className="sr-only">{fill(C.barcodeRemove, { n: i + 1 })}</span>
+                  </Button>
+                ) : null}
+              </div>
+              <FieldError
+                id={err(`bc-${i}`)}
+                message={errors.barcodes?.[i]?.code?.message ?? errors.barcodes?.[i]?.store_id?.message}
+              />
             </div>
-            <FieldError id={err(`bc-${i}`)} message={errors.barcodes?.[i]?.code?.message} />
-          </div>
-        ))}
+          );
+        })}
         <Button variant="ghost" className="self-start" onClick={() => barcodes.append({ code: '' })}>
           <Plus aria-hidden />
           {C.barcodeAdd}

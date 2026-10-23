@@ -65,3 +65,16 @@ export function formatSize(p: SizedProduct): string {
 export function formatQuantity(value: number, unit: string): string {
   return `${SIZE.format(value)} ${unit}`;
 }
+
+/** Isian harga: "19.500" / "19500" / "Rp19.500" / "" → 19500 / null (titik = ribuan, koma = desimal). */
+export function parsePrice(s: string): number | null {
+  const t = s.replace(/[^\d,]/g, '').replace(',', '.');
+  if (!t) return null;
+  const n = Number(t);
+  return Number.isFinite(n) ? n : null;
+}
+
+/** Angka → teks isian yang dibaca ulang parsePrice dengan nilai sama (desimal memakai koma). */
+export function priceInputText(v: number | null | undefined): string {
+  return v == null ? '' : String(v).replace('.', ',');
+}

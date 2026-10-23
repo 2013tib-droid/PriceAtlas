@@ -12,6 +12,8 @@ export const UNIT_OPTIONS = Object.keys(UNITS) as UnitCode[];
 export const WEIGHT_UNIT_OPTIONS: UnitCode[] = ['kg', 'g', 'l', 'ml', 'm'];
 
 export const GTIN_RE = /^[0-9]{8,14}$/;
+/** PLU timbang dari toko tertentu (F-55): angka saja; `barcode_assignment` mewajibkan toko untuk PLU. */
+export const PLU_RE = /^[0-9]{1,14}$/;
 
 export const productFormSchema = z
   .object({
@@ -26,7 +28,14 @@ export const productFormSchema = z
     pack_count: z.string(),
     content_size: z.string(),
     content_unit: P.content_unit.min(1, C.errors.unit),
-    barcodes: z.array(z.object({ code: z.string() })),
+    barcodes: z.array(
+      z.object({
+        code: z.string(),
+        /** Default GTIN. PLU hanya untuk produk timbang, wajib toko (check constraint, F-55). */
+        code_type: P.barcodes.unwrap().element.shape.code_type.optional(),
+        store_id: z.string().optional(),
+      }),
+    ),
   })
   .superRefine((v, ctx) => {
     if (v.sale_mode === 'unit') {
@@ -37,7 +46,14 @@ export const productFormSchema = z
         ctx.addIssue({ code: 'custom', path: ['pack_count'], message: C.errors.packCount });
     }
     v.barcodes.forEach((b, i) => {
-      if (b.code.trim() && !GTIN_RE.test(b.code.trim()))
+      const code = b.code.trim();
+      if (!code) return;
+      if (codeType(v, b) === 'plu') {
+        if (!PLU_RE.test(code))
+          ctx.addIssue({ code: 'custom', path: ['barcodes', i, 'code'], message: C.pluErrors.code });
+        if (!b.store_id)
+          ctx.addIssue({ code: 'custom', path: ['barcodes', i, 'store_id'], message: C.pluErrors.store });
+      } else if (!GTIN_RE.test(code))
         ctx.addIssue({ code: 'custom', path: ['barcodes', i, 'code'], message: C.errors.barcode });
     });
     if (v.groupMode === 'new' && !v.groupName.trim())
@@ -87,6 +103,11 @@ export function defaultProductForm(init: { name?: string; barcode?: string } = {
 
 type ProductInput = RpcInput<'create_private_product'>['p_product'];
 
+/** Jenis kode efektif: PLU hanya berlaku untuk produk timbang; selain itu GTIN. */
+export function codeType(v: Pick<ProductFormValues, 'sale_mode'>, b: { code_type?: 'gtin' | 'plu' }): 'gtin' | 'plu' {
+  return v.sale_mode === 'weight' && b.code_type === 'plu' ? 'plu' : 'gtin';
+}
+
 /** Nilai form → p_product W8 (docs/05 §3.3 S-15). */
 export function toProductInput(v: ProductFormValues, id?: string): ProductInput {
   const unit = v.sale_mode === 'unit';
@@ -99,9 +120,12 @@ export function toProductInput(v: ProductFormValues, id?: string): ProductInput 
     content_unit: v.content_unit,
     category_id: v.category_id || null,
     barcodes: v.barcodes
-      .map((b) => b.code.trim())
-      .filter(Boolean)
-      .map((code) => ({ code, code_type: 'gtin' as const })),
+      .filter((b) => b.code.trim())
+      .map((b) =>
+        codeType(v, b) === 'plu' && b.store_id
+          ? { code: b.code.trim(), code_type: 'plu' as const, store_id: b.store_id }
+          : { code: b.code.trim(), code_type: 'gtin' as const },
+      ),
   };
   if (id) out.id = id;
   if (v.brand.trim()) out.brand = { new: v.brand.trim() };
