@@ -88,8 +88,10 @@ describe('S-03 Detail produk', () => {
     await openProduct(ID.milo200);
     await screen.findByTestId('price-chart');
     await userEvent.setup().click(screen.getByLabelText('Hanya harga normal'));
-    await waitFor(() =>
-      expect(sb.rpc).toHaveBeenCalledWith('price_chart', { p_product_id: ID.milo200, p_normal_only: true }),
+    // Toggle menulis prefs ke IndexedDB dulu, lalu R9 dipanggil: beri waktu lebih saat runner CI sibuk.
+    await waitFor(
+      () => expect(sb.rpc).toHaveBeenCalledWith('price_chart', { p_product_id: ID.milo200, p_normal_only: true }),
+      { timeout: 5_000 },
     );
     expect(screen.queryByText(/garis putus-putus/)).toBeNull();
     const { readPref } = await import('@/lib/offline/prefs');
