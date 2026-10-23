@@ -487,7 +487,7 @@ export function ReceiptScreen() {
 
   return (
     <section
-      className="flex flex-col gap-4 p-4 pb-[calc(var(--spacing-tabbar)+6rem)]"
+      className="flex flex-col gap-4 p-4 pb-[calc(var(--bottom-bars)+6rem)]"
       aria-labelledby="judul-layar"
       data-testid="receipt-screen"
       data-status={status}

@@ -1,11 +1,12 @@
 'use client';
-// /kamera?jenis=… (S-07). barcode (M1, D-58), struk dan screenshot (M2, D-82). Kamera label
-// (jendela bidik) dibuat di M4; sementara layar menjelaskan itu dan menyediakan jalan kembali.
+// /kamera?jenis=… (S-07). barcode (M1, D-58), struk dan screenshot (M2, D-82), label (jendela bidik
+// tetap terbuka, M4). Jenis lain: pesan + jalan kembali.
 import { ArrowLeft } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { APP_COPY, fill, SCAN_COPY, STATE_COPY } from '@/lib/copy/id';
 import { CaptureScreen } from '@/features/capture/capture-screen';
+import { LabelCamera } from '@/features/capture/label-camera';
 import { BarcodeScanner } from './barcode-scanner';
 
 const KIND_LABEL: Record<string, string> = {
@@ -20,6 +21,7 @@ export function CameraScreen() {
   if (kind === 'barcode') return <BarcodeScanner />;
   if (kind === 'struk') return <CaptureScreen kind="receipt" />;
   if (kind === 'screenshot') return <CaptureScreen kind="marketplace" />;
+  if (kind === 'label') return <LabelCamera />;
   return (
     <section className="flex flex-col gap-4 p-4" aria-labelledby="judul-layar">
       <h1 id="judul-layar" tabIndex={-1} className="text-2xl font-semibold">

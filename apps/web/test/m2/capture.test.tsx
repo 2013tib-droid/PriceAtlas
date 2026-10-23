@@ -45,13 +45,13 @@ describe('S-06 Foto apa? (?sheet=foto)', () => {
     expect(labels).toEqual(['Struk', 'Label harga', 'Screenshot marketplace', 'Pilih dari galeri']);
   });
 
-  it('Label tanpa sesi: pesan (kamera label = M4, F-53), tidak membuka halaman yang belum ada (D-85)', async () => {
+  it('Label tanpa sesi → S-12 mode manual untuk label (F-53, disambungkan di M4)', async () => {
     setUrl('/', 'sheet=foto');
     await renderWithProviders(<PhotoSheet />);
     await userEvent.setup().click(await screen.findByRole('button', { name: /Label harga/ }));
-    expect(screen.getByRole('status').textContent).toMatch(/Label harga butuh kamera label/);
-    expect(nav.push).not.toHaveBeenCalled();
-    expect(nav.replace).not.toHaveBeenCalled();
+    expect(nav.replace).toHaveBeenCalledWith(
+      `/lokasi?mode=manual&untuk=label&kembali=${encodeURIComponent('/kamera?jenis=label')}`,
+    );
   });
 
   it('Struk membuka kamera bawaan (<input capture>) dan menyerahkan foto ke /kamera?jenis=struk', async () => {

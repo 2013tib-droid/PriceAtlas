@@ -83,6 +83,8 @@ export function invalidateCaptures(qc: QueryClient) {
     qc.invalidateQueries({ queryKey: ['rpc', 'list_captures'] }),
     qc.invalidateQueries({ queryKey: ['rpc', 'get_capture'] }),
     qc.invalidateQueries({ queryKey: ['rest', 'capture'] }),
+    // Status label di S-13/banner ikut berubah (W2/W3/W4/W5).
+    qc.invalidateQueries({ queryKey: ['rpc', 'get_active_session'] }),
   ]);
 }
 

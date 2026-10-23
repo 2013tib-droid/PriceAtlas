@@ -1,13 +1,16 @@
 'use client';
-// S-12 Pilih toko & cabang (docs/07 §7.3, wireframe S-12, docs/05 §3.3 S-12), mode manual dan koreksi
-// (mode sesi = M4). Langkah 1 toko: "Terakhir dipakai" (R17) di bawah dekat jempol, semua toko + search
+// S-12 Pilih toko & cabang (docs/07 §7.3, wireframe S-12, docs/05 §3.3 S-12), mode manual, koreksi,
+// dan sesi. Langkah 1 toko: "Terakhir dipakai" (R17) di bawah dekat jempol, semua toko + search
 // (REST store, normalized_name ilike) di bawahnya. Langkah 2 cabang: REST branch (tutup di bawah),
-// "Tidak tahu cabangnya" (U-14), "+ Toko baru" / "+ Cabang baru" (W17, id dari klien, privat D-29,
-// 23505 = sukses). Hasil dikembalikan ke layar asal (`kembali=`) lewat lib/confirm/location-handoff.
+// "Tidak tahu cabangnya" (U-14, bukan mode sesi), "+ Toko baru" / "+ Cabang baru" (W17, id dari klien,
+// privat D-29, 23505 = sukses). Hasil dikembalikan ke layar asal (`kembali=`) lewat
+// lib/confirm/location-handoff; label tanpa sesi (`untuk=label`, F-53) lanjut ke kamera label dengan
+// lokasi manual. Mode sesi (D-60, W-19): cabang wajib, cabang tutup tidak bisa dipilih, W11 dengan id
+// dari klien (id sama per cabang = sesi sama, F-16), butuh sinyal (D-81/Q-54), BRANCH_CLOSED.
 import { ArrowLeft, Plus } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useId, useState, type FormEvent } from 'react';
-import { EmptyState, ErrorState, LoadingState } from '@/components/app/screen-state';
+import { useId, useRef, useState, type FormEvent } from 'react';
+import { ErrorState, LoadingState } from '@/components/app/screen-state';
 import { PriceLabel, PrivateBadge } from '@/components/price/price';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
@@ -23,7 +26,7 @@ import {
   type LocationMode,
   type PickedLocation,
 } from '@/lib/confirm/location-handoff';
-import { fill, LOCATION_COPY as C } from '@/lib/copy/id';
+import { fill, LOCATION_COPY as C, SESSION_COPY } from '@/lib/copy/id';
 import {
   useBranches,
   useCreateBranch,
@@ -32,7 +35,13 @@ import {
   useStores,
   type BranchRow,
 } from '@/lib/data/confirm';
+import { useStartSession } from '@/lib/data/session';
+import { flashToast } from '@/lib/flash';
+import { useOnline } from '@/lib/hooks/use-online';
 import { newCaptureId } from '@/lib/media/capture-id';
+import { sessionError } from '@/lib/session/errors';
+import { LABEL_TARGET, labelCameraHref, manualLocationOf } from '@/lib/session/label-target';
+import { sessionPlace } from '@/lib/session/session';
 
 type Store = PickedLocation['store'];
 
@@ -167,8 +176,14 @@ export function LocationScreen() {
   const router = useRouter();
   const params = useSearchParams();
   const mode = (params?.get('mode') ?? 'koreksi') as LocationMode;
+  const session = mode === 'sesi';
   const target = params?.get('untuk') ?? '';
-  const back = safeBack(params?.get('kembali'));
+  const back = safeBack(params?.get('kembali'), session ? '/belanja' : undefined);
+  const online = useOnline();
+  const start = useStartSession();
+  /** Id sesi per cabang: mengulang untuk cabang yang sama = sesi yang sama (F-16). */
+  const sessionIds = useRef(new Map<string, string>());
+  const [sessionErr, setSessionErr] = useState<string | null>(null);
   const recent = useRecentLocations();
   const [q, setQ] = useState('');
   const stores = useStores(q);
@@ -181,7 +196,41 @@ export function LocationScreen() {
   const [channel, setChannel] = useState<'offline' | 'online'>('offline');
   const [error, setError] = useState<string | null>(null);
 
+  const startSession = (picked: PickedLocation) => {
+    const branch = picked.branch;
+    if (!branch || start.isPending) return;
+    setSessionErr(null);
+    if (!navigator.onLine) return setSessionErr(SESSION_COPY.needsSignal);
+    const ids = sessionIds.current;
+    const sessionId = ids.get(branch.id) ?? newCaptureId();
+    ids.set(branch.id, sessionId);
+    start.mutate(
+      { sessionId, branchId: branch.id },
+      {
+        onSuccess: (data) => {
+          if (!data) {
+            // Id ini milik sesi yang sudah berakhir: pilih lagi → id baru.
+            ids.delete(branch.id);
+            return setSessionErr(SESSION_COPY.restartEnded);
+          }
+          flashToast('success', fill(SESSION_COPY.started, { place: sessionPlace(data) }));
+          router.replace(back);
+        },
+        onError: (e) => {
+          const r = sessionError(e, 'S-12');
+          setSessionErr(r.message);
+          if (r.action.kind === 'pick-other') void branches.refetch();
+        },
+      },
+    );
+  };
+
   const finish = (picked: PickedLocation) => {
+    if (session) return startSession(picked);
+    if (mode === 'manual' && target === LABEL_TARGET) {
+      completeLocationPick(target, picked);
+      return router.replace(labelCameraHref(manualLocationOf(picked)));
+    }
     const fromApp = openedFromApp(target);
     completeLocationPick(target, picked);
     if (fromApp) router.back();
@@ -201,25 +250,40 @@ export function LocationScreen() {
     </div>
   );
 
-  if (mode === 'sesi') {
-    return (
-      <section className="flex flex-col gap-4 p-4" aria-labelledby="judul-layar">
-        {header}
-        <EmptyState message={C.sessionLater} />
-      </section>
-    );
-  }
+  const sessionNotice = session ? (
+    <>
+      <p className="text-sm text-muted-foreground">{C.sessionHint}</p>
+      {!online ? (
+        <p className="rounded-lg bg-warning p-3 text-sm text-warning-foreground">{SESSION_COPY.needsSignal}</p>
+      ) : null}
+      {sessionErr ? (
+        <p role="alert" className="rounded-lg border border-danger p-3 text-sm">
+          {sessionErr}
+        </p>
+      ) : null}
+      {start.isPending ? (
+        <p role="status" className="text-sm">
+          {C.starting}
+        </p>
+      ) : null}
+    </>
+  ) : null;
 
   if (store) {
     const list = branches.data ?? [];
     const recentBranches = (recent.data ?? []).filter((r) => r.store.id === store.id && r.branch);
     const seller = store.channel === 'online';
+    // Mode sesi: cabang tutup tampil di bawah tetapi tidak bisa dipilih (wireframe S-12, §8.2).
     const branchRow = (b: BranchRow, testId: string) => (
       <Row
         key={`${testId}-${b.id}`}
         testId={testId}
         title={b.name}
-        subtitle={[b.city, b.region].filter(Boolean).join(', ') || null}
+        disabled={(session && b.status === 'closed') || start.isPending}
+        subtitle={
+          [b.city, b.region].filter(Boolean).join(', ') ||
+          (session && b.status === 'closed' ? C.sessionClosedHint : null)
+        }
         badges={
           <>
             {b.household_id ? <PrivateBadge /> : null}
@@ -238,6 +302,7 @@ export function LocationScreen() {
       <section className="flex flex-col gap-4 p-4 pb-8" aria-labelledby="judul-layar">
         {header}
         <p className="text-sm text-muted-foreground">{fill(C.stepBranch, { store: store.name })}</p>
+        {sessionNotice}
         {branches.isError && !branches.data ? (
           <ErrorState error={branches.error} onRetry={() => void branches.refetch()} />
         ) : branches.isPending ? (
@@ -268,6 +333,7 @@ export function LocationScreen() {
                   key={r.branch!.id}
                   testId="recent-branch"
                   title={r.branch!.name}
+                  disabled={(session && r.branch!.status === 'closed') || start.isPending}
                   badges={r.branch!.is_private ? <PrivateBadge /> : null}
                   onClick={() => finish({ store, branch: r.branch })}
                 />
@@ -276,11 +342,23 @@ export function LocationScreen() {
           </section>
         ) : null}
         <div className="flex flex-col gap-2">
-          <Button size="action" variant="secondary" onClick={() => finish({ store, branch: null })}>
-            {C.unknownBranch}
-          </Button>
-          <p className="text-sm text-muted-foreground">{C.unknownBranchHint}</p>
-          <Button size="action" variant="ghost" onClick={() => setNewBranchOpen(true)}>
+          {/* Mode sesi: tanpa "Tidak tahu cabangnya" (D-60); penggantinya "+ Cabang baru" cepat (W-19). */}
+          {session ? (
+            <p className="text-sm text-muted-foreground">{C.sessionNewBranchHint}</p>
+          ) : (
+            <>
+              <Button size="action" variant="secondary" onClick={() => finish({ store, branch: null })}>
+                {C.unknownBranch}
+              </Button>
+              <p className="text-sm text-muted-foreground">{C.unknownBranchHint}</p>
+            </>
+          )}
+          <Button
+            size="action"
+            variant={session ? 'secondary' : 'ghost'}
+            onClick={() => setNewBranchOpen(true)}
+            disabled={start.isPending}
+          >
             <Plus aria-hidden />
             {seller ? C.newSeller : C.newBranch}
           </Button>
@@ -331,6 +409,7 @@ export function LocationScreen() {
     <section className="flex flex-col gap-4 p-4 pb-8" aria-labelledby="judul-layar">
       {header}
       <p className="text-sm text-muted-foreground">{C.stepStore}</p>
+      {sessionNotice}
       <section aria-labelledby="judul-semua-toko" className="flex flex-col gap-2">
         <h2 id="judul-semua-toko" className="text-lg font-semibold">
           {C.allStores}
@@ -382,6 +461,7 @@ export function LocationScreen() {
                 testId="recent-location"
                 title={r.store.name}
                 subtitle={r.branch?.name ?? null}
+                disabled={(session && r.branch?.status === 'closed') || start.isPending}
                 badges={
                   <>
                     {r.store.is_private || r.branch?.is_private ? <PrivateBadge /> : null}
@@ -394,7 +474,7 @@ export function LocationScreen() {
           </ul>
         )}
       </section>
-      <div className="sticky bottom-[calc(var(--spacing-tabbar)+env(safe-area-inset-bottom))] flex flex-col gap-1 bg-background py-2">
+      <div className="sticky bottom-[calc(var(--bottom-bars)+env(safe-area-inset-bottom))] flex flex-col gap-1 bg-background py-2">
         <label htmlFor="cari-toko" className="sr-only">
           {C.searchLabel}
         </label>

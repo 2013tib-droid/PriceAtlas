@@ -6,8 +6,8 @@ export function Toaster() {
   return (
     <Sonner
       position="bottom-center"
-      offset={{ bottom: 'calc(var(--spacing-tabbar) + 0.75rem)' }}
-      mobileOffset={{ bottom: 'calc(var(--spacing-tabbar) + 0.75rem)' }}
+      offset={{ bottom: 'calc(var(--bottom-bars) + 0.75rem)' }}
+      mobileOffset={{ bottom: 'calc(var(--bottom-bars) + 0.75rem)' }}
       toastOptions={{ classNames: { toast: 'text-base' } }}
     />
   );

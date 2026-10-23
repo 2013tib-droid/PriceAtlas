@@ -164,9 +164,12 @@ export function useWhereCheaper(
   });
 }
 
-/** R6 (D-58): sekali panggil dari jendela bidik; tidak di-cache lama. */
-export function findProductByBarcode(qc: QueryClient, code: string): Promise<BarcodeHit> {
-  const input: RpcInput<'find_product_by_barcode'> = { p_code: code };
+/**
+ * R6 (D-58, docs/07 §5.7): sekali panggil dari jendela bidik; tidak di-cache lama. Saat sesi belanja
+ * aktif, toko sesi ikut dikirim (PLU/barcode internal toko).
+ */
+export function findProductByBarcode(qc: QueryClient, code: string, storeId?: string | null): Promise<BarcodeHit> {
+  const input: RpcInput<'find_product_by_barcode'> = storeId ? { p_code: code, p_store_id: storeId } : { p_code: code };
   return qc.fetchQuery({
     queryKey: qk.rpc('find_product_by_barcode', input),
     queryFn: () =>

@@ -161,11 +161,7 @@ describe('S-12 Pilih toko & cabang', () => {
     expect(screen.getAllByRole('button', { name: 'Coba lagi' }).length).toBeGreaterThan(0);
   });
 
-  it('mode sesi = M4: pesan, tanpa daftar', async () => {
-    await open('sesi');
-    expect(screen.getByText('Memulai sesi belanja dibuat di milestone berikutnya (M4).')).toBeTruthy();
-    expect(screen.queryByTestId('store-row')).toBeNull();
-  });
+  // Mode sesi (M4): test/m4/session.test.tsx.
 });
 
 describe('S-14 Pilih produk', () => {

@@ -37,7 +37,12 @@ export function defaultOutboxFactory(userId: string, qc: QueryClient): Outbox {
     upload: uploadToStorage,
     submit: async (input) => {
       const r = await submitCapture(input);
-      if (r.ok) void qc.invalidateQueries({ queryKey: ['rpc', 'list_captures'] });
+      if (r.ok) {
+        void qc.invalidateQueries({ queryKey: ['rpc', 'list_captures'] });
+        // Label sesi baru (W1 dengan p_shopping_session_id) → S-13/banner (§4.3).
+        if (input.p_shopping_session_id || input.p_kind === 'price_label')
+          void qc.invalidateQueries({ queryKey: ['rpc', 'get_active_session'] });
+      }
       return r;
     },
     findDuplicates,
