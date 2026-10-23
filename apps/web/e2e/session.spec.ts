@@ -59,7 +59,9 @@ test('alur 4: mulai sesi (S-12) → banner → foto label → S-13 kartu → per
   await expect(sheet).toBeHidden();
 
   // Banner (U-13) → kamera label.
-  const banner = page.getByRole('region', { name: 'Belanja di AEON BSD' });
+  // S-13 juga region bernama sama (judul layar), jadi banner dicari lewat penandanya.
+  const banner = page.locator('[data-session-banner]');
+  await expect(banner).toHaveAttribute('aria-label', 'Belanja di AEON BSD');
   await expect(banner).toContainText('0 label');
   await banner.getByRole('link', { name: 'Foto label' }).click();
   await expect(page).toHaveURL(/\/kamera\?jenis=label$/);
