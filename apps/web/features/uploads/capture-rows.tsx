@@ -1,6 +1,8 @@
 'use client';
-// CaptureRow (docs/07 §7.2): baris S-08 per status dari R13, dan baris antrean lokal (U-17).
+// CaptureRow (docs/07 §7.2): baris S-08 per status dari R13 ("Perlu dicek" langsung ke S-10/S-11),
+// dan baris antrean lokal (U-17).
 import type { CaptureListItem } from '@priceatlas/contracts';
+import { useQueryClient } from '@tanstack/react-query';
 import { ChevronRight, RefreshCw, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -18,6 +20,10 @@ import { captureStatusText, captureTitle, localErrorText, localStatusText } from
 
 export const detailHref = (id: string) => `/unggahan/detail?id=${id}`;
 
+/** S-10 untuk struk (R13/R14 `receipt_id`), S-11 untuk label/screenshot. */
+export const confirmHref = (captureId: string, receiptId: string | null | undefined) =>
+  receiptId ? `/struk?id=${receiptId}` : `/konfirmasi?capture=${captureId}`;
+
 function KindChip({ kind }: { kind: CaptureListItem['kind'] }) {
   return (
     <span className="rounded border border-border px-1.5 text-xs font-medium uppercase">{UPLOADS_COPY.kind[kind]}</span>
@@ -31,7 +37,7 @@ export function CaptureRow({ c, timeZone }: { c: CaptureListItem; timeZone: stri
   return (
     <li data-testid="capture-row" data-status={c.status} className="flex items-center gap-2 border-b border-divider">
       <Link
-        href={detailHref(c.id)}
+        href={c.status === 'needs_confirmation' ? confirmHref(c.id, c.receipt_id) : detailHref(c.id)}
         className="flex min-h-action flex-1 items-center gap-2 py-2"
         aria-label={`${UPLOADS_COPY.kindLong[c.kind]}, ${title}: ${status}`}
       >
@@ -62,10 +68,11 @@ export function CaptureRow({ c, timeZone }: { c: CaptureListItem; timeZone: stri
 }
 
 export function LocalRow({ item, outbox, timeZone }: { item: OutboxItem; outbox: Outbox; timeZone: string }) {
+  const qc = useQueryClient();
   const [confirm, setConfirm] = useState(false);
   const held = isHeld(item);
   const status = held
-    ? fill(DUPLICATE_COPY.inQueue, { date: duplicateDate(item.duplicate.matches[0], timeZone) })
+    ? fill(DUPLICATE_COPY.inQueue, { date: duplicateDate(item.duplicate.matches[0], timeZone, qc) })
     : localStatusText(item);
   return (
     <li data-testid="local-row" data-state={item.state} className="flex flex-col gap-2 border-b border-divider py-2">

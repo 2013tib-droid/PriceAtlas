@@ -80,7 +80,11 @@ describe('S-08 Unggahan', () => {
     expect(within(failed).getByText('Gambar buram atau terpotong.')).toBeTruthy();
     const headings = screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent);
     expect(headings).toEqual(['Perlu dicek (1)', 'Sedang diproses (2)', 'Selesai', 'Gagal (1)']);
-    expect(within(needs).getByRole('link').getAttribute('href')).toBe(`/unggahan/detail?id=${captureIds().needs}`);
+    // M3: "Perlu dicek" langsung ke S-10 (struk, receipt_id dari R13).
+    const receiptId = fx<{ id: string; receipt_id: string }[]>('captures_all').find(
+      (c) => c.id === captureIds().needs,
+    )!.receipt_id;
+    expect(within(needs).getByRole('link').getAttribute('href')).toBe(`/struk?id=${receiptId}`);
     expect(sb.rpc).toHaveBeenCalledWith('list_captures', { p_limit: 50, p_kind: null });
   });
 
@@ -266,13 +270,12 @@ describe('S-09 Detail unggahan', () => {
     expect(screen.getByTestId('timeline').textContent).toMatch(/Percobaan ke-1 · sedang dibaca/);
   });
 
-  it('needs_confirmation: "Cek sekarang" nonaktif + pesan M3 (D-85), jumlah dari R13 di cache', async () => {
+  it('needs_confirmation: "Cek sekarang" → S-10 (receipt_id R14), jumlah dari R13 di cache (D-86)', async () => {
     const view = await open('needs');
     view.qc.setQueryData(['rpc', 'list_captures', { p_limit: 50, p_kind: null }], fx('captures_all'));
     expect(await screen.findByText('2 item perlu dicek')).toBeTruthy();
-    const btn = screen.getByRole('button', { name: 'Cek sekarang' }) as HTMLButtonElement;
-    expect(btn.disabled).toBe(true);
-    expect(screen.getByText('Halaman konfirmasi dibuat di milestone berikutnya (M3).')).toBeTruthy();
+    const link = screen.getByRole('link', { name: 'Cek sekarang' });
+    expect(link.getAttribute('href')).toBe(`/struk?id=${fx<{ receipt_id: string }>('capture_needs').receipt_id}`);
   });
 
   it('gambar: signed URL 300 dtk dengan JWT user (bukan di-cache SW)', async () => {

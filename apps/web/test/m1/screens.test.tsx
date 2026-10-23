@@ -238,14 +238,17 @@ describe('Scan barcode (D-58, §5.7)', () => {
     expect(toast).toHaveBeenCalledWith('Barcode ini milik produk yang sudah digabung. Kami buka produk penggantinya.');
   });
 
-  it('tidak dikenal → pesan + Scan lagi / Cari dengan mengetik', async () => {
+  it('tidak dikenal → pesan + Pilih atau buat produk (S-14 → S-15, D-85) / Scan lagi / Cari dengan mengetik', async () => {
     detect.mockResolvedValue([{ rawValue: '1234567890123', format: 'ean_13' }]);
     await renderWithProviders(<BarcodeScanner />);
     expect(
-      await screen.findByText('Barcode 1234567890123 belum dikenal di katalogmu. Cari namanya atau foto labelnya.'),
+      await screen.findByText('Barcode 1234567890123 belum dikenal di katalogmu. Cari namanya atau buat produk baru.'),
     ).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Scan lagi' })).toBeTruthy();
-    await userEvent.setup().click(screen.getByRole('button', { name: 'Cari dengan mengetik' }));
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: 'Pilih atau buat produk' }));
+    expect(nav.replace).toHaveBeenCalledWith('/produk/baru?barcode=1234567890123&pilih=produk&untuk=barcode');
+    await user.click(screen.getByRole('button', { name: 'Cari dengan mengetik' }));
     expect(nav.replace).toHaveBeenCalledWith('/');
   });
 

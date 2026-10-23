@@ -1,9 +1,9 @@
 'use client';
 // Jendela bidik barcode (D-58, D-82, docs/07 §5.7): getUserMedia kamera belakang, deteksi tiap
 // ±150 ms, berhenti saat terbaca → R6 find_product_by_barcode → S-03 (via_merge → toast). Tidak
-// dikenal → pesan + cari manual (S-14 "Buat produk baru" ada di M3).
+// dikenal → pesan + "Pilih atau buat produk" (S-14 dengan kode terisi → S-15 dengan barcode, D-85).
 import { useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Search } from 'lucide-react';
+import { ArrowLeft, PackagePlus, Search } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -117,9 +117,22 @@ export function BarcodeScanner() {
       {/* Kontrol di sepertiga bawah (U-07). */}
       <div className="mt-auto flex flex-col gap-2">
         {state.kind === 'not-found' ? (
-          <Button size="action" variant="secondary" onClick={() => setAttempt((n) => n + 1)}>
-            {SCAN_COPY.scanAgain}
-          </Button>
+          <>
+            <Button
+              size="action"
+              onClick={() =>
+                router.replace(
+                  `/produk/baru?${new URLSearchParams({ barcode: state.code, pilih: 'produk', untuk: 'barcode' }).toString()}`,
+                )
+              }
+            >
+              <PackagePlus aria-hidden />
+              {SCAN_COPY.pickProduct}
+            </Button>
+            <Button size="action" variant="secondary" onClick={() => setAttempt((n) => n + 1)}>
+              {SCAN_COPY.scanAgain}
+            </Button>
+          </>
         ) : null}
         <Button size="action" variant="secondary" onClick={searchInstead}>
           <Search aria-hidden />

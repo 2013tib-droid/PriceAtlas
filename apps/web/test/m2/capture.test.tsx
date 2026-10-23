@@ -45,11 +45,11 @@ describe('S-06 Foto apa? (?sheet=foto)', () => {
     expect(labels).toEqual(['Struk', 'Label harga', 'Screenshot marketplace', 'Pilih dari galeri']);
   });
 
-  it('Label tanpa sesi: pesan, tidak membuka halaman yang belum ada (D-85)', async () => {
+  it('Label tanpa sesi: pesan (kamera label = M4, F-53), tidak membuka halaman yang belum ada (D-85)', async () => {
     setUrl('/', 'sheet=foto');
     await renderWithProviders(<PhotoSheet />);
     await userEvent.setup().click(await screen.findByRole('button', { name: /Label harga/ }));
-    expect(screen.getByRole('status').textContent).toMatch(/Label harga butuh toko dan cabang/);
+    expect(screen.getByRole('status').textContent).toMatch(/Label harga butuh kamera label/);
     expect(nav.push).not.toHaveBeenCalled();
     expect(nav.replace).not.toHaveBeenCalled();
   });

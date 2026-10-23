@@ -2,7 +2,8 @@
 // S-09 Detail unggahan (docs/07 §7.3, wireframe S-09): R14 (polling 5 dtk saat uploaded/processing),
 // ImageCarousel dengan signed URL 300 dtk (tidak di-persist / di-cache SW, P-14), StatusTimeline,
 // aksi per status: uploaded → Hapus (W3); processing → bilah tak tentu; needs_confirmation →
-// "Cek sekarang" (S-10/S-11 dibuat di M3: nonaktif + pesan, D-85); done → daftar ringkas;
+// "Cek sekarang" → S-10 (struk) / S-11 (label, screenshot); done → daftar ringkas + "Lihat struk"
+// (S-10 mode tersimpan) / "Lihat harga" (S-11);
 // failed → Ulangi (W2) / Foto ulang / Hapus. Gambar dihapus retensi (purged_at, D-32).
 import type { CaptureDetail } from '@priceatlas/contracts';
 import { useQueryClient } from '@tanstack/react-query';
@@ -25,6 +26,7 @@ import { formatTime, formatTransactionDate, todayInZone } from '@/lib/format';
 import { productTitle } from '@/lib/format/product';
 import { useTimeZone } from '@/lib/hooks/use-time-zone';
 import { captureErrorAction, captureErrorText } from './capture-text';
+import { confirmHref } from './capture-rows';
 
 type Detail = CaptureDetail;
 
@@ -269,14 +271,9 @@ export function UploadDetailScreen() {
         </p>
       );
       actions = (
-        <div className="flex flex-col gap-2">
-          <Button size="action" disabled aria-describedby="cek-segera">
-            {UPLOAD_DETAIL_COPY.checkNow}
-          </Button>
-          <p id="cek-segera" className="text-sm text-muted-foreground">
-            {UPLOAD_DETAIL_COPY.confirmSoon}
-          </p>
-        </div>
+        <Button size="action" asChild>
+          <Link href={confirmHref(c.id, d.receipt_id)}>{UPLOAD_DETAIL_COPY.checkNow}</Link>
+        </Button>
       );
       break;
     case 'done':
@@ -284,6 +281,13 @@ export function UploadDetailScreen() {
         <p className="text-lg font-semibold">
           {fill(UPLOAD_DETAIL_COPY.status.done, { n: d.saved_records.filter((r) => r.status === 'active').length })}
         </p>
+      );
+      actions = (
+        <Button size="action" variant="secondary" asChild>
+          <Link href={confirmHref(c.id, d.receipt_id)}>
+            {d.receipt_id ? UPLOAD_DETAIL_COPY.viewReceipt : UPLOAD_DETAIL_COPY.viewItems}
+          </Link>
+        </Button>
       );
       break;
     case 'failed': {

@@ -64,11 +64,10 @@ test('alur 3: galeri struk-aeon → antrean → Storage → W1 → worker → po
     { position: 1, sha256: fixtureSha('struk-aeon'), storage_path: expect.stringMatching(/\/1\.jpg$/) },
   ]);
 
-  // S-09: gambar lewat signed URL, "Cek sekarang" menunggu M3.
-  await needs.getByRole('link').click();
-  await expect(page).toHaveURL(new RegExp(`/unggahan/detail\\?id=${cap!.id}$`));
+  // S-09: gambar lewat signed URL, "Cek sekarang" → S-10 (M3; alur lengkap di e2e/confirm.spec.ts).
+  await page.goto(`/unggahan/detail?id=${cap!.id}`);
   await expect(page.getByTestId('detail-status')).toContainText('2 item perlu dicek');
-  await expect(page.getByRole('button', { name: 'Cek sekarang' })).toBeDisabled();
+  await expect(page.getByRole('link', { name: 'Cek sekarang' })).toHaveAttribute('href', /^\/struk\?id=/);
   await expect(page.getByTestId('carousel-image')).toHaveCount(1);
 });
 

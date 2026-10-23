@@ -2,9 +2,9 @@
 // (migration + seed + record di bawah), dipanggil sebagai user lewat PgRpcClient (JWT simulasi).
 // Dipakai test/fixtures.l3.test.ts: membangkitkan ulang `rpc.json` (UPDATE_FIXTURES=1) atau
 // memeriksa bahwa bentuk keluaran server sama dengan fixture yang di-commit.
-import { mkdtempSync, readFileSync } from 'node:fs';
+import { copyFileSync, mkdtempSync, readdirSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 import type pg from 'pg';
 import { PgRpcClient, USERS, householdOf } from '@priceatlas/testkit';
 import { uploadAndSubmit } from '@priceatlas/worker/scripts/client-sim.ts';
@@ -126,16 +126,18 @@ async function seedScenario(pool: pg.Pool): Promise<void> {
   await pool.query('select app.process_summary_queue()');
 }
 
-/**
- * M2 (S-08/S-09): capture milik Citra di setiap status lewat pipeline worker ASLI (stub + fixture
- * apps/worker/test/fixtures), supaya R13/R14 = keluaran server. Citra dipakai agar histori Ani/Budi
- * (fixture M1) tidak berubah.
- */
-async function seedCaptures(pool: pg.Pool, url: string) {
+/** Fixture worker tambahan untuk web (struk tanpa toko + field ragu), di samping fixture worker. */
+const WEB_WORKER_FIXTURES = resolve(import.meta.dirname, 'worker');
+
+/** Pipeline worker ASLI (stub + fixture) untuk user Citra, mode A + LocalBlobStore. */
+function createWorker(pool: pg.Pool, url: string) {
   setLogSink(() => undefined);
+  const dir = mkdtempSync(join(tmpdir(), 'pa-web-fxdir-'));
+  for (const src of [DEFAULT_FIXTURES_DIR, WEB_WORKER_FIXTURES])
+    for (const f of readdirSync(src)) copyFileSync(join(src, f), join(dir, f));
   const workerDb = createPool(url, { role: 'service_role', max: 2 });
   const blob = new LocalBlobStore(mkdtempSync(join(tmpdir(), 'pa-web-fx-')), workerDb);
-  const fixtures = new FixtureRegistry(DEFAULT_FIXTURES_DIR);
+  const fixtures = new FixtureRegistry(dir);
   const deps = {
     db: workerDb,
     blob,
@@ -145,34 +147,40 @@ async function seedCaptures(pool: pg.Pool, url: string) {
   };
   const submit = async (name: string) => {
     const fx = fixtures.byName(name)!;
-    const images = fx.images!.map((f) => readFileSync(join(DEFAULT_FIXTURES_DIR, f)));
+    const images = fx.images!.map((f) => readFileSync(join(dir, f)));
     return (await uploadAndSubmit({ pool, blob, userId: USERS.c, kind: fx.output.kind, images })).captureId;
   };
+  return { deps, workerDb, submit, process: () => processNextCapture(deps), end: () => workerDb.end() };
+}
+type Worker = ReturnType<typeof createWorker>;
+
+/**
+ * M2 (S-08/S-09): capture milik Citra di setiap status lewat pipeline worker ASLI (stub + fixture
+ * apps/worker/test/fixtures), supaya R13/R14 = keluaran server. Citra dipakai agar histori Ani/Budi
+ * (fixture M1) tidak berubah.
+ */
+async function seedCaptures(pool: pg.Pool, w: Worker) {
   const skipBackoff = (id: string) =>
     pool.query(
       `update public.processing_run set started_at = started_at - interval '1 hour',
               finished_at = finished_at - interval '1 hour' where capture_id = $1`,
       [id],
     );
-  try {
-    const needs = await submit('struk-aeon');
-    await processNextCapture(deps);
-    const failed = await submit('struk-buram');
-    await processNextCapture(deps);
-    // 2× gagal sementara lalu sukses (retry otomatis, backoff dilewati) → done.
-    const done = await submit('struk-alfamart-timeout');
-    for (let i = 0; i < 3; i++) {
-      await processNextCapture(deps);
-      await skipBackoff(done);
-    }
-    // Diklaim worker tanpa selesai → processing.
-    const processing = await submit('label-milo');
-    await workerDb.query(`select * from app.claim_next_capture('w-web-fixtures', 'stub', null, 'stub-1')`);
-    const uploaded = await submit('shopee-milo');
-    return { needs, failed, done, processing, uploaded };
-  } finally {
-    await workerDb.end();
+  const needs = await w.submit('struk-aeon');
+  await w.process();
+  const failed = await w.submit('struk-buram');
+  await w.process();
+  // 2× gagal sementara lalu sukses (retry otomatis, backoff dilewati) → done.
+  const done = await w.submit('struk-alfamart-timeout');
+  for (let i = 0; i < 3; i++) {
+    await w.process();
+    await skipBackoff(done);
   }
+  // Diklaim worker tanpa selesai → processing.
+  const processing = await w.submit('label-milo');
+  await w.workerDb.query(`select * from app.claim_next_capture('w-web-fixtures', 'stub', null, 'stub-1')`);
+  const uploaded = await w.submit('shopee-milo');
+  return { needs, failed, done, processing, uploaded };
 }
 
 export type Fixtures = { today: string; data: Record<string, unknown> };
@@ -180,7 +188,16 @@ export type Fixtures = { today: string; data: Record<string, unknown> };
 /** Bangun skenario lalu kumpulkan keluaran RPC (Ani = punya histori, Budi = kosong). */
 export async function collectFixtures(pool: pg.Pool, url: string): Promise<Fixtures> {
   await seedScenario(pool);
-  const caps = await seedCaptures(pool, url);
+  const w = createWorker(pool, url);
+  try {
+    return await collectAll(pool, w);
+  } finally {
+    await w.end();
+  }
+}
+
+async function collectAll(pool: pg.Pool, w: Worker): Promise<Fixtures> {
+  const caps = await seedCaptures(pool, w);
   const ani = new PgRpcClient(pool, USERS.a);
   const budi = new PgRpcClient(pool, USERS.b);
   const data: Record<string, unknown> = {};
@@ -254,6 +271,135 @@ export async function collectFixtures(pool: pg.Pool, url: string): Promise<Fixtu
   await call('retry_not_failed', citra, 'retry_capture', { p_capture_id: caps.needs });
   await call('delete_not_allowed', citra, 'delete_capture', { p_capture_id: caps.needs });
 
+  // M3 (S-10/S-11/S-12/S-14/S-15): keluaran R15/R16/R17 dan W4/W5/W8/W18 asli untuk Citra.
+  type Line = { id: string; raw_text: string; needs_check: boolean; suggestion: { id: string } | null };
+  const receiptOf = async (captureId: string) =>
+    (await pool.query<{ id: string }>(`select id from public.receipt where capture_id = $1`, [captureId])).rows[0]!.id;
+  await w.process(); // shopee-milo yang masih `uploaded` dari M2 (antrean urut waktu unggah)
+  const aeonReceipt = await receiptOf(caps.needs);
+  await call('receipt_aeon', citra, 'get_receipt', { p_receipt_id: aeonReceipt });
+  await call('receipt_unknown', citra, 'get_receipt', { p_receipt_id: IDS.unknown });
+  await call('confirm_receipt_undecided', citra, 'confirm_receipt', { p_receipt_id: aeonReceipt, p_lines: [] });
+  const needLines = (data.receipt_aeon as { lines: Line[] }).lines.filter((l) => l.needs_check);
+  // Benar untuk yang punya saran, Ganti (Milo 3in1) untuk sisanya.
+  await call('confirm_receipt_ok', citra, 'confirm_receipt', {
+    p_receipt_id: aeonReceipt,
+    p_lines: needLines.map((l) =>
+      l.suggestion
+        ? { line_id: l.id, action: 'accept' }
+        : { line_id: l.id, action: 'replace', product_id: IDS.milo3in1 },
+    ),
+  });
+  await call('receipt_confirmed', citra, 'get_receipt', { p_receipt_id: aeonReceipt });
+  // Struk yang sama diunggah lagi ("Tetap unggah", U-10) → banner duplikat D-20.
+  const dupCapture = await w.submit('struk-aeon');
+  await w.process();
+  const dupReceipt = await receiptOf(dupCapture);
+  await call('receipt_duplicate', citra, 'get_receipt', { p_receipt_id: dupReceipt });
+  await call('confirm_receipt_duplicate', citra, 'confirm_receipt', { p_receipt_id: dupReceipt, p_lines: [] });
+  // Toko tidak dikenali (D-49) + field ragu (field_confidence < τ).
+  const noStoreCapture = await w.submit('struk-tanpa-toko');
+  await w.process();
+  const noStoreReceipt = await receiptOf(noStoreCapture);
+  await call('receipt_nostore', citra, 'get_receipt', { p_receipt_id: noStoreReceipt });
+  await call('confirm_receipt_nostore', citra, 'confirm_receipt', { p_receipt_id: noStoreReceipt, p_lines: [] });
+
+  // Screenshot (shopee-milo, diproses di awal M3) dan label (label-milo, diunggah lagi).
+  await call('items_shopee', citra, 'get_capture_items', { p_capture_id: caps.uploaded });
+  const labelCapture = await w.submit('label-milo');
+  await w.process();
+  await call('items_label', citra, 'get_capture_items', { p_capture_id: labelCapture });
+  await call('capture_label', citra, 'get_capture', { p_capture_id: labelCapture });
+  await call('items_unknown', citra, 'get_capture_items', { p_capture_id: IDS.unknown });
+  type Item = { id: string; updated_at: string };
+  const [label1, label2] = data.items_label as Item[];
+  await call('update_item_stale', citra, 'update_capture_item', {
+    p_item_id: label1!.id,
+    p_patch: { normal_price: 19000 },
+    p_expected_updated_at: '2000-01-01T00:00:00+00:00',
+  });
+  await call('confirm_items_store_required', citra, 'confirm_capture_items', {
+    p_capture_id: labelCapture,
+    p_items: [{ item_id: label1!.id, action: 'accept' }],
+  });
+  // Hanya harga member, user bukan member → tidak ada harga yang berlaku.
+  await call('update_item_member_only', citra, 'update_capture_item', {
+    p_item_id: label2!.id,
+    p_patch: { normal_price: null, store_id: IDS.aeon },
+    p_expected_updated_at: label2!.updated_at,
+  });
+  // Harga member dengan program katalog; Citra bukan member → member tidak dihitung (D-27).
+  await call('update_item_member_price', citra, 'update_capture_item', {
+    p_item_id: label2!.id,
+    p_patch: { member_price: 21000, member_program_id: IDS.aeonMember },
+    p_expected_updated_at: (data.update_item_member_only as Item).updated_at,
+  });
+  await call('confirm_items_no_price', citra, 'confirm_capture_items', {
+    p_capture_id: labelCapture,
+    p_items: [{ item_id: label2!.id, action: 'accept' }],
+  });
+  await call('update_item_location', citra, 'update_capture_item', {
+    p_item_id: label1!.id,
+    p_patch: { store_id: IDS.aeon, branch_id: IDS.aeonBsd },
+    p_expected_updated_at: label1!.updated_at,
+  });
+  await call('items_label_updated', citra, 'get_capture_items', { p_capture_id: labelCapture });
+  await call('confirm_items_ok', citra, 'confirm_capture_items', {
+    p_capture_id: labelCapture,
+    p_items: [
+      { item_id: label1!.id, action: 'accept' },
+      { item_id: label2!.id, action: 'reject' },
+    ],
+  });
+  // shopee-milo pertama di-auto-save (tier fuzzy, confidence 1). Diunggah lagi ("Tetap unggah"):
+  // duplikat hash tidak pernah di-auto-save (D-71) → perlu dicek di S-11 (alur 5).
+  const shopeeDup = await w.submit('shopee-milo');
+  await w.process();
+  await call('items_shopee_pending', citra, 'get_capture_items', { p_capture_id: shopeeDup });
+  await call('capture_shopee', citra, 'get_capture', { p_capture_id: shopeeDup });
+  const shopeeItem = (data.items_shopee_pending as Item[])[0]!;
+  await call('confirm_items_shopee', citra, 'confirm_capture_items', {
+    p_capture_id: shopeeDup,
+    p_items: [{ item_id: shopeeItem.id, action: 'accept' }],
+  });
+
+  await call('programs', citra, 'get_my_programs');
+  // S-12: R17 setelah konfirmasi; toko/cabang privat baru (W17).
+  await call('recent_locations', citra, 'recent_locations', { p_limit: 10 });
+  await call('recent_locations_empty', budi, 'recent_locations', { p_limit: 10 });
+  await call('create_store', citra, 'create_private_store', {
+    p_store: { id: 'c0000000-0000-0000-0000-000000000001', name: 'Toko Makmur Jaya', channel: 'offline' },
+  });
+  await call('create_branch', citra, 'create_private_branch', {
+    p_branch: {
+      id: 'c0000000-0000-0000-0000-000000000002',
+      store_id: 'c0000000-0000-0000-0000-000000000001',
+      name: 'Pasar Modern',
+      city: 'Tangerang',
+    },
+  });
+  // S-15: W8 sukses, ukuran kosong untuk kemasan (23514), barcode tumpang tindih (23P01).
+  const newProduct = {
+    name: 'Gula Aren Bubuk',
+    variant: '250 g',
+    brand: { new: 'Kebun Sari' },
+    group: 'same_as_name',
+    sale_mode: 'unit',
+    pack_count: 1,
+    content_size: 250,
+    content_unit: 'g',
+    barcodes: [{ code: '8990000000017', code_type: 'gtin' }],
+  };
+  await call('create_product_ok', citra, 'create_private_product', {
+    p_product: { ...newProduct, id: 'c0000000-0000-0000-0000-000000000010' },
+  });
+  await call('create_product_23514', citra, 'create_private_product', {
+    p_product: { ...newProduct, id: 'c0000000-0000-0000-0000-000000000011', content_size: null, barcodes: [] },
+  });
+  await call('create_product_23P01', citra, 'create_private_product', {
+    p_product: { ...newProduct, id: 'c0000000-0000-0000-0000-000000000012', name: 'Gula Aren Cair' },
+  });
+
   // S-01 "Harga baru masuk": REST price_record_view (docs/05 §3.3), sebagai user (RLS).
   const recentSql = `select id, product_id, transaction_date, effective_price, price_basis, store_name
                        from public.price_record_view where status = 'active'
@@ -266,6 +412,22 @@ export async function collectFixtures(pool: pg.Pool, url: string): Promise<Fixtu
     ),
   );
   data.recent_prices_empty = (await budi.asUser(`select 1 from (${recentSql}) r`)).rows;
+
+  // S-12 / S-15: REST baca (docs/05 §3.3 S-12), sebagai user (RLS).
+  const rows = async (sql: string, client = citra) =>
+    (await client.asUser<{ j: Record<string, unknown> }>(`select to_jsonb(r) as j from (${sql}) r`)).rows.map(
+      (r) => r.j,
+    );
+  data.rest_stores = await rows(
+    `select id, name, channel, household_id from public.store where status = 'active' order by name limit 50`,
+  );
+  data.rest_branches_aeon = await rows(
+    `select id, name, city, region, kind, status, household_id, store_id from public.branch
+      where store_id = '${IDS.aeon}' order by status, name`,
+  );
+  data.rest_categories = await rows(
+    `select id, name, household_id from public.category where archived_at is null order by name`,
+  );
 
   const today = (
     await pool.query<{ d: string }>(`select app.household_today($1)::text as d`, [await householdOf(pool, USERS.a)])

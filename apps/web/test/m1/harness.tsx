@@ -117,7 +117,10 @@ export function defaultRpc(fn: string, a: Record<string, unknown>): Res {
     }
     case 'get_capture': {
       const key = Object.entries(captureIds()).find(([, id]) => id === a.p_capture_id)?.[0];
-      return key ? ok(fx(`capture_${key}`)) : errOf('capture_unknown');
+      if (key) return ok(fx(`capture_${key}`));
+      if (a.p_capture_id === m3Ids().items.label) return ok(fx('capture_label'));
+      if (a.p_capture_id === m3Ids().items.shopee_pending) return ok(fx('capture_shopee'));
+      return errOf('capture_unknown');
     }
     case 'retry_capture':
       return ok({ capture_id: a.p_capture_id, status: 'uploaded' });
@@ -125,8 +128,60 @@ export function defaultRpc(fn: string, a: Record<string, unknown>): Res {
       return ok({ capture_id: a.p_capture_id, deleted: true });
     case 'submit_capture':
       return ok({ capture_id: a.p_capture_id, status: 'uploaded', created: true });
+    // M3 (S-10…S-15): keluaran R15/R16/R17/W4/W5/W8/W17/W18 asli user Citra.
+    case 'get_receipt': {
+      const key = Object.entries(m3Ids().receipts).find(([, id]) => id === a.p_receipt_id)?.[0];
+      return key ? ok(fx(`receipt_${key}`)) : errOf('receipt_unknown');
+    }
+    case 'confirm_receipt':
+      if (a.p_duplicate_decision === 'discard')
+        return ok({ saved_count: 0, cheaper_than_best_count: 0, receipt_status: 'discarded' });
+      return ok(fx('confirm_receipt_ok'));
+    case 'get_capture_items': {
+      const key = Object.entries(m3Ids().items).find(([, id]) => id === a.p_capture_id)?.[0];
+      return key ? ok(fx(`items_${key}`)) : errOf('items_unknown');
+    }
+    case 'update_capture_item': {
+      // Versi baru item (patch diterapkan, updated_at maju) — computed tetap dari fixture.
+      const all = [
+        ...fx<Record<string, unknown>[]>('items_label'),
+        ...fx<Record<string, unknown>[]>('items_shopee_pending'),
+      ];
+      const item = all.find((i) => i.id === a.p_item_id);
+      if (!item) return errOf('items_unknown');
+      const patch = { ...(a.p_patch as Record<string, unknown>) };
+      if ('product_id' in patch) {
+        item.suggested_product_id = patch.product_id;
+        delete patch.product_id;
+      }
+      return ok({ ...item, ...patch, updated_at: new Date(Date.parse(String(item.updated_at)) + 1000).toISOString() });
+    }
+    case 'confirm_capture_items':
+      return ok(fx(a.p_capture_id === m3Ids().items.shopee_pending ? 'confirm_items_shopee' : 'confirm_items_ok'));
+    case 'get_my_programs':
+      return ok(fx('programs'));
+    case 'set_program_membership':
+      return ok({ program_id: a.p_program_id, is_member: a.p_member });
+    case 'recent_locations':
+      return ok(fx('recent_locations'));
+    case 'create_private_store':
+      return ok({
+        ...fx<Record<string, unknown>>('create_store'),
+        ...(a.p_store as Record<string, unknown>),
+        is_private: true,
+      });
+    case 'create_private_branch':
+      return ok({
+        ...fx<Record<string, unknown>>('create_branch'),
+        ...(a.p_branch as Record<string, unknown>),
+        is_private: true,
+      });
+    case 'create_private_product':
+      return ok(fx('create_product_ok'));
+    case 'correct_receipt_line':
+      return ok({ line: {}, attached: [], record: null });
     default:
-      throw new Error(`RPC ${fn} tidak diharapkan di M1/M2`);
+      throw new Error(`RPC ${fn} tidak diharapkan di M1–M3`);
   }
 }
 
@@ -138,13 +193,34 @@ export function captureIds(): Record<string, string> {
   return out;
 }
 
+/** Id struk/capture fixture M3. */
+export function m3Ids() {
+  const receipt = (k: string) => fx<{ header: { id: string; capture_id: string } }>(`receipt_${k}`).header;
+  const capOf = (k: string) => fx<{ capture_id: string }[]>(`items_${k}`)[0]!.capture_id;
+  return {
+    receipts: { aeon: receipt('aeon').id, duplicate: receipt('duplicate').id, nostore: receipt('nostore').id },
+    items: { label: capOf('label'), shopee: capOf('shopee'), shopee_pending: capOf('shopee_pending') },
+  };
+}
+
+export type RestCall = { table: string; calls: [string, unknown[]][] };
+type RestHandler = (c: RestCall) => Res | Promise<Res>;
+
 export const state = {
   rpcOverride: null as null | ((fn: string, a: Record<string, unknown>) => Res | Promise<Res> | undefined),
   rest: {
     price_record_view: () => ok(fx('recent_prices')) as Res | Promise<Res>,
     capture: () => ({ data: null, error: null, count: 0 }) as Res & { count?: number },
     capture_image: () => ok([]) as Res | Promise<Res>,
+    receipt: (() => ok([{ id: 'x', updated_at: new Date().toISOString() }])) as RestHandler,
+    store: (() => ok(fx('rest_stores'))) as RestHandler,
+    branch: (() => ok(fx('rest_branches_aeon'))) as RestHandler,
+    category: (() => ok(fx('rest_categories'))) as RestHandler,
+    brand: (() => ok([])) as RestHandler,
+    product_group: (() => ok([])) as RestHandler,
   },
+  /** Semua panggilan REST (tabel + rantai method) untuk diperiksa test. */
+  restCalls: [] as RestCall[],
   storage: {
     upload: vi.fn(async (...args: [path: string, blob: Blob, opts?: unknown]) => ({
       data: { path: args[0] },
@@ -175,11 +251,17 @@ export const sb = {
       createSignedUrl: (path: string, seconds: number) => state.storage.createSignedUrl(path, seconds),
     })),
   },
-  from: vi.fn((table: 'price_record_view' | 'capture' | 'capture_image') => {
+  from: vi.fn((table: keyof typeof state.rest) => {
+    const call: RestCall = { table, calls: [] };
+    state.restCalls.push(call);
     const chain: Record<string, unknown> = {};
-    for (const m of ['select', 'eq', 'order', 'limit', 'in', 'neq']) chain[m] = () => chain;
+    for (const m of ['select', 'eq', 'order', 'limit', 'in', 'neq', 'ilike', 'is', 'update'])
+      chain[m] = (...args: unknown[]) => {
+        call.calls.push([m, args]);
+        return chain;
+      };
     chain.then = (resolve: (v: unknown) => void, reject: (e: unknown) => void) =>
-      Promise.resolve(state.rest[table]()).then(resolve, reject);
+      Promise.resolve((state.rest[table] as (c: RestCall) => Res)(call)).then(resolve, reject);
     return chain;
   }),
 };
@@ -203,6 +285,18 @@ export async function resetHarness() {
   state.rest.price_record_view = () => ok(fx('recent_prices'));
   state.rest.capture = () => ({ data: null, error: null, count: 0 });
   state.rest.capture_image = () => ok([]);
+  state.rest.receipt = () => ok([{ id: 'x', updated_at: new Date().toISOString() }]);
+  state.rest.store = () => ok(fx('rest_stores'));
+  state.rest.branch = () => ok(fx('rest_branches_aeon'));
+  state.rest.category = () => ok(fx('rest_categories'));
+  state.rest.brand = () => ok([]);
+  state.rest.product_group = () => ok([]);
+  state.restCalls = [];
+  try {
+    sessionStorage.clear();
+  } catch {
+    // node: tanpa sessionStorage
+  }
   state.storage.upload.mockImplementation(async (...args: [string, Blob, unknown?]) => ({
     data: { path: args[0] },
     error: null,
@@ -250,14 +344,17 @@ export async function renderWithProviders(ui: ReactNode) {
   const { OutboxProvider } = await import('@/lib/offline/outbox-context');
   const qc = createQueryClient();
   qc.setDefaultOptions({ queries: { ...qc.getDefaultOptions().queries, retry: false } });
-  const view = render(
+  const tree = (node: ReactNode) => (
     <QueryClientProvider client={qc}>
       <AuthProvider>
-        <OutboxProvider>{ui}</OutboxProvider>
+        <OutboxProvider>{node}</OutboxProvider>
       </AuthProvider>
-    </QueryClientProvider>,
+    </QueryClientProvider>
   );
-  return Object.assign(view, { qc });
+  const view = render(tree(ui));
+  /** Render ulang dengan provider yang sama (mis. setelah URL tiruan berubah). */
+  const rerenderUi = (node: ReactNode) => view.rerender(tree(node));
+  return Object.assign(view, { qc, rerenderUi });
 }
 
 /** Tanggal pembuatan fixture = "hari ini" (12:00 WIB) supaya tanggal relatif stabil. */

@@ -219,6 +219,149 @@ export const CaptureDetailSchema = z.looseObject({
 export type CaptureDetail = z.infer<typeof CaptureDetailSchema>;
 
 // ---------------------------------------------------------------------------
+// R15 get_receipt · R16 get_capture_items · R17 recent_locations (S-10, S-11, S-12; docs/05 §3.3)
+// ---------------------------------------------------------------------------
+const PriceBasis = z.enum(['normal', 'promo', 'member']);
+const Confidence = z.number().min(0).max(1);
+const MatchTier = z.enum(['barcode', 'alias', 'fuzzy', 'ai', 'manual']);
+
+/** app.branch_json: BranchRef + kind + is_private (S-12 badge PRIBADI, seller marketplace). */
+export const BranchJsonSchema = BranchRefSchema.extend({ kind: z.enum(['physical', 'seller']), is_private: z.boolean() });
+
+const ReceiptLineTypeOut = z.enum(['product', 'discount', 'void', 'non_product', 'tax', 'other']);
+
+/** Baris diskon/void yang menempel ke baris produk (applies_to_line_id). */
+export const ReceiptAttachedLineSchema = z.looseObject({
+  id: Uuid, line_no: Num, line_type: ReceiptLineTypeOut, raw_text: z.string().nullable(),
+  quantity: Num.nullable(), line_amount: Num, updated_at: Timestamp,
+});
+
+export const ReceiptLineSchema = z.looseObject({
+  id: Uuid,
+  line_no: Num,
+  line_type: ReceiptLineTypeOut,
+  raw_text: z.string().nullable(),
+  quantity: Num.nullable(),
+  unit_amount: Num.nullable(),
+  line_amount: Num,
+  updated_at: Timestamp,
+  match_tier: MatchTier.nullable(),
+  match_confidence: Num.nullable(),
+  attached: z.array(ReceiptAttachedLineSchema),
+  /** ProductCard-lite (app.product_lite) dari suggested_product_id. */
+  suggestion: ProductLiteSchema.nullable(),
+  record: PriceRecordViewSchema.nullable(),
+  /** Baris produk tanpa record di struk draft. */
+  needs_check: z.boolean(),
+});
+export type ReceiptLine = z.infer<typeof ReceiptLineSchema>;
+
+export const ReceiptStatusSchema = z.enum(['draft', 'confirmed', 'discarded']);
+
+export const ReceiptDetailSchema = z.looseObject({
+  header: z.looseObject({
+    id: Uuid,
+    status: ReceiptStatusSchema,
+    capture_id: Uuid.nullable(),
+    store: StoreRefSchema.nullable(),
+    branch: BranchJsonSchema.nullable(),
+    transaction_date: IsoDate.nullable(),
+    transaction_time: z.string().nullable(),
+    currency: z.string(),
+    subtotal_amount: Num.nullable(),
+    total_amount: Num.nullable(),
+    payment_method: z.string().nullable(),
+    confirmed_at: Timestamp.nullable(),
+    updated_at: Timestamp,
+  }),
+  /** receipt.field_confidence (D-49): store, branch, date, time, total, subtotal. */
+  field_confidence: z.record(z.string(), Confidence).nullable(),
+  uploaded_at: Timestamp.nullable(),
+  images: z.array(z.looseObject({ position: Num, storage_path: z.string(), purged_at: Timestamp.nullable() })),
+  totals: z.looseObject({ lines_sum: Num, total_amount: Num.nullable(), diff: Num.nullable() }),
+  /** Struk lain yang dicurigai sama (D-20); null jika tidak ada. */
+  duplicate: z.looseObject({ receipt_id: Uuid, store: StoreRefSchema.nullable(), date: IsoDate.nullable(), total: Num.nullable() }).nullable(),
+  lines: z.array(ReceiptLineSchema),
+  adjustments: z.array(z.looseObject({
+    id: Uuid, kind: z.enum(['voucher', 'cashback', 'points', 'shipping', 'other']), description: z.string().nullable(),
+    amount: Num.nullable(), points: Num.nullable(),
+  })),
+  /** Diskon bertanda member (D-63, D-74); program_id jika toko punya tepat satu program aktif. */
+  member_hint: z.looseObject({ text: z.string(), program_id: Uuid.optional() }).nullable(),
+  membership_known: z.boolean(),
+});
+export type ReceiptDetail = z.infer<typeof ReceiptDetailSchema>;
+
+/** W4 confirm_receipt. */
+export const ConfirmReceiptResultSchema = z.looseObject({
+  saved_count: Num, cheaper_than_best_count: Num, receipt_status: ReceiptStatusSchema, replayed: z.boolean().optional(),
+});
+export type ConfirmReceiptResult = z.infer<typeof ConfirmReceiptResultSchema>;
+
+/** R16: capture_item + suggestion, candidates (≤ 5), computed live (D-26) untuk item pending. */
+export const CaptureItemSchema = z.looseObject({
+  id: Uuid,
+  capture_id: Uuid,
+  position: Num,
+  status: z.enum(['pending', 'accepted', 'rejected']),
+  raw_text: z.string().nullable(),
+  image_position: Num.nullable(),
+  region: z.looseObject({ x: Num, y: Num, w: Num, h: Num }).nullable(),
+  suggested_product_id: Uuid.nullable(),
+  candidate_product_ids: z.array(Uuid).nullable(),
+  match_tier: MatchTier.nullable(),
+  match_confidence: Num.nullable(),
+  store_id: Uuid.nullable(),
+  branch_id: Uuid.nullable(),
+  seller_name: z.string().nullable(),
+  seller_ref: z.string().nullable(),
+  transaction_date: IsoDate,
+  currency: z.string(),
+  normal_price: Num.nullable(),
+  promo_price: Num.nullable(),
+  promo_min_qty: Num.nullable(),
+  promo_valid_from: IsoDate.nullable(),
+  promo_valid_until: IsoDate.nullable(),
+  member_price: Num.nullable(),
+  member_program_id: Uuid.nullable(),
+  is_bundle: z.boolean(),
+  extra: PriceExtraSchema,
+  field_confidence: z.record(z.string(), Confidence).nullable(),
+  price_record_id: Uuid.nullable(),
+  updated_at: Timestamp,
+  suggestion: ProductLiteSchema.nullable(),
+  candidates: z.array(ProductLiteSchema),
+  computed: z.looseObject({
+    effective_price: Num.nullable(),
+    price_basis: PriceBasis.nullable(),
+    member_eligible: z.boolean().nullable(),
+    reason: z.literal('no_applicable_price').nullable(),
+    unit_price: Num.nullable(),
+  }).nullable(),
+  needs_check: z.boolean(),
+});
+export type CaptureItem = z.infer<typeof CaptureItemSchema>;
+
+/** W5 confirm_capture_items. */
+export const ConfirmCaptureItemsResultSchema = z.looseObject({
+  saved: z.array(z.looseObject({ item_id: Uuid, price_record_id: Uuid })), remaining_pending: Num,
+});
+export type ConfirmCaptureItemsResult = z.infer<typeof ConfirmCaptureItemsResultSchema>;
+
+/** R17 recent_locations (S-12 "Terakhir dipakai"). */
+export const RecentLocationSchema = z.looseObject({
+  store: StoreRefSchema, branch: BranchJsonSchema.nullable(), last_used: Timestamp,
+});
+export type RecentLocation = z.infer<typeof RecentLocationSchema>;
+
+/** R21 get_my_programs (S-11 nama program member + "Saya member"; S-19b di M6). */
+export const MyProgramSchema = z.looseObject({
+  program_id: Uuid, program_name: z.string(), status: z.enum(['active', 'discontinued']), store: StoreRefSchema,
+  is_member: z.boolean(),
+});
+export type MyProgram = z.infer<typeof MyProgramSchema>;
+
+// ---------------------------------------------------------------------------
 // Input RPC tulis (§3.2, §4)
 // ---------------------------------------------------------------------------
 export const SubmitCaptureInput = z.object({
