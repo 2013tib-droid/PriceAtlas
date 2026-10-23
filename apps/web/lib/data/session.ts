@@ -24,12 +24,17 @@ export function fetchActiveSession(): Promise<ActiveSession | null> {
   return rpcCall<'get_active_session', ActiveSession | null>('get_active_session', {}, { output: ActiveSessionSchema });
 }
 
-export function useActiveSession() {
+/**
+ * R18. `refetchOnMount: 'always'` hanya untuk S-13 (layar sesi selalu menampilkan status terbaru saat
+ * dibuka); banner dan layar lain memakai staleTime 30 dtk.
+ */
+export function useActiveSession(opts: { refetchOnMount?: 'always' } = {}) {
   return useQuery({
     queryKey: sessionKey(),
     queryFn: fetchActiveSession,
     enabled: useAuth().status === 'signed-in',
     refetchInterval: (q) => sessionPollInterval(q.state.data),
+    ...opts,
   });
 }
 

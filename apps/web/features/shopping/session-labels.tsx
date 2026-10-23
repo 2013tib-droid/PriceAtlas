@@ -28,13 +28,19 @@ function nameOf(l: SessionLabel): string {
   return `${t.title} ${t.size}`;
 }
 
-/** Teks pembanding §S-13; null jika belum ada data 90 hari. */
-export function ComparisonText({ pct, nearPct }: { pct: number | null; nearPct: number }) {
+/** Teks pembanding (wireframe S-13, W-08); null jika belum ada data 90 hari. */
+export function comparisonText(pct: number | null | undefined, nearPct: number): string | null {
   const c = labelComparison(pct, nearPct);
   if (!c) return null;
-  const text = c.kind === 'same' ? C.compare.same : fill(C.compare[c.kind], { pct: formatPercent(c.pct) });
+  return c.kind === 'same' ? C.compare.same : fill(C.compare[c.kind], { pct: formatPercent(c.pct) });
+}
+
+export function ComparisonText({ pct, nearPct }: { pct: number | null; nearPct: number }) {
+  const text = comparisonText(pct, nearPct);
+  const kind = labelComparison(pct, nearPct)?.kind;
+  if (!text) return null;
   return (
-    <span className={cn('text-sm', c.kind === 'cheaper' ? 'text-success' : c.kind === 'pricier' ? 'text-danger' : '')}>
+    <span className={cn('text-sm', kind === 'cheaper' ? 'text-success' : kind === 'pricier' ? 'text-danger' : '')}>
       {text}
     </span>
   );

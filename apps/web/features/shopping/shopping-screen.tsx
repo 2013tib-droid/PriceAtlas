@@ -50,7 +50,7 @@ export function ShoppingScreen() {
   const tz = useTimeZone();
   const online = useOnline();
   const now = useNow(TICK_MS);
-  const q = useActiveSession();
+  const q = useActiveSession({ refetchOnMount: 'always' });
   const { config } = useClientConfig();
   const { items } = useOutboxItems();
   const remembered = usePref<RememberedSession | null>(PREF_KEYS.lastSession, null);
