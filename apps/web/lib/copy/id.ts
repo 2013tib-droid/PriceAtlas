@@ -177,13 +177,12 @@ export const APP_COPY = {
     label: 'harga di rak toko',
     screenshot: 'Shopee, Tokopedia, dll.',
   },
-  labelNeedsLocation:
-    'Label harga butuh kamera label dan sesi belanja, yang dibuat di milestone berikutnya. Untuk sekarang foto struk atau screenshot.',
+  /** S-06 dengan sesi aktif (U-08). */
+  labelTarget: 'Label harga akan masuk ke {place}',
   close: 'Tutup',
   comingSoon: 'Segera hadir',
   placeholders: {
     search: { title: 'Cari harga', body: 'Cari produk untuk melihat harga terbaik 90 hari dan sepanjang masa (M1).' },
-    shopping: { title: 'Sesi belanja', body: 'Mulai belanja di satu cabang lalu foto label harga (M4).' },
     me: { title: 'Saya', body: 'Profil, program member, berbagi publik, dan privasi (M6).' },
     member: {
       title: 'Program member',
@@ -746,7 +745,11 @@ export const LOCATION_COPY = {
   titleManual: 'Label ini dari mana?',
   titleKoreksi: 'Pilih toko & cabang',
   titleSession: 'Kamu belanja di mana?',
-  sessionLater: 'Memulai sesi belanja dibuat di milestone berikutnya (M4).',
+  /** Mode sesi (D-60, W-19): cabang wajib, cabang tutup tidak bisa dipilih. */
+  sessionHint: 'Label harga yang kamu foto selama sesi otomatis tercatat di cabang ini.',
+  sessionClosedHint: 'Cabang tutup tidak bisa dipakai untuk sesi baru.',
+  sessionNewBranchHint: 'Cabangnya belum ada? Tambahkan cukup dengan nama.',
+  starting: 'Memulai sesi…',
   stepStore: 'Langkah 1 dari 2 · Toko',
   stepBranch: 'Langkah 2 dari 2 · Cabang di {store}',
   recent: 'Terakhir dipakai',
@@ -778,6 +781,93 @@ export const LOCATION_COPY = {
   cancel: 'Batal',
   required: 'Tulis namanya dulu.',
   online: 'online',
+} as const;
+
+/** Sesi belanja bersama: banner (U-13, §5.6), S-12 mode sesi, S-13 (wireframe S-13, D-43, D-60). */
+export const SESSION_COPY = {
+  banner: 'Belanja di {place}',
+  bannerLabels: '{n} label',
+  bannerOpen: 'Buka sesi belanja di {place}, berjalan {duration}, {n} label',
+  photoLabel: 'Foto label',
+  needsSignal:
+    'Memulai atau mengubah sesi belanja butuh sinyal. Setelah sesi dimulai, foto label tetap bisa diambil tanpa sinyal.',
+  started: 'Sesi belanja dimulai di {place}.',
+  extended: 'Sesi diperpanjang sampai {time}.',
+  ended: 'Sesi di {place} diakhiri. {n} label tersimpan.',
+  restartEnded: 'Sesi ini sudah berakhir. Pilih cabang lagi untuk mulai sesi baru.',
+} as const;
+
+/** S-13 Sesi belanja (wireframe S-13, docs/07 §7.3). */
+export const SHOPPING_COPY = {
+  title: 'Sesi belanja',
+  invite: 'Lagi di toko? Mulai sesi supaya label harga otomatis tercatat di cabang yang benar.',
+  start: 'Mulai belanja',
+  recentTitle: 'Mulai lagi di',
+  recentHint: 'Satu ketukan untuk mulai sesi di cabang yang sama.',
+  activeTitle: 'Belanja di {place}',
+  times: 'Mulai {start} · berakhir otomatis {end}',
+  nearExpiry: 'Sesi berakhir {n} menit lagi.',
+  extend: 'Perpanjang',
+  extendHint: 'Tambah {h} jam',
+  labelsTitle: 'Label di sesi ini ({n})',
+  emptyLabels: 'Foto label harga pertama.',
+  end: 'Akhiri sesi',
+  photoLabel: 'Foto label',
+  changeBranch: 'Ganti cabang',
+  shelfCheck: 'Cek harga rak',
+  expired: 'Sesi di {place} berakhir otomatis pukul {time}. {n} label tersimpan.',
+  expiredNext: 'Foto label berikutnya tidak masuk ke sesi lama.',
+  startNew: 'Mulai sesi baru',
+  dismiss: 'Tutup',
+  cached: 'Sesi dari data tersimpan. Status label diperbarui saat ada sinyal.',
+  unknownProduct: 'Produk belum dikenali',
+  localLabel: 'Foto label',
+  status: {
+    processing: 'diproses…',
+    needsCheck: 'perlu dicek',
+    failed: 'gagal dibaca',
+    waiting: 'menunggu sinyal',
+    uploading: 'mengunggah…',
+    held: 'menunggu keputusan di Unggahan',
+    error: 'gagal diunggah',
+  },
+  openCheck: 'Cek label {what}',
+  openFailed: 'Lihat label yang gagal dibaca',
+  compare: {
+    cheaper: '{pct} lebih murah dari biasanya',
+    same: 'setara harga terbaikmu',
+    near: 'mendekati harga terbaikmu',
+    pricier: '{pct} lebih mahal dari termurahmu 90 hari',
+  },
+} as const;
+
+/** S-07 kamera label (D-82, P-18, U-07): jendela bidik di app yang tetap terbuka. */
+export const LABEL_CAMERA_COPY = {
+  title: 'Foto label',
+  checking: 'Memeriksa sesi belanja…',
+  targetSession: 'Label masuk ke {place} (sesi belanja).',
+  targetManual: 'Label masuk ke {place}.',
+  hint: 'Arahkan ke satu label harga. Kamera tetap terbuka untuk label berikutnya.',
+  starting: 'Menyalakan kamera…',
+  denied: 'Izin kamera ditolak. Pilih foto label dari galeri, atau izinkan kamera di pengaturan browser.',
+  unavailable: 'Kamera tidak bisa dibuka di perangkat ini. Pilih foto label dari galeri.',
+  shutter: 'Ambil foto label',
+  gallery: 'Galeri',
+  pickGallery: 'Pilih dari galeri',
+  done: 'Selesai',
+  preparing: 'menyiapkan…',
+  saved: 'tersimpan',
+  savedOffline: 'disimpan di HP',
+  failedOne: 'gagal',
+  announceSaved: 'Label {n} tersimpan. Foto label berikutnya.',
+  announceOffline: 'Label {n} disimpan di HP. Akan diunggah saat ada sinyal.',
+  failed: 'Foto label belum bisa disimpan. Coba lagi.',
+  taken: 'Label yang baru difoto',
+  thumb: 'Label {n}: {state}',
+  sessionEnded: 'Sesi belanja sudah berakhir. Label ini disimpan tanpa lokasi; pilih tokonya saat mengecek.',
+  toastDone: '{n} label diunggah. Kami kabari kalau perlu dicek.',
+  toastDoneOffline: '{n} label disimpan di HP. Akan diunggah saat ada sinyal.',
+  back: 'Kembali',
 } as const;
 
 /** S-14 Pilih produk (wireframe S-14). */

@@ -362,6 +362,44 @@ export const MyProgramSchema = z.looseObject({
 export type MyProgram = z.infer<typeof MyProgramSchema>;
 
 // ---------------------------------------------------------------------------
+// R18 get_active_session · W11/W12/W13 (S-12 mode sesi, S-13, banner sesi; docs/05 §3.3)
+// ---------------------------------------------------------------------------
+/**
+ * Satu baris label sesi: per capture sesi dan per item yang tidak ditolak. Capture tanpa item
+ * (uploaded/processing/failed) → `item_id` null. Harga = record tersimpan, atau `computed` live untuk
+ * item pending (app.observation_price). vs_*_pct terhadap price_summary saat ini (1 desimal).
+ */
+export const SessionLabelSchema = z.looseObject({
+  capture_id: Uuid,
+  status: CaptureStatusSchema,
+  item_id: Uuid.nullable(),
+  product: ProductLiteSchema.nullable(),
+  effective_price: Num.nullable(),
+  price_basis: PriceBasis.nullable(),
+  vs_best_pct: Num.nullable(),
+  vs_last_pct: Num.nullable(),
+});
+export type SessionLabel = z.infer<typeof SessionLabelSchema>;
+
+export const SessionTimesSchema = z.looseObject({ id: Uuid, started_at: Timestamp, expires_at: Timestamp });
+export type SessionTimes = z.infer<typeof SessionTimesSchema>;
+
+/** R18 (dan hasil W11): sesi aktif = `ended_at IS NULL AND expires_at > now()`, selain itu null. */
+export const ActiveSessionSchema = z
+  .looseObject({
+    session: SessionTimesSchema,
+    store: StoreRefSchema,
+    branch: BranchJsonSchema,
+    labels: z.array(SessionLabelSchema),
+  })
+  .nullable();
+export type ActiveSession = NonNullable<z.infer<typeof ActiveSessionSchema>>;
+
+/** W13 end_shopping_session (idempoten: sesi yang sudah berakhir → sukses). */
+export const EndedSessionSchema = SessionTimesSchema.extend({ ended_at: Timestamp.nullable() });
+export type EndedSession = z.infer<typeof EndedSessionSchema>;
+
+// ---------------------------------------------------------------------------
 // Input RPC tulis (§3.2, §4)
 // ---------------------------------------------------------------------------
 export const SubmitCaptureInput = z.object({

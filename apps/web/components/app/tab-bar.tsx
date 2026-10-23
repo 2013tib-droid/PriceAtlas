@@ -1,5 +1,6 @@
 'use client';
-// Tab bar: 4 tab + tombol kamera di tengah (U-01, D-47). Slug Indonesia (D-79).
+// Tab bar: 4 tab + tombol kamera di tengah (U-01, D-47), banner sesi di atasnya (U-13). Slug Indonesia
+// (D-79).
 import { Camera, Search, ShoppingBasket, Upload, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -8,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { useNeedsCheckCount } from '@/lib/data/queries';
 import { fill } from '@/lib/copy/id';
 import { PhotoSheet, usePhotoSheet } from './photo-sheet';
+import { SessionBanner } from './session-banner';
 
 export const TABS = [
   {
@@ -60,29 +62,30 @@ export function TabBar() {
   const needsCheck = useNeedsCheckCount().data ?? 0;
   const [left, right] = [TABS.slice(0, 2), TABS.slice(2)];
   return (
-    <nav
-      aria-label="Navigasi utama"
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-divider bg-surface pb-[env(safe-area-inset-bottom)]"
-    >
-      <ul className="mx-auto flex max-w-xl items-stretch">
-        {left.map((t) => (
-          <TabLink key={t.href} tab={t} active={t.match(pathname)} badge={t.href === '/unggahan' ? needsCheck : 0} />
-        ))}
-        <li className="flex flex-1 items-center justify-center">
-          <button
-            type="button"
-            onClick={photo.open}
-            aria-label={APP_COPY.cameraLabel}
-            className="flex size-14 -translate-y-3 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md"
-          >
-            <Camera aria-hidden className="size-7" />
-          </button>
-        </li>
-        {right.map((t) => (
-          <TabLink key={t.href} tab={t} active={t.match(pathname)} />
-        ))}
-      </ul>
+    <div className="group fixed inset-x-0 bottom-0 z-30 border-t border-divider bg-surface pb-[env(safe-area-inset-bottom)]">
+      {/* Banner sesi di atas tab bar (U-13); tinggi ikut --bottom-bars (globals.css). */}
+      <SessionBanner />
+      <nav aria-label="Navigasi utama">
+        <ul className="mx-auto flex max-w-xl items-stretch">
+          {left.map((t) => (
+            <TabLink key={t.href} tab={t} active={t.match(pathname)} badge={t.href === '/unggahan' ? needsCheck : 0} />
+          ))}
+          <li className="flex flex-1 items-center justify-center">
+            <button
+              type="button"
+              onClick={photo.open}
+              aria-label={APP_COPY.cameraLabel}
+              className="flex size-14 -translate-y-3 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md group-has-[[data-session-banner]]:translate-y-0"
+            >
+              <Camera aria-hidden className="size-7" />
+            </button>
+          </li>
+          {right.map((t) => (
+            <TabLink key={t.href} tab={t} active={t.match(pathname)} />
+          ))}
+        </ul>
+      </nav>
       <PhotoSheet />
-    </nav>
+    </div>
   );
 }

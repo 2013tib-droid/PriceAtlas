@@ -1,11 +1,13 @@
 // Skema kontrak per kunci fixture (test/fixtures/rpc.json). Satu sumber untuk test L3 (keluaran
 // server lolos skema) dan test komponen (fixture divalidasi sebelum dipakai).
 import {
+  ActiveSessionSchema,
   BarcodeHitSchema,
   BranchJsonSchema,
   CaptureItemSchema,
   ConfirmCaptureItemsResultSchema,
   ConfirmReceiptResultSchema,
+  EndedSessionSchema,
   CaptureDetailSchema,
   CaptureListItemSchema,
   ChartPointSchema,
@@ -19,6 +21,7 @@ import {
   ReceiptDetailSchema,
   RecentLocationSchema,
   SearchResultSchema,
+  SessionTimesSchema,
   StoreRefSchema,
   WhereCheaperRowSchema,
 } from '@priceatlas/contracts';
@@ -150,4 +153,21 @@ export const FIXTURE_SCHEMAS: Record<string, z.ZodType> = {
   create_product_ok: ProductCardSchema,
   create_product_23514: RpcErrorFixture,
   create_product_23P01: RpcErrorFixture,
+  // M4: R18 / W11 / W12 / W13 (Ani).
+  session_none: ActiveSessionSchema.refine((v) => v === null),
+  session_start_closed: RpcErrorFixture,
+  session_start: ActiveSessionSchema.refine((v) => v !== null && v.labels.length === 0),
+  session_start_repeat: ActiveSessionSchema.refine((v) => v !== null),
+  session_uploaded: ActiveSessionSchema.refine((v) => v !== null && v.labels.length === 1),
+  session_labels: ActiveSessionSchema.refine((v) => v !== null && v.labels.length > 0),
+  session_labels_refreshed: ActiveSessionSchema.refine((v) => v !== null && v.labels.length > 0),
+  session_near_expiry: ActiveSessionSchema.refine((v) => v !== null),
+  session_extend: SessionTimesSchema,
+  session_end: EndedSessionSchema,
+  session_end_repeat: EndedSessionSchema,
+  session_extend_ended: RpcErrorFixture,
+  session_after_end: ActiveSessionSchema.refine((v) => v === null),
+  session_start_expired: ActiveSessionSchema.refine((v) => v !== null),
+  session_expired: ActiveSessionSchema.refine((v) => v === null),
+  session_extend_expired: RpcErrorFixture,
 };

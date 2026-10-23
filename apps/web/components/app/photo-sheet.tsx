@@ -1,15 +1,21 @@
 'use client';
 // S-06 Pilih jenis foto (wireframe S-06, U-08): sheet global lewat `?sheet=foto` sehingga tombol
-// kembali Android menutup sheet (docs/07 §3.3). Tanpa sesi belanja: Struk, Label, Screenshot,
-// lalu "Pilih dari galeri" (sesi aktif = M4). Struk/galeri/screenshot langsung membuka kamera
-// bawaan atau galeri (satu ketukan); file diserahkan ke S-07 lewat handoff di memori.
+// kembali Android menutup sheet (docs/07 §3.3). Tanpa sesi belanja: Struk, Label, Screenshot, lalu
+// "Pilih dari galeri"; sesi aktif (R18): Label paling atas dan terpilih + "Label harga akan masuk ke
+// AEON BSD". Struk/galeri/screenshot langsung membuka kamera bawaan atau galeri (satu ketukan); file
+// diserahkan ke S-07 lewat handoff di memori. Label → kamera label (sesi) atau S-12 mode manual (F-53).
 import { Images, ReceiptText, Smartphone, Tag } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useCallback, useId, useState, type ChangeEvent, type ReactNode } from 'react';
+import { useCallback, useId, type ChangeEvent, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerTitle } from '@/components/ui/drawer';
-import { APP_COPY } from '@/lib/copy/id';
+import { APP_COPY, fill } from '@/lib/copy/id';
+import { useActiveSession } from '@/lib/data/session';
+import { useNow } from '@/lib/hooks/use-now';
 import { setPendingFiles, type PendingFiles } from '@/lib/media/handoff';
+import { LABEL_CAMERA, labelLocationHref } from '@/lib/session/label-target';
+import { activeOrNull, photoOptionOrder, sessionPlace, type PhotoOption } from '@/lib/session/session';
+import { cn } from '@/lib/utils';
 
 export const SHEET_PHOTO = 'foto';
 
@@ -101,7 +107,9 @@ function FileOption({
 export function PhotoSheet() {
   const router = useRouter();
   const { isOpen, close } = usePhotoSheet();
-  const [labelInfo, setLabelInfo] = useState(false);
+  const session = useActiveSession();
+  const now = useNow(30_000);
+  const active = activeOrNull(session.data, now);
   const o = APP_COPY.photoOptions;
   const h = APP_COPY.photoOptionHints;
 
@@ -111,15 +119,53 @@ export function PhotoSheet() {
     pushed = false;
     router.replace(href);
   };
+  const label = () => {
+    pushed = false;
+    router.replace(active ? LABEL_CAMERA : labelLocationHref());
+  };
+
+  const options: Record<PhotoOption, ReactNode> = {
+    receipt: (
+      <FileOption
+        icon={<ReceiptText aria-hidden className="size-6 shrink-0" />}
+        title={o.receipt}
+        hint={h.receipt}
+        capture
+        testId="sheet-input-receipt"
+        onFiles={(files) => go({ kind: 'receipt', source: 'camera', files }, '/kamera?jenis=struk')}
+      />
+    ),
+    label: (
+      <button
+        type="button"
+        className={cn(optionClass, active && 'border-2 border-primary')}
+        aria-current={active ? 'true' : undefined}
+        onClick={label}
+      >
+        <Tag aria-hidden className="size-6 shrink-0" />
+        <OptionText
+          title={o.label}
+          hint={active ? fill(APP_COPY.labelTarget, { place: sessionPlace(active) }) : h.label}
+        />
+      </button>
+    ),
+    screenshot: (
+      <FileOption
+        icon={<Smartphone aria-hidden className="size-6 shrink-0" />}
+        title={o.screenshot}
+        hint={h.screenshot}
+        multiple
+        testId="sheet-input-screenshot"
+        onFiles={(files) => go({ kind: 'marketplace', source: 'gallery', files }, '/kamera?jenis=screenshot')}
+      />
+    ),
+  };
 
   return (
     <Drawer
       open={isOpen}
       onOpenChange={(v) => {
-        if (!v) {
-          setLabelInfo(false);
-          close();
-        }
+        if (!v) close();
       }}
     >
       <DrawerContent>
@@ -127,42 +173,9 @@ export function PhotoSheet() {
           <DrawerTitle>{APP_COPY.photoSheetTitle}</DrawerTitle>
           <DrawerDescription>{APP_COPY.photoSheetDescription}</DrawerDescription>
           <ul className="flex flex-col gap-2">
-            <li>
-              <FileOption
-                icon={<ReceiptText aria-hidden className="size-6 shrink-0" />}
-                title={o.receipt}
-                hint={h.receipt}
-                capture
-                testId="sheet-input-receipt"
-                onFiles={(files) => go({ kind: 'receipt', source: 'camera', files }, '/kamera?jenis=struk')}
-              />
-            </li>
-            <li>
-              <button
-                type="button"
-                className={optionClass}
-                aria-expanded={labelInfo}
-                onClick={() => setLabelInfo((v) => !v)}
-              >
-                <Tag aria-hidden className="size-6 shrink-0" />
-                <OptionText title={o.label} hint={h.label} />
-              </button>
-              {labelInfo ? (
-                <p role="status" className="mt-2 rounded-lg bg-muted p-3 text-sm">
-                  {APP_COPY.labelNeedsLocation}
-                </p>
-              ) : null}
-            </li>
-            <li>
-              <FileOption
-                icon={<Smartphone aria-hidden className="size-6 shrink-0" />}
-                title={o.screenshot}
-                hint={h.screenshot}
-                multiple
-                testId="sheet-input-screenshot"
-                onFiles={(files) => go({ kind: 'marketplace', source: 'gallery', files }, '/kamera?jenis=screenshot')}
-              />
-            </li>
+            {photoOptionOrder(Boolean(active)).map((k) => (
+              <li key={k}>{options[k]}</li>
+            ))}
           </ul>
           <FileOption
             icon={<Images aria-hidden className="size-6 shrink-0" />}

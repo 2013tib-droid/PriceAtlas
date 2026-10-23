@@ -37,7 +37,7 @@ export function SearchDock({
       }}
       className={
         placement === 'tabbar'
-          ? 'fixed inset-x-0 bottom-[calc(var(--spacing-tabbar)+env(safe-area-inset-bottom))] z-20 border-t border-divider bg-surface px-3 py-2'
+          ? 'fixed inset-x-0 bottom-[calc(var(--bottom-bars)+env(safe-area-inset-bottom))] z-20 border-t border-divider bg-surface px-3 py-2'
           : 'fixed inset-x-0 bottom-0 z-20 border-t border-divider bg-surface px-3 pt-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))]'
       }
     >

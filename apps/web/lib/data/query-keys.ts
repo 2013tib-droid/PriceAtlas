@@ -22,5 +22,7 @@ export const STALE_TIME: Partial<Record<RpcName, number>> = {
   get_receipt: 0,
   get_capture_items: 0,
   price_record_detail: 0,
+  /** R18 sesi: 30 dtk + polling saat label diproses (§4.3, §5.5). */
+  get_active_session: 30_000,
 };
 export const DEFAULT_STALE_TIME = 30_000;

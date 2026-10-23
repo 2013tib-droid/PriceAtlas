@@ -145,12 +145,26 @@ function createWorker(pool: pg.Pool, url: string) {
     ai: new StubAiMatcher(fixtures),
     workerId: 'w-web-fixtures',
   };
-  const submit = async (name: string) => {
+  type SubmitOpts = { userId?: string; sessionId?: string | null };
+  const submit = async (name: string, o: SubmitOpts = {}) => {
     const fx = fixtures.byName(name)!;
     const images = fx.images!.map((f) => readFileSync(join(dir, f)));
-    return (await uploadAndSubmit({ pool, blob, userId: USERS.c, kind: fx.output.kind, images })).captureId;
+    return (
+      await uploadAndSubmit({
+        pool,
+        blob,
+        userId: o.userId ?? USERS.c,
+        kind: fx.output.kind,
+        images,
+        sessionId: o.sessionId,
+      })
+    ).captureId;
   };
-  return { deps, workerDb, submit, process: () => processNextCapture(deps), end: () => workerDb.end() };
+  /** Gambar tanpa fixture (stub → gagal `unsupported`), mis. frame kamera label. */
+  const submitBytes = async (image: Buffer, kind: 'price_label', o: SubmitOpts = {}) =>
+    (await uploadAndSubmit({ pool, blob, userId: o.userId ?? USERS.c, kind, images: [image], sessionId: o.sessionId }))
+      .captureId;
+  return { deps, workerDb, submit, submitBytes, process: () => processNextCapture(deps), end: () => workerDb.end() };
 }
 type Worker = ReturnType<typeof createWorker>;
 
@@ -429,8 +443,88 @@ async function collectAll(pool: pg.Pool, w: Worker): Promise<Fixtures> {
     `select id, name, household_id from public.category where archived_at is null order by name`,
   );
 
+  await collectSessions(pool, w, ani, data);
+
   const today = (
     await pool.query<{ d: string }>(`select app.household_today($1)::text as d`, [await householdOf(pool, USERS.a)])
   ).rows[0]!.d;
   return { today, data };
+}
+
+/** Id sesi fixture (dibuat klien, F-16). */
+export const SESSION_IDS = {
+  aeonBsd: 'c0000000-0000-0000-0000-0000000000a1',
+  closed: 'c0000000-0000-0000-0000-0000000000a2',
+  expired: 'c0000000-0000-0000-0000-0000000000a3',
+} as const;
+
+/**
+ * M4 (S-12 mode sesi, S-13, banner): R18/W11/W12/W13 ASLI untuk Ani (punya histori Milo, sehingga
+ * vs_best_pct berarti). Label diunggah DENGAN shopping_session_id dan diproses pipeline worker:
+ * label-milo → Milo 200 g auto-accept (lokasi dari sesi, docs/05 §5.5) + Milo 3in1 perlu dicek;
+ * label-milo lagi (duplikat hash, tidak auto-save) → keduanya diterima → `done`; gambar tanpa
+ * fixture → `failed` (seperti frame kamera palsu di e2e); satu lagi diklaim tanpa selesai. R18 diambil
+ * sebelum dan sesudah antrean ringkasan (F-60).
+ * Dijalankan paling akhir supaya fixture M1–M3 Ani tidak berubah.
+ */
+async function collectSessions(pool: pg.Pool, w: Worker, ani: PgRpcClient, data: Record<string, unknown>) {
+  const call = async (key: string, fn: string, args: Record<string, unknown> = {}) => {
+    const r = await ani.rpc(fn, args);
+    data[key] = r.error ? { error: r.error } : r.data;
+    return r.data;
+  };
+  const S = SESSION_IDS;
+  await call('session_none', 'get_active_session');
+  await call('session_start_closed', 'start_shopping_session', { p_session_id: S.closed, p_branch_id: IDS.aeonLama });
+  await call('session_start', 'start_shopping_session', { p_session_id: S.aeonBsd, p_branch_id: IDS.aeonBsd });
+  // Mengulang id yang sama = sesi yang sama (F-16, idempoten).
+  await call('session_start_repeat', 'start_shopping_session', { p_session_id: S.aeonBsd, p_branch_id: IDS.aeonBsd });
+
+  const opts = { userId: USERS.a, sessionId: S.aeonBsd };
+  await w.submit('label-milo', opts);
+  await call('session_uploaded', 'get_active_session');
+  await w.process();
+  // Duplikat hash (D-71): semua item pending → diterima user → capture `done`.
+  const dup = await w.submit('label-milo', opts);
+  await w.process();
+  const items = (await ani.rpc('get_capture_items', { p_capture_id: dup })).data as { id: string }[];
+  const saved = await ani.rpc('confirm_capture_items', {
+    p_capture_id: dup,
+    p_items: [
+      { item_id: items[0]!.id, action: 'accept' },
+      { item_id: items[1]!.id, action: 'accept', product_id: IDS.milo3in1 },
+    ],
+  });
+  if (saved.error) throw new Error(`confirm_capture_items: ${saved.error.message}`);
+  await w.submitBytes(Buffer.from('frame kamera label tanpa fixture'), 'price_label', opts);
+  await w.process();
+  await w.submitBytes(Buffer.from('frame kamera label diproses'), 'price_label', opts);
+  await w.workerDb.query(`select * from app.claim_next_capture('w-web-fixtures', 'stub', null, 'stub-1')`);
+  // Sebelum antrean ringkasan (D-31) berjalan: vs_best_pct terhadap ringkasan lama (Milo 200 g
+  // lebih murah dari termurah 90 hari; Milo 3in1 tanpa data 90 hari → null).
+  await call('session_labels', 'get_active_session');
+  // Setelah ringkasan dihitung ulang, record sesi ikut ringkasan → harga terbaru = termurah (0 %), F-60.
+  await pool.query('select app.process_summary_queue()');
+  await call('session_labels_refreshed', 'get_active_session');
+
+  // Hampir kedaluwarsa (< 30 mnt): data test saja, expires_at dimajukan.
+  await pool.query(`update public.shopping_session set expires_at = now() + interval '20 minutes' where id = $1`, [
+    S.aeonBsd,
+  ]);
+  await call('session_near_expiry', 'get_active_session');
+  await call('session_extend', 'extend_shopping_session', { p_session_id: S.aeonBsd });
+  await call('session_end', 'end_shopping_session', { p_session_id: S.aeonBsd });
+  await call('session_end_repeat', 'end_shopping_session', { p_session_id: S.aeonBsd });
+  await call('session_extend_ended', 'extend_shopping_session', { p_session_id: S.aeonBsd });
+  await call('session_after_end', 'get_active_session');
+
+  // Kedaluwarsa otomatis (D-43): R18 null, perpanjang → SESSION_NOT_ACTIVE.
+  await call('session_start_expired', 'start_shopping_session', { p_session_id: S.expired, p_branch_id: IDS.aeonBsd });
+  await pool.query(
+    `update public.shopping_session set started_at = now() - interval '5 hours', expires_at = now() - interval '1 hour'
+      where id = $1`,
+    [S.expired],
+  );
+  await call('session_expired', 'get_active_session');
+  await call('session_extend_expired', 'extend_shopping_session', { p_session_id: S.expired });
 }

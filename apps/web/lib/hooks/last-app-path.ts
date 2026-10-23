@@ -17,6 +17,8 @@ export function useRememberAppPath() {
   const pathname = usePathname();
   const search = useSearchParams();
   useEffect(() => {
+    // S-12 hanya pemilih: kembali dari kamera label (mode manual) menuju layar sebelum S-12.
+    if (pathname === '/lokasi') return;
     const qs = new URLSearchParams(search?.toString());
     qs.delete('sheet');
     const s = qs.toString();

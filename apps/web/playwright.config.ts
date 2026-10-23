@@ -3,10 +3,18 @@
 //   PW_BASE_URL       default http://localhost:3000
 //   PW_NO_SERVER=1    jangan menyalakan next start (server sudah jalan)
 //   PW_CHROMIUM_PATH  executable Chromium lain (mis. /opt/pw-browsers di lingkungan cloud)
+// Chromium memakai kamera palsu (file Y4M dari e2e/support/fake-camera.ts) untuk kamera label (alur 4);
+// WebKit tidak punya kamera palsu, jadi alur 4 di WebKit memakai "Galeri" di kamera label (F-64).
 import { defineConfig, devices } from '@playwright/test';
+import { writeFakeCameraFile } from './e2e/support/fake-camera';
 
 const baseURL = process.env.PW_BASE_URL ?? 'http://localhost:3000';
 const chromiumPath = process.env.PW_CHROMIUM_PATH;
+const fakeCamera = [
+  '--use-fake-device-for-media-stream',
+  '--use-fake-ui-for-media-stream',
+  `--use-file-for-fake-video-capture=${writeFakeCameraFile()}`,
+];
 
 export default defineConfig({
   testDir: 'e2e',
@@ -21,7 +29,11 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium-mobile',
-      use: { ...devices['Pixel 7'], ...(chromiumPath ? { launchOptions: { executablePath: chromiumPath } } : {}) },
+      use: {
+        ...devices['Pixel 7'],
+        permissions: ['camera'],
+        launchOptions: { args: fakeCamera, ...(chromiumPath ? { executablePath: chromiumPath } : {}) },
+      },
     },
     { name: 'webkit-mobile', use: { ...devices['iPhone 14'] } },
   ],

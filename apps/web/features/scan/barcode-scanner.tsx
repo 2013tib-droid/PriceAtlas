@@ -1,6 +1,6 @@
 'use client';
 // Jendela bidik barcode (D-58, D-82, docs/07 §5.7): getUserMedia kamera belakang, deteksi tiap
-// ±150 ms, berhenti saat terbaca → R6 find_product_by_barcode → S-03 (via_merge → toast). Tidak
+// ±150 ms, berhenti saat terbaca → R6 find_product_by_barcode (+ toko sesi aktif) → S-03 (via_merge → toast). Tidak
 // dikenal → pesan + "Pilih atau buat produk" (S-14 dengan kode terisi → S-15 dengan barcode, D-85).
 import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, PackagePlus, Search } from 'lucide-react';
@@ -12,6 +12,7 @@ import { productHref } from '@/components/product/product-card';
 import { Button } from '@/components/ui/button';
 import { fill, SCAN_COPY, STATE_COPY } from '@/lib/copy/id';
 import { findProductByBarcode } from '@/lib/data/queries';
+import { activeSessionNow } from '@/lib/data/session';
 import { createBarcodeDetector, type BarcodeDetectorLike } from '@/lib/media/barcode';
 
 export const SCAN_INTERVAL_MS = 150;
@@ -36,7 +37,8 @@ export function BarcodeScanner() {
     async (code: string) => {
       setState({ kind: 'looking', code });
       try {
-        const hit = await findProductByBarcode(qc, code);
+        const sesi = activeSessionNow(qc);
+        const hit = await findProductByBarcode(qc, code, sesi?.store.id);
         if (!hit) return setState({ kind: 'not-found', code });
         if (hit.via_merge) toast(SCAN_COPY.viaMerge);
         router.replace(productHref(hit.product_id));

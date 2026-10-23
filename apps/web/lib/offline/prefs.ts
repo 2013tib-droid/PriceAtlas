@@ -6,6 +6,8 @@ export const PREF_KEYS = {
   recentSearches: 'recent_searches',
   viewed: 'viewed_products',
   chartNormalOnly: 'chart_normal_only',
+  /** Sesi belanja aktif terakhir (D-43: teks "berakhir otomatis" di S-13). */
+  lastSession: 'last_session',
 } as const;
 export type PrefKey = (typeof PREF_KEYS)[keyof typeof PREF_KEYS];
 

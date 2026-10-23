@@ -180,8 +180,17 @@ export function defaultRpc(fn: string, a: Record<string, unknown>): Res {
       return ok(fx('create_product_ok'));
     case 'correct_receipt_line':
       return ok({ line: {}, attached: [], record: null });
+    // M4 (S-12 mode sesi, S-13, banner): keluaran R18/W11/W12/W13 asli user Ani. Default: tanpa sesi.
+    case 'get_active_session':
+      return ok(fx('session_none'));
+    case 'start_shopping_session':
+      return ok(fx('session_start'));
+    case 'extend_shopping_session':
+      return ok(fx('session_extend'));
+    case 'end_shopping_session':
+      return ok(fx('session_end'));
     default:
-      throw new Error(`RPC ${fn} tidak diharapkan di M1–M3`);
+      throw new Error(`RPC ${fn} tidak diharapkan di M1–M4`);
   }
 }
 

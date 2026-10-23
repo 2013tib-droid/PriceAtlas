@@ -32,6 +32,19 @@
   --spacing-touch: 2.75rem;
   --spacing-action: 3rem;
   --spacing-tabbar: 4rem;
+  /* Banner sesi belanja di atas tab bar (U-13). */
+  --spacing-banner: 3rem;
+}
+
+/*
+ * Tinggi bilah bawah = tab bar + banner sesi jika tampil (U-13). Elemen yang menempel di atas bilah
+ * bawah (StickyAction, SearchDock, toast) memakai --bottom-bars.
+ */
+:root {
+  --bottom-bars: var(--spacing-tabbar);
+}
+html:has([data-session-banner]) {
+  --bottom-bars: calc(var(--spacing-tabbar) + var(--spacing-banner));
 }
 
 @layer base {

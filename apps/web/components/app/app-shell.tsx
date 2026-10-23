@@ -56,7 +56,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <SwUpdateBanner />
       <main
         id="konten"
-        className="mx-auto w-full max-w-xl flex-1 pb-[calc(var(--spacing-tabbar)+env(safe-area-inset-bottom)+1rem)]"
+        className="mx-auto w-full max-w-xl flex-1 pb-[calc(var(--bottom-bars)+env(safe-area-inset-bottom)+1rem)]"
       >
         <AuthGate>{children}</AuthGate>
       </main>

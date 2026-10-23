@@ -6,7 +6,7 @@
 // sebelum apa pun dikirim. Selesai → kembali + toast (U-11), tanpa layar tunggu.
 import { ArrowLeft, ChevronLeft, ChevronRight, Images, Plus, ReceiptText, X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useId, useRef, useState, type ChangeEvent, type ReactNode } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { CAMERA_COPY, fill } from '@/lib/copy/id';
@@ -22,8 +22,8 @@ import type { CaptureKind } from '@/lib/media/image-plan';
 import type { ImageSource, PreparedImage } from '@/lib/media/prepare';
 import { useOutboxHandle } from '@/lib/offline/outbox-context';
 import { newItem, QUEUE_WARN_BYTES, type DuplicateMatch, type OutboxItem } from '@/lib/offline/outbox-store';
-import { cn } from '@/lib/utils';
 import { DuplicateDialog } from './duplicate-dialog';
+import { FileButton } from './file-button';
 import { GalleryDialog } from './gallery-dialog';
 
 /** Batas UI bagian per struk (D-81, Q-64). */
@@ -49,55 +49,6 @@ async function rejectedMessage(e: unknown): Promise<string> {
 }
 
 let seq = 0;
-
-function FileButton({
-  children,
-  capture,
-  multiple,
-  disabled,
-  onFiles,
-  className,
-  testId,
-}: {
-  children: ReactNode;
-  capture?: boolean;
-  multiple?: boolean;
-  disabled?: boolean;
-  onFiles: (files: File[]) => void;
-  className?: string;
-  testId: string;
-}) {
-  const id = useId();
-  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const files = [...(e.target.files ?? [])];
-    e.target.value = '';
-    if (files.length) onFiles(files);
-  };
-  return (
-    <label
-      htmlFor={id}
-      aria-disabled={disabled || undefined}
-      className={cn(
-        'flex cursor-pointer flex-col items-center justify-center gap-1 text-sm font-medium has-focus-visible:outline-2 has-focus-visible:outline-focus',
-        disabled && 'pointer-events-none opacity-50',
-        className,
-      )}
-    >
-      {children}
-      <input
-        id={id}
-        type="file"
-        accept="image/*"
-        className="sr-only"
-        disabled={disabled}
-        data-testid={testId}
-        {...(capture ? { capture: 'environment' as const } : {})}
-        multiple={multiple}
-        onChange={onChange}
-      />
-    </label>
-  );
-}
 
 export function CaptureScreen({ kind }: { kind: 'receipt' | 'marketplace' }) {
   const router = useRouter();
