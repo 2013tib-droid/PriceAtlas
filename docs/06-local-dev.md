@@ -355,7 +355,10 @@ e2e memakai `next start` (Playwright menyalakannya), env `NEXT_PUBLIC_SUPABASE_*
 | `app/(app)/lokasi`, `features/location` | M3: S-12 pilih toko & cabang (`/lokasi?mode=manual\|koreksi&untuk=&kembali=`), hasil lewat `lib/confirm/location-handoff.ts` |
 | `features/picker`, `app/(app)/produk/baru`, `features/new-product` | M3: S-14 lapisan `?pilih=produk&untuk=…`, S-15 `/produk/baru` (react-hook-form + zod dari kontrak) |
 | `lib/data/confirm.ts`, `lib/confirm/*` | M3: hook R15/R16/R17/R21, W4/W5/W7/W8/W16/W17/W18, REST PATCH receipt + store/branch/category; logika baris, field ragu, beda ukuran, pemetaan error §8.2 |
-| `lib/offline/prefs.ts`, `lib/hooks/use-pref.ts` | 💾 di IndexedDB `prefs`: pencarian terakhir (8), baru dicek (150, untuk R5), toggle "Hanya harga normal" |
+| `app/(app)/belanja`, `features/shopping`, `components/app/session-banner.tsx` | M4: S-13 sesi belanja (`/belanja`) dan banner sesi di atas tab bar (U-13) |
+| `features/capture/label-camera.tsx`, `lib/media/frame.ts` | M4: kamera label `/kamera?jenis=label` (jendela bidik `getUserMedia`, frame → canvas → pipeline §6) |
+| `lib/data/session.ts`, `lib/session/*` | M4: hook R18/W11/W12/W13; logika sesi (waktu, label per foto, pembanding `vs_best_pct`, sesi diingat, urutan U-08), error §8.2, sasaran label (sesi / lokasi manual) |
+| `lib/offline/prefs.ts`, `lib/hooks/use-pref.ts` | 💾 di IndexedDB `prefs`: pencarian terakhir (8), baru dicek (150, untuk R5), toggle "Hanya harga normal", sesi belanja aktif terakhir (`last_session`, teks "berakhir otomatis" S-13) |
 
 ### 4.4 Fixture dan data e2e (M1)
 
@@ -398,3 +401,21 @@ Offline: DevTools → Network → Offline (atau mode pesawat di HP) → foto →
 **Fixture R15/R16/R17.** `apps/web/test/fixtures/scenario.ts` menjalankan pipeline worker asli (mode A) untuk Citra: struk-aeon, struk-aeon lagi (duplikat), struk tanpa toko + field ragu (fixture tambahan khusus web di `apps/web/test/fixtures/worker/`, digabung dengan fixture worker di folder sementara; fixture dan logika worker tidak diubah), label-milo, shopee-milo (auto-save + unggahan kedua), lalu memanggil R15/R16/R17/R21, W4/W5/W8/W17/W18 (sukses dan error) dan REST store/branch/category sebagai user. Dibangkitkan ulang seperti §4.4 (`UPDATE_FIXTURES=1 …`, lalu `prettier --write test/fixtures/rpc.json`).
 
 **e2e.** `e2e/confirm.spec.ts`: alur 3 (S-10 sampai harga tampil di S-02/S-03 dan S-10 mode tersimpan dari S-09), 3b (dialog U-10 → banner → buang), 5 (screenshot → S-11 → simpan). Jalan di job `supabase-e2e` (Chromium + WebKit) bersama worker stub. Data tambahan e2e hanya lewat helper test (`e2e/support/captures.ts`, service role di proses test).
+
+### 4.7 Sesi belanja dan kamera label dari UI (M4)
+
+**Alur** (`docs/07` §1.8): tab Belanja (S-13) → "Mulai belanja" → S-12 mode sesi (`/lokasi?mode=sesi`: toko → cabang; cabang tutup tidak bisa dipilih, tanpa "Tidak tahu cabangnya", "+ Cabang baru" cepat) → W11 → S-13 aktif + banner "● Belanja di AEON BSD · 0m · 0 label [Foto label]" di semua layar (app). "Foto label" (banner, S-13, atau sheet foto yang kini menaruh "Label harga" di atas) → kamera label `/kamera?jenis=label`: jendela bidik tetap terbuka, setiap shutter = satu capture label dengan `shopping_session_id` sesi aktif → antrean → W1. S-13 menampilkan kartu per foto (diproses / gagal dibaca / perlu dicek → S-11 / tersimpan dengan harga, label, dan pembanding `vs_best_pct`), "Perpanjang" saat sisa < 30 mnt (W12, +2 jam), "Akhiri sesi" (W13). Tanpa sesi, "Label harga" di sheet → S-12 mode manual (`untuk=label`) → kamera label dengan lokasi manual (`toko`, `cabang`).
+
+**Mencoba (mode B):** jalankan Supabase + worker stub + web seperti §4.5. Kamera butuh secure context: `localhost` di desktop, atau HTTPS di HP (§4.1). Di desktop tanpa kamera: izin ditolak / kamera tidak ada → "Pilih dari galeri"; pilih `apps/worker/test/fixtures/label-milo.jpg` → dalam beberapa detik kartu "perlu dicek" (Milo 200 g tersimpan otomatis karena lokasi dari sesi, Milo 3in1 menunggu konfirmasi) → S-11 → Simpan → kartu tersimpan. Foto kamera sungguhan tidak punya fixture stub → "gagal dibaca" (`unsupported`). Kamera palsu Chromium untuk mencoba jendela bidik:
+
+```bash
+node --experimental-strip-types -e "import('./apps/web/e2e/support/fake-camera.ts').then(m => console.log(m.writeFakeCameraFile()))"
+chromium --use-fake-device-for-media-stream --use-fake-ui-for-media-stream \
+  --use-file-for-fake-video-capture=<path .y4m di atas> http://localhost:3000/belanja
+```
+
+"Hampir kedaluwarsa" tanpa menunggu 3,5 jam (data lokal saja): `update public.shopping_session set expires_at = now() + interval '20 minutes' where id = '<id>';` lalu buka ulang tab Belanja (S-13 selalu memuat ulang R18 saat dibuka). Sesi kedaluwarsa: set `expires_at` ke masa lalu → banner hilang dalam ≤ 15 dtk, S-13 menulis "Sesi di … berakhir otomatis pukul …".
+
+**Fixture R18/W11/W12/W13.** `apps/web/test/fixtures/scenario.ts` (`collectSessions`, user Ani, dijalankan paling akhir supaya fixture M1–M3 tidak berubah): tanpa sesi, W11 `BRANCH_CLOSED` (AEON Lama), mulai + ulang id yang sama, label-milo dengan sesi lewat pipeline worker asli (uploaded → needs_confirmation), label-milo lagi (duplikat hash) diterima → done, gambar tanpa fixture → failed, satu capture diklaim → processing, R18 sebelum dan sesudah antrean ringkasan (F-60), hampir kedaluwarsa (`expires_at` dimajukan, data test), W12, W13 (+ ulang), `SESSION_NOT_ACTIVE` setelah berakhir dan setelah kedaluwarsa. Dibangkitkan ulang seperti §4.4.
+
+**e2e.** `e2e/session.spec.ts` (alur 4) di job `supabase-e2e`. Chromium memakai kamera palsu: `playwright.config.ts` membangkitkan file Y4M 1280×720 (`e2e/support/fake-camera.ts`, sisi test, tidak di-commit sebagai biner) dan memberi `--use-fake-device-for-media-stream --use-fake-ui-for-media-stream --use-file-for-fake-video-capture=…` + izin `camera`. Frame kamera palsu diperiksa sampai capture terdaftar dengan sesi yang benar (JPEG ≤ 2048 px, sha256 cocok) dan tampil "gagal dibaca" (stub memetakan fixture lewat sha256, F-63); isi kartu dari label-milo lewat galeri di kamera label yang sama. WebKit tidak punya kamera palsu: langkah shutter dilewati (F-64). Helper `e2e/support/session.ts` (service role di proses test) membaca sesi/capture/gambar dan memajukan `expires_at` untuk "Perpanjang"; migration, RPC, dan logika worker tidak diubah.
