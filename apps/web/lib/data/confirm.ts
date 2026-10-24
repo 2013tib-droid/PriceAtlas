@@ -265,7 +265,7 @@ export function normalizeName(q: string): string {
 export const STORE_LIST_LIMIT = 50;
 
 /** `store?select=id,name,channel,household_id&status=eq.active&normalized_name=ilike.*q*&order=name` */
-export function useStores(q: string) {
+export function useStores(q: string, enabled = true) {
   const term = normalizeName(q);
   return useQuery({
     queryKey: ['rest', 'store', term],
@@ -280,7 +280,7 @@ export function useStores(q: string) {
         if (term) req = req.ilike('normalized_name', `*${term}*`);
         return req as unknown as PromiseLike<{ data: StoreRow[] | null; error: unknown }>;
       }),
-    enabled: useSignedIn(),
+    enabled: useSignedIn() && enabled,
     placeholderData: (prev) => prev,
   });
 }

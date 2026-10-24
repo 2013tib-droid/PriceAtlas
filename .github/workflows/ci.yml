@@ -192,7 +192,7 @@ jobs:
           STORAGE_BACKEND: supabase
           EXTRACTOR: stub
 
-      - name: e2e Playwright (login OTP, shell offline, alur 1–5, O antrean, G gagal; kamera palsu Chromium untuk alur 4)
+      - name: e2e Playwright (login OTP, shell offline, alur 1–6, O antrean, G gagal; kamera palsu Chromium untuk alur 4)
         run: pnpm --filter @priceatlas/web test:e2e
 
       - name: Log worker

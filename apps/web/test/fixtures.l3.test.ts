@@ -3,6 +3,8 @@
 //   1. Setiap keluaran RPC lolos skema kontrak (packages/contracts) yang dipakai hook web.
 //   2. Bentuk test/fixtures/rpc.json (yang dipakai test komponen) sama dengan keluaran server saat ini.
 // Membangkitkan ulang fixture: UPDATE_FIXTURES=1 pnpm --filter @priceatlas/web test fixtures
+// Hanya menambah kunci baru (nilai yang di-commit tetap, mis. jam sesi yang dipakai test M4):
+// UPDATE_FIXTURES=new …
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type pg from 'pg';
@@ -20,7 +22,12 @@ beforeAll(async () => {
   const url = buildTestDb('priceatlas_l3_web_fixtures');
   pool = newPool(url);
   fresh = await collectFixtures(pool, url);
-  if (process.env.UPDATE_FIXTURES) writeFileSync(FILE, `${JSON.stringify(fresh, null, 2)}\n`);
+  if (process.env.UPDATE_FIXTURES === 'new') {
+    const committed = JSON.parse(readFileSync(FILE, 'utf8')) as Fixtures;
+    const data = { ...committed.data };
+    for (const [k, v] of Object.entries(fresh.data)) if (!(k in data)) data[k] = v;
+    writeFileSync(FILE, `${JSON.stringify({ today: committed.today, data }, null, 2)}\n`);
+  } else if (process.env.UPDATE_FIXTURES) writeFileSync(FILE, `${JSON.stringify(fresh, null, 2)}\n`);
 });
 afterAll(async () => {
   await pool?.end();

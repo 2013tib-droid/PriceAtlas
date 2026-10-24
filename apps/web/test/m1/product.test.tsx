@@ -88,8 +88,10 @@ describe('S-03 Detail produk', () => {
     await openProduct(ID.milo200);
     await screen.findByTestId('price-chart');
     await userEvent.setup().click(screen.getByLabelText('Hanya harga normal'));
-    await waitFor(() =>
-      expect(sb.rpc).toHaveBeenCalledWith('price_chart', { p_product_id: ID.milo200, p_normal_only: true }),
+    // Toggle menulis prefs ke IndexedDB dulu, lalu R9 dipanggil: beri waktu lebih saat runner CI sibuk.
+    await waitFor(
+      () => expect(sb.rpc).toHaveBeenCalledWith('price_chart', { p_product_id: ID.milo200, p_normal_only: true }),
+      { timeout: 5_000 },
     );
     expect(screen.queryByText(/garis putus-putus/)).toBeNull();
     const { readPref } = await import('@/lib/offline/prefs');
@@ -155,22 +157,28 @@ describe('S-03 Detail produk', () => {
     expect(screen.getByText('Hanya ada 1 data bundle · tidak dipakai untuk harga terbaik')).toBeTruthy();
   });
 
-  it('produk privat: PRIBADI + menu Edit/Gabungkan/Pisahkan/Hapus', async () => {
+  it('produk privat: PRIBADI + menu Edit/Gabungkan/Pisahkan (tautan M5) + Hapus', async () => {
     await openProduct(ID.gula);
     expect(screen.getByText('PRIBADI')).toBeTruthy();
     await userEvent.setup().click(screen.getByRole('button', { name: 'Lainnya' }));
     const menu = within(await screen.findByRole('dialog', { name: 'Aksi produk' }));
-    for (const l of ['Edit produk', 'Gabungkan', 'Pisahkan', 'Hapus produk'])
-      expect(menu.getByRole('button', { name: l })).toBeTruthy();
+    const q = `?id=${ID.gula}`;
+    expect(menu.getByRole('link', { name: 'Edit produk' }).getAttribute('href')).toBe(`/produk/edit${q}`);
+    expect(menu.getByRole('link', { name: 'Gabungkan' }).getAttribute('href')).toBe(`/produk/gabung${q}`);
+    expect(menu.getByRole('link', { name: 'Pisahkan' }).getAttribute('href')).toBe(`/produk/pisah${q}`);
+    expect(menu.getByRole('button', { name: 'Hapus produk' })).toBeTruthy();
   });
 
-  it('produk global: Gabungkan nonaktif dengan teks D-30', async () => {
+  it('produk global: Edit dan Gabungkan nonaktif dengan teks D-38/D-30, Pisahkan tetap', async () => {
     await openProduct(ID.milo200);
     await userEvent.setup().click(screen.getByRole('button', { name: 'Lainnya' }));
     const menu = within(await screen.findByRole('dialog', { name: 'Aksi produk' }));
     expect((menu.getByRole('button', { name: 'Gabungkan' }) as HTMLButtonElement).disabled).toBe(true);
     expect(menu.getByText('Produk katalog umum hanya bisa digabung oleh kurator.')).toBeTruthy();
-    expect(menu.queryByRole('button', { name: 'Edit produk' })).toBeNull();
+    expect((menu.getByRole('button', { name: 'Edit produk' }) as HTMLButtonElement).disabled).toBe(true);
+    expect(menu.getByText('Produk katalog umum tidak bisa diubah, termasuk kategorinya.')).toBeTruthy();
+    expect(menu.getByRole('link', { name: 'Pisahkan' }).getAttribute('href')).toBe(`/produk/pisah?id=${ID.milo200}`);
+    expect(menu.queryByRole('button', { name: 'Hapus produk' })).toBeNull();
   });
 
   it('produk sudah digabung: router.replace ke produk pengganti + toast', async () => {

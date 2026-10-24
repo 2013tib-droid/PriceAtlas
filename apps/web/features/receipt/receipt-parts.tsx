@@ -4,6 +4,7 @@
 // produk / Voucher & poin, MemberHintBox (U-21). Label selalu teks (U-15).
 import type { ReceiptDetail, ReceiptLine } from '@priceatlas/contracts';
 import { Check, MoreHorizontal, Pencil } from 'lucide-react';
+import Link from 'next/link';
 import { useId, useState, type ReactNode } from 'react';
 import { BasisLabel, PriceLabel, PriceText, PrivateBadge } from '@/components/price/price';
 import { Button } from '@/components/ui/button';
@@ -370,6 +371,7 @@ export function AutoSavedRow({
   onUndo,
   editable,
   onEdit,
+  href,
 }: {
   line: ReceiptLine;
   decision: LineDecision | undefined;
@@ -378,11 +380,13 @@ export function AutoSavedRow({
   onUndo?: () => void;
   editable: boolean;
   onEdit?: () => void;
+  /** Mode tersimpan: baris di-tap → S-16 untuk koreksi lengkap (F-52, D-87). */
+  href?: string;
 }) {
   const rec = line.record;
   const p = decision?.product ?? line.suggestion;
-  return (
-    <li className="flex flex-col gap-1 border-b border-divider py-2" data-testid="saved-line">
+  const summary = (
+    <>
       <p className="text-sm">
         <span className="font-mono">{line.raw_text}</span>
         {p ? <span className="font-medium"> → {lineName(p)}</span> : null}
@@ -396,6 +400,21 @@ export function AutoSavedRow({
         </p>
       ) : (
         <LineAmounts line={line} weight={p?.sale_mode === 'weight'} />
+      )}
+    </>
+  );
+  return (
+    <li className="flex flex-col gap-1 border-b border-divider py-2" data-testid="saved-line">
+      {href ? (
+        <Link
+          href={href}
+          className="flex min-h-touch flex-col gap-1 rounded-lg hover:bg-muted"
+          data-testid="saved-line-link"
+        >
+          {summary}
+        </Link>
+      ) : (
+        summary
       )}
       {decision ? (
         <p className="text-sm">

@@ -1,7 +1,8 @@
 'use client';
 // S-03 Detail produk (docs/07 §7.3, wireframe S-03): R7 (redirect_to → router.replace + toast),
 // ringkasan, grafik R9 + toggle "Hanya harga normal", 3 toko teratas R12, ukuran lain R11, histori
-// R8 (cursor), "Cek harga rak" menempel di bawah → S-03b (?sheet=cek-harga).
+// R8 (cursor; baris di-tap → S-16 `/harga?id=`, M5), "Cek harga rak" menempel di bawah → S-03b
+// (?sheet=cek-harga), menu ⋯ (M5: S-15 edit, S-17, S-18, arsip).
 import type { ProductDetail } from '@priceatlas/contracts';
 import { Calculator, ChevronRight, MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
@@ -11,7 +12,7 @@ import { toast } from 'sonner';
 import { ErrorState, LoadingState, OfflineState, QueryState } from '@/components/app/screen-state';
 import { StickyAction } from '@/components/app/sticky-action';
 import { BasisLabel, DataCount, PriceText, PrivateBadge, StoreLine, TrendText } from '@/components/price/price';
-import { HistoryRow } from '@/components/product/history-row';
+import { HistoryRow, recordHref } from '@/components/product/history-row';
 import { MainPrice, ShortPrice } from '@/components/product/main-price';
 import { productHref } from '@/components/product/product-card';
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,7 @@ import { useOnline } from '@/lib/hooks/use-online';
 import { usePref } from '@/lib/hooks/use-pref';
 import { useTimeZone } from '@/lib/hooks/use-time-zone';
 import { PREF_KEYS, pushViewed } from '@/lib/offline/prefs';
+import { ArchiveDialog } from '@/features/catalog/archive-dialog';
 import { StoreRankRow } from '@/features/cheaper/store-rank-row';
 import { SizeRow } from '@/features/sizes/size-rows';
 import { PriceChart } from './price-chart';
@@ -291,7 +293,7 @@ function HistorySection({
           ) : (
             <ul>
               {rows.map((r) => (
-                <HistoryRow key={r.id} record={r} product={p} />
+                <HistoryRow key={r.id} record={r} product={p} href={recordHref(r.id)} />
               ))}
             </ul>
           )}
@@ -317,12 +319,31 @@ function HistorySection({
   );
 }
 
-/** Menu ⋯ di bawah (bukan pojok kanan atas, wireframe S-03). Aksinya dibuat di M5. */
+/**
+ * Menu ⋯ di bawah (bukan pojok kanan atas, wireframe S-03; docs/05 §3.3 S-03). Produk privat: Edit (S-15),
+ * Gabungkan (S-17), Pisahkan (S-18), Hapus (arsip lewat REST PATCH). Produk global: Pisahkan saja; Edit
+ * dan Gabungkan nonaktif dengan teks D-38/D-30.
+ */
 function MoreMenu({ detail }: { detail: ProductDetail }) {
   const [open, setOpen] = useState(false);
-  const priv = detail.card.product.is_private;
+  const [archiveOpen, setArchiveOpen] = useState(false);
+  const p = detail.card.product;
+  const priv = p.is_private;
   const m = PRODUCT_COPY.menu;
-  const items = priv ? [m.edit, m.merge, m.split, m.archive] : [m.split];
+  const q = `?id=${encodeURIComponent(p.id)}`;
+  const link = (href: string, label: string) => (
+    <Button key={label} variant="secondary" size="action" className="justify-start" asChild>
+      <Link href={href}>{label}</Link>
+    </Button>
+  );
+  const disabled = (label: string, why: string) => (
+    <div key={label} className="flex flex-col gap-1">
+      <Button variant="secondary" size="action" disabled className="justify-start">
+        {label}
+      </Button>
+      <p className="text-sm text-muted-foreground">{why}</p>
+    </div>
+  );
   return (
     <>
       <Button variant="ghost" onClick={() => setOpen(true)} className="self-start">
@@ -333,23 +354,29 @@ function MoreMenu({ detail }: { detail: ProductDetail }) {
         <DrawerContent>
           <div className="flex flex-col gap-2 p-4">
             <DrawerTitle>{PRODUCT_COPY.moreTitle}</DrawerTitle>
-            <DrawerDescription>{PRODUCT_COPY.soonM5}</DrawerDescription>
-            {items.map((label) => (
-              <Button key={label} variant="secondary" size="action" disabled className="justify-start">
-                {label}
+            <DrawerDescription>{PRODUCT_COPY.moreDescription}</DrawerDescription>
+            {priv ? link(`/produk/edit${q}`, m.edit) : disabled(m.edit, PRODUCT_COPY.editGlobal)}
+            {priv ? link(`/produk/gabung${q}`, m.merge) : disabled(m.merge, PRODUCT_COPY.mergeGlobal)}
+            {link(`/produk/pisah${q}`, m.split)}
+            {priv ? (
+              <Button
+                variant="secondary"
+                size="action"
+                className="justify-start text-danger"
+                onClick={() => {
+                  setOpen(false);
+                  setArchiveOpen(true);
+                }}
+              >
+                {m.archive}
               </Button>
-            ))}
-            {priv ? null : (
-              <div className="flex flex-col gap-1">
-                <Button variant="secondary" size="action" disabled className="justify-start">
-                  {m.merge}
-                </Button>
-                <p className="text-sm text-muted-foreground">{PRODUCT_COPY.mergeGlobal}</p>
-              </div>
-            )}
+            ) : null}
           </div>
         </DrawerContent>
       </Drawer>
+      {priv ? (
+        <ArchiveDialog productId={p.id} name={productTitle(p).title} open={archiveOpen} onOpenChange={setArchiveOpen} />
+      ) : null}
     </>
   );
 }

@@ -47,7 +47,7 @@ export async function householdOf(pool: pg.Pool, userId: string): Promise<string
 }
 
 type ArgMeta = { name: string; type: string };
-type FnMeta = { args: ArgMeta[]; retset: boolean; composite: boolean };
+type FnMeta = { args: ArgMeta[]; retset: boolean; composite: boolean; void: boolean };
 
 /**
  * Meniru `supabase.rpc(fn, args)` lewat PostgREST: satu transaksi, role
@@ -65,8 +65,14 @@ export class PgRpcClient {
   private async fnMeta(fn: string): Promise<FnMeta> {
     const cached = this.meta.get(fn);
     if (cached) return cached;
-    const r = await this.pool.query<{ names: string[] | null; types: string[]; retset: boolean; typtype: string }>(
-      `select p.proargnames as names,
+    const r = await this.pool.query<{
+      names: string[] | null;
+      types: string[];
+      retset: boolean;
+      typtype: string;
+      typname: string;
+    }>(
+      `select p.proargnames as names, t.typname,
               array(select format_type(t, null) from unnest(p.proargtypes) t) as types,
               p.proretset as retset,
               -- RETURNS TABLE (record + argmode 't') dibentuk seperti tipe komposit oleh PostgREST.
@@ -82,6 +88,8 @@ export class PgRpcClient {
       args: row.types.map((type, i) => ({ name: row.names?.[i] ?? `$${i + 1}`, type })),
       retset: row.retset,
       composite: row.typtype === 'c',
+      // RETURNS void: PostgREST membalas tanpa isi → supabase-js `data: null` (bukan to_jsonb(void) = "").
+      void: row.typname === 'void',
     };
     this.meta.set(fn, meta);
     return meta;
@@ -115,7 +123,7 @@ export class PgRpcClient {
       );
       const r = await client.query<{ data: unknown }>(sql, params);
       await client.query('commit');
-      return { data: r.rows[0]?.data ?? null, error: null };
+      return { data: meta.void ? null : (r.rows[0]?.data ?? null), error: null };
     } catch (e) {
       await client.query('rollback').catch(() => undefined);
       const err = e as pg.DatabaseError;

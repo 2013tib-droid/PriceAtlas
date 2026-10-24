@@ -358,13 +358,16 @@ e2e memakai `next start` (Playwright menyalakannya), env `NEXT_PUBLIC_SUPABASE_*
 | `app/(app)/belanja`, `features/shopping`, `components/app/session-banner.tsx` | M4: S-13 sesi belanja (`/belanja`) dan banner sesi di atas tab bar (U-13) |
 | `features/capture/label-camera.tsx`, `lib/media/frame.ts` | M4: kamera label `/kamera?jenis=label` (jendela bidik `getUserMedia`, frame → canvas → pipeline §6) |
 | `lib/data/session.ts`, `lib/session/*` | M4: hook R18/W11/W12/W13; logika sesi (waktu, label per foto, pembanding `vs_best_pct`, sesi diingat, urutan U-08), error §8.2, sasaran label (sesi / lokasi manual) |
+| `app/(app)/harga`, `features/record` | M5: S-16 detail & koreksi harga (`/harga?id=`): R20, W6, editor baris struk W7 (`features/receipt/line-edit-dialog.tsx`) |
+| `app/(app)/produk/{gabung,pisah,edit}`, `features/catalog` | M5: S-17 gabungkan (`/produk/gabung?id=&ke=`), S-18 pisahkan (`/produk/pisah?id=`), S-15 edit + hapus produk (`/produk/edit?id=`) |
+| `lib/data/catalog.ts`, `lib/catalog/*` | M5: hook R19/R20/W6/W9/W10 + REST `product` (baca + PATCH filter `updated_at`); logika patch S-16, error §8.2, pratinjau merge, split T1/T2, form edit, riwayat audit |
 | `lib/offline/prefs.ts`, `lib/hooks/use-pref.ts` | 💾 di IndexedDB `prefs`: pencarian terakhir (8), baru dicek (150, untuk R5), toggle "Hanya harga normal", sesi belanja aktif terakhir (`last_session`, teks "berakhir otomatis" S-13) |
 
 ### 4.4 Fixture dan data e2e (M1)
 
 | Bagian | Isi |
 |---|---|
-| `apps/web/test/fixtures/rpc.json` | Keluaran RPC **asli** dari database mode A (`test/fixtures/scenario.ts`: katalog seed + record harga Ani, Budi tanpa histori). Dipakai test komponen L5b. `test/fixtures.l3.test.ts` (butuh PostgreSQL, ikut `pnpm -r test`) memeriksa setiap keluaran lolos skema kontrak dan bentuknya sama dengan file yang di-commit. Setelah RPC/kontrak berubah: `UPDATE_FIXTURES=1 pnpm --filter @priceatlas/web exec vitest run test/fixtures.l3.test.ts`, lalu tinjau diff. |
+| `apps/web/test/fixtures/rpc.json` | Keluaran RPC **asli** dari database mode A (`test/fixtures/scenario.ts`: katalog seed + record harga Ani, Budi tanpa histori). Dipakai test komponen L5b. `test/fixtures.l3.test.ts` (butuh PostgreSQL, ikut `pnpm -r test`) memeriksa setiap keluaran lolos skema kontrak dan bentuknya sama dengan file yang di-commit. Setelah RPC/kontrak berubah: `UPDATE_FIXTURES=1 pnpm --filter @priceatlas/web exec vitest run test/fixtures.l3.test.ts`, lalu tinjau diff. Untuk **menambah** kunci baru tanpa mengubah nilai yang sudah di-commit (test M4 memakai jam sesi dari fixture, F-75): `UPDATE_FIXTURES=new …`. Setelah itu `pnpm --filter @priceatlas/web exec prettier --write test/fixtures/rpc.json`. |
 | `apps/web/e2e/support/seed.ts` | `supabase/seed.sql` hanya katalog. e2e alur 1–2 menambah histori harga untuk household user e2e lewat **service role di proses test** (bukan kode klien, D-61), lalu menunggu `price_summary` dari pg_cron (≤ 10 dtk). Migration tidak diubah. |
 
 ### 4.5 Antrean foto, worker di e2e, dan mencoba unggah lokal (M2)
@@ -419,3 +422,25 @@ chromium --use-fake-device-for-media-stream --use-fake-ui-for-media-stream \
 **Fixture R18/W11/W12/W13.** `apps/web/test/fixtures/scenario.ts` (`collectSessions`, user Ani, dijalankan paling akhir supaya fixture M1–M3 tidak berubah): tanpa sesi, W11 `BRANCH_CLOSED` (AEON Lama), mulai + ulang id yang sama, label-milo dengan sesi lewat pipeline worker asli (uploaded → needs_confirmation), label-milo lagi (duplikat hash) diterima → done, gambar tanpa fixture → failed, satu capture diklaim → processing, R18 sebelum dan sesudah antrean ringkasan (F-60), hampir kedaluwarsa (`expires_at` dimajukan, data test), W12, W13 (+ ulang), `SESSION_NOT_ACTIVE` setelah berakhir dan setelah kedaluwarsa. Dibangkitkan ulang seperti §4.4.
 
 **e2e.** `e2e/session.spec.ts` (alur 4) di job `supabase-e2e`. Chromium memakai kamera palsu: `playwright.config.ts` membangkitkan file Y4M 1280×720 (`e2e/support/fake-camera.ts`, sisi test, tidak di-commit sebagai biner) dan memberi `--use-fake-device-for-media-stream --use-fake-ui-for-media-stream --use-file-for-fake-video-capture=…` + izin `camera`. Frame kamera palsu diperiksa sampai capture terdaftar dengan sesi yang benar (JPEG ≤ 2048 px, sha256 cocok) dan tampil "gagal dibaca" (stub memetakan fixture lewat sha256, F-63); isi kartu dari label-milo lewat galeri di kamera label yang sama. WebKit tidak punya kamera palsu: langkah shutter dilewati (F-64). Helper `e2e/support/session.ts` (service role di proses test) membaca sesi/capture/gambar dan memajukan `expires_at` untuk "Perpanjang"; migration, RPC, dan logika worker tidak diubah.
+
+### 4.8 Koreksi & katalog dari UI (M5)
+
+**Alur** (`docs/07` §1.9): detail produk (S-03) → tap baris histori → S-16 `/harga?id=` (juga dari baris struk tersimpan di S-10). Label/screenshot: ubah harga, tanggal, toko/cabang (S-12 mode koreksi), bundle, info tambahan → "Simpan perubahan" (W6 dengan `p_expected_updated_at`) → "Ringkasan sedang diperbarui…" sampai `price_summary.refreshed_at` menyusul (pg_cron). Record struk: angka terkunci; "Ubah baris struk" (W7) atau "Buka struk" (header S-10). "Ganti produk" → S-14 (+ tawaran alias). "Batalkan data ini" = status `void`. Menu ⋯ S-03 (produk privat): Edit (`/produk/edit`), Gabungkan (`/produk/gabung`: pilih tujuan → pratinjau R19 → beda ukuran = tekan dua kali / "Pindahkan ke group" → W10), Pisahkan (`/produk/pisah`: produk tujuan baru/yang ada → centang harga → alias → W9), Hapus produk (arsip). Produk katalog umum: Pisahkan saja.
+
+**Mencoba (mode B):** jalankan Supabase + worker stub + web seperti §4.5. Data contoh cepat untuk user yang sedang login (SQL Studio / psql, data lokal saja):
+
+```sql
+-- household user lokal → tiga harga label Milo 200 g (produk katalog seed)
+with h as (select household_id as id from public.household_member limit 1)
+insert into public.price_record (household_id, product_id, store_id, branch_id, source_type, transaction_date,
+                                 normal_price, effective_price, price_basis)
+select h.id, '70000000-0000-0000-0000-000000000200', '20000000-0000-0000-0000-000000000001',
+       '30000000-0000-0000-0000-000000000001', 'price_label', current_date - d, 19500, 19500, 'normal'
+  from h, generate_series(1, 3) d;
+```
+
+Lalu buka `/produk?id=70000000-0000-0000-0000-000000000200` → baris histori → S-16. **Konflik dua tab:** buka record yang sama di dua tab, simpan di tab kedua, lalu simpan di tab pertama → "Data ini baru saja berubah di tempat lain…" dan perubahan yang masih berlaku ditampilkan lagi. Detail record (R20) tidak di-persist ke IndexedDB (`qcache` tidak memuat `price_record_detail`).
+
+**Fixture R19/R20/W6/W7/W9/W10 + REST product.** `apps/web/test/fixtures/scenario.ts` (`collectCatalog`, user Citra, dijalankan paling akhir): R20 untuk record label/struk/screenshot, W6/W7 sukses dan setiap error §8.2, gambar dihapus, W8 dengan PLU, W9/W10/R19 (sukses, ulang, `RECORDS_NOT_OWNED`, `42501`, `P0001`, beda ukuran/dimensi, ke katalog), REST `product` (baca, PATCH sukses / 0 baris / `23514` / `23503`, pindah group, arsip). Ditambahkan dengan `UPDATE_FIXTURES=new` (§4.4).
+
+**e2e.** `e2e/correction.spec.ts` (alur 6a/6b/6c) di job `supabase-e2e` (Chromium + WebKit). `STALE_WRITE` "dua tab" = dua page dalam context Playwright yang sama (sesi login sama); RPC tidak diubah. Data tambahan lewat helper test (`e2e/support/seed.ts`, `e2e/support/catalog.ts`, service role di proses test saja).

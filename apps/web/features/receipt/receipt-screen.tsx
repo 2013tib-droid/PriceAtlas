@@ -4,8 +4,8 @@
 // updated_at; 0 baris = STALE_WRITE), NeedsCheckList + "Benarkan semua saran" (≥ 3, U-12), lipatan,
 // TotalsCheck (selisih = peringatan saja, D-50), field ragu (< τ R2), DuplicateBanner (D-20, D-74),
 // toko belum dikenali → S-12 (D-49), MemberHintBox → W16 (U-21), "Simpan N harga" → W4.
-// Mode tersimpan (status confirmed): tampilan + koreksi baris W7. Pilihan user disimpan di memori +
-// sessionStorage selama belum tersimpan (keadaan gagal §7.3).
+// Mode tersimpan (status confirmed): tampilan + koreksi baris W7; baris di-tap → S-16 (M5, F-52, D-87).
+// Pilihan user disimpan di memori + sessionStorage selama belum tersimpan (keadaan gagal §7.3).
 import type { ReceiptDetail, ReceiptLine } from '@priceatlas/contracts';
 import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
@@ -14,6 +14,7 @@ import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react';
 import { toast } from 'sonner';
 import { ErrorState, LoadingState } from '@/components/app/screen-state';
+import { recordHref } from '@/components/product/history-row';
 import { StickyAction } from '@/components/app/sticky-action';
 import { SummaryUpdating } from '@/components/app/summary-updating';
 import { Button } from '@/components/ui/button';
@@ -57,6 +58,7 @@ import { formatRupiah } from '@/lib/format';
 import { flashToast } from '@/lib/flash';
 import { useLayer } from '@/lib/hooks/use-layer';
 import { useTimeZone } from '@/lib/hooks/use-time-zone';
+import { LineEditDialog } from './line-edit-dialog';
 import {
   AdjustmentsList,
   AutoSavedRow,
@@ -169,85 +171,6 @@ function HeaderForm({
         </Button>
         <Button type="submit" className="flex-1" disabled={pending}>
           {C.saveHeader}
-        </Button>
-      </div>
-    </form>
-  );
-}
-
-/** Koreksi baris struk di mode tersimpan (W7 correct_receipt_line, docs/05 §4.3). */
-function LineEditDialog({
-  line,
-  onClose,
-  pending,
-  error,
-  onSave,
-}: {
-  line: ReceiptLine | null;
-  onClose: () => void;
-  pending: boolean;
-  error: string | null;
-  onSave: (patch: { quantity?: number; line_amount?: number; add_discount?: { line_amount: number } }) => void;
-}) {
-  return (
-    <Dialog open={Boolean(line)} onOpenChange={(v) => (v ? undefined : onClose())}>
-      <DialogContent>
-        {line ? <LineEditForm line={line} onClose={onClose} pending={pending} error={error} onSave={onSave} /> : null}
-      </DialogContent>
-    </Dialog>
-  );
-}
-
-function LineEditForm({
-  line,
-  onClose,
-  pending,
-  error,
-  onSave,
-}: Omit<Parameters<typeof LineEditDialog>[0], 'line'> & { line: ReceiptLine }) {
-  const [qty, setQty] = useState(line.quantity != null ? String(line.quantity) : '');
-  const [amount, setAmount] = useState(String(line.line_amount));
-  const [disc, setDisc] = useState('');
-  const num = (s: string) => Number(s.replace(/\./g, '').replace(',', '.'));
-  const submit = (e: FormEvent) => {
-    e.preventDefault();
-    const patch: { quantity?: number; line_amount?: number; add_discount?: { line_amount: number } } = {};
-    if (qty && num(qty) > 0 && num(qty) !== line.quantity) patch.quantity = num(qty);
-    if (amount && Number.isFinite(num(amount)) && num(amount) !== line.line_amount) patch.line_amount = num(amount);
-    if (disc && num(disc) > 0) patch.add_discount = { line_amount: num(disc) };
-    if (!Object.keys(patch).length) return onClose();
-    onSave(patch);
-  };
-  return (
-    <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
-      <DialogTitle>{C.editLineTitle}</DialogTitle>
-      <DialogDescription className="font-mono">{line.raw_text}</DialogDescription>
-      <div className="flex gap-2">
-        <div className="flex w-24 flex-col gap-1">
-          <Label htmlFor="baris-jumlah">{C.lineQty}</Label>
-          <Input id="baris-jumlah" inputMode="decimal" value={qty} onChange={(e) => setQty(e.target.value)} />
-        </div>
-        <div className="flex flex-1 flex-col gap-1">
-          <Label htmlFor="baris-total">{C.lineAmount}</Label>
-          <Input id="baris-total" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value)} />
-        </div>
-      </div>
-      <div className="flex flex-col gap-1">
-        <Label htmlFor="baris-diskon">{C.lineDiscount}</Label>
-        <Input id="baris-diskon" inputMode="numeric" value={disc} onChange={(e) => setDisc(e.target.value)} />
-      </div>
-      <p className="text-sm text-muted-foreground">{C.lineDetailLater}</p>
-      {error ? (
-        <p role="alert" className="text-sm text-danger">
-          {error}
-        </p>
-      ) : null}
-      <div className="flex gap-2">
-        <Button variant="secondary" className="flex-1" onClick={onClose}>
-          {C.cancel}
-        </Button>
-        <Button type="submit" className="flex-1" disabled={pending}>
-          {C.lineSave}
         </Button>
       </div>
     </form>
@@ -603,6 +526,7 @@ export function ReceiptScreen() {
                 onReplace={() => openPicker(l)}
                 onNonProduct={() => decide(l.id, { action: 'non_product' })}
                 onUndo={() => undo(l.id)}
+                href={status === 'confirmed' && l.record ? recordHref(l.record.id) : undefined}
                 onEdit={
                   status === 'confirmed' && l.record
                     ? () => {

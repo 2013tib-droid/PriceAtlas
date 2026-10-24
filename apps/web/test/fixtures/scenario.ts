@@ -444,6 +444,7 @@ async function collectAll(pool: pg.Pool, w: Worker): Promise<Fixtures> {
   );
 
   await collectSessions(pool, w, ani, data);
+  await collectCatalog(pool, citra, data);
 
   const today = (
     await pool.query<{ d: string }>(`select app.household_today($1)::text as d`, [await householdOf(pool, USERS.a)])
@@ -527,4 +528,235 @@ async function collectSessions(pool: pg.Pool, w: Worker, ani: PgRpcClient, data:
   );
   await call('session_expired', 'get_active_session');
   await call('session_extend_expired', 'extend_shopping_session', { p_session_id: S.expired });
+}
+
+/** Id produk privat Citra untuk S-15 edit / S-17 / S-18 (dibuat lewat W8 dengan id klien). */
+export const CATALOG_IDS = {
+  /** "Gula Aren Bubuk" 250 g dari fixture M3 (create_product_ok): target merge. */
+  gulaAren: 'c0000000-0000-0000-0000-000000000010',
+  /** Dobel 250 g dengan barcode: sumber merge (ukuran sama). */
+  dup: 'c0000000-0000-0000-0000-000000000020',
+  /** 1 kg: beda ukuran (U-16). */
+  big: 'c0000000-0000-0000-0000-000000000021',
+  /** 500 ml: beda dimensi. */
+  syrup: 'c0000000-0000-0000-0000-000000000022',
+  /** Produk timbang dengan PLU per toko (F-55). */
+  plu: 'c0000000-0000-0000-0000-000000000023',
+} as const;
+
+/** Kolom `product` yang dibaca/ditulis lewat REST di S-15 edit dan S-17 (docs/05 §3.3). */
+export const PRODUCT_REST_COLUMNS =
+  'id, household_id, name, variant, brand_id, product_group_id, category_id, sale_mode, pack_count, content_size, content_unit, status, updated_at';
+
+/**
+ * M5 (S-15 edit, S-16, S-17, S-18): R19/R20/W6/W7/W9/W10 + REST product ASLI untuk Citra (punya
+ * record struk, label, dan screenshot dari M3). Dijalankan paling akhir supaya fixture M1–M4 tidak
+ * berubah. Record/produk Ani dipakai untuk kasus lintas household (RECORDS_NOT_OWNED, target lain).
+ */
+async function collectCatalog(pool: pg.Pool, citra: PgRpcClient, data: Record<string, unknown>) {
+  const call = async (key: string, client: PgRpcClient, fn: string, args: Record<string, unknown> = {}) => {
+    const r = await client.rpc(fn, args);
+    data[key] = r.error ? { error: r.error } : r.data;
+    return r.data;
+  };
+  const C = CATALOG_IDS;
+  const citraHh = await householdOf(pool, USERS.c);
+  type Rec = { id: string; source_type: string; capture_id: string | null };
+  const recs = (
+    await pool.query<Rec>(
+      `select id, source_type, capture_id from public.price_record
+        where household_id = $1 and status = 'active' order by created_at, id`,
+      [citraHh],
+    )
+  ).rows;
+  const receiptRec = recs.find((r) => r.source_type === 'receipt')!.id;
+  const labelRec = recs.find((r) => r.source_type === 'price_label')!.id;
+  const shopeeRec = recs.find((r) => r.source_type === 'marketplace')!.id;
+  type Detail = {
+    record: { updated_at: string; capture_id: string };
+    receipt_line: { id: string; updated_at: string };
+  };
+  const detail = async (key: string, id: string) =>
+    (await call(key, citra, 'price_record_detail', { p_id: id })) as Detail;
+
+  // R20 per sumber.
+  const label = await detail('record_label', labelRec);
+  const receipt = await detail('record_receipt', receiptRec);
+  const shopee = await detail('record_shopee', shopeeRec);
+  await call('record_unknown', citra, 'price_record_detail', { p_id: IDS.unknown });
+  // S-18 langkah 2: daftar record produk asal (struk + screenshot, dua toko), sebelum dikoreksi.
+  await call('split_history', citra, 'price_history', { p_product_id: IDS.milo500, p_include_void: false });
+  // Dua record screenshot bertanggal sama: R8 mengurutkannya dengan id (acak per run). Urutan dibuat
+  // tetap (created_at) supaya pemeriksaan bentuk fixture deterministik; isinya tetap keluaran R8.
+  (data.split_history as { transaction_date: string; created_at: string }[]).sort(
+    (a, b) => b.transaction_date.localeCompare(a.transaction_date) || a.created_at.localeCompare(b.created_at),
+  );
+
+  // W6 observasi: ubah harga normal (hitung ulang D-26) → riwayat audit.
+  await call('correct_label_ok', citra, 'correct_price_record', {
+    p_id: labelRec,
+    p_patch: { normal_price: 19900 },
+    p_expected_updated_at: label.record.updated_at,
+  });
+  const labelAfter = await detail('record_label_corrected', labelRec);
+  await call('correct_stale', citra, 'correct_price_record', {
+    p_id: labelRec,
+    p_patch: { normal_price: 19000 },
+    p_expected_updated_at: '2000-01-01T00:00:00+00:00',
+  });
+  await call('correct_no_price', citra, 'correct_price_record', {
+    p_id: labelRec,
+    p_patch: { normal_price: null, promo_price: null, member_price: null },
+    p_expected_updated_at: labelAfter.record.updated_at,
+  });
+  // Record struk: angka → USE_RECEIPT_LINE (D-23).
+  await call('correct_use_receipt_line', citra, 'correct_price_record', {
+    p_id: receiptRec,
+    p_patch: { normal_price: 1000 },
+    p_expected_updated_at: receipt.record.updated_at,
+  });
+  // Screenshot: extra di luar kontrak D-66 → INVALID_EXTRA; ongkir + catatan (extra lengkap); batalkan.
+  await call('correct_invalid_extra', citra, 'correct_price_record', {
+    p_id: shopeeRec,
+    p_patch: { extra: { kupon: 5000 } },
+    p_expected_updated_at: shopee.record.updated_at,
+  });
+  const shopeeExtra = (await call('correct_extra', citra, 'correct_price_record', {
+    p_id: shopeeRec,
+    p_patch: { extra: { listing_title: 'Milo Activ-Go 500g', shipping_fee: 12000, note: 'beli 2' } },
+    p_expected_updated_at: shopee.record.updated_at,
+  })) as { updated_at: string };
+  await call('correct_void', citra, 'correct_price_record', {
+    p_id: shopeeRec,
+    p_patch: { status: 'void' },
+    p_expected_updated_at: shopeeExtra.updated_at,
+  });
+  await detail('record_shopee_void', shopeeRec);
+
+  // Record struk: ganti produk + alias (D-35), lalu ubah baris struk lewat W7 (record dibentuk ulang).
+  await call('correct_product_alias', citra, 'correct_price_record', {
+    p_id: receiptRec,
+    p_patch: { product_id: IDS.milo200 },
+    p_expected_updated_at: receipt.record.updated_at,
+    p_update_alias: true,
+  });
+  const receiptAfter = await detail('record_receipt_corrected', receiptRec);
+  await call('correct_line_ok', citra, 'correct_receipt_line', {
+    p_line_id: receiptAfter.receipt_line.id,
+    p_patch: { line_amount: 88000 },
+    p_expected_updated_at: receiptAfter.receipt_line.updated_at,
+  });
+  await call('correct_line_stale', citra, 'correct_receipt_line', {
+    p_line_id: receiptAfter.receipt_line.id,
+    p_patch: { line_amount: 86000 },
+    p_expected_updated_at: receiptAfter.receipt_line.updated_at,
+  });
+  await detail('record_receipt_line_corrected', receiptRec);
+
+  // Gambar sumber dihapus retensi (D-32).
+  await pool.query(`update public.capture_image set purged_at = now() where capture_id = $1`, [
+    label.record.capture_id,
+  ]);
+  await detail('record_label_purged', labelRec);
+
+  // W8: produk privat untuk merge/split (ukuran sama + barcode, 1 kg, 500 ml, timbang + PLU per toko).
+  const base = { brand: { new: 'Kebun Sari' }, group: 'same_as_name', sale_mode: 'unit', pack_count: 1 };
+  for (const p of [
+    {
+      id: C.dup,
+      name: 'Gula Aren Bubuk Kebun',
+      content_size: 250,
+      content_unit: 'g',
+      barcodes: [{ code: '8990000000024', code_type: 'gtin' }],
+    },
+    { id: C.big, name: 'Gula Aren Bubuk', variant: '1 kg', content_size: 1, content_unit: 'kg', barcodes: [] },
+    { id: C.syrup, name: 'Sirup Gula Aren', content_size: 500, content_unit: 'ml', barcodes: [] },
+  ]) {
+    const r = await citra.rpc('create_private_product', { p_product: { ...base, ...p } });
+    if (r.error) throw new Error(`create_private_product: ${r.error.message}`);
+  }
+  await call('create_product_plu', citra, 'create_private_product', {
+    p_product: {
+      id: C.plu,
+      name: 'Jeruk Pontianak',
+      group: 'same_as_name',
+      sale_mode: 'weight',
+      content_unit: 'kg',
+      barcodes: [{ code: '2001', code_type: 'plu', store_id: IDS.aeon }],
+    },
+  });
+
+  // W9 (T2): pindahkan record label + struk Citra ke produk dobel, dengan alias household.
+  const moveIds = [labelRec, receiptRec];
+  await call('move_ok', citra, 'move_price_records', {
+    p_record_ids: moveIds,
+    p_target_product_id: C.dup,
+    p_alias: { store_id: IDS.aeon, alias_text: 'GULA AREN BBK' },
+  });
+  await call('move_repeat', citra, 'move_price_records', { p_record_ids: moveIds, p_target_product_id: C.dup });
+  const aniRec = (
+    await pool.query<{ id: string }>(
+      `select id from public.price_record where household_id = $1 order by created_at, id limit 1`,
+      [await householdOf(pool, USERS.a)],
+    )
+  ).rows[0]!.id;
+  await call('move_not_owned', citra, 'move_price_records', {
+    p_record_ids: [labelRec, aniRec],
+    p_target_product_id: C.dup,
+  });
+  await call('move_target_missing', citra, 'move_price_records', {
+    p_record_ids: [labelRec],
+    p_target_product_id: IDS.unknown,
+  });
+
+  // R19 pratinjau (U-16, F-01/D-65).
+  await call('merge_preview_ok', citra, 'merge_product_preview', { p_from: C.dup, p_into: C.gulaAren });
+  await call('merge_preview_size', citra, 'merge_product_preview', { p_from: C.dup, p_into: C.big });
+  await call('merge_preview_dimension', citra, 'merge_product_preview', { p_from: C.dup, p_into: C.syrup });
+  await call('merge_preview_global_target', citra, 'merge_product_preview', { p_from: C.dup, p_into: IDS.milo200 });
+  await call('merge_preview_source_global', citra, 'merge_product_preview', {
+    p_from: IDS.milo200,
+    p_into: C.gulaAren,
+  });
+  await call('merge_preview_unknown', citra, 'merge_product_preview', { p_from: C.dup, p_into: IDS.unknown });
+  // W10: global tidak bisa memulai (D-30, 42501); sukses; ulang = sudah merged ke target sama.
+  await call('merge_forbidden', citra, 'merge_product', { p_from: IDS.milo200, p_into: C.gulaAren });
+  await call('merge_ok', citra, 'merge_product', { p_from: C.dup, p_into: C.gulaAren });
+  await call('merge_preview_already', citra, 'merge_product_preview', { p_from: C.dup, p_into: C.gulaAren });
+  await call('merge_repeat', citra, 'merge_product', { p_from: C.dup, p_into: C.gulaAren });
+  await call('merge_target_inactive', citra, 'merge_product', { p_from: C.big, p_into: C.dup });
+  await call('merge_target_other', citra, 'merge_product', { p_from: C.big, p_into: IDS.gula });
+  await call('detail_merged_target', citra, 'get_product_detail', { p_product_id: C.gulaAren });
+
+  // REST product (S-15 edit, arsip, "Pindahkan ke group"): sebagai user (RLS), filter updated_at.
+  const rest = async (key: string, sql: string, params: unknown[]) => {
+    try {
+      const r = await citra.asUser<{ j: Record<string, unknown> }>(sql, params);
+      data[key] = r.rows.map((x) => x.j);
+    } catch (e) {
+      const err = e as pg.DatabaseError;
+      data[key] = {
+        error: { message: err.message, code: err.code ?? null, details: err.detail ?? null, hint: err.hint ?? null },
+      };
+    }
+    return data[key] as Record<string, unknown>[];
+  };
+  const cols = PRODUCT_REST_COLUMNS;
+  const select = `select to_jsonb(r) as j from (select ${cols} from public.product where id = $1) r`;
+  const [syrupRow] = await rest('rest_product', select, [C.syrup]);
+  await rest('rest_product_global', select, [IDS.milo200]);
+  // UPDATE … RETURNING sama dengan PATCH + Prefer: return=representation (0 baris = konflik).
+  const patch = (set: string) =>
+    `with u as (update public.product set ${set} where id = $1 and updated_at = $2 returning ${cols})
+     select to_jsonb(u) as j from u`;
+  const [patched] = await rest('patch_product_ok', patch(`name = 'Sirup Gula Aren Asli', content_size = 600`), [
+    C.syrup,
+    syrupRow!.updated_at,
+  ]);
+  await rest('patch_product_stale', patch(`name = 'Sirup Lama'`), [C.syrup, syrupRow!.updated_at]);
+  await rest('patch_product_23514', patch(`content_size = null`), [C.syrup, patched!.updated_at]);
+  await rest('patch_product_23503', patch(`product_group_id = '${IDS.unknown}'`), [C.syrup, patched!.updated_at]);
+  const [bigRow] = await rest('rest_product_big', select, [C.big]);
+  await rest('patch_product_group', patch(`product_group_id = '${IDS.groupMilo}'`), [C.big, bigRow!.updated_at]);
+  await rest('patch_product_archive', patch(`status = 'archived'`), [C.syrup, patched!.updated_at]);
 }

@@ -189,8 +189,32 @@ export function defaultRpc(fn: string, a: Record<string, unknown>): Res {
       return ok(fx('session_extend'));
     case 'end_shopping_session':
       return ok(fx('session_end'));
+    // M5 (S-16/S-17/S-18): keluaran R19/R20/W6/W9/W10 asli user Citra.
+    case 'price_record_detail': {
+      const key = Object.entries(m5Ids().records).find(([, id]) => id === a.p_id)?.[0];
+      return key ? ok(fx(`record_${key}`)) : errOf('record_unknown');
+    }
+    case 'correct_price_record': {
+      // Versi baru record (patch diterapkan, updated_at maju); angka turunan tetap dari fixture.
+      const key = Object.entries(m5Ids().records).find(([, id]) => id === a.p_id)?.[0];
+      if (!key) return errOf('record_unknown');
+      const rec = fx<{ record: Record<string, unknown> }>(`record_${key}`).record;
+      return ok({
+        ...rec,
+        ...(a.p_patch as Record<string, unknown>),
+        updated_at: new Date(Date.parse(String(rec.updated_at)) + 1000).toISOString(),
+      });
+    }
+    case 'merge_product_preview': {
+      const key = MERGE_PREVIEW[`${String(a.p_from)}>${String(a.p_into)}`];
+      return key ? ok(fx(key)) : errOf('merge_preview_unknown');
+    }
+    case 'merge_product':
+      return a.p_from === ID.milo200 ? errOf('merge_forbidden') : ok(null);
+    case 'move_price_records':
+      return ok({ moved_count: (a.p_record_ids as string[]).length, target_product_id: a.p_target_product_id });
     default:
-      throw new Error(`RPC ${fn} tidak diharapkan di M1–M4`);
+      throw new Error(`RPC ${fn} tidak diharapkan di M1–M5`);
   }
 }
 
@@ -212,6 +236,27 @@ export function m3Ids() {
   };
 }
 
+/** Id fixture M5 (Citra): record per sumber dan produk privat untuk merge/split. */
+export const CAT = {
+  gulaAren: 'c0000000-0000-0000-0000-000000000010',
+  dup: 'c0000000-0000-0000-0000-000000000020',
+  big: 'c0000000-0000-0000-0000-000000000021',
+  syrup: 'c0000000-0000-0000-0000-000000000022',
+} as const;
+
+export function m5Ids() {
+  const rec = (k: string) => fx<{ record: { id: string } }>(`record_${k}`).record.id;
+  return { records: { label: rec('label'), receipt: rec('receipt'), shopee: rec('shopee') } };
+}
+
+const MERGE_PREVIEW: Record<string, string> = {
+  [`${CAT.dup}>${CAT.gulaAren}`]: 'merge_preview_ok',
+  [`${CAT.dup}>${CAT.big}`]: 'merge_preview_size',
+  [`${CAT.dup}>${CAT.syrup}`]: 'merge_preview_dimension',
+  [`${CAT.dup}>${ID.milo200}`]: 'merge_preview_global_target',
+  [`${ID.milo200}>${CAT.gulaAren}`]: 'merge_preview_source_global',
+};
+
 export type RestCall = { table: string; calls: [string, unknown[]][] };
 type RestHandler = (c: RestCall) => Res | Promise<Res>;
 
@@ -227,6 +272,9 @@ export const state = {
     category: (() => ok(fx('rest_categories'))) as RestHandler,
     brand: (() => ok([])) as RestHandler,
     product_group: (() => ok([])) as RestHandler,
+    /** M5: baca baris produk (S-15 edit) / PATCH dengan filter updated_at. */
+    product: ((c: RestCall) =>
+      ok(fx(c.calls.some(([m]) => m === 'update') ? 'patch_product_ok' : 'rest_product'))) as RestHandler,
   },
   /** Semua panggilan REST (tabel + rantai method) untuk diperiksa test. */
   restCalls: [] as RestCall[],
@@ -300,6 +348,7 @@ export async function resetHarness() {
   state.rest.category = () => ok(fx('rest_categories'));
   state.rest.brand = () => ok([]);
   state.rest.product_group = () => ok([]);
+  state.rest.product = (c) => ok(fx(c.calls.some(([m]) => m === 'update') ? 'patch_product_ok' : 'rest_product'));
   state.restCalls = [];
   try {
     sessionStorage.clear();
