@@ -115,5 +115,5 @@ test('setelah login: layar utama tanpa pelanggaran serius; S-02 → S-20 Tanya',
   await expect(page.getByRole('link', { name: 'Lihat hasil cari "milo"' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Kirim' })).toBeDisabled();
   await page.getByRole('button', { name: 'harga per gram?' }).click();
-  await expect(page.getByLabel('Pertanyaan')).toHaveValue('milo harga per gram?');
+  await expect(page.getByLabel('Pertanyaan', { exact: true })).toHaveValue('milo harga per gram?');
 });
