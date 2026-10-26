@@ -6,8 +6,8 @@
 | | |
 |---|---|
 | Nama sementara | Price Intelligence (repo: PriceAtlas) |
-| Status | Tahap 5b M5 selesai, menunggu review (pertanyaan Q-85 s/d Q-88, `docs/07-frontend-design.md` §13.9) |
-| Terakhir diperbarui | 2026-10-23 |
+| Status | Tahap 5b M5 selesai dan disetujui; Q-85 s/d Q-88 diputuskan (D-89); berikutnya M6 (Pengaturan & onboarding) |
+| Terakhir diperbarui | 2026-10-26 |
 
 ---
 
@@ -295,6 +295,7 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 | D-86 | Hasil M2: pertanyaan Q-72 s/d Q-75 | Pemilik proyek menerima usulan default (`docs/07-frontend-design.md` §13.6). Fixture gambar worker tetap untuk M2; file yang tidak bisa didekode browser (HEIC di non-Safari, file rusak) diunggah apa adanya jika ≤ 10 MB dan tipenya diizinkan, worker yang menilai (F-40); fixture JPEG sungguhan dipertimbangkan di Tahap 6 bersama uji OCR (D-16). CSP `script-src` memakai `'unsafe-inline'` di MVP karena shell statis (F-44), ditinjau di Tahap 7 (hash skrip atau nonce). Dialog duplikat hash U-10 hanya menyebut tanggal di M2; nama toko ditinjau di M3 lewat R13 di cache, tanpa RPC baru (F-46). S-09 mengambil jumlah "perlu dicek" dan lokasi dari R13 di cache, tanpa mengubah R14 (F-41, pola Q-70); ditinjau di M3. |
 | D-87 | Hasil M3: pertanyaan Q-76 s/d Q-79 | Pemilik proyek menerima usulan default (`docs/07-frontend-design.md` §13.7). `category`, `brand`, `product_group` masuk daftar REST langsung sebagai **baca saja** (RLS); tulis tetap lewat W8 (F-51). Harga member dari label tanpa toko (`extra.member_note`) diisi ulang user di S-11; pemetaan ulang otomatis ditinjau bersama uji OCR di Tahap 6 (F-57). e2e alur 5 tetap mencapai S-11 lewat unggahan kedua (duplikat hash, D-71); fixture screenshot ber-confidence rendah dipertimbangkan di Tahap 6 (F-50). Koreksi baris kecil lewat W7 tetap di S-10 mode tersimpan; di M5 baris di-tap membuka S-16 untuk koreksi lengkap (F-52). |
 | D-88 | Hasil M4: pertanyaan Q-80 s/d Q-84 | Pemilik proyek menerima usulan default (`docs/07-frontend-design.md` §13.8). `vs_best_pct` R18 tetap dibandingkan dengan ringkasan saat ini (harga terbaik baru tampil "setara harga terbaikmu", F-60) dan status label di S-13 tetap per foto (F-61); keduanya ditinjau sebagai satu perubahan RPC di Tahap 6. e2e alur 4 tetap: foto kamera palsu diperiksa sampai capture terdaftar dengan sesi, isi kartu dari label-milo lewat galeri (F-63); ditinjau saat stub diganti di Tahap 6. Kartu label S-13 tanpa thumbnail di MVP, ditinjau di audit M7 (F-66). Kartu "Label di sesi ini" di beranda tidak dibuat; banner sesi cukup, ditinjau di M6/M7. |
+| D-89 | Hasil M5: pertanyaan Q-85 s/d Q-88 | Pemilik proyek menerima usulan default (`docs/07-frontend-design.md` §13.9). `barcode_assignment` masuk daftar REST langsung: select + insert untuk produk privat sendiri (RLS, check `plu ⇒ store_id`, exclusion constraint yang sudah ada), tanpa RPC baru; dibuat di M6 untuk barcode/PLU produk privat yang sudah ada (F-69, F-55). S-15 edit tidak membuat brand/group baru; brand/group baru tetap lewat W8 (F-70). Teks alias R20 untuk label/listing tetap kalimat umum di MVP, ditinjau di Tahap 6 bersama Q-80/Q-81 (F-72). `product` select (RLS: global + privat sendiri) disahkan sebagai REST langsung baca, bersama PATCH produk privat sendiri (F-77, pola D-87). |
 ---
 
 ## 9. Asumsi
@@ -331,7 +332,7 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 | 2 | Database Design | ✅ Selesai ([domain model](docs/02-domain-model.md), [desain fisik](docs/03-database-design.md), [skema](db/schema.sql)) |
 | 3 | Wireframe | ✅ Selesai ([spesifikasi](docs/04-wireframe.md), [prototipe](docs/wireframes/index.html)) |
 | 4 | Backend | ✅ Selesai ([desain backend](docs/05-backend-design.md), [menjalankan lokal](docs/06-local-dev.md)) |
-| 5 | Frontend | 🔄 5a disetujui ([desain frontend](docs/07-frontend-design.md)); 5b M0 selesai dan disetujui (D-84); M1 selesai, Q-68–Q-71 → D-85 ([hasil M1](docs/07-frontend-design.md#15-tahap-5b-m1-hasil-dan-temuan-baru-f-31-dst)); M2 selesai dan disetujui, Q-72–Q-75 → D-86 ([hasil M2](docs/07-frontend-design.md#16-tahap-5b-m2-hasil-dan-temuan-baru-f-40-dst)); M3 selesai dan disetujui, Q-76–Q-79 → D-87 ([hasil M3](docs/07-frontend-design.md#17-tahap-5b-m3-hasil-dan-temuan-baru-f-49-dst)); M4 selesai dan disetujui, Q-80–Q-84 → D-88 ([hasil M4](docs/07-frontend-design.md#18-tahap-5b-m4-hasil-dan-temuan-baru-f-60-dst)); M5 selesai, menunggu review, Q-85–Q-88 ([hasil M5](docs/07-frontend-design.md#19-tahap-5b-m5-hasil-dan-temuan-baru-f-68-dst)); M6–M7 berikutnya |
+| 5 | Frontend | 🔄 5a disetujui ([desain frontend](docs/07-frontend-design.md)); 5b M0 selesai dan disetujui (D-84); M1 selesai, Q-68–Q-71 → D-85 ([hasil M1](docs/07-frontend-design.md#15-tahap-5b-m1-hasil-dan-temuan-baru-f-31-dst)); M2 selesai dan disetujui, Q-72–Q-75 → D-86 ([hasil M2](docs/07-frontend-design.md#16-tahap-5b-m2-hasil-dan-temuan-baru-f-40-dst)); M3 selesai dan disetujui, Q-76–Q-79 → D-87 ([hasil M3](docs/07-frontend-design.md#17-tahap-5b-m3-hasil-dan-temuan-baru-f-49-dst)); M4 selesai dan disetujui, Q-80–Q-84 → D-88 ([hasil M4](docs/07-frontend-design.md#18-tahap-5b-m4-hasil-dan-temuan-baru-f-60-dst)); M5 selesai dan disetujui, Q-85–Q-88 → D-89 ([hasil M5](docs/07-frontend-design.md#19-tahap-5b-m5-hasil-dan-temuan-baru-f-68-dst)); M6–M7 berikutnya |
 | 6 | AI Integration (termasuk uji OCR, D-16) | — |
 | 7 | Production | — |
 
