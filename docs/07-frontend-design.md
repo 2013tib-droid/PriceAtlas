@@ -1265,6 +1265,8 @@ Setiap pertanyaan punya usulan default. Jawab "setuju semua" jika semua default 
 | Q-100 | Tab bar di S-00b/S-00c (D-90, F-104). | **Sembunyikan:** pindahkan `/selamat-datang` dan `/selamat-datang/member` ke grup layout baru `(onboarding)` dengan penjaga sesi yang sama, tanpa `TabBar` dan `SessionBanner` (URL tetap, `SHELL_ROUTES` tetap). Dibuat setelah disetujui. |
 | Q-101 | Cek manual VoiceOver/TalkBack (F-105) belum dilakukan. Siapa dan kapan? | **Pemilik proyek menjalankan daftar cek §1.11 di satu iPhone (Safari, PWA terpasang) dan satu Android (Chrome) sebelum Tahap 6**; temuan dicatat sebagai F-xx dan diperbaiki di 5b. Sampai itu kriteria M7 dipenuhi oleh axe otomatis (L5b + e2e). |
 
+**Hasil review M7 (2026-10-26):** pemilik proyek menyetujui semua usulan default Q-93 s/d Q-101 → **D-91**.
+
 ### 13.3 Bagian yang belum bisa dirancang penuh
 
 | Bagian | Yang kurang | Dampak ke 5b |
