@@ -1,6 +1,7 @@
 // M1 kriteria selesai (docs/07 §12, §11.3): alur 1 (Cari) dan alur 2 (Detail) terhadap Supabase
 // lokal, menjawab 6 pertanyaan inti (wireframe §8.1). Data harga: e2e/support/seed.ts.
 import { expect, test, type Page } from '@playwright/test';
+import { skipOnboarding } from './support/auth';
 import { seedMiloPrices } from './support/seed';
 import { generateEmailOtpForUser, hasSupabase, uniqueEmail } from './support/supabase';
 
@@ -17,6 +18,7 @@ async function loginWithPrices(page: Page, tag: string) {
   await seedMiloPrices(userId);
   await page.getByLabel('Kode 6 angka').fill(otp);
   await page.getByRole('button', { name: 'Masuk' }).click();
+  await skipOnboarding(page);
   await expect(page.getByRole('heading', { name: 'Cari harga' })).toBeVisible();
 }
 

@@ -507,6 +507,21 @@ export type MovePriceRecordsResult = z.infer<typeof MovePriceRecordsResultSchema
 export const MergeProductResultSchema = z.null();
 
 // ---------------------------------------------------------------------------
+// Keluaran W14 · W15 · W16 (S-00c, S-19b, S-19c; docs/05 §3.3, §4.6)
+// ---------------------------------------------------------------------------
+/** W14 set_share_prices_public: `withdrawn_count` = record yang ditarik saat dimatikan (0 saat dinyalakan). */
+export const SetSharePricesPublicResultSchema = z.looseObject({ enabled: z.boolean(), withdrawn_count: Num });
+export type SetSharePricesPublicResult = z.infer<typeof SetSharePricesPublicResultSchema>;
+
+/** W15 share_existing_prices: job antre (dedup) + jumlah record privat aktif saat ini. */
+export const ShareExistingPricesResultSchema = z.looseObject({ job_id: Num, eligible_count: Num });
+export type ShareExistingPricesResult = z.infer<typeof ShareExistingPricesResultSchema>;
+
+/** W16 set_program_membership. */
+export const SetProgramMembershipResultSchema = z.looseObject({ program_id: Uuid, is_member: z.boolean() });
+export type SetProgramMembershipResult = z.infer<typeof SetProgramMembershipResultSchema>;
+
+// ---------------------------------------------------------------------------
 // Input RPC tulis (§3.2, §4)
 // ---------------------------------------------------------------------------
 export const SubmitCaptureInput = z.object({

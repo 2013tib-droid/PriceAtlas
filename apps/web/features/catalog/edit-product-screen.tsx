@@ -4,7 +4,8 @@
 // → baris terbaru dimuat, perubahan yang masih berlaku ditampilkan lagi). Form react-hook-form + zod dari
 // kontrak (lib/catalog/product-edit.ts). Mengubah ukuran → teks "dihitung ulang" (job
 // recompute_unit_price). Brand/group: pilih yang ada (REST baca, D-87); yang baru hanya lewat W8.
-// Barcode/PLU: hanya saat membuat produk (F-69/Q-85). Hapus produk = arsip (REST PATCH status).
+// Barcode/PLU: REST barcode_assignment select + insert (D-89, BarcodeSection). Hapus produk = arsip
+// (REST PATCH status).
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -35,6 +36,7 @@ import { useCategories, useNamedSearch } from '@/lib/data/confirm';
 import type { ProductRow } from '@/lib/data/rest-schemas';
 import { flashToast } from '@/lib/flash';
 import { ArchiveDialog } from './archive-dialog';
+import { BarcodeSection } from './barcode-section';
 
 const E = CATALOG_COPY.edit;
 
@@ -307,7 +309,6 @@ function EditForm({ row }: { row: ProductRow }) {
             </p>
           ) : null}
         </div>
-        <p className="text-sm text-muted-foreground">{E.barcodes}</p>
         {serverError ? (
           <p role="alert" className="rounded-lg border border-danger p-3 text-sm" data-testid="edit-error">
             {serverError}
@@ -317,6 +318,7 @@ function EditForm({ row }: { row: ProductRow }) {
           {patch.isPending ? E.saving : dirty ? E.save : E.noChanges}
         </Button>
       </form>
+      <BarcodeSection productId={base.id} saleMode={base.sale_mode} />
       <Button variant="secondary" className="self-start text-danger" onClick={() => setArchiveOpen(true)}>
         {E.archive}
       </Button>

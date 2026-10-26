@@ -213,8 +213,13 @@ export function defaultRpc(fn: string, a: Record<string, unknown>): Res {
       return a.p_from === ID.milo200 ? errOf('merge_forbidden') : ok(null);
     case 'move_price_records':
       return ok({ moved_count: (a.p_record_ids as string[]).length, target_product_id: a.p_target_product_id });
+    // M6 (S-19b/S-19c): keluaran W14/W15 asli user Citra.
+    case 'set_share_prices_public':
+      return ok(fx(a.p_enabled ? 'share_on' : 'share_off'));
+    case 'share_existing_prices':
+      return ok(fx('share_existing'));
     default:
-      throw new Error(`RPC ${fn} tidak diharapkan di M1–M5`);
+      throw new Error(`RPC ${fn} tidak diharapkan di M1–M6`);
   }
 }
 
@@ -275,6 +280,11 @@ export const state = {
     /** M5: baca baris produk (S-15 edit) / PATCH dengan filter updated_at. */
     product: ((c: RestCall) =>
       ok(fx(c.calls.some(([m]) => m === 'update') ? 'patch_product_ok' : 'rest_product'))) as RestHandler,
+    /** M6: PATCH profile.display_name (S-19). */
+    profile: (() => ok(fx('patch_profile_ok'))) as RestHandler,
+    /** M6: barcode produk privat (S-15 edit, D-89): select = daftar PLU, insert = sukses. */
+    barcode_assignment: ((c: RestCall) =>
+      c.calls.some(([m]) => m === 'insert') ? ok(null) : ok(fx('barcodes_plu'))) as RestHandler,
   },
   /** Semua panggilan REST (tabel + rantai method) untuk diperiksa test. */
   restCalls: [] as RestCall[],
@@ -296,7 +306,15 @@ export const sb = {
   auth: {
     getSession: vi.fn(async () => ({ data: { session: { user: { id: ID.user, email: 'ani@example.com' } } } })),
     onAuthStateChange: vi.fn(() => ({ data: { subscription: { unsubscribe: vi.fn() } } })),
-    signOut: vi.fn(),
+    signOut: vi.fn<(opts?: unknown) => Promise<{ error: unknown }>>(async () => ({ error: null })),
+    signInWithOtp: vi.fn<(a?: unknown) => Promise<{ data: unknown; error: unknown }>>(async () => ({
+      data: {},
+      error: null,
+    })),
+    verifyOtp: vi.fn<(a?: unknown) => Promise<{ data: unknown; error: unknown }>>(async () => ({
+      data: {},
+      error: null,
+    })),
   },
   rpc: vi.fn(async (fn: string, a: Record<string, unknown> = {}) => {
     const o = await state.rpcOverride?.(fn, a);
@@ -312,7 +330,7 @@ export const sb = {
     const call: RestCall = { table, calls: [] };
     state.restCalls.push(call);
     const chain: Record<string, unknown> = {};
-    for (const m of ['select', 'eq', 'order', 'limit', 'in', 'neq', 'ilike', 'is', 'update'])
+    for (const m of ['select', 'eq', 'order', 'limit', 'in', 'neq', 'ilike', 'is', 'update', 'insert'])
       chain[m] = (...args: unknown[]) => {
         call.calls.push([m, args]);
         return chain;
@@ -349,6 +367,11 @@ export async function resetHarness() {
   state.rest.brand = () => ok([]);
   state.rest.product_group = () => ok([]);
   state.rest.product = (c) => ok(fx(c.calls.some(([m]) => m === 'update') ? 'patch_product_ok' : 'rest_product'));
+  state.rest.profile = () => ok(fx('patch_profile_ok'));
+  state.rest.barcode_assignment = (c) => (c.calls.some(([m]) => m === 'insert') ? ok(null) : ok(fx('barcodes_plu')));
+  sb.auth.signOut.mockImplementation(async () => ({ error: null }));
+  sb.auth.signInWithOtp.mockImplementation(async () => ({ data: {}, error: null }));
+  sb.auth.verifyOtp.mockImplementation(async () => ({ data: {}, error: null }));
   state.restCalls = [];
   try {
     sessionStorage.clear();
@@ -366,7 +389,8 @@ export async function resetHarness() {
   setUrl('/');
   Object.defineProperty(navigator, 'onLine', { configurable: true, value: true });
   // Prefs per user: mulai bersih setiap test.
-  const { deleteUserData } = await import('@/lib/offline/db');
+  const { deleteUserData, unlockUserDb } = await import('@/lib/offline/db');
+  unlockUserDb(ID.user);
   await deleteUserData(ID.user);
 }
 

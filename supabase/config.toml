@@ -48,9 +48,10 @@ jwt_expiry = 3600
 enable_refresh_token_rotation = true
 enable_signup = true
 
-# Lokal/CI saja: default CLI 2 email/jam terlalu kecil untuk test L4 + e2e.
+# Lokal/CI saja: default CLI 2 email/jam terlalu kecil untuk test L4 + e2e. M6: login ulang
+# hapus akun (alur 7) dan onboarding (alur 8) menambah email OTP per profil browser (F-86).
 [auth.rate_limit]
-email_sent = 30
+email_sent = 100
 
 # D-60, D-83: login email OTP (kode 6 digit saja, tanpa magic link) + Google.
 [auth.email]
@@ -59,6 +60,8 @@ enable_confirmations = false
 double_confirm_changes = true
 otp_length = 6
 otp_expiry = 600
+# Lokal/CI saja: e2e alur 7 meminta kode kedua (login ulang hapus akun) untuk email yang sama.
+max_frequency = "1s"
 
 # F-20, D-83: template Indonesia yang hanya berisi kode {{ .Token }}. Login OTP user lama
 # memakai magic_link; signup lewat OTP (user baru) memakai confirmation.

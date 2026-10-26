@@ -28,11 +28,14 @@ import {
   RecentLocationSchema,
   SearchResultSchema,
   SessionTimesSchema,
+  SetProgramMembershipResultSchema,
+  SetSharePricesPublicResultSchema,
+  ShareExistingPricesResultSchema,
   StoreRefSchema,
   WhereCheaperRowSchema,
 } from '@priceatlas/contracts';
 import { z } from 'zod';
-import { ProductRowSchema, RecentPriceSchema } from '@/lib/data/rest-schemas';
+import { BarcodeRowSchema, ProductRowSchema, ProfileRowSchema, RecentPriceSchema } from '@/lib/data/rest-schemas';
 
 const RpcErrorFixture = z.object({
   error: z.object({
@@ -226,4 +229,29 @@ export const FIXTURE_SCHEMAS: Record<string, z.ZodType> = {
   rest_product_big: z.array(ProductRowSchema).length(1),
   patch_product_group: z.array(ProductRowSchema).length(1),
   patch_product_archive: z.array(ProductRowSchema).refine((v) => v[0]?.status === 'archived'),
+  // M6: W14 / W15 / W16 / R21 / REST profile + barcode_assignment (Citra).
+  member_on: SetProgramMembershipResultSchema.refine((v) => v.is_member),
+  member_on_repeat: SetProgramMembershipResultSchema.refine((v) => v.is_member),
+  programs_member: z.array(MyProgramSchema).refine((v) => v.some((p) => p.is_member && p.status === 'active')),
+  member_off: SetProgramMembershipResultSchema.refine((v) => !v.is_member),
+  member_discontinued: RpcErrorFixture,
+  member_unknown: RpcErrorFixture,
+  member_alfagift: SetProgramMembershipResultSchema.refine((v) => v.is_member),
+  context_member: MyContextSchema.refine((v) => v.program_ids.length === 1),
+  share_existing_off: RpcErrorFixture,
+  share_on: SetSharePricesPublicResultSchema.refine((v) => v.enabled && v.withdrawn_count === 0),
+  context_shared: MyContextSchema.refine((v) => v.household.share_prices_public),
+  share_existing: ShareExistingPricesResultSchema.refine((v) => v.eligible_count > 0),
+  share_existing_repeat: ShareExistingPricesResultSchema,
+  share_off: SetSharePricesPublicResultSchema.refine((v) => !v.enabled && v.withdrawn_count > 0),
+  share_off_repeat: SetSharePricesPublicResultSchema.refine((v) => v.withdrawn_count === 0),
+  patch_profile_ok: z.array(ProfileRowSchema).refine((v) => v[0]?.display_name === 'Citra Lestari'),
+  patch_profile_other: z.array(ProfileRowSchema).length(0),
+  barcodes_plu: z.array(BarcodeRowSchema).refine((v) => v.some((b) => b.code_type === 'plu' && b.store_id)),
+  barcode_insert_ok: z.array(BarcodeRowSchema).length(1),
+  barcode_insert_repeat: RpcErrorFixture,
+  barcode_insert_23P01: RpcErrorFixture,
+  barcode_insert_23514: RpcErrorFixture,
+  barcode_insert_global: RpcErrorFixture,
+  barcodes_big: z.array(BarcodeRowSchema).refine((v) => v.some((b) => b.code === '8991234500017')),
 };

@@ -34,3 +34,28 @@ export const ProductRowSchema = z.object({
   updated_at: z.string(),
 });
 export type ProductRow = z.infer<typeof ProductRowSchema>;
+
+/** Baris `barcode_assignment` (S-15 edit, REST select + insert produk privat sendiri, D-89). */
+export const BARCODE_ROW_COLUMNS = 'id,product_id,code,code_type,store_id,valid_from,valid_until';
+export const BarcodeRowSchema = z.object({
+  id: z.string(),
+  product_id: z.string(),
+  code: z.string(),
+  code_type: z.enum(['gtin', 'plu']),
+  store_id: z.string().nullable(),
+  valid_from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  valid_until: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .nullable(),
+});
+export type BarcodeRow = z.infer<typeof BarcodeRowSchema>;
+
+/** Baris `profile` (S-19: REST select/PATCH `display_name`, docs/05 §3.3). */
+export const PROFILE_ROW_COLUMNS = 'user_id,display_name,updated_at';
+export const ProfileRowSchema = z.object({
+  user_id: z.string(),
+  display_name: z.string().nullable(),
+  updated_at: z.string(),
+});
+export type ProfileRow = z.infer<typeof ProfileRowSchema>;

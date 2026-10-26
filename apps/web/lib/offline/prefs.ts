@@ -8,6 +8,8 @@ export const PREF_KEYS = {
   chartNormalOnly: 'chart_normal_only',
   /** Sesi belanja aktif terakhir (D-43: teks "berakhir otomatis" di S-13). */
   lastSession: 'last_session',
+  /** S-00b/S-00c sudah dilihat di perangkat ini (wireframe S-00b 💾). */
+  onboarded: 'onboarded',
 } as const;
 export type PrefKey = (typeof PREF_KEYS)[keyof typeof PREF_KEYS];
 

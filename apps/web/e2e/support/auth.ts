@@ -13,6 +13,15 @@ export async function login(page: Page, tag: string, base = ''): Promise<{ email
   const { otp, userId } = await generateEmailOtpForUser(email);
   await page.getByLabel('Kode 6 angka').fill(otp);
   await page.getByRole('button', { name: 'Masuk' }).click();
+  await skipOnboarding(page);
   await expect(page.getByRole('heading', { name: 'Cari harga' })).toBeVisible();
   return { email, userId };
 }
+
+/** User baru selalu melihat S-00b sekali per perangkat (M6); alur selain 8 langsung "Lewati". */
+export async function skipOnboarding(page: Page): Promise<void> {
+  await expect(page.getByRole('heading', { name: WELCOME_HEADING })).toBeVisible();
+  await page.getByRole('button', { name: 'Lewati' }).click();
+}
+
+export const WELCOME_HEADING = 'Murah atau mahal? Cek dulu sebelum beli.';

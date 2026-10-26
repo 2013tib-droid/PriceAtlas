@@ -324,7 +324,6 @@ describe('S-15 edit + arsip', () => {
     expect(name.value).toBe('Sirup Gula Aren');
     expect((screen.getByLabelText('Ukuran per isi') as HTMLInputElement).value).toBe('500');
     expect((screen.getByTestId('edit-save') as HTMLButtonElement).disabled).toBe(true);
-    expect(screen.getByText(/Barcode dan PLU ditambahkan saat membuat produk/)).toBeTruthy();
   });
 
   it('ubah ukuran → teks hitung ulang → PATCH dengan filter updated_at → detail produk', async () => {

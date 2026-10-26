@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { myContextQuery } from '@/lib/auth/context';
 import { authErrorMessage, RESEND_COOLDOWN_SECONDS } from '@/lib/auth/otp-errors';
 import { safeNext } from '@/lib/auth/redirect';
+import { welcomeHref } from '@/lib/settings/onboarding';
 import { useAuth } from '@/lib/auth/session';
 import { AUTH_COPY, fill } from '@/lib/copy/id';
 import { errorCopy } from '@/lib/data/errors';
@@ -94,7 +95,8 @@ export function SignInScreen() {
       setBusy(null);
       return setError(errorCopy(e, 'S-00a').message);
     }
-    router.replace(next);
+    // Pertama kali di perangkat ini → S-00b; selain itu S-00b langsung meneruskan ke tujuan (§3.5).
+    router.replace(welcomeHref(next));
   }
 
   async function google() {
@@ -102,7 +104,7 @@ export function SignInScreen() {
     setBusy('google');
     const { error: err } = await getSupabaseBrowserClient().auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(welcomeHref(next))}` },
     });
     if (err) {
       setBusy(null);

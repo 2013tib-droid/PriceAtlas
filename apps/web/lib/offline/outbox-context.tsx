@@ -6,7 +6,7 @@ import type { MyContext } from '@priceatlas/contracts';
 import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { myContextQuery } from '@/lib/auth/context';
-import { useAuth } from '@/lib/auth/session';
+import { onLocalStop, useAuth } from '@/lib/auth/session';
 import { qk } from '@/lib/data/query-keys';
 import { createOutbox, type Outbox } from './outbox';
 import { findDuplicates, refreshSession, submitCapture, uploadToStorage } from './outbox-deps';
@@ -73,8 +73,11 @@ export function OutboxProvider({
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setOutbox(o);
     const off = o.subscribe(() => void qc.invalidateQueries({ queryKey: outboxQueryKey(userId) }));
+    // Keluar/hapus akun: antrean berhenti sebelum IndexedDB dihapus (Q-61).
+    const offStop = onLocalStop(() => o.stop());
     void o.kick('open');
     return () => {
+      offStop();
       off();
       o.stop();
       setOutbox(null);
