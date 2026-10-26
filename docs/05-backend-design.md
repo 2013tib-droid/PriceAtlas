@@ -478,7 +478,7 @@ PricePoint = { record_id, effective_price, unit_price, price_basis, member_progr
 | W18 | `update_capture_item(p_item_id, p_patch jsonb, p_expected_updated_at)` | 4.2 |
 | Route | `POST /api/account/delete` | 7.6 |
 
-**REST langsung** (bagian dari kontrak): `profile` (select/update `display_name`), `receipt` (PATCH kolom header saja, dengan filter `updated_at`), `product` (PATCH produk privat sendiri), `member_program` (select), `store` dan `branch` (select dan search), `audit_log` (select), `household_program_membership` (select), `category`, `brand`, `product_group` (select saja, S-15; D-87). Semua tulisan lain lewat RPC.
+**REST langsung** (bagian dari kontrak): `profile` (select/update `display_name`), `receipt` (PATCH kolom header saja, dengan filter `updated_at`), `product` (select: global + privat sendiri, dan PATCH produk privat sendiri; D-89), `member_program` (select), `store` dan `branch` (select dan search), `audit_log` (select), `household_program_membership` (select), `category`, `brand`, `product_group` (select saja, S-15; D-87), `barcode_assignment` (select + insert untuk produk privat sendiri, S-15 edit; D-89). Semua tulisan lain lewat RPC.
 
 ### 3.3 Kontrak per layar
 
