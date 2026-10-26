@@ -470,6 +470,17 @@ Karena tidak bisa dijalankan, setiap butir L4 diperiksa dari kode dan dokumentas
 
 **Hasil review M7 (2026-10-26):** pemilik proyek menyetujui semua usulan default Q-93 s/d Q-101 → **D-91**.
 
+**Tindak lanjut D-91 (sebelum Tahap 6):**
+
+| Q | Implementasi |
+|---|---|
+| Q-93 | `check:bundle`: dasar ukur = modul saja (polyfill `noModule` ditampilkan, tidak dihitung); peringatan jika > 350 KiB, target 200 KiB tetap. Ukuran sekarang: `/` 336 KiB modul + 38 KiB polyfill. |
+| Q-95 | `BestAllLine` (`components/product/main-price.tsx`) di S-02 dan S-03: record sama dengan termurah 90 hari → "Termurah sepanjang masa: sama dengan 90 hari terakhir"; berbeda → harga, label, toko lengkap. |
+| Q-96 | `useKeyboardInset` (`lib/hooks/use-keyboard-inset.ts`): SearchDock dan `StickyAction` menempel di atas keyboard virtual (`innerHeight − visualViewport.height − offsetTop`, > 80 px) hanya selama fokus ada di dalamnya; tanpa pustaka. Verifikasi di iPhone: butir no. 3 daftar cek di bawah. |
+| Q-100 | `/selamat-datang` dan `/selamat-datang/member` pindah ke grup `app/(onboarding)` (penjaga sesi + strip offline, tanpa `TabBar`/`SessionBanner`); URL dan `SHELL_ROUTES` tetap. |
+
+Test: `test/m7/followup.test.tsx` (6). Q-94, Q-97, Q-98, Q-99 tidak butuh perubahan kode; Q-101 (cek manual) oleh pemilik proyek.
+
 **Daftar cek manual pembaca layar (F-105).** Status semua butir: *belum dicek di perangkat*.
 
 | # | Langkah | Yang diharapkan |
@@ -864,8 +875,8 @@ File diunggah apa adanya jika **semua** benar: tipe JPEG/PNG/WebP, ukuran ≤ 1,
 |---|---|---|---|
 | `/masuk` | S-00a | `(auth)` | Pesan "butuh sinyal" |
 | `/auth/callback` | — (PKCE) | Route Handler | — |
-| `/selamat-datang` | S-00b | `(app)` | ya |
-| `/selamat-datang/member` | S-00c | `(app)` | tidak |
+| `/selamat-datang` | S-00b | `(onboarding)` tanpa tab bar (D-91) | ya |
+| `/selamat-datang/member` | S-00c | `(onboarding)` tanpa tab bar (D-91) | tidak |
 | `/` | S-01 Beranda / Cari | `(app)` tab Cari | ya (cache) |
 | `/cari?q=` | S-02 Hasil cari | `(app)` | ya (cache) |
 | `/produk?id=` (+ `?sheet=cek-harga`) | S-03, S-03b | `(app)` | sebagian (§5.6) |

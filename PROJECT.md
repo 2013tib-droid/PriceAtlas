@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | Nama sementara | Price Intelligence (repo: PriceAtlas) |
-| Status | Tahap 5b M7 selesai dan disetujui; Q-93 s/d Q-101 diputuskan (D-91); berikutnya tindak lanjut D-91 (Q-95, Q-96, Q-100) sebelum Tahap 6 |
+| Status | Tahap 5b M7 selesai dan disetujui; Q-93 s/d Q-101 diputuskan (D-91) dan tindak lanjutnya diterapkan (`docs/07` §1.11); menunggu cek manual pemilik proyek (VoiceOver/TalkBack, SearchDock di iPhone) sebelum Tahap 6 |
 | Terakhir diperbarui | 2026-10-26 |
 
 ---

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Pengaman bundle klien (docs/07 §11.4, §11.6). Dijalankan setelah `next build`.
 #   1. .next/static tidak memuat nama/nilai kunci service role (D-61). GAGAL jika ada.
-#   2. Anggaran JS halaman utama ≤ 200 kB gzip: hanya PERINGATAN.
+#   2. Anggaran JS halaman utama (gzip, modul saja; polyfill noModule ditampilkan terpisah, D-91):
+#      PERINGATAN jika > 350 KiB; 200 KiB tetap target. Tidak pernah gagal.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 [[ -d .next/static ]] || { echo "GAGAL: .next/static tidak ada; jalankan next build dulu"; exit 1; }
@@ -15,26 +16,27 @@ if [[ -n "${SUPABASE_SERVICE_ROLE_KEY:-}" ]] && grep -rIlF -- "$SUPABASE_SERVICE
 fi
 [[ $fail -eq 0 ]] && echo "ok  : bundle klien tanpa service role"
 
-budget=$((200 * 1024))
+limit=$((350 * 1024))
+target=$((200 * 1024))
 html=.next/server/app/index.html
 if [[ -f $html ]]; then
-  # Polyfill `noModule` hanya dimuat browser lama; dihitung di total (dasar anggaran D-84) dan
-  # ditampilkan terpisah (docs/07 §1.11, F-94).
+  # Polyfill `noModule` hanya dimuat browser lama: tidak dihitung, ditampilkan terpisah (D-91, F-94).
   nomodule=$(grep -oE '<script src="/_next/static/chunks/[^"]*\.js" noModule' "$html" | grep -oE '/_next/static/chunks/[^"]*\.js' | sort -u || true)
-  total=0
+  modules=0
   legacy=0
   for f in $(grep -o '/_next/static/chunks/[^"]*\.js' "$html" | sort -u); do
     size=$(gzip -c ".next/${f#/_next/}" | wc -c)
-    total=$((total + size))
-    if grep -qxF "$f" <<<"$nomodule"; then legacy=$((legacy + size)); fi
+    if grep -qxF "$f" <<<"$nomodule"; then legacy=$((legacy + size)); else modules=$((modules + size)); fi
   done
-  kib=$((total / 1024))
-  detail="modul $(((total - legacy) / 1024)) KiB + polyfill noModule $((legacy / 1024)) KiB"
-  if (( total > budget )); then
-    msg="JS halaman / = ${kib} KiB gzip (${detail}), melebihi anggaran 200 KiB (docs/07 §11.4, peringatan)"
+  kib=$((modules / 1024))
+  detail="polyfill noModule $((legacy / 1024)) KiB tidak dihitung"
+  if (( modules > limit )); then
+    msg="JS halaman / = ${kib} KiB gzip (modul; ${detail}), melebihi batas peringatan 350 KiB; target 200 KiB (D-91)"
     [[ -n "${GITHUB_ACTIONS:-}" ]] && echo "::warning::$msg" || echo "PERINGATAN: $msg"
+  elif (( modules > target )); then
+    echo "ok  : JS halaman / = ${kib} KiB gzip (modul; ${detail}), di bawah batas 350 KiB; target 200 KiB belum tercapai (D-91)"
   else
-    echo "ok  : JS halaman / = ${kib} KiB gzip (${detail}; anggaran 200 KiB)"
+    echo "ok  : JS halaman / = ${kib} KiB gzip (modul; ${detail}; target 200 KiB)"
   fi
 fi
 exit $fail

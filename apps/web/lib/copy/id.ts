@@ -230,6 +230,8 @@ export const PRICE_COPY = {
   dataCount: '{n} data · terakhir {date}',
   best90: 'Termurah 90 hari',
   bestAll: 'Termurah sepanjang masa',
+  /** best_all = record yang sama dengan best_90d (D-91, Q-95). */
+  bestAllSame: 'sama dengan 90 hari terakhir',
   no90: 'Belum ada harga 90 hari terakhir',
   lastRecorded: 'terakhir dicatat {age}',
   online: 'belum termasuk ongkir',

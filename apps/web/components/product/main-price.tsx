@@ -1,6 +1,7 @@
 'use client';
 import type { ProductCard } from '@priceatlas/contracts';
-import { BasisLabel, PriceText, UnitPrice } from '@/components/price/price';
+import { BasisLabel, PriceText, StoreLine, UnitPrice } from '@/components/price/price';
+import { PRICE_COPY } from '@/lib/copy/id';
 import { formatUnitPrice } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
@@ -43,5 +44,34 @@ export function ShortPrice({
     <UnitPrice product={product} value={point.unit_price} />
   ) : (
     <PriceText value={point.effective_price} />
+  );
+}
+
+/**
+ * Baris "Termurah sepanjang masa" (D-02, pembanding kecil) di S-02 dan S-03. Jika record-nya sama
+ * dengan termurah 90 hari, angka yang sama tidak diulang: "sama dengan 90 hari terakhir" (D-91, Q-95).
+ */
+export function BestAllLine({
+  product,
+  summary,
+}: {
+  product: Lite;
+  summary: Pick<NonNullable<ProductCard['summary']>, 'best_90d' | 'best_all'>;
+}) {
+  const all = summary.best_all;
+  const same = summary.best_90d?.record_id === all.record_id;
+  return (
+    <p className="flex flex-wrap items-baseline gap-x-1.5 text-sm text-muted-foreground" data-testid="best-all">
+      <span>{PRICE_COPY.bestAll}:</span>
+      {same ? (
+        <span>{PRICE_COPY.bestAllSame}</span>
+      ) : (
+        <>
+          <ShortPrice product={product} point={all} />
+          <BasisLabel basis={all.price_basis} program={all.member_program_name} />
+          <StoreLine store={all.store} branch={all.branch} date={all.date} />
+        </>
+      )}
+    </p>
   );
 }

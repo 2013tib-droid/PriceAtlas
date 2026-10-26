@@ -14,7 +14,7 @@ import { ErrorState, LoadingState, OfflineState, QueryState } from '@/components
 import { StickyAction } from '@/components/app/sticky-action';
 import { BasisLabel, DataCount, PriceText, PrivateBadge, StoreLine, TrendText } from '@/components/price/price';
 import { HistoryRow, recordHref } from '@/components/product/history-row';
-import { MainPrice, ShortPrice } from '@/components/product/main-price';
+import { BestAllLine, MainPrice, ShortPrice } from '@/components/product/main-price';
 import { ProductCard as ProductCardView, productHref } from '@/components/product/product-card';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from '@/components/ui/drawer';
@@ -97,14 +97,7 @@ function SummaryBlock({ detail, updating }: { detail: ProductDetail; updating: b
         <StoreLine store={main.store} branch={main.branch} date={main.date} />
         {s.best_90d ? null : ` · ${fill(PRICE_COPY.lastRecorded, { age: formatAge(s.last_transaction_date, tz) })}`}
       </p>
-      {s.best_90d ? (
-        <p className="flex flex-wrap items-baseline gap-x-1.5 text-sm text-muted-foreground">
-          <span>{PRICE_COPY.bestAll}:</span>
-          <ShortPrice product={p} point={s.best_all} />
-          <BasisLabel basis={s.best_all.price_basis} program={s.best_all.member_program_name} />
-          <StoreLine store={s.best_all.store} branch={s.best_all.branch} date={s.best_all.date} />
-        </p>
-      ) : null}
+      {s.best_90d ? <BestAllLine product={p} summary={s} /> : null}
       {detail.last_record ? (
         <p className="flex flex-wrap items-baseline gap-x-1.5 text-sm">
           <span>{PRODUCT_COPY.lastPrice}:</span>
