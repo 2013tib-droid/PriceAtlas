@@ -1,5 +1,6 @@
 // M0 kriteria selesai: login OTP e2e terhadap Supabase lokal (docs/07 §11.2, §12).
 import { expect, test } from '@playwright/test';
+import { skipOnboarding } from './support/auth';
 import { codeFrom, generateEmailOtp, hasSupabase, latestEmail, uniqueEmail } from './support/supabase';
 
 test.skip(!hasSupabase(), 'butuh Supabase lokal (job CI supabase-e2e)');
@@ -19,6 +20,9 @@ test('login OTP: email → kode (generateLink) → R1 → beranda', async ({ pag
   await page.getByLabel('Kode 6 angka').fill(otp);
   await page.getByRole('button', { name: 'Masuk' }).click();
 
+  // Login pertama di perangkat ini → S-00b dengan tujuan semula (M6); Lewati → tujuan.
+  await expect(page).toHaveURL(/\/selamat-datang\?next=%2Funggahan$/);
+  await skipOnboarding(page);
   await expect(page).toHaveURL(/\/unggahan$/);
   await expect(page.getByRole('heading', { name: 'Unggahan' })).toBeVisible();
   await expect(page.getByRole('navigation', { name: 'Navigasi utama' })).toBeVisible();
@@ -62,6 +66,7 @@ test('email OTP berisi kode 6 digit berbahasa Indonesia, tanpa magic link (F-20,
   await expect(page.getByText('Kode salah. Periksa 6 angka di emailmu.')).toBeVisible();
   await page.getByLabel('Kode 6 angka').fill(otp);
   await page.getByRole('button', { name: 'Masuk' }).click();
+  await skipOnboarding(page);
   await expect(page).toHaveURL(/\/$/);
   await page.getByRole('link', { name: 'Saya' }).click();
   await expect(page.getByTestId('signed-in-as')).toContainText(email);

@@ -361,7 +361,10 @@ e2e memakai `next start` (Playwright menyalakannya), env `NEXT_PUBLIC_SUPABASE_*
 | `app/(app)/harga`, `features/record` | M5: S-16 detail & koreksi harga (`/harga?id=`): R20, W6, editor baris struk W7 (`features/receipt/line-edit-dialog.tsx`) |
 | `app/(app)/produk/{gabung,pisah,edit}`, `features/catalog` | M5: S-17 gabungkan (`/produk/gabung?id=&ke=`), S-18 pisahkan (`/produk/pisah?id=`), S-15 edit + hapus produk (`/produk/edit?id=`) |
 | `lib/data/catalog.ts`, `lib/catalog/*` | M5: hook R19/R20/W6/W9/W10 + REST `product` (baca + PATCH filter `updated_at`); logika patch S-16, error §8.2, pratinjau merge, split T1/T2, form edit, riwayat audit |
-| `lib/offline/prefs.ts`, `lib/hooks/use-pref.ts` | 💾 di IndexedDB `prefs`: pencarian terakhir (8), baru dicek (150, untuk R5), toggle "Hanya harga normal", sesi belanja aktif terakhir (`last_session`, teks "berakhir otomatis" S-13) |
+| `app/(app)/selamat-datang`, `features/onboarding` | M6: S-00b `/selamat-datang?next=` (semua login lewat sini; diteruskan jika sudah onboarded), S-00c `/selamat-datang/member` |
+| `app/(app)/saya/*`, `features/me` | M6: S-19 `/saya` (nama, ringkasan, Keluar), S-19b `/saya/member`, S-19c `/saya/berbagi`, Privasi & hapus akun `/saya/privasi` |
+| `lib/data/settings.ts`, `lib/settings/*`, `lib/catalog/barcodes.ts` | M6: hook W14/W15/W16, REST PATCH `profile`, REST `barcode_assignment` (select + insert, D-89), `POST /api/account/delete`; logika program member, Keluar/hapus akun, onboarding, barcode S-15 edit |
+| `lib/offline/prefs.ts`, `lib/hooks/use-pref.ts` | 💾 di IndexedDB `prefs`: pencarian terakhir (8), baru dicek (150, untuk R5), toggle "Hanya harga normal", sesi belanja aktif terakhir (`last_session`, teks "berakhir otomatis" S-13), status onboarding (`onboarded`, M6) |
 
 ### 4.4 Fixture dan data e2e (M1)
 
@@ -444,3 +447,22 @@ Lalu buka `/produk?id=70000000-0000-0000-0000-000000000200` → baris histori �
 **Fixture R19/R20/W6/W7/W9/W10 + REST product.** `apps/web/test/fixtures/scenario.ts` (`collectCatalog`, user Citra, dijalankan paling akhir): R20 untuk record label/struk/screenshot, W6/W7 sukses dan setiap error §8.2, gambar dihapus, W8 dengan PLU, W9/W10/R19 (sukses, ulang, `RECORDS_NOT_OWNED`, `42501`, `P0001`, beda ukuran/dimensi, ke katalog), REST `product` (baca, PATCH sukses / 0 baris / `23514` / `23503`, pindah group, arsip). Ditambahkan dengan `UPDATE_FIXTURES=new` (§4.4).
 
 **e2e.** `e2e/correction.spec.ts` (alur 6a/6b/6c) di job `supabase-e2e` (Chromium + WebKit). `STALE_WRITE` "dua tab" = dua page dalam context Playwright yang sama (sesi login sama); RPC tidak diubah. Data tambahan lewat helper test (`e2e/support/seed.ts`, `e2e/support/catalog.ts`, service role di proses test saja).
+
+### 4.9 Pengaturan & onboarding dari UI (M6)
+
+**Alur** (`docs/07` §1.10): login pertama di perangkat → `/selamat-datang` (S-00b) → "Mulai" → `/selamat-datang/member` (S-00c, pilih program → "Simpan & lanjut") → beranda. "Lewati" di salah satu layar menyimpan status 💾 `prefs.onboarded`; login berikutnya di perangkat yang sama langsung ke tujuan. Keluar menghapus IndexedDB, jadi S-00b tampil lagi setelah login ulang (F-80).
+
+Tab Saya (`/saya`): ubah nama tampilan, Program member (`/saya/member`, toggle = W16), Berbagi harga publik (`/saya/berbagi`: nyalakan = W14, "Bagikan juga data lama" = W15, matikan dengan konfirmasi), Privasi & data (`/saya/privasi`), Keluar (dengan peringatan jika antrean foto belum kosong). Edit produk privat (`/produk/edit`) punya bagian "Barcode dan PLU" (tambah saja).
+
+**Mencoba (mode B):** jalankan Supabase + worker stub + web seperti §4.5, lalu:
+
+- **Member → harga dihitung ulang:** mulai sesi belanja di AEON BSD, foto/galeri label `label-milo` (kamera label), buka item "perlu dicek" (S-11): MILO 3IN1 menampilkan Rp23.000 + "Harga member tidak dihitung…". Tandai AEON Member di `/saya/member`, kembali ke S-11 → Rp21.000.
+- **"Bagikan juga data lama":** W15 hanya mengantre job; batch dijalankan pg_cron (`app.run_sql_jobs`). Status job: `select status, payload from app.job where kind = 'share_existing_prices' order by id desc limit 5;`.
+- **Hapus akun:** di `/saya/privasi` tekan "Kirim kode", ambil kode di Mailpit (http://127.0.0.1:54324), ketik `HAPUS AKUN`, tekan tombol dua kali. Route butuh `SUPABASE_SERVICE_ROLE_KEY` di env server Next (§3.4). Setelah 202: user Auth hilang, `household.archived_at` terisi, job `delete_household` menghapus data (worker).
+- **Mengulang onboarding di browser yang sama:** DevTools → Application → IndexedDB → `priceatlas:<user_id>` → `prefs` → hapus kunci `onboarded` (atau Keluar lalu masuk lagi).
+
+**Batas email Auth lokal.** `supabase/config.toml` (lokal/CI saja): `email_sent = 100` per jam dan `max_frequency = "1s"` supaya e2e bisa meminta kode kedua untuk email yang sama (F-86). Ubah `config.toml` → jalankan ulang `supabase stop && supabase start`.
+
+**Fixture W14/W15/W16 + REST profile/barcode.** `apps/web/test/fixtures/scenario.ts` (`collectSettings`, user Citra, dijalankan paling akhir, `UPDATE_FIXTURES=new`, §4.4).
+
+**e2e.** `e2e/settings.spec.ts` (alur 7, 8) di job `supabase-e2e` (Chromium + WebKit). Helper `login()` (`e2e/support/auth.ts`) kini menekan "Lewati" di S-00b untuk alur lain.

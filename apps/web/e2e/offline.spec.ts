@@ -2,6 +2,7 @@
 // di Chromium. "Offline" = setOffline (navigator.onLine, strip offline) + proxy diputus
 // (jaringan benar-benar gagal untuk service worker, lihat support/cut-proxy.ts).
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
+import { skipOnboarding } from './support/auth';
 import { startCutProxy, type CutProxy } from './support/cut-proxy';
 import { generateEmailOtp, hasSupabase, uniqueEmail } from './support/supabase';
 
@@ -72,6 +73,7 @@ test('setelah login: shell (app) terbuka offline dengan strip offline', async ({
   await expect(page.getByRole('heading', { name: 'Masukkan kode' })).toBeVisible();
   await page.getByLabel('Kode 6 angka').fill(await generateEmailOtp(email));
   await page.getByRole('button', { name: 'Masuk' }).click();
+  await skipOnboarding(page);
   await expect(page.getByRole('heading', { name: 'Cari harga' })).toBeVisible();
   await page.getByRole('link', { name: 'Saya' }).click();
   await expect(page.getByTestId('signed-in-as')).toContainText(email);

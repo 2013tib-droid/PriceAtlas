@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | Nama sementara | Price Intelligence (repo: PriceAtlas) |
-| Status | Tahap 5b M5 selesai dan disetujui; Q-85 s/d Q-88 diputuskan (D-89); berikutnya M6 (Pengaturan & onboarding) |
+| Status | Tahap 5b M6 selesai, menunggu review (pertanyaan Q-89 s/d Q-92, `docs/07-frontend-design.md` §13.10) |
 | Terakhir diperbarui | 2026-10-26 |
 
 ---
@@ -332,7 +332,7 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 | 2 | Database Design | ✅ Selesai ([domain model](docs/02-domain-model.md), [desain fisik](docs/03-database-design.md), [skema](db/schema.sql)) |
 | 3 | Wireframe | ✅ Selesai ([spesifikasi](docs/04-wireframe.md), [prototipe](docs/wireframes/index.html)) |
 | 4 | Backend | ✅ Selesai ([desain backend](docs/05-backend-design.md), [menjalankan lokal](docs/06-local-dev.md)) |
-| 5 | Frontend | 🔄 5a disetujui ([desain frontend](docs/07-frontend-design.md)); 5b M0 selesai dan disetujui (D-84); M1 selesai, Q-68–Q-71 → D-85 ([hasil M1](docs/07-frontend-design.md#15-tahap-5b-m1-hasil-dan-temuan-baru-f-31-dst)); M2 selesai dan disetujui, Q-72–Q-75 → D-86 ([hasil M2](docs/07-frontend-design.md#16-tahap-5b-m2-hasil-dan-temuan-baru-f-40-dst)); M3 selesai dan disetujui, Q-76–Q-79 → D-87 ([hasil M3](docs/07-frontend-design.md#17-tahap-5b-m3-hasil-dan-temuan-baru-f-49-dst)); M4 selesai dan disetujui, Q-80–Q-84 → D-88 ([hasil M4](docs/07-frontend-design.md#18-tahap-5b-m4-hasil-dan-temuan-baru-f-60-dst)); M5 selesai dan disetujui, Q-85–Q-88 → D-89 ([hasil M5](docs/07-frontend-design.md#19-tahap-5b-m5-hasil-dan-temuan-baru-f-68-dst)); M6–M7 berikutnya |
+| 5 | Frontend | 🔄 5a disetujui ([desain frontend](docs/07-frontend-design.md)); 5b M0 selesai dan disetujui (D-84); M1 selesai, Q-68–Q-71 → D-85 ([hasil M1](docs/07-frontend-design.md#15-tahap-5b-m1-hasil-dan-temuan-baru-f-31-dst)); M2 selesai dan disetujui, Q-72–Q-75 → D-86 ([hasil M2](docs/07-frontend-design.md#16-tahap-5b-m2-hasil-dan-temuan-baru-f-40-dst)); M3 selesai dan disetujui, Q-76–Q-79 → D-87 ([hasil M3](docs/07-frontend-design.md#17-tahap-5b-m3-hasil-dan-temuan-baru-f-49-dst)); M4 selesai dan disetujui, Q-80–Q-84 → D-88 ([hasil M4](docs/07-frontend-design.md#18-tahap-5b-m4-hasil-dan-temuan-baru-f-60-dst)); M5 selesai dan disetujui, Q-85–Q-88 → D-89 ([hasil M5](docs/07-frontend-design.md#19-tahap-5b-m5-hasil-dan-temuan-baru-f-68-dst)); M6 selesai, menunggu review, Q-89–Q-92 ([hasil M6](docs/07-frontend-design.md#110-tahap-5b-m6-hasil-dan-temuan-baru-f-80-dst)); M7 berikutnya |
 | 6 | AI Integration (termasuk uji OCR, D-16) | — |
 | 7 | Production | — |
 

@@ -95,7 +95,8 @@ describe('S-00a Masuk', () => {
 
     expect(sb.auth.verifyOtp).toHaveBeenCalledWith({ email: 'ani@example.com', token: '123456', type: 'email' });
     await waitFor(() => expect(sb.rpc).toHaveBeenCalledWith('get_my_context', {}));
-    await waitFor(() => expect(nav.replace).toHaveBeenCalledWith('/unggahan'));
+    // Semua login lewat S-00b (yang meneruskan ke ?next jika sudah onboarded, M6).
+    await waitFor(() => expect(nav.replace).toHaveBeenCalledWith('/selamat-datang?next=%2Funggahan'));
   });
 
   it('email tidak valid tidak dikirim', async () => {
@@ -150,7 +151,7 @@ describe('S-00a Masuk', () => {
     await user.click(screen.getByRole('button', { name: AUTH_COPY.google }));
     expect(sb.auth.signInWithOAuth).toHaveBeenCalledWith({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=%2Fsaya` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=%2Fselamat-datang%3Fnext%3D%252Fsaya` },
     });
   });
 

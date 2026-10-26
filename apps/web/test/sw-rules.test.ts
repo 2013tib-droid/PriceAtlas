@@ -40,6 +40,7 @@ describe('service worker', () => {
       '/kamera',
       '/belanja',
       '/saya',
+      '/selamat-datang',
       '/masuk',
       '/offline',
     ]);

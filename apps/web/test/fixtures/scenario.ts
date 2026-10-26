@@ -445,6 +445,7 @@ async function collectAll(pool: pg.Pool, w: Worker): Promise<Fixtures> {
 
   await collectSessions(pool, w, ani, data);
   await collectCatalog(pool, citra, data);
+  await collectSettings(pool, citra, ani, data);
 
   const today = (
     await pool.query<{ d: string }>(`select app.household_today($1)::text as d`, [await householdOf(pool, USERS.a)])
@@ -759,4 +760,85 @@ async function collectCatalog(pool: pg.Pool, citra: PgRpcClient, data: Record<st
   const [bigRow] = await rest('rest_product_big', select, [C.big]);
   await rest('patch_product_group', patch(`product_group_id = '${IDS.groupMilo}'`), [C.big, bigRow!.updated_at]);
   await rest('patch_product_archive', patch(`status = 'archived'`), [C.syrup, patched!.updated_at]);
+}
+
+export const SETTINGS_IDS = {
+  aeonMember: '40000000-0000-0000-0000-000000000001',
+  alfagift: '40000000-0000-0000-0000-000000000002',
+  /** Program dihentikan (seed): tidak bisa ditandai (W16 → INVALID_STATE). */
+  aeonOld: '40000000-0000-0000-0000-000000000003',
+  /** Barcode baru untuk produk privat yang sudah ada (D-89). */
+  barcode: 'c0000000-0000-0000-0000-000000000030',
+  barcodeDup: 'c0000000-0000-0000-0000-000000000031',
+  barcodePlu: 'c0000000-0000-0000-0000-000000000032',
+  barcodeGlobal: 'c0000000-0000-0000-0000-000000000033',
+} as const;
+
+export const BARCODE_REST_COLUMNS = 'id, product_id, code, code_type, store_id, valid_from, valid_until';
+
+/**
+ * M6 (S-00c, S-19, S-19b, S-19c, S-15 barcode): W14/W15/W16 + REST profile/barcode_assignment ASLI
+ * untuk Citra. Dijalankan paling akhir (mengubah keanggotaan dan visibilitas record Citra), sehingga
+ * fixture M1–M5 tidak berubah. Ani dipakai untuk kasus lintas user (profile orang lain).
+ */
+async function collectSettings(pool: pg.Pool, citra: PgRpcClient, ani: PgRpcClient, data: Record<string, unknown>) {
+  const call = async (key: string, client: PgRpcClient, fn: string, args: Record<string, unknown> = {}) => {
+    const r = await client.rpc(fn, args);
+    data[key] = r.error ? { error: r.error } : r.data;
+    return r.data;
+  };
+  const S = SETTINGS_IDS;
+  const rest = async (key: string, client: PgRpcClient, sql: string, params: unknown[]) => {
+    try {
+      const r = await client.asUser<{ j: Record<string, unknown> }>(sql, params);
+      data[key] = r.rows.map((x) => x.j);
+    } catch (e) {
+      const err = e as pg.DatabaseError;
+      data[key] = {
+        error: { message: err.message, code: err.code ?? null, details: err.detail ?? null, hint: err.hint ?? null },
+      };
+    }
+  };
+
+  // S-19b / S-00c: W16 tandai lalu lepas; program dihentikan dan program tidak dikenal.
+  await call('member_on', citra, 'set_program_membership', { p_program_id: S.aeonMember, p_member: true });
+  await call('member_on_repeat', citra, 'set_program_membership', { p_program_id: S.aeonMember, p_member: true });
+  await call('programs_member', citra, 'get_my_programs');
+  await call('member_off', citra, 'set_program_membership', { p_program_id: S.aeonMember, p_member: false });
+  await call('member_discontinued', citra, 'set_program_membership', { p_program_id: S.aeonOld, p_member: true });
+  await call('member_unknown', citra, 'set_program_membership', { p_program_id: IDS.unknown, p_member: true });
+  await call('member_alfagift', citra, 'set_program_membership', { p_program_id: S.alfagift, p_member: true });
+  await call('context_member', citra, 'get_my_context');
+
+  // S-19c: W15 saat mati (INVALID_STATE) → W14 nyala → W15 (job, dedup) → batch job → W14 mati (tarik).
+  await call('share_existing_off', citra, 'share_existing_prices');
+  await call('share_on', citra, 'set_share_prices_public', { p_enabled: true });
+  await call('context_shared', citra, 'get_my_context');
+  await call('share_existing', citra, 'share_existing_prices');
+  await call('share_existing_repeat', citra, 'share_existing_prices');
+  // Sama dengan app.run_sql_jobs (pg_cron): satu batch membagikan record lama.
+  await pool.query(`select app.share_existing_batch($1, 1000)`, [await householdOf(pool, USERS.c)]);
+  await call('share_off', citra, 'set_share_prices_public', { p_enabled: false });
+  await call('share_off_repeat', citra, 'set_share_prices_public', { p_enabled: false });
+
+  // S-19: REST PATCH profile.display_name (RLS self_update); profile user lain = 0 baris.
+  const profile = (set: string) =>
+    `with u as (update public.profile set ${set} where user_id = $1 returning user_id, display_name, updated_at)
+     select to_jsonb(u) as j from u`;
+  await rest('patch_profile_ok', citra, profile(`display_name = 'Citra Lestari'`), [USERS.c]);
+  await rest('patch_profile_other', ani, profile(`display_name = 'Bukan Ani'`), [USERS.c]);
+
+  // S-15 edit (D-89): REST barcode_assignment select + insert untuk produk privat sendiri.
+  const cols = BARCODE_REST_COLUMNS;
+  const select = `select to_jsonb(r) as j from (select ${cols} from public.barcode_assignment
+                   where product_id = $1 order by valid_from desc, code) r`;
+  const insert = `with i as (insert into public.barcode_assignment (id, product_id, code, code_type, store_id)
+                   values ($1, $2, $3, $4, $5) returning ${cols}) select to_jsonb(i) as j from i`;
+  await rest('barcodes_plu', citra, select, [CATALOG_IDS.plu]);
+  await rest('barcode_insert_ok', citra, insert, [S.barcode, CATALOG_IDS.big, '8991234500017', 'gtin', null]);
+  await rest('barcode_insert_repeat', citra, insert, [S.barcode, CATALOG_IDS.big, '8991234500017', 'gtin', null]);
+  await rest('barcode_insert_23P01', citra, insert, [S.barcodeDup, CATALOG_IDS.big, '8991234500017', 'gtin', null]);
+  await rest('barcode_insert_23514', citra, insert, [S.barcodePlu, CATALOG_IDS.plu, '2101', 'plu', null]);
+  await rest('barcode_insert_global', citra, insert, [S.barcodeGlobal, IDS.milo200, '8991234500024', 'gtin', null]);
+  await rest('barcodes_big', citra, select, [CATALOG_IDS.big]);
 }

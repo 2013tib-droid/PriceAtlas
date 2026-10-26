@@ -10,6 +10,7 @@ export const SHELL_ROUTES = [
   '/kamera',
   '/belanja',
   '/saya',
+  '/selamat-datang',
   '/masuk',
   '/offline',
 ] as const;

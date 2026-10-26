@@ -9815,6 +9815,203 @@
         "household_id": "f1f91d07-cf54-4fc8-ba10-0ed2913d2546",
         "product_group_id": "03f9d17d-1800-4d69-8100-a339659bec1c"
       }
+    ],
+    "member_on": {
+      "is_member": true,
+      "program_id": "40000000-0000-0000-0000-000000000001"
+    },
+    "member_on_repeat": {
+      "is_member": true,
+      "program_id": "40000000-0000-0000-0000-000000000001"
+    },
+    "programs_member": [
+      {
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000001",
+          "name": "AEON",
+          "channel": "offline",
+          "is_private": false
+        },
+        "status": "discontinued",
+        "is_member": false,
+        "program_id": "40000000-0000-0000-0000-000000000003",
+        "program_name": "AEON Lama Club"
+      },
+      {
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000001",
+          "name": "AEON",
+          "channel": "offline",
+          "is_private": false
+        },
+        "status": "active",
+        "is_member": true,
+        "program_id": "40000000-0000-0000-0000-000000000001",
+        "program_name": "AEON Member"
+      },
+      {
+        "store": {
+          "id": "20000000-0000-0000-0000-000000000002",
+          "name": "Alfamart",
+          "channel": "offline",
+          "is_private": false
+        },
+        "status": "active",
+        "is_member": false,
+        "program_id": "40000000-0000-0000-0000-000000000002",
+        "program_name": "Alfagift"
+      }
+    ],
+    "member_off": {
+      "is_member": false,
+      "program_id": "40000000-0000-0000-0000-000000000001"
+    },
+    "member_discontinued": {
+      "error": {
+        "message": "INVALID_STATE",
+        "code": "PT409",
+        "details": "{\"status\": \"discontinued\", \"program_id\": \"40000000-0000-0000-0000-000000000003\"}",
+        "hint": "Status data tidak mengizinkan aksi ini."
+      }
+    },
+    "member_unknown": {
+      "error": {
+        "message": "NOT_FOUND",
+        "code": "PT404",
+        "details": "{\"program_id\": \"99999999-0000-0000-0000-000000000000\"}",
+        "hint": "Data tidak ditemukan."
+      }
+    },
+    "member_alfagift": {
+      "is_member": true,
+      "program_id": "40000000-0000-0000-0000-000000000002"
+    },
+    "context_member": {
+      "role": "owner",
+      "user_id": "00000000-0000-0000-0000-00000000000c",
+      "household": {
+        "id": "ffb907db-f620-4776-b2a2-2836e078f37d",
+        "name": "citra",
+        "timezone": "Asia/Jakarta",
+        "default_currency": "IDR",
+        "share_prices_public": false
+      },
+      "program_ids": ["40000000-0000-0000-0000-000000000002"],
+      "display_name": "citra"
+    },
+    "share_existing_off": {
+      "error": {
+        "message": "INVALID_STATE",
+        "code": "PT409",
+        "details": "{\"reason\": \"share_disabled\"}",
+        "hint": "Status data tidak mengizinkan aksi ini."
+      }
+    },
+    "share_on": {
+      "enabled": true,
+      "withdrawn_count": 0
+    },
+    "context_shared": {
+      "role": "owner",
+      "user_id": "00000000-0000-0000-0000-00000000000c",
+      "household": {
+        "id": "ffb907db-f620-4776-b2a2-2836e078f37d",
+        "name": "citra",
+        "timezone": "Asia/Jakarta",
+        "default_currency": "IDR",
+        "share_prices_public": true
+      },
+      "program_ids": ["40000000-0000-0000-0000-000000000002"],
+      "display_name": "citra"
+    },
+    "share_existing": {
+      "job_id": 2,
+      "eligible_count": 6
+    },
+    "share_existing_repeat": {
+      "job_id": 2,
+      "eligible_count": 6
+    },
+    "share_off": {
+      "enabled": false,
+      "withdrawn_count": 6
+    },
+    "share_off_repeat": {
+      "enabled": false,
+      "withdrawn_count": 0
+    },
+    "patch_profile_ok": [
+      {
+        "user_id": "00000000-0000-0000-0000-00000000000c",
+        "updated_at": "2026-10-26T10:09:48.984843+07:00",
+        "display_name": "Citra Lestari"
+      }
+    ],
+    "patch_profile_other": [],
+    "barcodes_plu": [
+      {
+        "id": "3ea03ad1-2296-4fe5-b01b-39452c23b4a4",
+        "code": "2001",
+        "store_id": "20000000-0000-0000-0000-000000000001",
+        "code_type": "plu",
+        "product_id": "c0000000-0000-0000-0000-000000000023",
+        "valid_from": "2026-10-26",
+        "valid_until": null
+      }
+    ],
+    "barcode_insert_ok": [
+      {
+        "id": "c0000000-0000-0000-0000-000000000030",
+        "code": "8991234500017",
+        "store_id": null,
+        "code_type": "gtin",
+        "product_id": "c0000000-0000-0000-0000-000000000021",
+        "valid_from": "2026-10-26",
+        "valid_until": null
+      }
+    ],
+    "barcode_insert_repeat": {
+      "error": {
+        "message": "duplicate key value violates unique constraint \"barcode_assignment_pkey\"",
+        "code": "23505",
+        "details": null,
+        "hint": null
+      }
+    },
+    "barcode_insert_23P01": {
+      "error": {
+        "message": "conflicting key value violates exclusion constraint \"barcode_assignment_code_coalesce_coalesce1_daterange_excl\"",
+        "code": "23P01",
+        "details": "Key conflicts with existing key.",
+        "hint": null
+      }
+    },
+    "barcode_insert_23514": {
+      "error": {
+        "message": "new row for relation \"barcode_assignment\" violates check constraint \"barcode_assignment_check1\"",
+        "code": "23514",
+        "details": null,
+        "hint": null
+      }
+    },
+    "barcode_insert_global": {
+      "error": {
+        "message": "new row violates row-level security policy for table \"barcode_assignment\"",
+        "code": "42501",
+        "details": null,
+        "hint": null
+      }
+    },
+    "barcodes_big": [
+      {
+        "id": "c0000000-0000-0000-0000-000000000030",
+        "code": "8991234500017",
+        "store_id": null,
+        "code_type": "gtin",
+        "product_id": "c0000000-0000-0000-0000-000000000021",
+        "valid_from": "2026-10-26",
+        "valid_until": null
+      }
     ]
   }
 }
