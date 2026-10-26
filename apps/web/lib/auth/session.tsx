@@ -4,7 +4,7 @@
 import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { startPersist } from '@/lib/data/query-client';
-import { deleteUserData } from '@/lib/offline/db';
+import { deleteUserData, lockUserDb, unlockUserDb } from '@/lib/offline/db';
 import { getSupabaseBrowserClient } from '@/lib/supabase/browser';
 
 export type SessionUser = { id: string; email: string | null };
@@ -24,12 +24,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient();
-    const apply = (u: { id: string; email?: string | null } | null | undefined) =>
+    const apply = (u: { id: string; email?: string | null } | null | undefined) => {
+      // Login (lagi): IndexedDB user boleh dibuka (dikunci saat Keluar, F-81).
+      if (u) unlockUserDb(u.id);
       setState((prev) => {
         if (!u) return prev.status === 'signed-out' ? prev : { status: 'signed-out', user: null };
         if (prev.user?.id === u.id) return prev;
         return { status: 'signed-in', user: { id: u.id, email: u.email ?? null } };
       });
+    };
     void supabase.auth.getSession().then(({ data }) => apply(data.session?.user));
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       // SIGNED_OUT juga terjadi saat refresh token gagal: cache di memori dibersihkan, tetapi data
@@ -88,7 +91,10 @@ export async function signOutAndClear(userId: string | null, queryClient?: Query
   const { error } = await supabase.auth.signOut().catch((e: unknown) => ({ error: e }));
   if (error) await supabase.auth.signOut({ scope: 'local' }).catch(() => undefined);
   queryClient?.clear();
-  if (userId) await deleteUserData(userId).catch(() => undefined);
+  if (userId) {
+    lockUserDb(userId);
+    await deleteUserData(userId).catch(() => undefined);
+  }
   await clearCacheStorage();
   try {
     sessionStorage.clear();

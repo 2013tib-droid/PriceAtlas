@@ -22,12 +22,28 @@ interface PriceAtlasDB extends DBSchema {
 export type UserDb = IDBPDatabase<PriceAtlasDB>;
 
 const open = new Map<string, Promise<UserDb>>();
+/** User yang datanya sedang/sudah dihapus (Keluar, hapus akun): IndexedDB-nya tidak boleh dibuka lagi. */
+const locked = new Set<string>();
+
+/**
+ * Keluar / hapus akun (Q-61, F-81): setelah ini `openUserDb` menolak user tersebut, sehingga komponen
+ * yang masih terpasang (prefs, antrean, persist) tidak membuat ulang database setelah dihapus.
+ */
+export function lockUserDb(userId: string): void {
+  locked.add(userId);
+}
+
+/** Login (lagi) sebagai user ini: IndexedDB-nya boleh dibuka. */
+export function unlockUserDb(userId: string): void {
+  locked.delete(userId);
+}
 
 export function dbName(userId: string): string {
   return `${DB_PREFIX}${userId}`;
 }
 
 export function openUserDb(userId: string): Promise<UserDb> {
+  if (locked.has(userId)) return Promise.reject(new Error('IndexedDB user ini sudah dihapus (keluar)'));
   let p = open.get(userId);
   if (!p) {
     p = openDB<PriceAtlasDB>(dbName(userId), VERSION, {

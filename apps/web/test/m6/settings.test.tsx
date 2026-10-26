@@ -105,6 +105,9 @@ describe('S-19 Saya', () => {
     expect(sb.auth.signOut).toHaveBeenCalled();
     const names = (await indexedDB.databases()).map((d) => d.name);
     expect(names).not.toContain(`priceatlas:${ID.user}`);
+    // Komponen yang masih terpasang tidak bisa membuat ulang database setelah Keluar (F-81).
+    expect(await readPref(ID.user, PREF_KEYS.onboarded, false)).toBe(false);
+    expect((await indexedDB.databases()).map((d) => d.name)).not.toContain(`priceatlas:${ID.user}`);
   });
 
   it('Keluar dengan antrean belum kosong → peringatan jumlah foto (Q-61); Batal tidak keluar', async () => {

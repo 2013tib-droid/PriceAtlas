@@ -389,7 +389,8 @@ export async function resetHarness() {
   setUrl('/');
   Object.defineProperty(navigator, 'onLine', { configurable: true, value: true });
   // Prefs per user: mulai bersih setiap test.
-  const { deleteUserData } = await import('@/lib/offline/db');
+  const { deleteUserData, unlockUserDb } = await import('@/lib/offline/db');
+  unlockUserDb(ID.user);
   await deleteUserData(ID.user);
 }
 
