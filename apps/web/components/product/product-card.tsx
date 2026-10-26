@@ -4,13 +4,13 @@
 import type { ProductCard as Card } from '@priceatlas/contracts';
 import { Calculator } from 'lucide-react';
 import Link from 'next/link';
-import { BasisLabel, DataCount, PrivateBadge, StoreLine, TrendText } from '@/components/price/price';
+import { DataCount, PrivateBadge, StoreLine, TrendText } from '@/components/price/price';
 import { fill, PRICE_COPY } from '@/lib/copy/id';
 import { formatAge, formatRupiah } from '@/lib/format';
 import { productTitle } from '@/lib/format/product';
 import { useTimeZone } from '@/lib/hooks/use-time-zone';
 import { cn } from '@/lib/utils';
-import { MainPrice, ShortPrice } from './main-price';
+import { BestAllLine, MainPrice } from './main-price';
 
 export function productHref(id: string, extra?: Record<string, string>): string {
   const qs = new URLSearchParams({ id, ...extra });
@@ -66,14 +66,7 @@ export function ProductCard({
               </span>
             )}
           </p>
-          {s.best_90d ? (
-            <p className="flex flex-wrap items-baseline gap-x-1.5 text-sm text-muted-foreground">
-              <span>{PRICE_COPY.bestAll}:</span>
-              <ShortPrice product={p} point={s.best_all} />
-              <BasisLabel basis={s.best_all.price_basis} program={s.best_all.member_program_name} />
-              <StoreLine store={s.best_all.store} branch={s.best_all.branch} date={s.best_all.date} />
-            </p>
-          ) : null}
+          {s.best_90d ? <BestAllLine product={p} summary={s} /> : null}
           <p className="flex flex-wrap gap-x-3 gap-y-0.5 text-sm">
             <TrendText direction={s.trend_direction} pct={s.trend_pct} />
             <DataCount count={s.record_count} lastDate={s.last_transaction_date} />

@@ -1,10 +1,12 @@
 'use client';
 // Kolom search di bawah layar, di atas tab bar (U-02, docs/07 §7.2). Ikon scan hanya jika
-// BarcodeDetector + ean_13 didukung (D-58).
+// BarcodeDetector + ean_13 didukung (D-58). Saat kolom fokus dan keyboard virtual terbuka, dock
+// menempel di atas keyboard (`visualViewport`, D-91 Q-96).
 import { ScanBarcode, Search, X } from 'lucide-react';
 import Link from 'next/link';
-import type { RefObject } from 'react';
+import { useRef, type RefObject } from 'react';
 import { SEARCH_COPY } from '@/lib/copy/id';
+import { useKeyboardInset } from '@/lib/hooks/use-keyboard-inset';
 import { useBarcodeSupport } from '@/lib/media/barcode';
 
 export function SearchDock({
@@ -28,9 +30,13 @@ export function SearchDock({
   id?: string;
 }) {
   const scan = useBarcodeSupport() && showScan;
+  const formRef = useRef<HTMLFormElement>(null);
+  const inset = useKeyboardInset(formRef);
   return (
     <form
+      ref={formRef}
       role="search"
+      style={inset > 0 ? { bottom: inset } : undefined}
       onSubmit={(e) => {
         e.preventDefault();
         onSubmit(value);

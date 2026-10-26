@@ -1,6 +1,6 @@
 # Tahap 5a — Desain Frontend
 
-> **Status: disetujui (2026-10-19).** Semua default Q-43 s/d Q-64 diterima dan dicatat sebagai D-78 s/d D-83. **Tahap 5b M0 selesai dan disetujui** (hasil dan temuan F-25 s/d F-30: §1.4; Q-65 s/d Q-67 diputuskan sebagai D-84: §13.4). **Tahap 5b M1 selesai** (hasil, temuan F-31 s/d F-39: §1.5; pertanyaan Q-68 s/d Q-71: §13.5, diputuskan sebagai D-85). **Tahap 5b M2 selesai dan disetujui** (hasil, temuan F-40 s/d F-48: §1.6; pertanyaan Q-72 s/d Q-75: §13.6, diputuskan sebagai D-86). **Tahap 5b M3 selesai dan disetujui** (hasil, temuan F-49 s/d F-59: §1.7; pertanyaan Q-76 s/d Q-79: §13.7, diputuskan sebagai D-87). **Tahap 5b M4 selesai dan disetujui** (hasil, temuan F-60 s/d F-67: §1.8; pertanyaan Q-80 s/d Q-84: §13.8, diputuskan sebagai D-88). **Tahap 5b M5 selesai dan disetujui** (hasil, temuan F-68 s/d F-79: §1.9; pertanyaan Q-85 s/d Q-88: §13.9, diputuskan sebagai D-89). **Tahap 5b M6 selesai dan disetujui** (hasil, temuan F-80 s/d F-91: §1.10; pertanyaan Q-89 s/d Q-92: §13.10, diputuskan sebagai D-90). **Tahap 5b M7 selesai, menunggu review** (hasil, temuan F-92 s/d F-105: §1.11; pertanyaan Q-93 s/d Q-101: §13.11).
+> **Status: disetujui (2026-10-19).** Semua default Q-43 s/d Q-64 diterima dan dicatat sebagai D-78 s/d D-83. **Tahap 5b M0 selesai dan disetujui** (hasil dan temuan F-25 s/d F-30: §1.4; Q-65 s/d Q-67 diputuskan sebagai D-84: §13.4). **Tahap 5b M1 selesai** (hasil, temuan F-31 s/d F-39: §1.5; pertanyaan Q-68 s/d Q-71: §13.5, diputuskan sebagai D-85). **Tahap 5b M2 selesai dan disetujui** (hasil, temuan F-40 s/d F-48: §1.6; pertanyaan Q-72 s/d Q-75: §13.6, diputuskan sebagai D-86). **Tahap 5b M3 selesai dan disetujui** (hasil, temuan F-49 s/d F-59: §1.7; pertanyaan Q-76 s/d Q-79: §13.7, diputuskan sebagai D-87). **Tahap 5b M4 selesai dan disetujui** (hasil, temuan F-60 s/d F-67: §1.8; pertanyaan Q-80 s/d Q-84: §13.8, diputuskan sebagai D-88). **Tahap 5b M5 selesai dan disetujui** (hasil, temuan F-68 s/d F-79: §1.9; pertanyaan Q-85 s/d Q-88: §13.9, diputuskan sebagai D-89). **Tahap 5b M6 selesai dan disetujui** (hasil, temuan F-80 s/d F-91: §1.10; pertanyaan Q-89 s/d Q-92: §13.10, diputuskan sebagai D-90). **Tahap 5b M7 selesai dan disetujui** (hasil, temuan F-92 s/d F-105: §1.11; pertanyaan Q-93 s/d Q-101: §13.11, diputuskan sebagai D-91).
 > Dasar: `PROJECT.md` (D-01 s/d D-77, terutama D-57–D-61 dan D-73–D-77), `docs/04-wireframe.md` + `docs/wireframes/index.html` (S-00a s/d S-20, alur 1–8, W-xx), `docs/05-backend-design.md` (R1–R21, W1–W18, §3.1, §4, §5, §7, §10), `docs/06-local-dev.md`, `packages/contracts`, `apps/web`.
 
 Dokumen ini tidak mengubah requirement, keputusan, skema, maupun RPC. Temuan baru ditulis sebagai **F-xx** (melanjutkan F-16 di `docs/05` §0.2), potensi masalah sebagai **P-xx**, dan pertanyaan sebagai **Q-43** dst. Setiap pertanyaan punya usulan default.
@@ -468,6 +468,19 @@ Karena tidak bisa dijalankan, setiap butir L4 diperiksa dari kode dan dokumentas
 | F-104 | **Tinjauan D-90 tab bar di S-00b/S-00c** (F-89): memindahkan dua route ke grup layout baru tanpa `TabBar`/`SessionBanner` (penjaga sesi tetap) adalah perubahan kecil, tanpa perubahan data. | Saat ini user bisa keluar dari onboarding lewat tab tanpa status tersimpan → S-00b muncul lagi di login berikutnya. | Belum diubah. Lihat **Q-100**. | Q-100 |
 | F-105 | Cek manual VoiceOver (iOS) dan TalkBack (Android) **belum dilakukan**: tidak ada perangkat di lingkungan ini. Daftar cek di bawah. | Pembacaan angka, urutan fokus sheet, dan pengumuman `aria-live` belum terbukti di pembaca layar sungguhan. | Lihat **Q-101**. | Q-101 |
 
+**Hasil review M7 (2026-10-26):** pemilik proyek menyetujui semua usulan default Q-93 s/d Q-101 → **D-91**.
+
+**Tindak lanjut D-91 (sebelum Tahap 6):**
+
+| Q | Implementasi |
+|---|---|
+| Q-93 | `check:bundle`: dasar ukur = modul saja (polyfill `noModule` ditampilkan, tidak dihitung); peringatan jika > 350 KiB, target 200 KiB tetap. Ukuran sekarang: `/` 336 KiB modul + 38 KiB polyfill. |
+| Q-95 | `BestAllLine` (`components/product/main-price.tsx`) di S-02 dan S-03: record sama dengan termurah 90 hari → "Termurah sepanjang masa: sama dengan 90 hari terakhir"; berbeda → harga, label, toko lengkap. |
+| Q-96 | `useKeyboardInset` (`lib/hooks/use-keyboard-inset.ts`): SearchDock dan `StickyAction` menempel di atas keyboard virtual (`innerHeight − visualViewport.height − offsetTop`, > 80 px) hanya selama fokus ada di dalamnya; tanpa pustaka. Verifikasi di iPhone: butir no. 3 daftar cek di bawah. |
+| Q-100 | `/selamat-datang` dan `/selamat-datang/member` pindah ke grup `app/(onboarding)` (penjaga sesi + strip offline, tanpa `TabBar`/`SessionBanner`); URL dan `SHELL_ROUTES` tetap. |
+
+Test: `test/m7/followup.test.tsx` (6). Q-94, Q-97, Q-98, Q-99 tidak butuh perubahan kode; Q-101 (cek manual) oleh pemilik proyek.
+
 **Daftar cek manual pembaca layar (F-105).** Status semua butir: *belum dicek di perangkat*.
 
 | # | Langkah | Yang diharapkan |
@@ -862,8 +875,8 @@ File diunggah apa adanya jika **semua** benar: tipe JPEG/PNG/WebP, ukuran ≤ 1,
 |---|---|---|---|
 | `/masuk` | S-00a | `(auth)` | Pesan "butuh sinyal" |
 | `/auth/callback` | — (PKCE) | Route Handler | — |
-| `/selamat-datang` | S-00b | `(app)` | ya |
-| `/selamat-datang/member` | S-00c | `(app)` | tidak |
+| `/selamat-datang` | S-00b | `(onboarding)` tanpa tab bar (D-91) | ya |
+| `/selamat-datang/member` | S-00c | `(onboarding)` tanpa tab bar (D-91) | tidak |
 | `/` | S-01 Beranda / Cari | `(app)` tab Cari | ya (cache) |
 | `/cari?q=` | S-02 Hasil cari | `(app)` | ya (cache) |
 | `/produk?id=` (+ `?sheet=cek-harga`) | S-03, S-03b | `(app)` | sebagian (§5.6) |
@@ -1262,6 +1275,8 @@ Setiap pertanyaan punya usulan default. Jawab "setuju semua" jika semua default 
 | Q-99 | Status onboarding per perangkat (D-90, F-103), juga status ajakan pasang iOS. | **Tetap per perangkat di MVP** (1 ketukan "Lewati"). Status server (`profile.onboarded_at`, perubahan skema) ditinjau di Tahap 7 jika ada keluhan. |
 | Q-100 | Tab bar di S-00b/S-00c (D-90, F-104). | **Sembunyikan:** pindahkan `/selamat-datang` dan `/selamat-datang/member` ke grup layout baru `(onboarding)` dengan penjaga sesi yang sama, tanpa `TabBar` dan `SessionBanner` (URL tetap, `SHELL_ROUTES` tetap). Dibuat setelah disetujui. |
 | Q-101 | Cek manual VoiceOver/TalkBack (F-105) belum dilakukan. Siapa dan kapan? | **Pemilik proyek menjalankan daftar cek §1.11 di satu iPhone (Safari, PWA terpasang) dan satu Android (Chrome) sebelum Tahap 6**; temuan dicatat sebagai F-xx dan diperbaiki di 5b. Sampai itu kriteria M7 dipenuhi oleh axe otomatis (L5b + e2e). |
+
+**Hasil review M7 (2026-10-26):** pemilik proyek menyetujui semua usulan default Q-93 s/d Q-101 → **D-91**.
 
 ### 13.3 Bagian yang belum bisa dirancang penuh
 
