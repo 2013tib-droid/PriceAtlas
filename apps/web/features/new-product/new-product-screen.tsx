@@ -22,6 +22,7 @@ export function NewProductScreen() {
   return (
     <section className="mx-auto flex w-full max-w-xl flex-col gap-4 p-4 pb-8">
       <NewProductForm
+        asScreen
         initialName={name}
         initialBarcode={barcode}
         onCreated={(card) => {

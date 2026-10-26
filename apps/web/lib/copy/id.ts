@@ -192,6 +192,12 @@ export const APP_COPY = {
     reload: 'Muat ulang',
     waitQueue: 'Versi baru siap. Dipasang setelah semua foto terunggah.',
   },
+  /** Ajakan pasang ke layar utama di iOS Safari, sekali setelah foto pertama (D-81, Q-62, P-04). */
+  install: {
+    title: 'Pasang PriceAtlas ke layar utama',
+    body: 'Supaya foto yang belum terunggah tidak dihapus iPhone. Ketuk Bagikan, lalu "Tambah ke Layar Utama".',
+    dismiss: 'Nanti saja',
+  },
   offlinePage: {
     title: 'Halaman ini butuh sinyal',
     body: 'Halaman ini belum tersimpan di HP. Buka lagi saat online, atau kembali ke beranda.',
@@ -257,6 +263,8 @@ export const SEARCH_COPY = {
   title: 'Hasil cari',
   resultCount: '{n} produk untuk "{q}"',
   notFound: 'Tidak ada produk "{q}". Coba kata lain, scan barcode, atau foto labelnya.',
+  /** Offline, dicari di kartu R5 tersimpan (D-60, §5.6). */
+  offlineNotFound: 'Tidak ada "{q}" di data yang tersimpan di HP. Coba lagi saat ada sinyal.',
   ask: 'Tanya: {q}',
   askHint: 'Segera hadir',
   groupBest: 'Paling hemat {per}: {size}',
@@ -1304,6 +1312,32 @@ export const ONBOARDING_COPY = {
     save: 'Simpan & lanjut',
     saving: 'Menyimpan…',
     skip: 'Lewati',
+  },
+} as const;
+
+/** S-20 Tanya (kerangka, docs/07 §9, wireframe S-20). Jawaban sungguhan di Tahap 6 (D-57). */
+export const ASK_COPY = {
+  title: 'Tanya',
+  intro: 'Tanya dengan bahasa sehari-hari. Jawaban hanya dari histori hargamu.',
+  you: 'Kamu',
+  app: 'PriceAtlas',
+  inputLabel: 'Pertanyaan',
+  placeholder: 'mis. milo paling murah di mana?',
+  send: 'Kirim',
+  comingSoon: 'Segera hadir. Untuk sekarang, pakai hasil cari, Bandingkan ukuran, dan Lebih hemat di mana.',
+  searchFor: 'Lihat hasil cari "{q}"',
+  examplesTitle: 'Contoh pertanyaan',
+  examples: ['termurah di mana?', 'naik atau turun?', 'harga per gram?'],
+  loading: 'Mencari di historimu…',
+  outOfScope:
+    'Saya hanya bisa menjawab dari histori hargamu: harga termurah, di mana, tren, per satuan, perbandingan ukuran.',
+  ambiguous: 'Maksudmu yang mana?',
+  answeredWith: 'Dijawab dengan:',
+  screens: {
+    'S-02': 'Lihat hasil cari',
+    'S-03': 'Lihat detail produk',
+    'S-04': 'Lihat perbandingan ukuran',
+    'S-05': 'Lihat lebih hemat di mana',
   },
 } as const;
 

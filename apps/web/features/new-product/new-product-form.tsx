@@ -99,7 +99,10 @@ export function NewProductForm({
   onCreated,
   onUseExisting,
   onCancel,
+  asScreen = false,
 }: {
+  /** Layar sendiri (`/produk/baru`): judul jadi h1 layar (§10.1); di sheet S-14 tetap h2. */
+  asScreen?: boolean;
   initialName?: string;
   initialBarcode?: string;
   /** Isian awal tambahan (S-18: salinan produk asal). */
@@ -166,11 +169,22 @@ export function NewProductForm({
   const unitOptions = v.sale_mode === 'weight' ? WEIGHT_UNIT_OPTIONS : UNIT_OPTIONS;
 
   return (
-    <form onSubmit={submit} noValidate className="flex flex-col gap-4" aria-labelledby={`${uid}-title`}>
+    <form
+      onSubmit={submit}
+      noValidate
+      className="flex flex-col gap-4"
+      aria-labelledby={asScreen ? 'judul-layar' : `${uid}-title`}
+    >
       <div className="flex items-center gap-2">
-        <h2 id={`${uid}-title`} className="text-2xl font-semibold">
-          {C.title}
-        </h2>
+        {asScreen ? (
+          <h1 id="judul-layar" tabIndex={-1} className="text-2xl font-semibold">
+            {C.title}
+          </h1>
+        ) : (
+          <h2 id={`${uid}-title`} className="text-2xl font-semibold">
+            {C.title}
+          </h2>
+        )}
         <PrivateBadge />
       </div>
       <p className="text-sm text-muted-foreground">{C.privateNote}</p>

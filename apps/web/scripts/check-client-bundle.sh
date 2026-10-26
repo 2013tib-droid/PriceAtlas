@@ -18,16 +18,23 @@ fi
 budget=$((200 * 1024))
 html=.next/server/app/index.html
 if [[ -f $html ]]; then
+  # Polyfill `noModule` hanya dimuat browser lama; dihitung di total (dasar anggaran D-84) dan
+  # ditampilkan terpisah (docs/07 §1.11, F-94).
+  nomodule=$(grep -oE '<script src="/_next/static/chunks/[^"]*\.js" noModule' "$html" | grep -oE '/_next/static/chunks/[^"]*\.js' | sort -u || true)
   total=0
+  legacy=0
   for f in $(grep -o '/_next/static/chunks/[^"]*\.js' "$html" | sort -u); do
-    total=$((total + $(gzip -c ".next/${f#/_next/}" | wc -c)))
+    size=$(gzip -c ".next/${f#/_next/}" | wc -c)
+    total=$((total + size))
+    if grep -qxF "$f" <<<"$nomodule"; then legacy=$((legacy + size)); fi
   done
   kib=$((total / 1024))
+  detail="modul $(((total - legacy) / 1024)) KiB + polyfill noModule $((legacy / 1024)) KiB"
   if (( total > budget )); then
-    msg="JS halaman / = ${kib} KiB gzip, melebihi anggaran 200 KiB (docs/07 §11.4, peringatan)"
+    msg="JS halaman / = ${kib} KiB gzip (${detail}), melebihi anggaran 200 KiB (docs/07 §11.4, peringatan)"
     [[ -n "${GITHUB_ACTIONS:-}" ]] && echo "::warning::$msg" || echo "PERINGATAN: $msg"
   else
-    echo "ok  : JS halaman / = ${kib} KiB gzip (anggaran 200 KiB)"
+    echo "ok  : JS halaman / = ${kib} KiB gzip (${detail}; anggaran 200 KiB)"
   fi
 fi
 exit $fail

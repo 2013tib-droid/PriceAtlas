@@ -7,9 +7,11 @@ import { useEffect, type ReactNode } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { AUTH_COPY, APP_COPY } from '@/lib/copy/id';
 import { useAuth } from '@/lib/auth/session';
+import { OfflineCacheSync } from '@/lib/data/offline-cache';
 import { useRememberAppPath } from '@/lib/hooks/last-app-path';
 import { useOnline } from '@/lib/hooks/use-online';
 import { UploadWatcher } from '@/features/uploads/upload-watcher';
+import { InstallPrompt } from './install-prompt';
 import { OfflineStrip } from './offline-strip';
 import { SwUpdateBanner } from './sw-update';
 import { TabBar } from './tab-bar';
@@ -54,6 +56,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </a>
       <OfflineStrip />
       <SwUpdateBanner />
+      <InstallPrompt />
       <main
         id="konten"
         className="mx-auto w-full max-w-xl flex-1 pb-[calc(var(--bottom-bars)+env(safe-area-inset-bottom)+1rem)]"
@@ -61,6 +64,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <AuthGate>{children}</AuthGate>
       </main>
       <UploadWatcher />
+      <OfflineCacheSync />
       <TabBar />
     </div>
   );
