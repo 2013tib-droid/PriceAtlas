@@ -446,6 +446,7 @@ async function collectAll(pool: pg.Pool, w: Worker): Promise<Fixtures> {
   await collectSessions(pool, w, ani, data);
   await collectCatalog(pool, citra, data);
   await collectSettings(pool, citra, ani, data);
+  await collectOffline(citra, ani, budi, data);
 
   const today = (
     await pool.query<{ d: string }>(`select app.household_today($1)::text as d`, [await householdOf(pool, USERS.a)])
@@ -841,4 +842,23 @@ async function collectSettings(pool: pg.Pool, citra: PgRpcClient, ani: PgRpcClie
   await rest('barcode_insert_23514', citra, insert, [S.barcodePlu, CATALOG_IDS.plu, '2101', 'plu', null]);
   await rest('barcode_insert_global', citra, insert, [S.barcodeGlobal, IDS.milo200, '8991234500024', 'gtin', null]);
   await rest('barcodes_big', citra, select, [CATALOG_IDS.big]);
+}
+
+/**
+ * M7 (D-60, §5.6): R5 get_offline_cache. Ani: "pernah dibuka" Milo UHT, Gula (privat), Milo 200 gr
+ * duplikat (sudah digabung → kartu Milo 200 g) + 50 teratas. Citra: sirup yang diarsipkan di M5
+ * (R5 tetap memuat produk arsip yang pernah dibuka; search offline menyaringnya). Budi: kosong.
+ * Dijalankan paling akhir (hanya baca).
+ */
+async function collectOffline(citra: PgRpcClient, ani: PgRpcClient, budi: PgRpcClient, data: Record<string, unknown>) {
+  const call = async (key: string, client: PgRpcClient, fn: string, args: Record<string, unknown> = {}) => {
+    const r = await client.rpc(fn, args);
+    data[key] = r.error ? { error: r.error } : r.data;
+  };
+  await call('offline_cache', ani, 'get_offline_cache', {
+    p_viewed_ids: [IDS.miloUht, IDS.gula, IDS.miloDup],
+    p_top: 50,
+  });
+  await call('offline_cache_archived', citra, 'get_offline_cache', { p_viewed_ids: [CATALOG_IDS.syrup], p_top: 0 });
+  await call('offline_cache_empty', budi, 'get_offline_cache', { p_viewed_ids: [], p_top: 50 });
 }

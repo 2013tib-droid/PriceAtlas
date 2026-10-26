@@ -218,8 +218,11 @@ export function defaultRpc(fn: string, a: Record<string, unknown>): Res {
       return ok(fx(a.p_enabled ? 'share_on' : 'share_off'));
     case 'share_existing_prices':
       return ok(fx('share_existing'));
+    // M7 (D-60): R5 asli user Ani.
+    case 'get_offline_cache':
+      return ok(fx('offline_cache'));
     default:
-      throw new Error(`RPC ${fn} tidak diharapkan di M1–M6`);
+      throw new Error(`RPC ${fn} tidak diharapkan di M1–M7`);
   }
 }
 

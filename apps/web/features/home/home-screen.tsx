@@ -1,19 +1,22 @@
 'use client';
 // S-01 Beranda / Cari (docs/07 §7.3, wireframe S-01): pencarian terakhir + baru dicek (prefs
 // IndexedDB, R4), harga baru masuk (REST price_record_view + R4), badge perlu dicek, keadaan kosong
-// U-19. Kolom search ada di SearchLayout.
+// U-19. Kolom search ada di SearchLayout. Offline tanpa R4 tersimpan: "Baru dicek" dari kartu R5
+// (`offline_cards`, D-60, §5.6).
 import { Camera, Clock, Search, ShoppingBasket } from 'lucide-react';
 import Link from 'next/link';
 import { usePhotoSheet } from '@/components/app/photo-sheet';
-import { ErrorState, LoadingState } from '@/components/app/screen-state';
+import { ErrorState, LoadingState, OfflineState } from '@/components/app/screen-state';
 import { BasisLabel, PriceText } from '@/components/price/price';
 import { productHref } from '@/components/product/product-card';
 import { ProductRow } from '@/components/product/product-row';
 import { Skeleton } from '@/components/ui/skeleton';
 import { fill, HOME_COPY } from '@/lib/copy/id';
+import { useOfflineCardsByIds } from '@/lib/data/offline-cache';
 import { useNeedsCheckCount, useProductCards, useRecentPrices } from '@/lib/data/queries';
 import { formatTransactionDate } from '@/lib/format';
 import { productTitle } from '@/lib/format/product';
+import { useOnline } from '@/lib/hooks/use-online';
 import { usePref } from '@/lib/hooks/use-pref';
 import { useTimeZone } from '@/lib/hooks/use-time-zone';
 import { PREF_KEYS } from '@/lib/offline/prefs';
@@ -124,6 +127,10 @@ export function HomeScreen() {
   const viewed = usePref<string[]>(PREF_KEYS.viewed, []);
   const viewedIds = viewed.value.slice(0, RECENTLY_VIEWED_SHOWN);
   const viewedCards = useProductCards(viewedIds);
+  const online = useOnline();
+  const viewedOffline = !online && viewedCards.data === undefined;
+  const offlineViewed = useOfflineCardsByIds(viewedIds, viewedOffline);
+  const viewedData = viewedCards.data ?? (viewedOffline ? offlineViewed.data : undefined);
   const recent = useRecentPrices();
   const needsCheck = useNeedsCheckCount();
   const isEmpty = recent.data?.length === 0 && viewedIds.length === 0;
@@ -174,12 +181,14 @@ export function HomeScreen() {
               <h2 id="baru-dicek" className="text-lg font-semibold">
                 {HOME_COPY.recentlyViewed}
               </h2>
-              {viewedCards.data ? (
+              {viewedData && (viewedData.length > 0 || !viewedOffline) ? (
                 <ul className="flex flex-col gap-2">
-                  {viewedCards.data.map((c) => (
+                  {viewedData.map((c) => (
                     <ProductRow key={c.product.id} card={c} />
                   ))}
                 </ul>
+              ) : viewedData ? (
+                <OfflineState />
               ) : viewedCards.isError ? (
                 <ErrorState error={viewedCards.error} onRetry={() => void viewedCards.refetch()} />
               ) : (

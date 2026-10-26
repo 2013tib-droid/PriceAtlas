@@ -2,8 +2,9 @@
 // S-03 Detail produk (docs/07 §7.3, wireframe S-03): R7 (redirect_to → router.replace + toast),
 // ringkasan, grafik R9 + toggle "Hanya harga normal", 3 toko teratas R12, ukuran lain R11, histori
 // R8 (cursor; baris di-tap → S-16 `/harga?id=`, M5), "Cek harga rak" menempel di bawah → S-03b
-// (?sheet=cek-harga), menu ⋯ (M5: S-15 edit, S-17, S-18, arsip).
-import type { ProductDetail } from '@priceatlas/contracts';
+// (?sheet=cek-harga), menu ⋯ (M5: S-15 edit, S-17, S-18, arsip). Offline tanpa R7 tersimpan:
+// ringkasan dari kartu R5 saja, tanpa grafik/histori, "Detail lengkap butuh sinyal" (D-60, §5.6).
+import type { ProductCard, ProductDetail } from '@priceatlas/contracts';
 import { Calculator, ChevronRight, MoreHorizontal } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -14,7 +15,7 @@ import { StickyAction } from '@/components/app/sticky-action';
 import { BasisLabel, DataCount, PriceText, PrivateBadge, StoreLine, TrendText } from '@/components/price/price';
 import { HistoryRow, recordHref } from '@/components/product/history-row';
 import { MainPrice, ShortPrice } from '@/components/product/main-price';
-import { productHref } from '@/components/product/product-card';
+import { ProductCard as ProductCardView, productHref } from '@/components/product/product-card';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from '@/components/ui/drawer';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -28,6 +29,7 @@ import {
   useWhereCheaper,
 } from '@/lib/data/queries';
 import { toAppError } from '@/lib/data/errors';
+import { useOfflineCardsByIds } from '@/lib/data/offline-cache';
 import { formatAge, formatRupiah } from '@/lib/format';
 import { productTitle } from '@/lib/format/product';
 import { useOnline } from '@/lib/hooks/use-online';
@@ -393,6 +395,21 @@ function DetailSkeleton() {
   );
 }
 
+/** S-03 offline (§5.6): kartu tersimpan saja + "Detail lengkap butuh sinyal". */
+function OfflineProduct({ card }: { card: ProductCard }) {
+  const { title, size } = productTitle(card.product);
+  return (
+    <article className="flex flex-col gap-4 p-4" aria-labelledby="judul-layar">
+      <h1 id="judul-layar" tabIndex={-1} className="text-2xl font-semibold">
+        {title} <span className="font-normal text-muted-foreground">{size}</span>
+      </h1>
+      <p className="text-sm text-muted-foreground">{STATE_COPY.cachedLabel}</p>
+      <ProductCardView card={card} headingLevel={2} />
+      <OfflineState message={PRODUCT_COPY.offlineDetail} />
+    </article>
+  );
+}
+
 export function ProductScreen() {
   const router = useRouter();
   const pathname = usePathname() ?? '/produk';
@@ -404,6 +421,8 @@ export function ProductScreen() {
   const { config } = useClientConfig();
   const detail = useProductDetail(id);
   const d = detail.data;
+  const detailOffline = d === undefined && (!online || (detail.isError && toAppError(detail.error).kind === 'network'));
+  const offlineCard = useOfflineCardsByIds(id ? [id] : [], detailOffline);
   const [includeVoid, setIncludeVoid] = useState(false);
   const productId = d?.card.product.id ?? null;
   const history = usePriceHistory(productId, { storeId, includeVoid });
@@ -450,6 +469,8 @@ export function ProductScreen() {
 
   if (!id) return <ErrorState error={null} message={PRODUCT_COPY.notFound} />;
   if (!d) {
+    const saved = detailOffline ? offlineCard.data?.[0] : undefined;
+    if (saved) return <OfflineProduct card={saved} />;
     if (detail.isError) {
       const notFound = toAppError(detail.error).code === 'NOT_FOUND';
       return (

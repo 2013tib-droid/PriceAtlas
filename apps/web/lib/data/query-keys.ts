@@ -24,5 +24,7 @@ export const STALE_TIME: Partial<Record<RpcName, number>> = {
   price_record_detail: 0,
   /** R18 sesi: 30 dtk + polling saat label diproses (§4.3, §5.5). */
   get_active_session: 30_000,
+  /** R5: sinkron ulang saat app dibuka jika > 6 jam (§5.6, OFFLINE_SYNC_MS). */
+  get_offline_cache: 6 * HOUR,
 };
 export const DEFAULT_STALE_TIME = 30_000;

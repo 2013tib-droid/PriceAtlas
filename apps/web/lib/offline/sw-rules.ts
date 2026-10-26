@@ -38,3 +38,19 @@ export function versionOf(value: unknown): string {
   for (const ch of JSON.stringify(value)) h = (Math.imul(31, h) + ch.charCodeAt(0)) | 0;
   return (h >>> 0).toString(36);
 }
+
+/**
+ * Banner pembaruan (P-12, §5.2): SW baru (`waiting`) baru mengambil alih setelah antrean foto kosong
+ * DAN user menekan "Muat ulang". Selama antrean berisi, banner hanya memberi tahu.
+ */
+export type UpdateBanner = 'hidden' | 'wait_queue' | 'ready';
+export function updateBanner(input: { waiting: boolean; queueBusy: boolean }): UpdateBanner {
+  if (!input.waiting) return 'hidden';
+  return input.queueBusy ? 'wait_queue' : 'ready';
+}
+
+/** Cek versi baru saat app kembali terlihat, paling sering sekali per jam (PWA yang lama terbuka). */
+export const UPDATE_CHECK_MS = 60 * 60_000;
+export function shouldCheckForUpdate(lastCheck: number, now: number): boolean {
+  return now - lastCheck >= UPDATE_CHECK_MS;
+}

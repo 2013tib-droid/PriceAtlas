@@ -10,6 +10,8 @@ export const PREF_KEYS = {
   lastSession: 'last_session',
   /** S-00b/S-00c sudah dilihat di perangkat ini (wireframe S-00b 💾). */
   onboarded: 'onboarded',
+  /** Ajakan pasang ke layar utama iOS setelah foto pertama (Q-62): pending / dismissed / not_needed. */
+  installPrompt: 'install_prompt',
 } as const;
 export type PrefKey = (typeof PREF_KEYS)[keyof typeof PREF_KEYS];
 

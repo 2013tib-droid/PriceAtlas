@@ -39,7 +39,6 @@ export function CaptureRow({ c, timeZone }: { c: CaptureListItem; timeZone: stri
       <Link
         href={c.status === 'needs_confirmation' ? confirmHref(c.id, c.receipt_id) : detailHref(c.id)}
         className="flex min-h-action flex-1 items-center gap-2 py-2"
-        aria-label={`${UPLOADS_COPY.kindLong[c.kind]}, ${title}: ${status}`}
       >
         <KindChip kind={c.kind} />
         <span className="flex min-w-0 flex-1 flex-col">

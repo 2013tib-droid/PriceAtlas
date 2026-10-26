@@ -7,6 +7,7 @@ import { AuthProvider } from '@/lib/auth/session';
 import { createQueryClient } from '@/lib/data/query-client';
 import { FlashToast } from '@/lib/flash';
 import { OutboxProvider } from '@/lib/offline/outbox-context';
+import { FirstPhotoWatcher } from './install-prompt';
 
 // Service worker mati di `next dev` kecuali NEXT_PUBLIC_SW_DEV=1 (docs/07 §11.5).
 const SW_DISABLED = process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_SW_DEV !== '1';
@@ -23,7 +24,10 @@ export function Providers({ children }: { children: ReactNode }) {
     >
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <OutboxProvider>{children}</OutboxProvider>
+          <OutboxProvider>
+            {children}
+            <FirstPhotoWatcher />
+          </OutboxProvider>
         </AuthProvider>
         <Toaster />
         <FlashToast />

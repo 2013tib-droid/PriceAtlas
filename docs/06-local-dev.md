@@ -321,13 +321,17 @@ Menguji di HP sungguhan butuh HTTPS (kamera, `crypto.randomUUID`, service worker
 pnpm --filter @priceatlas/web lint            # ESLint flat + jsx-a11y (D-80)
 pnpm --filter @priceatlas/web format:check    # Prettier (format: pnpm --filter @priceatlas/web format)
 pnpm --filter @priceatlas/web typecheck       # app + service worker (tsconfig.sw.json)
-pnpm --filter @priceatlas/web test            # L5a unit + L5b komponen (vitest, jsdom)
+pnpm --filter @priceatlas/web test            # L5a unit + L5b komponen (vitest, jsdom; termasuk audit axe test/m7/a11y.test.tsx)
 pnpm --filter @priceatlas/web test:browser    # L5c browser (vitest browser mode + Chromium Playwright; PW_CHROMIUM_PATH opsional)
 pnpm --filter @priceatlas/web build && pnpm --filter @priceatlas/web check:bundle   # tanpa service role, anggaran JS
 pnpm --filter @priceatlas/web test:e2e        # Playwright (butuh Supabase lokal + env service role untuk test)
 ```
 
-e2e memakai `next start` (Playwright menyalakannya), env `NEXT_PUBLIC_SUPABASE_*` dan `SUPABASE_SERVICE_ROLE_KEY` (hanya proses test, untuk `auth.admin.generateLink`), dan `MAILPIT_URL`. Tanpa `SUPABASE_SERVICE_ROLE_KEY`, test yang butuh Supabase dilewati; test shell offline tanpa sesi tetap jalan. Browser lain: `PW_CHROMIUM_PATH=<path chromium>`.
+e2e memakai `next start` (Playwright menyalakannya), env `NEXT_PUBLIC_SUPABASE_*` dan `SUPABASE_SERVICE_ROLE_KEY` (hanya proses test, untuk `auth.admin.generateLink`), dan `MAILPIT_URL`. Tanpa `SUPABASE_SERVICE_ROLE_KEY`, test yang butuh Supabase dilewati; yang tetap jalan tanpa Supabase: shell offline tanpa sesi, axe di S-00a + `/offline`, dan cek PWA bisa dipasang (`e2e/a11y.spec.ts`, M7). Browser lain: `PW_CHROMIUM_PATH=<path chromium>`.
+
+Tanpa Supabase sama sekali, `next build`/`next start` tetap butuh nilai `NEXT_PUBLIC_SUPABASE_URL` dan `NEXT_PUBLIC_SUPABASE_ANON_KEY` (boleh tiruan, mis. `http://127.0.0.1:54321` + `dummy`); tanpa itu `proxy.ts` membalas 500.
+
+`check:bundle` mencetak JS halaman `/` gzip dengan rincian modul vs polyfill `noModule` (polyfill hanya dimuat browser lama). Anggaran 200 KiB tetap **peringatan** (D-84; hasil ukur M7: `docs/07` §1.11, F-94).
 
 ### 4.3 Peta `apps/web`
 
@@ -364,7 +368,11 @@ e2e memakai `next start` (Playwright menyalakannya), env `NEXT_PUBLIC_SUPABASE_*
 | `app/(app)/selamat-datang`, `features/onboarding` | M6: S-00b `/selamat-datang?next=` (semua login lewat sini; diteruskan jika sudah onboarded), S-00c `/selamat-datang/member` |
 | `app/(app)/saya/*`, `features/me` | M6: S-19 `/saya` (nama, ringkasan, Keluar), S-19b `/saya/member`, S-19c `/saya/berbagi`, Privasi & hapus akun `/saya/privasi` |
 | `lib/data/settings.ts`, `lib/settings/*`, `lib/catalog/barcodes.ts` | M6: hook W14/W15/W16, REST PATCH `profile`, REST `barcode_assignment` (select + insert, D-89), `POST /api/account/delete`; logika program member, Keluar/hapus akun, onboarding, barcode S-15 edit |
-| `lib/offline/prefs.ts`, `lib/hooks/use-pref.ts` | 💾 di IndexedDB `prefs`: pencarian terakhir (8), baru dicek (150, untuk R5), toggle "Hanya harga normal", sesi belanja aktif terakhir (`last_session`, teks "berakhir otomatis" S-13), status onboarding (`onboarded`, M6) |
+| `lib/offline/prefs.ts`, `lib/hooks/use-pref.ts` | 💾 di IndexedDB `prefs`: pencarian terakhir (8), baru dicek (150, untuk R5), toggle "Hanya harga normal", sesi belanja aktif terakhir (`last_session`, teks "berakhir otomatis" S-13), status onboarding (`onboarded`, M6), ajakan pasang iOS (`install_prompt`, M7) |
+| `lib/offline/offline-cards.ts`, `lib/data/offline-cache.ts` | M7: cache produk R5 (`get_offline_cache`) di store `offline_cards` + pencarian offline (normalisasi + pencocokan kata); `OfflineCacheSync` di layout (app) |
+| `app/(app)/tanya`, `features/ask`, `lib/ask/ask.ts` | M7: S-20 Tanya kerangka (`/tanya?q=`): `AskMessage`, `ToolSource`, `ExampleChips`; kirim nonaktif sampai Tahap 6 (D-57) |
+| `components/app/install-prompt.tsx`, `lib/offline/install.ts` | M7: `storage.persist()` + ajakan "Pasang ke layar utama" iOS setelah foto pertama (Q-62) |
+| `components/app/sw-update.tsx`, `lib/offline/sw-rules.ts` | Banner "Versi baru tersedia" (P-12): SW baru menunggu antrean kosong + "Muat ulang"; M7: cek versi saat app kembali terlihat (maks. 1× per jam) |
 
 ### 4.4 Fixture dan data e2e (M1)
 
@@ -466,3 +474,23 @@ Tab Saya (`/saya`): ubah nama tampilan, Program member (`/saya/member`, toggle =
 **Fixture W14/W15/W16 + REST profile/barcode.** `apps/web/test/fixtures/scenario.ts` (`collectSettings`, user Citra, dijalankan paling akhir, `UPDATE_FIXTURES=new`, §4.4).
 
 **e2e.** `e2e/settings.spec.ts` (alur 7, 8) di job `supabase-e2e` (Chromium + WebKit). Helper `login()` (`e2e/support/auth.ts`) kini menekan "Lewati" di S-00b untuk alur lain.
+
+### 4.10 Offline penuh, Tanya, audit (M7)
+
+**Cache produk offline (R5, D-60, `docs/07` §5.6, §1.11).** Setelah login, layout (app) memanggil `get_offline_cache(p_viewed_ids = "pernah dibuka" dari prefs (≤ 150), p_top = 50)` dan menyimpan kartunya di IndexedDB `priceatlas:<user_id>` → `offline_cards`. Sinkron ulang saat app dibuka jika sinkron terakhir > 6 jam (meta query di-persist, kartu tidak masuk `qcache`) dan setelah setiap tulis harga (konfirmasi struk/label, koreksi, merge/split). Offline (atau jaringan gagal) dan kata kunci belum pernah dicari online: S-02 mencari di `offline_cards` (huruf kecil, spasi tunggal, tanpa diakritik, setiap kata harus cocok di nama + varian + brand; produk arsip disaring) dengan label "data tersimpan, mungkin tidak terbaru". S-01 "Baru dicek" dan S-03 (ringkasan kartu saja, "Detail lengkap butuh sinyal") memakai kartu yang sama. Keluar/hapus akun menghapus `offline_cards` bersama database user; user dikunci (`lockUserDb`, F-81) sehingga sinkron yang masih berjalan tidak membuat ulang database.
+
+**Mencoba (mode B):** login dengan histori harga (§4.4/§4.8), tunggu beberapa detik, lalu DevTools → Application → IndexedDB → `priceatlas:<user_id>` → `offline_cards` (≤ 200 kartu). Build produksi (service worker aktif, §4.1) → DevTools → Network → Offline → cari kata yang belum pernah dicari (mis. "original") → kartu dari cache. Memaksa sinkron ulang: hapus entri `get_offline_cache` di `qcache` (atau Keluar lalu masuk lagi).
+
+**S-20 Tanya (kerangka, §9).** Baris "Tanya: …" di S-02 → `/tanya?q=`: pertanyaan tampil sebagai "Kamu: …" dengan balasan "Segera hadir" + tautan hasil cari; chip contoh mengisi kolom; tombol Kirim nonaktif. Tidak ada panggilan jaringan, dependensi Claude, atau API key di `apps/web` (Tahap 6: `POST /api/ask`). Keadaan jawaban (jawaban + "Dijawab dengan: tool(…)" + tautan layar sumber, di luar kemampuan, data kurang, ambigu, memuat) diuji dengan data contoh di `test/m7/offline.test.tsx`.
+
+**Ajakan pasang iOS (Q-62).** Saat antrean pertama kali berisi foto: `navigator.storage.persist()` diminta (semua platform) dan, di iOS yang belum dipasang ke layar utama, kartu "Pasang PriceAtlas ke layar utama" tampil sekali (tutup = `install_prompt: dismissed` di prefs). Mencoba di desktop: DevTools → mode perangkat iPhone (UA iOS) → foto pertama. Mengulang: hapus kunci `install_prompt` di `prefs`.
+
+**Pembaruan service worker (P-12).** Build baru → buka app lama: banner "Versi baru tersedia · Muat ulang"; selama antrean foto belum kosong: "Versi baru siap. Dipasang setelah semua foto terunggah." tanpa tombol. Mencoba: build + start, buka app, ubah satu teks, build + start lagi, kembali ke tab (atau DevTools → Application → Service Workers → Update).
+
+**Audit a11y.** `test/m7/a11y.test.tsx` menjalankan jest-axe di setiap layar S-xx (data fixture asli); hanya dampak serious/critical yang gagal. Ringkasan dampak lebih kecil per layar: `A11Y_REPORT=1 pnpm --filter @priceatlas/web exec vitest run test/m7/a11y.test.tsx`. Kontras warna tidak bisa dihitung di jsdom, jadi `e2e/a11y.spec.ts` menjalankan `@axe-core/playwright` (WCAG 2.1 A/AA) di browser sungguhan (Chromium + WebKit) untuk layar utama setelah login. Cek manual VoiceOver/TalkBack: daftar di `docs/07` §1.11.
+
+**PWA bisa dipasang.** Lighthouse 12 tidak lagi punya kategori PWA (F-95). Penggantinya `e2e/a11y.spec.ts` "PWA bisa dipasang": profil Chromium persisten (konteks biasa Playwright = penyamaran, `in-incognito`) → service worker siap → CDP `Page.getInstallabilityErrors` harus kosong. Jalan tanpa Supabase.
+
+**Fixture R5.** `apps/web/test/fixtures/scenario.ts` (`collectOffline`, paling akhir, hanya baca): `offline_cache` (Ani: pernah dibuka Milo UHT, Gula, produk duplikat yang sudah digabung + 50 teratas), `offline_cache_archived` (Citra: produk arsip M5), `offline_cache_empty` (Budi). Ditambahkan dengan `UPDATE_FIXTURES=new` (§4.4).
+
+**e2e.** `e2e/offline.spec.ts` "M7: cache produk R5" (Chromium, service worker) dan `e2e/a11y.spec.ts` (axe, installable, S-02 → S-20) di job `supabase-e2e`.

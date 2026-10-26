@@ -57,6 +57,25 @@ export function createIdbPersister(userId: string): Persister {
   };
 }
 
+// Janji "cache persist sudah dipulihkan" per user. Bisa diminta sebelum startPersist dipanggil (effect
+// komponen anak berjalan sebelum effect AuthProvider), jadi dibuat tertunda lalu diselesaikan nanti.
+const restoredByUser = new Map<string, { promise: Promise<void>; resolve: () => void }>();
+function restoredEntry(userId: string) {
+  let e = restoredByUser.get(userId);
+  if (!e) {
+    let resolve = () => undefined as void;
+    const promise = new Promise<void>((r) => (resolve = r));
+    e = { promise, resolve };
+    restoredByUser.set(userId, e);
+  }
+  return e;
+}
+
+/** Selesai memulihkan cache persist user ini (TanStack `persistQueryClient`). */
+export function whenRestored(userId: string): Promise<void> {
+  return restoredEntry(userId).promise;
+}
+
 /** Mulai persist untuk user ini. Mengembalikan fungsi berhenti dan janji pemulihan cache. */
 export function startPersist(queryClient: QueryClient, userId: string) {
   const [unsubscribe, restored] = persistQueryClient({
@@ -66,5 +85,14 @@ export function startPersist(queryClient: QueryClient, userId: string) {
     buster: PERSIST_BUSTER,
     dehydrateOptions: { shouldDehydrateQuery: shouldPersistQuery },
   });
-  return { unsubscribe, restored };
+  const entry = restoredEntry(userId);
+  restored.then(entry.resolve, entry.resolve);
+  return {
+    unsubscribe: () => {
+      unsubscribe();
+      // Persist berikutnya (login lagi, pasang ulang) memulihkan lagi: janji baru.
+      if (restoredByUser.get(userId) === entry) restoredByUser.delete(userId);
+    },
+    restored,
+  };
 }

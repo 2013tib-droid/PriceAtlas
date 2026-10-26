@@ -254,4 +254,8 @@ export const FIXTURE_SCHEMAS: Record<string, z.ZodType> = {
   barcode_insert_23514: RpcErrorFixture,
   barcode_insert_global: RpcErrorFixture,
   barcodes_big: z.array(BarcodeRowSchema).refine((v) => v.some((b) => b.code === '8991234500017')),
+  // M7: R5 get_offline_cache (D-60, §5.6).
+  offline_cache: z.array(ProductCardSchema).refine((v) => v.length > 3),
+  offline_cache_archived: z.array(ProductCardSchema).refine((v) => v.some((c) => c.product.status === 'archived')),
+  offline_cache_empty: z.array(ProductCardSchema).length(0),
 };
