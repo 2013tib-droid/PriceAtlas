@@ -39,7 +39,9 @@ HDR
 PGOPTIONS="-c client_min_messages=warning" psql -X -q -d postgres -c "drop database ${DB} with (force)"
 
 if [[ "${1:-}" == "--check" ]]; then
-  if ! diff -u db/schema.sql "$OUT"; then
+  # -B: pg_dump 17.11 (runner ubuntu-26.04) kadang menghasilkan satu baris kosong lebih/kurang di
+  # antara blok ACL; baris kosong tidak mengubah skema, jadi tidak dihitung sebagai drift.
+  if ! diff -u -B db/schema.sql "$OUT"; then
     echo "GAGAL: db/schema.sql tidak sama dengan hasil migration. Jalankan db/scripts/snapshot.sh"
     exit 1
   fi
