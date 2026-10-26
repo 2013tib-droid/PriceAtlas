@@ -85,10 +85,15 @@ describe('S-03 Detail produk', () => {
   });
 
   it('toggle "Hanya harga normal" memanggil R9 p_normal_only dan disimpan di prefs', async () => {
-    await openProduct(ID.milo200);
+    setUrl('/produk', `id=${ID.milo200}`);
+    const { qc } = await renderWithProviders(<ProductScreen />);
     await screen.findByTestId('price-chart');
+    // Klik setelah pref dibaca dari IndexedDB: jika belum, toggle membaca IndexedDB dulu sebelum R9
+    // dipanggil, yang bisa lambat saat runner CI sibuk.
+    await waitFor(() =>
+      expect(qc.getQueryState(['local', 'prefs', ID.user, 'chart_normal_only'])?.status).toBe('success'),
+    );
     await userEvent.setup().click(screen.getByLabelText('Hanya harga normal'));
-    // Toggle menulis prefs ke IndexedDB dulu, lalu R9 dipanggil: beri waktu lebih saat runner CI sibuk.
     await waitFor(
       () => expect(sb.rpc).toHaveBeenCalledWith('price_chart', { p_product_id: ID.milo200, p_normal_only: true }),
       { timeout: 5_000 },
