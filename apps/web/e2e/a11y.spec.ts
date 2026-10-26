@@ -111,7 +111,7 @@ test('setelah login: layar utama tanpa pelanggaran serius; S-02 → S-20 Tanya',
   await page.goto('/cari?q=milo');
   await page.getByRole('link', { name: /Tanya: milo/ }).click();
   await expect(page).toHaveURL(/\/tanya\?q=milo$/);
-  await expect(page.getByRole('heading', { name: 'Tanya' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Tanya', exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Lihat hasil cari "milo"' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Kirim' })).toBeDisabled();
   await page.getByRole('button', { name: 'harga per gram?' }).click();
