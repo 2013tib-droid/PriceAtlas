@@ -1,7 +1,6 @@
 # Tahap 6a — Desain AI Integration (termasuk uji OCR D-16)
 
-> Status: **Desain, menunggu persetujuan.** Belum ada kode produksi. Dokumen ini tidak mengubah keputusan D-01 s/d D-91.
-> Keputusan dari pertanyaan di §16 nanti dicatat mulai **D-92** di `PROJECT.md`.
+> Status: **Disetujui (2026-10-27).** Semua usulan default §16 diterima → **D-92**. Dokumen ini tidak mengubah keputusan D-01 s/d D-91.
 > Rujukan: `PROJECT.md` §3, §5.4, §5.9, D-16, D-50, D-57, D-61, D-70, D-74, D-75, D-82, D-86–D-91; `docs/05-backend-design.md` §5–§7, §9; `docs/06-local-dev.md` §2; `docs/07-frontend-design.md` §6, §9, §13.
 
 ## Daftar Isi
@@ -815,6 +814,8 @@ Setiap pertanyaan punya usulan default. Jawab "setuju semua" jika semua default 
 |---|---|---|
 | Q-118 | Fixture: ganti dengan JPEG sintetis (Q-72, F-118), tambah fixture screenshot ber-confidence rendah (Q-78), dan mode `STUB_FALLBACK_FIXTURE` khusus e2e untuk frame kamera (Q-82)? | **Ya, ketiganya.** Fallback hanya aktif lewat env di worker e2e, tidak pernah default. |
 | Q-119 | Pembagian milestone §14 dan urutan M0 → (M1 ∥ M5) → M2 → M3 → M4 → M6? | **Ya.** |
+
+**Hasil review 6a (2026-10-27):** pemilik proyek menyetujui semua usulan default Q-102 s/d Q-119 → **D-92**.
 
 ---
 
