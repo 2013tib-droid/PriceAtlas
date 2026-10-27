@@ -866,7 +866,7 @@ Setiap pertanyaan punya usulan default. Jawab "setuju semua" jika semua default 
 | Worker total | **114 lulus, 1 dilewati** (sebelumnya 37) | |
 | `pnpm -r --workspace-concurrency=1 test` | contracts 62, worker 114 (+1 skip), ai-tools 21, web **577** | Semua lulus. |
 | L5c browser (`test:browser`, Chromium terpasang via `PW_CHROMIUM_PATH`) | **12 lulus** | Fixture struk-aeon sekarang JPEG sungguhan → jalur "lewati kompresi" (`kept`), sha256 tetap = fixture stub. |
-| `pnpm -r typecheck`, lint + format web, `check-secrets.sh`, `pnpm install --frozen-lockfile` | lulus | |
+| `pnpm -r typecheck`, `next build`, lint + format web, `check-secrets.sh`, `pnpm install --frozen-lockfile` | lulus | Run CI pertama PR #21 gagal di typecheck/`next build` web: web mengimpor `prepare.ts` (lewat fixture test) tetapi tidak membaca deklarasi `heic-decode.d.ts` milik worker. Diperbaiki dengan `/// <reference>` di `prepare.ts`. Typecheck lokal sebelumnya berhenti di error worker sehingga error web tidak terlihat. |
 | Waktu `prepareImage` (4 vCPU, JPEG derau terburuk) | 12 MP (8,7 MB): ±370 ms; 4,9 MP (1920 × 2560): ±220 ms | HEIC belum diukur (tanpa sampel). |
 
 **Tidak dijalankan di sesi ini:** `db/scripts/snapshot.sh --check` (PostgreSQL 17 tidak bisa dipasang: `apt.postgresql.org` ditolak proxy; tidak ada perubahan SQL sehingga snapshot tidak terpengaruh), L4 dan e2e Playwright (butuh Supabase CLI, hanya di job CI `supabase-e2e`). Dampak ke e2e dianalisis: fixture baru ≤ 1,5 MB, ≤ 2048 px, tanpa GPS → aturan lewati kompresi (docs/07 §6.3) mengunggah byte asli, sehingga sha256 tetap dikenali stub; worker e2e menjalankan `prepareImages` dengan `sharp` prebuilt dari `pnpm install`.

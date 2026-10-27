@@ -5,6 +5,9 @@
 //   3. orientasi EXIF, metadata dibuang                 < 200 px → PermanentError('unsupported')
 // Hasil hanya di memori. Gambar asli di bucket tidak diubah (D-92, Q-112): sha256 tetap untuk
 // deteksi duplikat dan audit.
+// Deklarasi tipe heic-decode dirujuk langsung supaya ikut terbaca oleh proyek lain yang mengimpor
+// file ini (apps/web: test fixture + next build), bukan hanya tsconfig worker.
+/// <reference path="./heic-decode.d.ts" />
 import sharp, { type Sharp } from 'sharp';
 import heicDecode from 'heic-decode';
 import { log } from '../log.ts';
