@@ -58,10 +58,10 @@ describe('pembaca metadata (EXIF kecil buatan sendiri)', () => {
     expect(readImageMeta(webpVp8x(1500, 900))).toMatchObject({ sniffed: 'image/webp', width: 1500, height: 900 });
   });
 
-  it('fixture worker struk-aeon.jpg bukan JPEG sungguhan: jenis & ukuran tidak terbaca (F-40)', () => {
+  it('fixture worker struk-aeon.jpg = JPEG sintetis kecil (F-118): jenis & ukuran terbaca, tanpa GPS', () => {
     const b = new Uint8Array(readFileSync(FIXTURE));
-    expect(sniffMime(b)).toBeNull();
-    expect(readImageMeta(b)).toMatchObject({ width: null, height: null, hasGps: false });
+    expect(sniffMime(b)).toBe('image/jpeg');
+    expect(readImageMeta(b)).toMatchObject({ sniffed: 'image/jpeg', width: 492, height: 431, hasGps: false });
   });
 
   it('data rusak tidak melempar', () => {

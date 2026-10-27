@@ -1,5 +1,5 @@
 // Langkah worker untuk satu capture (docs/05 §5.4):
-//   claim → unduh gambar + verifikasi sha256 → extract → record_run_output →
+//   claim → unduh gambar + verifikasi sha256 → prepareImages (docs/08 §6) → extract → record_run_output →
 //   lokasi → matching tier 1–3 (SQL) → tier 4 (AiMatcher, hanya tanpa kandidat) →
 //   apply_extraction (satu transaksi). Gagal → fail_run (transient/permanen).
 import { createHash } from 'node:crypto';
@@ -11,6 +11,7 @@ import {
   type ParsedReceipt,
 } from '@priceatlas/contracts';
 import type { Db } from '../db.ts';
+import { prepareImages } from '../images/prepare.ts';
 import { log } from '../log.ts';
 import {
   PermanentError,
@@ -20,8 +21,14 @@ import {
   type CaptureExtractor,
   type CaptureKind,
   type ImageBlob,
+  type RunOutput,
   type UnmatchedItem,
 } from './types.ts';
+
+/** Lease run default (app.config capture_processing_timeout_seconds, D-70). */
+export const DEFAULT_LEASE_SECONDS = 300;
+/** Sisa waktu sebelum lease habis yang tidak dipakai panggilan AI (F-107). */
+export const DEADLINE_MARGIN_SECONDS = 30;
 
 export interface PipelineDeps {
   db: Db;
@@ -29,6 +36,8 @@ export interface PipelineDeps {
   extractor: CaptureExtractor;
   ai: AiMatcher;
   workerId: string;
+  /** Lease run dalam detik (default 300). Tenggat AI = lease − 30 dtk dari claim (F-107). */
+  leaseSeconds?: number;
   /** Hanya untuk test crash (L3): dipanggil tepat setelah klaim berhasil. */
   hooks?: { afterClaim?: (claim: Claim) => void | Promise<void> };
 }
@@ -75,15 +84,18 @@ export async function processNextCapture(deps: PipelineDeps): Promise<ProcessRes
   ]);
   const claim = r.rows[0];
   if (!claim) return null;
+  const deadline = createDeadline(started, deps.leaseSeconds ?? DEFAULT_LEASE_SECONDS);
   log('capture.claimed', { capture: claim.capture_id, run: claim.run_id, attempt: claim.attempt, kind: claim.kind });
   await deps.hooks?.afterClaim?.(claim);
 
   try {
-    const status = await runClaim(deps, claim);
+    const status = await runClaim(deps, claim, deadline);
     const ms = Date.now() - started;
     log('capture.applied', { capture: claim.capture_id, run: claim.run_id, status, ms });
     return { captureId: claim.capture_id, runId: claim.run_id, status, attempt: claim.attempt, ms };
   } catch (e) {
+    const runOutput = (e as { runOutput?: RunOutput } | null)?.runOutput;
+    if (runOutput) await recordRunOutput(db, claim.run_id, runOutput.rawText, runOutput.rawOutput, runOutput.usage);
     const { code, message, transient } = classify(e);
     const fr = await db.query<{ status: string }>('select app.fail_run($1, $2, $3, $4) as status', [
       claim.run_id,
@@ -95,7 +107,40 @@ export async function processNextCapture(deps: PipelineDeps): Promise<ProcessRes
     const ms = Date.now() - started;
     log('capture.failed', { capture: claim.capture_id, run: claim.run_id, code, transient, status, ms });
     return { captureId: claim.capture_id, runId: claim.run_id, status, attempt: claim.attempt, ms };
+  } finally {
+    deadline.clear();
   }
+}
+
+export interface Deadline {
+  signal: AbortSignal;
+  deadlineAt: Date;
+  clear(): void;
+}
+
+/** Tenggat absolut dari waktu claim: lease − margin. Sudah lewat → signal langsung aborted. */
+export function createDeadline(claimedAtMs: number, leaseSeconds: number, marginSeconds = DEADLINE_MARGIN_SECONDS, now = Date.now()): Deadline {
+  const deadlineAt = new Date(claimedAtMs + (leaseSeconds - marginSeconds) * 1000);
+  const ctl = new AbortController();
+  const ms = deadlineAt.getTime() - now;
+  let timer: NodeJS.Timeout | undefined;
+  if (ms <= 0) ctl.abort(new Error('tenggat lease habis'));
+  else {
+    timer = setTimeout(() => ctl.abort(new Error('tenggat lease habis')), ms);
+    timer.unref();
+  }
+  return { signal: ctl.signal, deadlineAt, clear: () => clearTimeout(timer) };
+}
+
+async function recordRunOutput(db: Db, runId: string, rawText: string | null | undefined, rawOutput: unknown, usage: RunOutput['usage']) {
+  await db.query('select app.record_run_output($1, $2, $3, $4, $5, $6)', [
+    runId,
+    rawText ?? null,
+    JSON.stringify(rawOutput),
+    usage?.inputTokens ?? null,
+    usage?.outputTokens ?? null,
+    usage?.costUsd ?? null,
+  ]);
 }
 
 export function classify(e: unknown): { code: string; message: string; transient: boolean } {
@@ -109,7 +154,7 @@ export function classify(e: unknown): { code: string; message: string; transient
   return { code: 'other', message: 'Terjadi kesalahan saat memproses. Akan dicoba lagi.', transient: true };
 }
 
-async function runClaim(deps: PipelineDeps, claim: Claim): Promise<string> {
+async function runClaim(deps: PipelineDeps, claim: Claim, deadline: Deadline): Promise<string> {
   const { db, blob, extractor, ai } = deps;
 
   // 1. Unduh gambar + verifikasi sha256.
@@ -128,6 +173,10 @@ async function runClaim(deps: PipelineDeps, claim: Claim): Promise<string> {
     images.push({ position: img.position, storagePath: img.storage_path, sha256: sha, data });
   }
 
+  // 1b. Dekode + bersihkan untuk model (§6). Gagal → `unsupported`, berlaku juga untuk stub.
+  const prepared = await prepareImages(images);
+  for (const img of images) img.prepared = prepared.find((p) => p.position === img.position);
+
   // 2. Extract (stub di Tahap 4) + validasi kontrak.
   const extraction = await extractor.extract({
     kind: claim.kind,
@@ -138,19 +187,14 @@ async function runClaim(deps: PipelineDeps, claim: Claim): Promise<string> {
       attempt: claim.attempt,
       uploadedAt: claim.uploaded_at,
       capturedAt: claim.captured_at,
+      signal: deadline.signal,
+      deadlineAt: deadline.deadlineAt,
     },
   });
   const parsed = ParsedOutputSchema.safeParse(extraction.output);
 
   // 3. Data mentah selalu disimpan, juga jika output tidak valid (audit, proses ulang).
-  await db.query('select app.record_run_output($1, $2, $3, $4, $5, $6)', [
-    claim.run_id,
-    extraction.rawText ?? null,
-    JSON.stringify(extraction.output),
-    extraction.usage?.inputTokens ?? null,
-    extraction.usage?.outputTokens ?? null,
-    extraction.usage?.costUsd ?? null,
-  ]);
+  await recordRunOutput(db, claim.run_id, extraction.rawText, extraction.rawOutput ?? extraction.output, extraction.usage);
   if (!parsed.success) throw new PermanentError('unsupported', 'Hasil pembacaan gambar tidak valid.');
   const output = parsed.data;
   if ((claim.kind === 'receipt') !== (output.kind === 'receipt')) {

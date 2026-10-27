@@ -4416,7 +4416,7 @@
       ],
       "images": [
         {
-          "sha256": "86a0948e6497d364a4938f97ad1594c198a4574776580cdef7410734aaf7c760",
+          "sha256": "a379bc9890e08149a13ee12729115308910433afd49e5951ac2d6a0ce30e6f98",
           "position": 1,
           "purged_at": null,
           "storage_path": "6f1b8230-4de7-48c2-b154-dd995268eed6/b35ab7f6-c466-43f1-8228-f3502a9ee690/1.jpg"
@@ -4500,7 +4500,7 @@
       ],
       "images": [
         {
-          "sha256": "e71fd121a40a66be1a5b9b7e3099d11544e0281520d5f89ada1605c81af15dfe",
+          "sha256": "2265f452b4c8b598ad25725e263aeb851e558e6f966f61589903863b1b2eb10a",
           "position": 1,
           "purged_at": null,
           "storage_path": "6f1b8230-4de7-48c2-b154-dd995268eed6/358e6715-3d16-460a-9af6-d982b2b502dc/1.jpg"
@@ -4550,7 +4550,7 @@
       ],
       "images": [
         {
-          "sha256": "0fd382726489de6b325e67e315c01540a15a04a724c27a7d82bbe61347a98c4d",
+          "sha256": "2180cb8d17cd0ffab5dca59811504b66a5e6777aa3ab489ea3304de28cf36741",
           "position": 1,
           "purged_at": null,
           "storage_path": "6f1b8230-4de7-48c2-b154-dd995268eed6/a9652c6a-7e71-4634-91ec-8df3a3718022/1.jpg"
@@ -4629,7 +4629,7 @@
       ],
       "images": [
         {
-          "sha256": "0901a686044416b7622e8f9a498b82ed8fc2d364dc2dbd7d507c8ffe27ef8d11",
+          "sha256": "eba79c86bf528afd4f9ab5dfa204039390c335b5bd429c58977efd943e23e138",
           "position": 1,
           "purged_at": null,
           "storage_path": "6f1b8230-4de7-48c2-b154-dd995268eed6/27be46bc-f03f-41bd-956e-42e3796b21fa/1.jpg"
@@ -4657,7 +4657,7 @@
       "runs": [],
       "images": [
         {
-          "sha256": "8a37c63b51f47f4aca648c472c99f14b56419c1a61e69fa5f64c80216c53d05f",
+          "sha256": "882ae9515d861b1b1f2f4681d18e378dc39cbc633acb56eb671d341b11a06281",
           "position": 1,
           "purged_at": null,
           "storage_path": "6f1b8230-4de7-48c2-b154-dd995268eed6/a843491b-cacc-48e9-9aa0-d80d5cc6672d/1.jpg"
@@ -4707,7 +4707,7 @@
       ],
       "images": [
         {
-          "sha256": "0fd382726489de6b325e67e315c01540a15a04a724c27a7d82bbe61347a98c4d",
+          "sha256": "2180cb8d17cd0ffab5dca59811504b66a5e6777aa3ab489ea3304de28cf36741",
           "position": 1,
           "purged_at": "2026-10-23T15:01:49.867833+07:00",
           "storage_path": "6f1b8230-4de7-48c2-b154-dd995268eed6/a9652c6a-7e71-4634-91ec-8df3a3718022/1.jpg"
@@ -6002,7 +6002,7 @@
       ],
       "images": [
         {
-          "sha256": "0901a686044416b7622e8f9a498b82ed8fc2d364dc2dbd7d507c8ffe27ef8d11",
+          "sha256": "eba79c86bf528afd4f9ab5dfa204039390c335b5bd429c58977efd943e23e138",
           "position": 1,
           "purged_at": null,
           "storage_path": "6f1b8230-4de7-48c2-b154-dd995268eed6/404bb531-8fa8-492a-876c-10e036c96b6e/1.jpg"
@@ -6720,7 +6720,7 @@
       ],
       "images": [
         {
-          "sha256": "8a37c63b51f47f4aca648c472c99f14b56419c1a61e69fa5f64c80216c53d05f",
+          "sha256": "882ae9515d861b1b1f2f4681d18e378dc39cbc633acb56eb671d341b11a06281",
           "position": 1,
           "purged_at": null,
           "storage_path": "6f1b8230-4de7-48c2-b154-dd995268eed6/61fc6150-fec5-4249-8d85-fd173e2de953/1.jpg"

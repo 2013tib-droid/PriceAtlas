@@ -11,7 +11,7 @@ import { newItem, OutboxStore } from '@/lib/offline/outbox-store';
 import { insertExif } from '../m2/images';
 
 /** sha256 fixture apps/worker/test/fixtures/struk-aeon.jpg (StubExtractor memetakan lewat hash ini). */
-const STRUK_AEON_SHA = '86a0948e6497d364a4938f97ad1594c198a4574776580cdef7410734aaf7c760';
+const STRUK_AEON_SHA = 'a379bc9890e08149a13ee12729115308910433afd49e5951ac2d6a0ce30e6f98';
 
 async function canvasImage(w: number, h: number, type: 'image/jpeg' | 'image/png', quality = 0.9): Promise<Uint8Array> {
   const c = new OffscreenCanvas(w, h);
@@ -102,11 +102,11 @@ describe('aturan lewati kompresi §6.3 (F-23)', () => {
     expect(out).toMatchObject({ how: 'kept', contentType: 'image/png', ext: 'png' });
   });
 
-  it('fixture worker struk-aeon.jpg (bukan JPEG sungguhan) → diunggah apa adanya, sha256 = fixture stub (F-40)', async () => {
+  it('fixture worker struk-aeon.jpg (JPEG sintetis kecil, F-118) → aturan lewati: byte apa adanya, sha256 = fixture stub', async () => {
     const res = await fetch(new URL('../../../worker/test/fixtures/struk-aeon.jpg', import.meta.url));
     const raw = new Uint8Array(await res.arrayBuffer());
     const out = await prepareImage(asFile(raw, 'struk-aeon.jpg', 'image/jpeg'), { kind: 'receipt', source: 'gallery' });
-    expect(out.how).toBe('undecodable');
+    expect(out.how).toBe('kept');
     expect(out.ext).toBe('jpg');
     expect(out.sha256).toBe(STRUK_AEON_SHA);
     expect(new Uint8Array(await out.blob.arrayBuffer())).toEqual(raw);

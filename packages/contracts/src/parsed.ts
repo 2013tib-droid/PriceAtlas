@@ -29,6 +29,8 @@ export const ParsedReceiptLineSchema = z.object({
   barcode: z.string().nullish(),
   parse_confidence: Confidence.nullish(),
   is_bundle: z.boolean().optional(),
+  /** Baris diskon karena kartu member menurut parser (docs/08 §11.3, Q-110). Opsional, aditif. */
+  member_discount: z.boolean().optional(),
 });
 
 export const ReceiptFieldConfidenceSchema = z
@@ -130,6 +132,11 @@ export const UsageSchema = z.object({
 export interface Extraction {
   rawText?: string | null;
   output: ParsedOutput;
+  /**
+   * Output mentah model + meta (docs/08 §5.3) untuk processing_run.raw_ai_output.
+   * Tidak diisi (stub) → `output` yang disimpan.
+   */
+  rawOutput?: unknown;
   usage?: z.infer<typeof UsageSchema>;
 }
 
