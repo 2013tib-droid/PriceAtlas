@@ -6,8 +6,8 @@
 | | |
 |---|---|
 | Nama sementara | Price Intelligence (repo: PriceAtlas) |
-| Status | Tahap 5b M7 selesai dan disetujui; Q-93 s/d Q-101 diputuskan (D-91) dan tindak lanjutnya diterapkan (`docs/07` §1.11); menunggu cek manual pemilik proyek (VoiceOver/TalkBack, SearchDock di iPhone) sebelum Tahap 6 |
-| Terakhir diperbarui | 2026-10-26 |
+| Status | Tahap 6a (desain AI Integration + rancangan uji OCR D-16) selesai, menunggu persetujuan: [`docs/08-ai-integration.md`](docs/08-ai-integration.md), temuan F-106 s/d F-122, pertanyaan Q-102 s/d Q-119. Cek manual pembaca layar (F-105, Q-101) belum dilakukan pemilik proyek; tidak memblokir Tahap 6 |
+| Terakhir diperbarui | 2026-10-27 |
 
 ---
 
@@ -50,7 +50,7 @@ Membantu pengguna mengetahui apakah harga suatu barang **murah atau mahal** berd
 | Database | Supabase PostgreSQL |
 | Storage | Supabase Storage |
 | AI | Claude |
-| OCR | Belum ditentukan. Lihat D-16. |
+| OCR | Belum ditentukan. Lihat D-16; rancangan uji di `docs/08-ai-integration.md` §4. |
 | Analytics DB | Belum memakai ClickHouse |
 
 ---
@@ -335,7 +335,7 @@ Hasil search langsung menampilkan, tanpa perlu membuka halaman detail:
 | 3 | Wireframe | ✅ Selesai ([spesifikasi](docs/04-wireframe.md), [prototipe](docs/wireframes/index.html)) |
 | 4 | Backend | ✅ Selesai ([desain backend](docs/05-backend-design.md), [menjalankan lokal](docs/06-local-dev.md)) |
 | 5 | Frontend | 🔄 5a disetujui ([desain frontend](docs/07-frontend-design.md)); 5b M0 selesai dan disetujui (D-84); M1 selesai, Q-68–Q-71 → D-85 ([hasil M1](docs/07-frontend-design.md#15-tahap-5b-m1-hasil-dan-temuan-baru-f-31-dst)); M2 selesai dan disetujui, Q-72–Q-75 → D-86 ([hasil M2](docs/07-frontend-design.md#16-tahap-5b-m2-hasil-dan-temuan-baru-f-40-dst)); M3 selesai dan disetujui, Q-76–Q-79 → D-87 ([hasil M3](docs/07-frontend-design.md#17-tahap-5b-m3-hasil-dan-temuan-baru-f-49-dst)); M4 selesai dan disetujui, Q-80–Q-84 → D-88 ([hasil M4](docs/07-frontend-design.md#18-tahap-5b-m4-hasil-dan-temuan-baru-f-60-dst)); M5 selesai dan disetujui, Q-85–Q-88 → D-89 ([hasil M5](docs/07-frontend-design.md#19-tahap-5b-m5-hasil-dan-temuan-baru-f-68-dst)); M6 selesai dan disetujui, Q-89–Q-92 → D-90 ([hasil M6](docs/07-frontend-design.md#110-tahap-5b-m6-hasil-dan-temuan-baru-f-80-dst)); M7 selesai dan disetujui, Q-93–Q-101 → D-91 ([hasil M7](docs/07-frontend-design.md#111-tahap-5b-m7-hasil-dan-temuan-baru-f-92-dst)) |
-| 6 | AI Integration (termasuk uji OCR, D-16) | — |
+| 6 | AI Integration (termasuk uji OCR, D-16) | 🔄 6a desain selesai, menunggu persetujuan ([desain AI](docs/08-ai-integration.md)); 6b dibagi M0–M6 (§14) |
 | 7 | Production | — |
 
 ### Cara Kerja Tim
