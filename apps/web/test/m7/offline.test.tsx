@@ -12,7 +12,6 @@ import {
   fx,
   ID,
   installDomPolyfills,
-  nav,
   renderWithProviders,
   resetHarness,
   sb,
@@ -26,7 +25,6 @@ const { SearchScreen } = await import('@/features/search/search-screen');
 const { SearchLayout } = await import('@/features/search/search-layout');
 const { HomeScreen } = await import('@/features/home/home-screen');
 const { ProductScreen } = await import('@/features/product/product-screen');
-const { AskScreen } = await import('@/features/ask/ask-screen');
 const { AskMessage } = await import('@/features/ask/ask-parts');
 const { FirstPhotoWatcher, InstallPrompt } = await import('@/components/app/install-prompt');
 const { SwUpdateBanner } = await import('@/components/app/sw-update');
@@ -196,27 +194,8 @@ describe('S-01 dan S-03 offline', () => {
   });
 });
 
-describe('S-20 Tanya (kerangka, §9)', () => {
-  it('pertanyaan dari S-02, "Segera hadir" + tautan hasil cari, kirim nonaktif, tanpa RPC', async () => {
-    setUrl('/tanya', 'q=milo');
-    await renderWithProviders(<AskScreen />);
-    expect(screen.getByRole('heading', { level: 1, name: 'Tanya' })).toBeTruthy();
-    expect(screen.getByText('milo')).toBeTruthy();
-    expect(screen.getAllByText(/^Segera hadir\. Untuk sekarang, pakai hasil cari/).length).toBeGreaterThan(0);
-    expect(screen.getByRole('link', { name: 'Lihat hasil cari "milo"' }).getAttribute('href')).toBe('/cari?q=milo');
-    const send = screen.getByRole('button', { name: 'Kirim' });
-    expect((send as HTMLButtonElement).disabled).toBe(true);
-    const input = screen.getByLabelText('Pertanyaan') as HTMLInputElement;
-    expect(input.value).toBe('milo');
-    await userEvent.setup().click(screen.getByRole('button', { name: 'termurah di mana?' }));
-    expect(input.value).toBe('milo termurah di mana?');
-    expect(sb.rpc).not.toHaveBeenCalledWith(
-      expect.not.stringMatching(/get_my_context|get_offline_cache/),
-      expect.anything(),
-    );
-    expect(nav.push).not.toHaveBeenCalled();
-  });
-
+describe('S-20 Tanya: komponen balasan (§9)', () => {
+  // S-20 aktif (6b M5): pengiriman, riwayat, offline, dan 7 keadaan diuji di test/m8/ask-screen.test.tsx.
   it('keadaan balasan dengan data contoh: jawaban, di luar kemampuan, data kurang, ambigu, memuat', async () => {
     const onPick = vi.fn();
     await renderWithProviders(
@@ -226,7 +205,7 @@ describe('S-20 Tanya (kerangka, §9)', () => {
           reply={{
             kind: 'answer',
             text: '500 g lebih hemat per gram: Rp91,8/g vs Rp97,5/g (6% lebih murah).',
-            basis: 'Berdasarkan harga terbaik 90 hari di historimu (9 data, terakhir 12 Okt).',
+            basis: { jumlah_data: 9, tanggal_terakhir: '2026-10-12' },
             tool: { name: 'bandingkan_ukuran', arg: 'Milo Original' },
             screen: { id: 'S-04', product_group_id: ID.group },
           }}

@@ -166,7 +166,8 @@ describe('axe: tanpa pelanggaran serious/critical (§10.1)', () => {
     await audit('/selamat-datang/member', '', <MemberStepScreen />);
   });
   it('S-20 Tanya', async () => {
-    await audit('/tanya', 'q=milo', <AskScreen />);
+    // Tanpa ?q= (dengan q, S-20 langsung mengirim; keadaan berisi jawaban diaudit di test/m8).
+    await audit('/tanya', '', <AskScreen />);
   });
 
   it('dialog terbuka (Keluar dengan konfirmasi) tetap lolos', async () => {

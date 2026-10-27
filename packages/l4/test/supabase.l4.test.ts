@@ -102,6 +102,28 @@ describe('PTnnn → HTTP lewat PostgREST (§3.1)', () => {
     expect(await res.json()).toMatchObject({ code: 'PT422', message: 'CAPTURE_IMAGES_MISSING' });
   });
 
+  it('Tanya: begin_ask + record_ask_usage dengan JWT user; AI_QUOTA_EXCEEDED → 429 (docs/08 §10.4)', async () => {
+    const u = await signedInUser('ask');
+    await pool.query(`update app.config set value = '1' where key = 'ask_daily_limit'`);
+    try {
+      const first = await call('begin_ask', {}, u.token);
+      expect(first.status).toBe(200);
+      const { day } = (await first.json()) as { day: string };
+      const rec = await call('record_ask_usage', { p_day: day, p_input_tokens: 10, p_output_tokens: 5, p_cost_usd: 0.001 }, u.token);
+      expect([200, 204]).toContain(rec.status);
+      const res = await call('begin_ask', {}, u.token);
+      expect(res.status).toBe(429);
+      expect(await res.json()).toMatchObject({ code: 'PT429', message: 'AI_QUOTA_EXCEEDED' });
+      const { error } = await u.client.rpc('begin_ask');
+      expect(parseRpcError(error!)).toMatchObject({ code: 'AI_QUOTA_EXCEEDED', http: 429, detail: { reason: 'daily' } });
+    } finally {
+      await pool.query(`update app.config set value = '30' where key = 'ask_daily_limit'`);
+    }
+    // Biaya hari ini hanya terbaca service role (worker), tidak lewat PostgREST untuk user.
+    const spend = await call('ai_spend_today', {}, u.token);
+    expect(spend.status).toBeGreaterThanOrEqual(400);
+  });
+
   it('anon tidak bisa menjalankan RPC (hanya authenticated)', async () => {
     const res = await call('get_my_context', {}, ANON_KEY);
     expect([401, 403]).toContain(res.status);

@@ -3,6 +3,7 @@
 //   PW_BASE_URL       default http://localhost:3000
 //   PW_NO_SERVER=1    jangan menyalakan next start (server sudah jalan)
 //   PW_CHROMIUM_PATH  executable Chromium lain (mis. /opt/pw-browsers di lingkungan cloud)
+//   ASK_ENGINE        default `stub` untuk next start e2e (Tanya tanpa Claude, docs/08 §13.1)
 // Chromium memakai kamera palsu (file Y4M dari e2e/support/fake-camera.ts) untuk kamera label (alur 4);
 // WebKit tidak punya kamera palsu, jadi alur 4 di WebKit memakai "Galeri" di kamera label (F-64).
 import { defineConfig, devices } from '@playwright/test';
@@ -39,5 +40,12 @@ export default defineConfig({
   ],
   webServer: process.env.PW_NO_SERVER
     ? undefined
-    : { command: 'pnpm start', url: `${baseURL}/masuk`, reuseExistingServer: !process.env.CI, timeout: 120_000 },
+    : {
+        command: 'pnpm start',
+        url: `${baseURL}/masuk`,
+        reuseExistingServer: !process.env.CI,
+        timeout: 120_000,
+        // S-20 (docs/08 §13.1): e2e tidak pernah memanggil Claude; jawaban dari stub berbasis pola.
+        env: { ASK_ENGINE: process.env.ASK_ENGINE ?? 'stub' },
+      },
 });

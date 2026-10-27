@@ -23,6 +23,9 @@ export const ERROR_HTTP = {
   REAUTH_REQUIRED: 401,
   FORBIDDEN: 403,
   INVALID_INPUT: 400,
+  // Tanya (docs/08 §11.3): kuota/anggaran habis (begin_ask) dan layanan AI tidak tersedia (route /api/ask).
+  AI_QUOTA_EXCEEDED: 429,
+  AI_UNAVAILABLE: 503,
 } as const;
 
 export type ErrorCode = keyof typeof ERROR_HTTP;

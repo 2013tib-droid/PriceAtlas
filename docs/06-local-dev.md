@@ -1,8 +1,8 @@
-# Menjalankan PriceAtlas Secara Lokal (backend Tahap 4b, frontend Tahap 5b)
+# Menjalankan PriceAtlas Secara Lokal (backend Tahap 4b, frontend Tahap 5b, AI Tahap 6b)
 
 > Dasar: `docs/05-backend-design.md` (§1.4 penjadwalan, §1.5 struktur repo, §5 pipeline, §7.7 rahasia, §8 test).
 > Dua mode: **A** (PostgreSQL biasa + stub, tanpa Supabase) dan **B** (Supabase CLI).
-> Tidak ada OCR/AI sungguhan (Tahap 6): extractor dan matcher AI memakai **stub berbasis fixture**. Frontend (`apps/web`, Tahap 5b) butuh mode B: lihat §4.
+> Extractor dan matcher AI worker masih **stub berbasis fixture** (extractor sungguhan di 6b M2). Tanya (`/api/ask`, 6b M5) memakai Claude jika `ANTHROPIC_API_KEY` web diisi, atau `ASK_ENGINE=stub` tanpa kunci: §4.11. Frontend (`apps/web`, Tahap 5b) butuh mode B: lihat §4.
 
 ---
 
@@ -42,9 +42,9 @@ apps/worker/           worker Node.js: pipeline capture + job (stub extractor, f
   src/images/          prepareImages: dekode + EXIF + resize sebelum extractor (docs/08 §6)
   src/ai/, extractors/ klien Claude, harga, skema LLM, prompt v1, konverter, VisionExtractor (belum dipasang, M2)
   eval/synthetic/      generator gambar sintetis (HTML → JPEG lewat Playwright)
-apps/web/              PWA Next.js 16 (Tahap 5b): /masuk, layout (app), service worker; POST /api/account/delete
+apps/web/              PWA Next.js 16 (Tahap 5b): /masuk, layout (app), service worker; POST /api/account/delete, POST /api/ask
 packages/contracts/    zod: input/output RPC, kode error, kontrak extra, unitPrice()
-packages/ai-tools/     6 tool AI (skema + handler ke RPC), belum disambungkan ke Claude
+packages/ai-tools/     6 tool AI (skema + handler ke RPC), loop Tanya `src/ask.ts` (server), tabel harga `src/pricing.ts`
 packages/testkit/      utilitas test: DB uji + klien RPC ala PostgREST dengan JWT simulasi
 packages/l4/           test L4 terhadap Supabase CLI (run.sh): hak akses, Storage, PTnnn → HTTP, OTP, worker
 packages/db-types/     tipe database hasil `supabase gen types` (dibangkitkan + dicek drift di CI)
@@ -208,6 +208,7 @@ bash db/tests/run.sh                  # L1: smoke (43, tidak diubah) + flows/*, 
 bash db/tests/run.sh 70_              # hanya flow yang namanya memuat "70_"
 pnpm -r --workspace-concurrency=1 test   # L2 + L3 + L5a/L5b web (membangun DB uji sendiri: priceatlas_l2_*, priceatlas_l3_*)
                                          # worker 6b M0: images/ai/convert (L2), vision-pipeline (L3, klien Claude palsu)
+                                         # 6b M5: ai-tools ask (loop Tanya, klien Claude palsu), web test/ask (route, S-20, set emas)
 pnpm -r typecheck
 bash db/scripts/snapshot.sh --check   # db/schema.sql tanpa drift
 bash scripts/check-secrets.sh
@@ -221,7 +222,9 @@ bash db/scripts/gen_inventory_test.sh       # tulis ulang whitelist hak akses 99
 pnpm --filter @priceatlas/db-types gen      # butuh mode B (§3.5); CI memeriksa drift
 ```
 
-Test L1 `60_public_share.sql` dan `70_capture_pipeline.sql` membuka sesi kedua lewat `dblink` ke database yang sama (`dbname=… user=postgres`, koneksi socket lokal). Server harus mengizinkan koneksi lokal itu tanpa kata sandi (default image Docker `postgres` dan paket Ubuntu dengan `peer` untuk user `postgres`). Socket dicari di direktori default libpq server itu: jika biner PostgreSQL berasal dari paket lain (mis. biner portabel yang memakai `/tmp`), jalankan server dengan `-k /var/run/postgresql,/tmp`.
+Tanpa PostgreSQL 17 lokal, `snapshot.sh` dengan `pg_dump` 16 menghasilkan berkas yang identik untuk skema ini (diperiksa di 6b M5, `docs/08` §19); CI tetap memeriksa dengan 17.
+
+Test L1 `60_public_share.sql`, `70_capture_pipeline.sql`, dan `86_ask_quota.sql` membuka sesi kedua lewat `dblink` ke database yang sama (`dbname=… user=postgres`, koneksi socket lokal). Server harus mengizinkan koneksi lokal itu tanpa kata sandi (default image Docker `postgres` dan paket Ubuntu dengan `peer` untuk user `postgres`). Socket dicari di direktori default libpq server itu: jika biner PostgreSQL berasal dari paket lain (mis. biner portabel yang memakai `/tmp`), jalankan server dengan `-k /var/run/postgresql,/tmp`.
 
 ---
 
@@ -323,6 +326,7 @@ cat > apps/web/.env.local <<ENV
 NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<ANON_KEY dari supabase status>
 SUPABASE_SERVICE_ROLE_KEY=<SERVICE_ROLE_KEY>     # hanya Route Handler /api/account/delete
+ANTHROPIC_API_KEY=<kunci "web" Anthropic>        # opsional, hanya Route Handler /api/ask (Tanya, §4.11)
 ENV
 pnpm --filter @priceatlas/web dev                # http://localhost:3000 → /masuk
 ```
@@ -347,13 +351,14 @@ pnpm --filter @priceatlas/web test            # L5a unit + L5b komponen (vitest,
 pnpm --filter @priceatlas/web test:browser    # L5c browser (vitest browser mode + Chromium Playwright; PW_CHROMIUM_PATH opsional)
 pnpm --filter @priceatlas/web build && pnpm --filter @priceatlas/web check:bundle   # tanpa service role, anggaran JS
 pnpm --filter @priceatlas/web test:e2e        # Playwright (butuh Supabase lokal + env service role untuk test)
+LIVE_AI=1 ANTHROPIC_API_KEY=… pnpm --filter @priceatlas/web test:live-ask   # set pertanyaan emas Tanya (manual, berbayar, §4.11)
 ```
 
-e2e memakai `next start` (Playwright menyalakannya), env `NEXT_PUBLIC_SUPABASE_*` dan `SUPABASE_SERVICE_ROLE_KEY` (hanya proses test, untuk `auth.admin.generateLink`), dan `MAILPIT_URL`. Tanpa `SUPABASE_SERVICE_ROLE_KEY`, test yang butuh Supabase dilewati; yang tetap jalan tanpa Supabase: shell offline tanpa sesi, axe di S-00a + `/offline`, dan cek PWA bisa dipasang (`e2e/a11y.spec.ts`, M7). Browser lain: `PW_CHROMIUM_PATH=<path chromium>`.
+e2e memakai `next start` (Playwright menyalakannya, dengan `ASK_ENGINE=stub` kecuali di-set lain), env `NEXT_PUBLIC_SUPABASE_*` dan `SUPABASE_SERVICE_ROLE_KEY` (hanya proses test, untuk `auth.admin.generateLink`), dan `MAILPIT_URL`. Tanpa `SUPABASE_SERVICE_ROLE_KEY`, test yang butuh Supabase dilewati; yang tetap jalan tanpa Supabase: shell offline tanpa sesi, axe di S-00a + `/offline`, dan cek PWA bisa dipasang (`e2e/a11y.spec.ts`, M7). Browser lain: `PW_CHROMIUM_PATH=<path chromium>`.
 
 Tanpa Supabase sama sekali, `next build`/`next start` tetap butuh nilai `NEXT_PUBLIC_SUPABASE_URL` dan `NEXT_PUBLIC_SUPABASE_ANON_KEY` (boleh tiruan, mis. `http://127.0.0.1:54321` + `dummy`); tanpa itu `proxy.ts` membalas 500.
 
-`check:bundle` mencetak JS halaman `/` gzip (modul; polyfill `noModule` hanya dimuat browser lama, ditampilkan terpisah). Dasar ukur = modul saja; **peringatan** jika > 350 KiB, target 200 KiB (D-91; hasil ukur M7: `docs/07` §1.11, F-94).
+`check:bundle` juga gagal jika `.next/static` memuat nama/nilai `ANTHROPIC_API_KEY`, `sk-ant-`, atau penanda SDK Anthropic (`anthropic-version`, `server-side-fallback-`): kunci dan SDK hanya di bundle server `/api/ask`. Lalu mencetak JS halaman `/` gzip (modul; polyfill `noModule` hanya dimuat browser lama, ditampilkan terpisah). Dasar ukur = modul saja; **peringatan** jika > 350 KiB, target 200 KiB (D-91; hasil ukur M7: `docs/07` §1.11, F-94).
 
 ### 4.3 Peta `apps/web`
 
@@ -503,7 +508,7 @@ Tab Saya (`/saya`): ubah nama tampilan, Program member (`/saya/member`, toggle =
 
 **Mencoba (mode B):** login dengan histori harga (§4.4/§4.8), tunggu beberapa detik, lalu DevTools → Application → IndexedDB → `priceatlas:<user_id>` → `offline_cards` (≤ 200 kartu). Build produksi (service worker aktif, §4.1) → DevTools → Network → Offline → cari kata yang belum pernah dicari (mis. "original") → kartu dari cache. Memaksa sinkron ulang: hapus entri `get_offline_cache` di `qcache` (atau Keluar lalu masuk lagi).
 
-**S-20 Tanya (kerangka, §9).** Baris "Tanya: …" di S-02 → `/tanya?q=`: pertanyaan tampil sebagai "Kamu: …" dengan balasan "Segera hadir" + tautan hasil cari; chip contoh mengisi kolom; tombol Kirim nonaktif. Tidak ada panggilan jaringan, dependensi Claude, atau API key di `apps/web` (Tahap 6: `POST /api/ask`). Keadaan jawaban (jawaban + "Dijawab dengan: tool(…)" + tautan layar sumber, di luar kemampuan, data kurang, ambigu, memuat) diuji dengan data contoh di `test/m7/offline.test.tsx`.
+**S-20 Tanya.** Kerangka M7; sejak 6b M5 aktif lewat `POST /api/ask` (§4.11).
 
 **Ajakan pasang iOS (Q-62).** Saat antrean pertama kali berisi foto: `navigator.storage.persist()` diminta (semua platform) dan, di iOS yang belum dipasang ke layar utama, kartu "Pasang PriceAtlas ke layar utama" tampil sekali (tutup = `install_prompt: dismissed` di prefs). Mencoba di desktop: DevTools → mode perangkat iPhone (UA iOS) → foto pertama. Mengulang: hapus kunci `install_prompt` di `prefs`.
 
@@ -516,3 +521,32 @@ Tab Saya (`/saya`): ubah nama tampilan, Program member (`/saya/member`, toggle =
 **Fixture R5.** `apps/web/test/fixtures/scenario.ts` (`collectOffline`, paling akhir, hanya baca): `offline_cache` (Ani: pernah dibuka Milo UHT, Gula, produk duplikat yang sudah digabung + 50 teratas), `offline_cache_archived` (Citra: produk arsip M5), `offline_cache_empty` (Budi). Ditambahkan dengan `UPDATE_FIXTURES=new` (§4.4).
 
 **e2e.** `e2e/offline.spec.ts` "M7: cache produk R5" (Chromium, service worker) dan `e2e/a11y.spec.ts` (axe, installable, S-02 → S-20) di job `supabase-e2e`.
+
+### 4.11 Tanya (S-20, Tahap 6b M5)
+
+Arsitektur: `docs/08` §10, hasil M5: `docs/08` §19. `POST /api/ask` (Route Handler Node, `import 'server-only'`) memakai cookie sesi user: `begin_ask()` (kuota 30/hari, 300/bulan per household, anggaran AI harian global) → loop Claude ⇄ 6 tool `packages/ai-tools` dengan JWT user (RLS) → `record_ask_usage()` → `{ reply, tools_used }`. Tanpa service role.
+
+| Env (server, `apps/web/.env.local`) | Nilai |
+|---|---|
+| `ANTHROPIC_API_KEY` | Kunci **web** (terpisah dari kunci worker, docs/08 §15 no. 5). Kosong → 503 `AI_UNAVAILABLE` (`disabled`), S-20 menampilkan "Segera hadir". Tidak pernah `NEXT_PUBLIC_`. |
+| `ASK_ENGINE` | `claude` (default), `stub` (e2e/CI: pola pertanyaan → tool sungguhan, tanpa Claude, biaya 0), `off` |
+| `ASK_MODEL` | Opsional, default `claude-opus-5-5`. Model lain hanya untuk dibandingkan dengan set pertanyaan emas (Q-115). |
+
+Kuota dan anggaran diubah tanpa migration: `update app.config set value = '…' where key in ('ask_daily_limit', 'ask_monthly_limit', 'ai_daily_budget_usd')`. Pemakaian per household per hari: `select * from app.ask_usage order by day desc` (sebagai `postgres`); biaya AI hari ini: `select app.ai_spend_today()`.
+
+**Mencoba tanpa kunci (mode B):** `ASK_ENGINE=stub pnpm --filter @priceatlas/web dev`, login dengan histori harga (§4.4), cari "milo" → "Tanya: milo" → pilih produk → jawaban dengan "Dijawab dengan: cari_harga_terbaik(…)" dan tautan ke S-03. "harga per gram Milo Original 200 g?" → tautan "Buka Cek harga rak" (S-03b, F-113). "total belanjaku bulan ini" → di luar kemampuan. Offline (DevTools) → Kirim nonaktif. Riwayat 20 tanya-jawab terakhir: IndexedDB `priceatlas:<user_id>` → `prefs` → `ask_history` (terhapus saat Keluar).
+
+**Dengan Claude:** isi `ANTHROPIC_API_KEY` lalu `pnpm --filter @priceatlas/web dev`. Log server (stdout, JSON satu baris) hanya memuat hash id user, durasi, token, biaya, nama tool, `kind`, dan `ask.unsupported_number`; teks pertanyaan/jawaban tidak dicatat.
+
+**Set pertanyaan emas (§13.3, manual, berbayar ±US$1–2 per putaran):**
+
+```bash
+export PGHOST=localhost PGUSER=postgres PGPASSWORD=postgres     # PostgreSQL lokal (mode A cukup)
+LIVE_AI=1 ANTHROPIC_API_KEY=sk-ant-… pnpm --filter @priceatlas/web test:live-ask
+GOLDEN_IDS=1,13,25 LIVE_AI=1 ANTHROPIC_API_KEY=… pnpm --filter @priceatlas/web test:live-ask   # sebagian
+ASK_MODEL=claude-sonnet-5-5 LIVE_AI=1 ANTHROPIC_API_KEY=… pnpm --filter @priceatlas/web test:live-ask   # model lain
+```
+
+Database uji `priceatlas_live_ask` dibangun dari migration + katalog contoh + histori sintetis (`apps/web/test/live/ask-golden.ts`). Setiap pertanyaan dicetak satu baris (kind, tool, tanda ✗); ringkasan + laporan agregat tanpa teks jawaban di `.data/ask-golden/<waktu>.json` (di-gitignore). Target: 100 % menolak di luar kemampuan, ≥ 90 % tool benar; test juga memastikan Tanya tidak menulis data.
+
+**Test:** `packages/ai-tools/test/ask.test.ts` (loop, pemetaan, error, fallback, F-122, stub), `apps/web/test/ask/` (route L3 dengan DB uji + klien Claude palsu, S-20 L5b, logika, set emas offline), `db/tests/flows/86_ask_quota.sql` (L1), `packages/l4` (429 lewat PostgREST), `apps/web/e2e/ask.spec.ts` (e2e dengan `ASK_ENGINE=stub`).

@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.3.0",
+    "@priceatlas/ai-tools": "workspace:*",
     "@priceatlas/contracts": "workspace:*",
     "@supabase/supabase-js": "^2.118.0",
     "heic-decode": "^2.1.0",

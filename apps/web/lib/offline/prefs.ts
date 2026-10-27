@@ -12,6 +12,8 @@ export const PREF_KEYS = {
   onboarded: 'onboarded',
   /** Ajakan pasang ke layar utama iOS setelah foto pertama (Q-62): pending / dismissed / not_needed. */
   installPrompt: 'install_prompt',
+  /** S-20 Tanya: 20 tanya-jawab terakhir (docs/08 §10.4); ikut terhapus saat Keluar (D-84). */
+  askHistory: 'ask_history',
 } as const;
 export type PrefKey = (typeof PREF_KEYS)[keyof typeof PREF_KEYS];
 

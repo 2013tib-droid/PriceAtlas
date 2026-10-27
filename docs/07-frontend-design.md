@@ -481,7 +481,7 @@ Karena tidak bisa dijalankan, setiap butir L4 diperiksa dari kode dan dokumentas
 
 Test: `test/m7/followup.test.tsx` (6). Q-94, Q-97, Q-98, Q-99 tidak butuh perubahan kode; Q-101 (cek manual) oleh pemilik proyek.
 
-**Daftar cek manual pembaca layar (F-105).** Status semua butir: *belum dicek di perangkat*.
+**Daftar cek manual pembaca layar (F-105).** Status semua butir: *belum dicek di perangkat*. Butir no. 10 diperbarui di 6b M5 (S-20 aktif, `docs/08` §19).
 
 | # | Langkah | Yang diharapkan |
 |---|---|---|
@@ -494,7 +494,7 @@ Test: `test/m7/followup.test.tsx` (6). Q-94, Q-97, Q-98, Q-99 tidak butuh peruba
 | 7 | Status unggahan berubah (online) | "Struk AEON BSD perlu dicek" diumumkan tanpa memindahkan fokus |
 | 8 | S-10: Benar / Ganti / Bukan produk | Setiap tombol menyebut baris yang dimaksud; "Simpan N harga" di bawah bisa dijangkau |
 | 9 | S-19 Keluar dengan antrean | Dialog dibacakan beserta jumlah foto; fokus kembali setelah Batal |
-| 10 | S-20 Tanya | Kolom "Pertanyaan" + petunjuk "Segera hadir…" dibacakan; tombol Kirim diumumkan nonaktif |
+| 10 | S-20 Tanya (aktif sejak 6b M5) | Kolom "Pertanyaan" + petunjuk "Jawaban hanya dari histori hargamu…" dibacakan; tombol Kirim nonaktif saat kolom kosong. Kirim → "Mencari di historimu…" dibacakan; jawaban diumumkan sekali ("Jawaban: …", `aria-live="polite"`) tanpa memindahkan fokus; riwayat yang dimuat saat layar dibuka tidak dibacakan. Tautan layar sumber ("Lihat detail produk", "Buka Cek harga rak", …) dan chip "Maksudmu yang mana?" bisa dijangkau satu per satu. Offline: petunjuk "Tanya butuh sinyal…" dibacakan dan Kirim diumumkan nonaktif |
 | 11 | Zoom 200% / teks besar sistem | Tata letak tidak terpotong; aksi utama tetap terlihat |
 | 12 | iOS: ajakan pasang | Kartu dibacakan dengan judul; "Nanti saja" berlabel |
 
@@ -1001,6 +1001,8 @@ Keterangan: **Data** = RPC/tabel (`docs/05` §3.2–3.3). **Keadaan** = memuat /
 | `23514` (400) | S-15 | "Isi ukuran kemasan untuk produk yang dijual per kemasan." | Fokus ke field ukuran |
 | `23P01` (409) | S-15 | "Barcode ini sudah dipakai produk lain di periode yang sama." | — |
 | `P0001` (400/500) | S-17 | "Produk tujuan tidak aktif atau bukan milikmu. Pilih produk lain." | — |
+| `AI_QUOTA_EXCEEDED` (429) | S-20 | Per `reason` dari `begin_ask` (`docs/08` §10.4): `daily` "Batas pertanyaan hari ini sudah tercapai. Coba lagi besok, atau pakai hasil cari."; `monthly` "Batas pertanyaan bulan ini sudah tercapai. Untuk sekarang, pakai hasil cari."; `budget` "Tanya sedang istirahat karena batas pemakaian AI hari ini tercapai. Coba lagi besok." | — |
+| `AI_UNAVAILABLE` (503) | S-20 | `reason` `disabled`/`config` (tanpa kunci, `ASK_ENGINE=off`, kunci ditolak): keadaan "Segera hadir…" + tautan hasil cari. `timeout`/`upstream`: "Gagal menjawab. Coba lagi." | "Coba lagi" |
 | Route `DELETE_FAILED` (500) | S-19 Privasi | "Gagal memulai penghapusan akun. Tidak ada yang berubah; coba lagi." | "Coba lagi" |
 | Route `DELETE_INCOMPLETE` (500) | S-19 Privasi | "Penghapusan belum selesai. Coba lagi." | "Coba lagi" |
 | Auth `otp_expired` | S-00a | "Kode sudah kedaluwarsa. Kirim kode baru." | "Kirim ulang" (jeda 60 dtk) |
@@ -1022,19 +1024,19 @@ Keterangan: **Data** = RPC/tabel (`docs/05` §3.2–3.3). **Keadaan** = memuat /
 
 ---
 
-## 9. S-20 Tanya (Kerangka)
+## 9. S-20 Tanya
 
-Sesuai D-57: hanya kerangka di Tahap 5, integrasi AI di Tahap 6.
+Sesuai D-57: kerangka di Tahap 5, integrasi AI di Tahap 6 (**aktif sejak 6b M5**, `docs/08` §10, §19).
 
 | Bagian | Tahap 5 | Tahap 6 |
 |---|---|---|
-| Route `/tanya?q=` dan baris "Tanya: …" di S-02 | Ya. Baris tampil di bawah hasil search dan di keadaan "Tidak ditemukan". | — |
+| Route `/tanya?q=` dan baris "Tanya: …" di S-02 | Ya. Baris tampil di bawah hasil search dan di keadaan "Tidak ditemukan". | Pertanyaan dari `?q=` langsung dikirim sekali (jika online), lalu URL menjadi `/tanya` supaya muat ulang tidak mengirim lagi (Q-128). |
 | Tata letak (pertanyaan, jawaban, "Dijawab dengan: tool(…)", tautan ke layar sumber, chip contoh pertanyaan) | Ya, dengan komponen `AskMessage`, `ToolSource`, `ExampleChips` | Diisi jawaban sungguhan |
-| Keadaan memuat ("Mencari di historimu…"), di luar kemampuan, data kurang, produk ambigu (chip) | Komponen dibuat, diuji dengan data contoh di test komponen | Dipakai |
-| Pengiriman pertanyaan | Tombol kirim nonaktif + teks "Segera hadir. Untuk sekarang, pakai hasil cari, Bandingkan ukuran, dan Lebih hemat di mana." | `POST /api/ask` (D-61) memakai `packages/ai-tools` |
-| Riwayat percakapan | — | 💾 di perangkat (wireframe), tidak di DB |
+| Keadaan memuat ("Mencari di historimu…"), di luar kemampuan, data kurang, produk ambigu (chip) | Komponen dibuat, diuji dengan data contoh di test komponen | Dipakai. Ditambah: kuota habis (429), gagal + "Coba lagi" (timeout/jaringan), "Segera hadir" (503 tanpa kunci). "Dijawab dengan: tool(arg)", tautan layar sumber (termasuk S-03b → `/produk?id=…&sheet=cek-harga`, F-113), dan "N data · terakhir …" selalu dari output tool. Chip ambigu mengirim pertanyaan baru. |
+| Pengiriman pertanyaan | Tombol kirim nonaktif + teks "Segera hadir. Untuk sekarang, pakai hasil cari, Bandingkan ukuran, dan Lebih hemat di mana." | `POST /api/ask` (D-61) memakai `packages/ai-tools`, tanpa streaming, satu pertanyaan sekaligus. Offline: Kirim nonaktif + "Tanya butuh sinyal. Hasil cari tetap bisa dipakai offline."; tidak diantrekan. Jawaban baru diumumkan lewat `aria-live`. |
+| Riwayat percakapan | — | 💾 IndexedDB user (`prefs` → `ask_history`), 20 tanya-jawab terakhir, terhapus saat Keluar (D-84). Maks 4 pasangan teks terakhir ikut dikirim sebagai `history`. |
 
-Tahap 5 **tidak** menambah dependensi Claude atau API key di `apps/web`.
+Tahap 5 **tidak** menambah dependensi Claude atau API key di `apps/web`. Sejak 6b M5, `@anthropic-ai/sdk` dan `ANTHROPIC_API_KEY` hanya dipakai Route Handler `/api/ask` (server); `check:bundle` gagal jika SDK atau kunci masuk bundle klien.
 
 ---
 
@@ -1110,6 +1112,7 @@ Tanpa membaca email: setup test memakai service role untuk `auth.admin.generateL
 | 8 | Onboarding | Login OTP pertama → S-00b → S-00c → S-01 keadaan kosong |
 | O | Offline | `context.setOffline(true)` → foto masuk antrean → S-08 "Menunggu sinyal" → online → terunggah; cari di cache R5; buka shell offline |
 | G | Gagal | `struk-buram` → S-09 "Gambar buram" + Ulangi; `struk-alfamart-timeout` → retry otomatis |
+| T | Tanya (6b M5) | `ASK_ENGINE=stub`: S-02 "Tanya: milo" → ambigu → pilih produk → jawaban + "Dijawab dengan" + tautan S-03; per gram → S-03b; di luar kemampuan; offline → Kirim nonaktif; riwayat setelah kembali; axe (`e2e/ask.spec.ts`) |
 
 ### 11.4 CI (GitHub Actions)
 

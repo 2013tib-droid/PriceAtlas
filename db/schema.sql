@@ -132,6 +132,20 @@ begin
 end $$;
 
 --
+-- Name: ai_spend_today(); Type: FUNCTION; Schema: app; Owner: -
+--
+
+CREATE FUNCTION app.ai_spend_today() RETURNS numeric
+    LANGUAGE sql STABLE SECURITY DEFINER
+    SET search_path TO ''
+    AS $$
+  select coalesce((select sum(cost_usd) from public.processing_run
+                    where started_at >= current_date::timestamptz
+                      and started_at <  (current_date + 1)::timestamptz), 0)
+       + coalesce((select sum(cost_usd) from app.ask_usage where day = current_date), 0)
+$$;
+
+--
 -- Name: apply_extraction(uuid, uuid, jsonb); Type: FUNCTION; Schema: app; Owner: -
 --
 
@@ -1119,7 +1133,9 @@ begin
       ('MERGE_FORBIDDEN',             '403', 'Produk ini tidak bisa digabungkan.'),
       ('REAUTH_REQUIRED',             '401', 'Masuk ulang dulu untuk melanjutkan.'),
       ('FORBIDDEN',                   '403', 'Tidak berhak melakukan aksi ini.'),
-      ('INVALID_INPUT',               '400', 'Input tidak valid.')
+      ('INVALID_INPUT',               '400', 'Input tidak valid.'),
+      ('AI_QUOTA_EXCEEDED',           '429', 'Batas pertanyaan Tanya sudah tercapai. Coba lagi nanti.'),
+      ('AI_UNAVAILABLE',              '503', 'Layanan AI sedang tidak tersedia.')
     ) as e(code, http, hint)
    where e.code = p_code;
 
@@ -2395,6 +2411,59 @@ CREATE FUNCTION public.begin_account_deletion(p_user_id uuid) RETURNS jsonb
     LANGUAGE sql SECURITY DEFINER
     SET search_path TO ''
     AS $$ select app.begin_account_deletion(p_user_id) $$;
+
+--
+-- Name: begin_ask(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.begin_ask() RETURNS jsonb
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO ''
+    AS $$
+declare
+  v_household uuid := (app.my_household()).id;
+  v_day       date;
+  v_daily     integer := coalesce(app.config_int('ask_daily_limit'), 30);
+  v_monthly   integer := coalesce(app.config_int('ask_monthly_limit'), 300);
+  v_budget    numeric := coalesce(app.config_numeric('ai_daily_budget_usd'), 2.00);
+  v_today_n   integer;
+  v_month_n   integer;
+begin
+  if v_household is null then
+    perform app.err('FORBIDDEN', jsonb_build_object('reason', 'no_household'));
+  end if;
+  v_day := app.household_today(v_household);
+
+  insert into app.ask_usage (household_id, day) values (v_household, v_day)
+  on conflict (household_id, day) do nothing;
+  select questions into v_today_n
+    from app.ask_usage where household_id = v_household and day = v_day
+     for update;
+
+  -- Setelah kunci: pernyataan baru melihat nilai terbaru baris yang dikunci.
+  select coalesce(sum(questions), 0) into v_month_n
+    from app.ask_usage
+   where household_id = v_household
+     and day >= date_trunc('month', v_day)::date and day <= v_day;
+
+  if v_today_n >= v_daily then
+    perform app.err('AI_QUOTA_EXCEEDED', jsonb_build_object('reason', 'daily', 'limit', v_daily));
+  end if;
+  if v_month_n >= v_monthly then
+    perform app.err('AI_QUOTA_EXCEEDED', jsonb_build_object('reason', 'monthly', 'limit', v_monthly));
+  end if;
+  if app.ai_spend_today() >= v_budget then
+    perform app.err('AI_QUOTA_EXCEEDED', jsonb_build_object('reason', 'budget'));
+  end if;
+
+  update app.ask_usage set questions = questions + 1, updated_at = now()
+   where household_id = v_household and day = v_day;
+
+  return jsonb_build_object(
+    'day', v_day,
+    'questions_today', v_today_n + 1, 'daily_limit', v_daily,
+    'questions_month', v_month_n + 1, 'monthly_limit', v_monthly);
+end $$;
 
 --
 -- Name: compare_sizes(uuid, text); Type: FUNCTION; Schema: public; Owner: -
@@ -3969,6 +4038,41 @@ CREATE FUNCTION public.recent_locations(p_limit integer DEFAULT 10) RETURNS SETO
 $$;
 
 --
+-- Name: record_ask_usage(date, integer, integer, numeric); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.record_ask_usage(p_day date, p_input_tokens integer, p_output_tokens integer, p_cost_usd numeric DEFAULT NULL::numeric) RETURNS void
+    LANGUAGE plpgsql SECURITY DEFINER
+    SET search_path TO ''
+    AS $$
+declare
+  v_household uuid := (app.my_household()).id;
+  v_today     date;
+begin
+  if v_household is null then
+    perform app.err('FORBIDDEN', jsonb_build_object('reason', 'no_household'));
+  end if;
+  v_today := app.household_today(v_household);
+  if p_day is null or p_day not between v_today - 1 and v_today
+     or p_input_tokens is null or p_input_tokens not between 0 and 2000000
+     or p_output_tokens is null or p_output_tokens not between 0 and 200000
+     or (p_cost_usd is not null and p_cost_usd not between 0 and 1) then
+    perform app.err('INVALID_INPUT', jsonb_build_object('reason', 'ask_usage'));
+  end if;
+
+  update app.ask_usage
+     set recorded      = recorded + 1,
+         input_tokens  = input_tokens + p_input_tokens,
+         output_tokens = output_tokens + p_output_tokens,
+         cost_usd      = cost_usd + coalesce(p_cost_usd, 0),
+         updated_at    = now()
+   where household_id = v_household and day = p_day and recorded < questions;
+  if not found then
+    perform app.err('INVALID_STATE', jsonb_build_object('reason', 'no_open_question', 'day', p_day));
+  end if;
+end $$;
+
+--
 -- Name: retry_capture(uuid); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -4326,6 +4430,26 @@ begin
     left join public.branch b on b.id = a.branch_id
    order by a.dimension, a.currency, a.avg_unit_price, a.store_id, a.branch_id;
 end $$;
+
+--
+-- Name: ask_usage; Type: TABLE; Schema: app; Owner: -
+--
+
+CREATE TABLE app.ask_usage (
+    household_id uuid NOT NULL,
+    day date NOT NULL,
+    questions integer DEFAULT 0 NOT NULL,
+    recorded integer DEFAULT 0 NOT NULL,
+    input_tokens bigint DEFAULT 0 NOT NULL,
+    output_tokens bigint DEFAULT 0 NOT NULL,
+    cost_usd numeric(12,6) DEFAULT 0 NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT ask_usage_check CHECK (((recorded >= 0) AND (recorded <= questions))),
+    CONSTRAINT ask_usage_cost_usd_check CHECK ((cost_usd >= (0)::numeric)),
+    CONSTRAINT ask_usage_input_tokens_check CHECK ((input_tokens >= 0)),
+    CONSTRAINT ask_usage_output_tokens_check CHECK ((output_tokens >= 0)),
+    CONSTRAINT ask_usage_questions_check CHECK ((questions >= 0))
+);
 
 --
 -- Name: config; Type: TABLE; Schema: app; Owner: -
@@ -4786,6 +4910,13 @@ CREATE TABLE public.store_group (
 );
 
 --
+-- Name: ask_usage ask_usage_pkey; Type: CONSTRAINT; Schema: app; Owner: -
+--
+
+ALTER TABLE ONLY app.ask_usage
+    ADD CONSTRAINT ask_usage_pkey PRIMARY KEY (household_id, day);
+
+--
 -- Name: config config_pkey; Type: CONSTRAINT; Schema: app; Owner: -
 --
 
@@ -5113,6 +5244,12 @@ ALTER TABLE ONLY public.store
 
 ALTER TABLE ONLY public.unit
     ADD CONSTRAINT unit_pkey PRIMARY KEY (code);
+
+--
+-- Name: ask_usage_day_idx; Type: INDEX; Schema: app; Owner: -
+--
+
+CREATE INDEX ask_usage_day_idx ON app.ask_usage USING btree (day);
 
 --
 -- Name: job_pending_idx; Type: INDEX; Schema: app; Owner: -
@@ -5635,6 +5772,13 @@ CREATE TRIGGER store_audit AFTER DELETE OR UPDATE ON public.store FOR EACH ROW E
 --
 
 CREATE TRIGGER store_touch BEFORE UPDATE ON public.store FOR EACH ROW EXECUTE FUNCTION app.touch_updated_at();
+
+--
+-- Name: ask_usage ask_usage_household_id_fkey; Type: FK CONSTRAINT; Schema: app; Owner: -
+--
+
+ALTER TABLE ONLY app.ask_usage
+    ADD CONSTRAINT ask_usage_household_id_fkey FOREIGN KEY (household_id) REFERENCES public.household(id) ON DELETE CASCADE;
 
 --
 -- Name: public_price_source public_price_source_fact_id_fkey; Type: FK CONSTRAINT; Schema: app; Owner: -
@@ -6668,6 +6812,13 @@ GRANT ALL ON FUNCTION app.accept_capture_item(p_item_id uuid, p_product_id uuid,
 GRANT ALL ON FUNCTION app.accept_capture_item(p_item_id uuid, p_product_id uuid, p_outcome text, p_create_alias boolean) TO service_role;
 
 --
+-- Name: FUNCTION ai_spend_today(); Type: ACL; Schema: app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION app.ai_spend_today() FROM PUBLIC;
+GRANT ALL ON FUNCTION app.ai_spend_today() TO service_role;
+
+--
 -- Name: FUNCTION apply_extraction(p_capture_id uuid, p_run_id uuid, p_payload jsonb); Type: ACL; Schema: app; Owner: -
 --
 
@@ -6896,8 +7047,8 @@ GRANT ALL ON FUNCTION app.enqueue_unit_price_recompute() TO service_role;
 --
 
 REVOKE ALL ON FUNCTION app.err(p_code text, p_detail jsonb) FROM PUBLIC;
-GRANT ALL ON FUNCTION app.err(p_code text, p_detail jsonb) TO authenticated;
 GRANT ALL ON FUNCTION app.err(p_code text, p_detail jsonb) TO service_role;
+GRANT ALL ON FUNCTION app.err(p_code text, p_detail jsonb) TO authenticated;
 
 --
 -- Name: FUNCTION fail_job(p_job_id bigint, p_error text); Type: ACL; Schema: app; Owner: -
@@ -7291,6 +7442,14 @@ REVOKE ALL ON FUNCTION public.begin_account_deletion(p_user_id uuid) FROM PUBLIC
 GRANT ALL ON FUNCTION public.begin_account_deletion(p_user_id uuid) TO service_role;
 
 --
+-- Name: FUNCTION begin_ask(); Type: ACL; Schema: public; Owner: -
+--
+
+REVOKE ALL ON FUNCTION public.begin_ask() FROM PUBLIC;
+GRANT ALL ON FUNCTION public.begin_ask() TO service_role;
+GRANT ALL ON FUNCTION public.begin_ask() TO authenticated;
+
+--
 -- Name: FUNCTION compare_sizes(p_group_id uuid, p_window text); Type: ACL; Schema: public; Owner: -
 --
 
@@ -7596,6 +7755,14 @@ GRANT ALL ON FUNCTION public.recent_locations(p_limit integer) TO service_role;
 GRANT ALL ON FUNCTION public.recent_locations(p_limit integer) TO authenticated;
 
 --
+-- Name: FUNCTION record_ask_usage(p_day date, p_input_tokens integer, p_output_tokens integer, p_cost_usd numeric); Type: ACL; Schema: public; Owner: -
+--
+
+REVOKE ALL ON FUNCTION public.record_ask_usage(p_day date, p_input_tokens integer, p_output_tokens integer, p_cost_usd numeric) FROM PUBLIC;
+GRANT ALL ON FUNCTION public.record_ask_usage(p_day date, p_input_tokens integer, p_output_tokens integer, p_cost_usd numeric) TO service_role;
+GRANT ALL ON FUNCTION public.record_ask_usage(p_day date, p_input_tokens integer, p_output_tokens integer, p_cost_usd numeric) TO authenticated;
+
+--
 -- Name: FUNCTION retry_capture(p_capture_id uuid); Type: ACL; Schema: public; Owner: -
 --
 
@@ -7666,6 +7833,12 @@ GRANT ALL ON FUNCTION public.update_capture_item(p_item_id uuid, p_patch jsonb, 
 REVOKE ALL ON FUNCTION public.where_cheaper(p_product_id uuid, p_group_id uuid, p_window_days integer) FROM PUBLIC;
 GRANT ALL ON FUNCTION public.where_cheaper(p_product_id uuid, p_group_id uuid, p_window_days integer) TO service_role;
 GRANT ALL ON FUNCTION public.where_cheaper(p_product_id uuid, p_group_id uuid, p_window_days integer) TO authenticated;
+
+--
+-- Name: TABLE ask_usage; Type: ACL; Schema: app; Owner: -
+--
+
+GRANT ALL ON TABLE app.ask_usage TO service_role;
 
 --
 -- Name: TABLE config; Type: ACL; Schema: app; Owner: -
@@ -8158,7 +8331,10 @@ INSERT INTO app.config VALUES
 	('fuzzy_min_similarity', '0.5', 'Ambang matching tier 3 (word_similarity)'),
 	('orphan_upload_ttl_hours', '24', 'Umur unggahan yatim sebelum disapu (§5.2)'),
 	('ocr_redact_after_days', '7', 'Redaksi OCR mentah N hari setelah capture final (§7.4)'),
-	('session_extend_hours', '2', 'Perpanjangan sesi belanja (D-60)');
+	('session_extend_hours', '2', 'Perpanjangan sesi belanja (D-60)'),
+	('ask_daily_limit', '30', 'Tanya: pertanyaan maksimum per household per hari (zona household, D-92)'),
+	('ask_monthly_limit', '300', 'Tanya: pertanyaan maksimum per household per bulan kalender (D-92)'),
+	('ai_daily_budget_usd', '2.00', 'Anggaran biaya AI global per hari (US$, zona DB). Habis → worker berhenti claim, Tanya 429 (docs/08 §12.3)');
 
 --
 -- Data for Name: unit; Type: TABLE DATA; Schema: public; Owner: -

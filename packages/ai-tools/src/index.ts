@@ -1,4 +1,4 @@
-// Tools AI (docs/05 §6, D-05, D-57). Belum disambungkan ke Claude (Tahap 6).
+// Tools AI (docs/05 §6, D-05, D-57). Dipakai loop Tanya (src/ask.ts, docs/08 §10) lewat /api/ask.
 // Prinsip:
 //   * Setiap tool memetakan ke RPC BACA di §3, dipanggil dengan JWT user. RLS membatasi
 //     data; tool tidak menambahkan filter household.
@@ -337,7 +337,7 @@ export const TOOLS = [cariHargaTerbaik, trenHarga, hargaPerSatuan, bandingkanUku
 export interface ToolRegistryEntry {
   name: string;
   description: string;
-  /** JSON Schema dari zod, siap dipakai sebagai input_schema tool Claude (Tahap 6). */
+  /** JSON Schema dari zod; input_schema tool Claude di src/ask.ts (tanpa `$schema`). */
   inputSchema: Record<string, unknown>;
   handler(client: RpcClient, input: unknown): Promise<unknown>;
 }
