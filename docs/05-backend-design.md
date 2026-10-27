@@ -969,6 +969,7 @@ Trigger `capture_status_guard` (**⚑ Q-04**, F-15) menolak transisi lain dengan
 ```
 claim
  └─ unduh gambar (BlobStore: Supabase Storage / folder lokal), verifikasi sha256
+ └─ prepareImages: dekode, EXIF, metadata dibuang, ≤ 2576 px   [6b M0, docs/08 §6; gagal → unsupported]
  └─ CaptureExtractor.extract(images, kind, ctx)              ← STUB di Tahap 4
      → { rawText?, output: ParsedReceipt | ParsedObservation, usage, engine, model, promptVersion }
  └─ app.record_run_output(run, raw_text, raw_output, usage)    [T-a: data mentah selalu disimpan, §3]

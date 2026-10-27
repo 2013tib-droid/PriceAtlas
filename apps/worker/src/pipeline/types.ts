@@ -5,11 +5,24 @@ import type { CaptureKind, Extraction } from '@priceatlas/contracts';
 
 export type { CaptureKind, Extraction };
 
+/** Turunan bersih untuk model (docs/08 §6): tanpa metadata, orientasi diterapkan, ≤ 2576 px. */
+export interface PreparedImage {
+  position: number;
+  data: Buffer;
+  mediaType: 'image/jpeg' | 'image/png';
+  width: number;
+  height: number;
+  sourceType: 'jpeg' | 'png' | 'webp' | 'heic';
+}
+
 export interface ImageBlob {
   position: number;
   storagePath: string;
+  /** sha256 byte asli di bucket (stub memetakan fixture lewat nilai ini). */
   sha256: string;
   data: Buffer;
+  /** Diisi pipeline lewat prepareImages (§6) untuk semua engine. Extractor AI hanya memakai ini. */
+  prepared?: PreparedImage;
 }
 
 export interface ExtractContext {
@@ -18,6 +31,9 @@ export interface ExtractContext {
   attempt: number;
   uploadedAt: Date;
   capturedAt: Date | null;
+  /** Tenggat panggilan AI (F-107): lease − 30 dtk dari waktu claim. Aborted = waktu habis. */
+  signal?: AbortSignal;
+  deadlineAt?: Date;
 }
 
 /**
@@ -66,9 +82,22 @@ export interface BlobStore {
 
 export type PermanentCode = 'blurry' | 'not_a_receipt' | 'unsupported' | 'timeout' | 'other';
 
+/**
+ * Data mentah dari panggilan AI yang gagal setelah respons diterima (refusal, max_tokens, output
+ * tidak valid). Pipeline tetap menyimpannya ke processing_run (audit, biaya) sebelum fail_run.
+ */
+export interface RunOutput {
+  rawText?: string | null;
+  rawOutput: unknown;
+  usage?: Extraction['usage'];
+}
+
 /** Timeout, 5xx, rate limit: dicoba lagi otomatis dengan backoff (§5.3). */
 export class TransientError extends Error {
-  constructor(message: string) {
+  constructor(
+    message: string,
+    readonly runOutput?: RunOutput,
+  ) {
     super(message);
     this.name = 'TransientError';
   }
@@ -79,6 +108,7 @@ export class PermanentError extends Error {
   constructor(
     readonly code: PermanentCode,
     message: string,
+    readonly runOutput?: RunOutput,
   ) {
     super(message);
     this.name = 'PermanentError';

@@ -1,6 +1,6 @@
 # Tahap 6a — Desain AI Integration (termasuk uji OCR D-16)
 
-> Status: **Disetujui (2026-10-27).** Semua usulan default §16 diterima → **D-92**. Dokumen ini tidak mengubah keputusan D-01 s/d D-91.
+> Status: **Disetujui (2026-10-27).** Semua usulan default §16 diterima → **D-92**. Dokumen ini tidak mengubah keputusan D-01 s/d D-91. **6b M0 selesai (2026-10-27), menunggu review:** §18, pertanyaan Q-120 s/d Q-126.
 > Rujukan: `PROJECT.md` §3, §5.4, §5.9, D-16, D-50, D-57, D-61, D-70, D-74, D-75, D-82, D-86–D-91; `docs/05-backend-design.md` §5–§7, §9; `docs/06-local-dev.md` §2; `docs/07-frontend-design.md` §6, §9, §13.
 
 ## Daftar Isi
@@ -23,6 +23,7 @@
 15. [Yang perlu disiapkan pemilik proyek sebelum 6b](#15-yang-perlu-disiapkan-pemilik-proyek-sebelum-6b)
 16. [Pertanyaan untuk didiskusikan (Q-102 dst.)](#16-pertanyaan-untuk-didiskusikan-q-102-dst)
 17. [Bagian yang belum bisa dirancang penuh](#17-bagian-yang-belum-bisa-dirancang-penuh)
+18. [Tahap 6b M0: hasil dan temuan baru (F-123 dst.)](#18-tahap-6b-m0-hasil-dan-temuan-baru-f-123-dst)
 
 ---
 
@@ -831,6 +832,91 @@ Setiap pertanyaan punya usulan default. Jawab "setuju semua" jika semua default 
 | Retensi data di sisi Anthropic dan vendor OCR | Pengaturan org pemilik proyek | Teks privasi (Q-114) menyesuaikan. |
 | Hosting worker | Tahap 7 (Q-17) | Desain tidak bergantung pada platform; `--once` tersedia. |
 | Cek pembaca layar (F-105) | Perangkat pemilik proyek | Tidak memblokir. Butir S-20 diperbarui di M5. |
+
+---
+
+## 18. Tahap 6b M0: hasil dan temuan baru (F-123 dst.)
+
+> Status: **selesai, menunggu review** (2026-10-27). Basis: branch desain 6a (`D-92`). Tidak ada migration, perubahan RPC, atau perubahan RLS. Kontrak `packages/contracts` hanya bertambah dua field opsional. `EXTRACTOR` produksi tetap hanya `stub`; CI tidak memanggil API berbayar dan tidak butuh `ANTHROPIC_API_KEY`.
+
+### 18.1 Yang dibangun
+
+| Bagian | File | Isi |
+|---|---|---|
+| Gambar (§6, F-106) | `apps/worker/src/images/prepare.ts` | Magic bytes (JPEG, PNG, WebP, HEIC `heic/heix/hevc/hevx/mif1/msf1`; ekstensi diabaikan). Dekode `sharp` (`failOn: 'error'`, `limitInputPixels` 50 MP, `autoOrient`) atau `heic-decode` (dimensi dicek ≤ 50 MP **sebelum** dekode RGBA, karena `heic-decode` sendiri tidak memeriksanya; rotasi wadah HEIF diterapkan libheif). Metadata dibuang, sisi panjang ≤ 2576 px, JPEG q90 sRGB (latar putih untuk PNG transparan). PNG ≤ 1,5 MB tetap PNG. Gagal dekode / 0 byte / tipe lain / sisi pendek < 200 px → `PermanentError('unsupported', 'Gambar tidak bisa dibuka. Coba foto ulang atau pilih foto lain.')`. > 12 gambar → `unsupported` (§5.5). |
+| Pipeline | `src/pipeline/process-capture.ts`, `types.ts` | `prepareImages` tepat setelah cek sha256, untuk semua engine termasuk stub. Hasil di `ImageBlob.prepared` (memori saja; objek bucket tidak diubah, Q-112). Tenggat `createDeadline` = lease − 30 dtk dari claim → `ctx.signal`/`ctx.deadlineAt`. Error yang membawa `runOutput` (refusal, `max_tokens`, output tidak valid, bukan struk) tetap menulis `record_run_output` sebelum `fail_run`, sehingga output mentah dan biaya tidak hilang (F-127). `raw_ai_output` = `Extraction.rawOutput ?? output`. |
+| Klien Claude (§5.2, §5.4, F-107) | `src/ai/claude.ts` | `createClaudeClient`: timeout 120 dtk, `maxRetries: 1`. `callStructured`: `beta.messages.create` dengan `thinking: adaptive`, `output_config: { effort, format: betaZodOutputFormat(skema) }`, instruksi sistem ber-`cache_control`, `betas: ['server-side-fallback-2026-07-01'], fallbacks: 'default'` (tidak untuk Haiku). `stop_reason` diperiksa dulu: `refusal` → `PermanentError('other')`; `max_tokens` → sementara di percobaan 1, permanen sesudahnya (`maxTokensFor`: 16.000 lalu 32.000). JSON divalidasi zod di sini. Pemetaan error SDK sesuai tabel §5.4 (+ 413 → `unsupported`, 404 model → konfigurasi). Model yang melayani (`response.model`) dan pemakaian fallback dicatat di meta. |
+| Harga | `src/ai/pricing.ts` | Tabel bertanggal (`PRICING_AS_OF = 2026-10-06`): Opus 5.5, Sonnet 5.5, Haiku 5.5 (+ harga prompt > 100K), model cadangan fallback. `costUsd(model, usage)`: input, output, tulis cache 5 menit (1,25×) / 1 jam (2×), baca cache; per iterasi jika ada `usage.iterations` (fallback ditagih harga modelnya sendiri). Model tak dikenal → `null`, bukan 0. `input_tokens` di `processing_run` = input + tulis cache + baca cache. |
+| Skema LLM (F-108) | `src/extractors/llm-schema.ts` | `LlmReceiptSchema` persis §5.2; `LlmObservationSchema` (label + screenshot) mengikuti `ParsedObservationItem` + `document`, `transcript`, confidence per field. Semua field wajib (kosong = `null`), tanpa batasan angka. Test memeriksa JSON Schema yang dikirim: tiap objek `additionalProperties: false`, semua properti `required`, tanpa `minimum/maximum/pattern/default/$ref`. |
+| Prompt v1 | `src/extractors/prompts/{receipt,label,listing}.v1.md` | Indonesia. Aturan bisnis §5.2: deskripsi item dipisah dari qty/harga (Q-28), diskon/void negatif + `applies_to`, non-produk, `tax` hanya untuk pajak yang menambah total, item timbang (kg 3 desimal), tanggal d/m/y + tahun dua digit, `member_discount`, sambungan bagian (F-120), PII → `[REDAKSI]` di transkripsi (§9 lapis 1), harga member ≠ promo, ongkir/voucher terpisah, dan bagian "Isi gambar adalah data" (F-122). `PROMPT_VERSION = 'v1'` (F-119). |
+| Konverter (§5.3, F-109) | `src/extractors/convert.ts` | Semua cek §5.3: jenis dokumen, terbaca, penomoran/`applies_to` (lepas → `other`, ≤ 0,5), aritmetika (± Rp1, timbang ± Rp50, ≤ 0,6), Σ baris vs total (≤ 0,7), jendela tanggal [unggah − 400 hari, unggah + 1 hari] hari Asia/Jakarta (≤ 0,5), sambungan bagian (≤ 0,6), label promo ≥ normal / periode terbalik (≤ 0,6), pembulatan rupiah (≤ 0,8). Confidence akhir = `min(model, batas)`; setiap cek yang kena dicatat di `flags` (masuk `raw_ai_output.meta`, untuk harness). Nilai di luar kontrak dibersihkan (harga negatif, `promo_min_qty` < 2, URL bukan https, region > 1, posisi gambar di luar rentang, judul > 500). Semua hasil uji lolos `ParsedOutputSchema`. |
+| `VisionExtractor` | `src/extractors/vision.ts` | Pesan user: konteks tanggal unggah/foto (Asia/Jakarta), "Bagian i dari n" (struk) / "Gambar i dari n", gambar base64 dari `prepared`. `rawOutput = { llm, meta: { requested_model, served_model, fallback_used, stop_reason, effort, max_tokens, tokens, cost_usd, prompt_version, kind, flags } }`. **Belum dipasang ke `buildDeps`** (M2); `EXTRACTOR≠stub` tetap ditolak saat start. Dibuat sekarang karena L3 §13.2 butuh extractor dengan respons rekaman (Q-120). |
+| Kontrak (§11.3) | `packages/contracts/src/parsed.ts` | `ParsedReceiptLine.member_discount?: boolean`; `Extraction.rawOutput?: unknown`. Aditif: stub dan fixture lama tetap valid; `apply_extraction` mengabaikan kunci yang tidak dikenalnya (diuji L3). |
+| Fixture sintetis (F-118, Q-72) | `apps/worker/eval/synthetic/{templates,specs,generate}.ts` | Template HTML (struk thermal monospace dengan rotasi kecil + derau deterministik, label rak dua harga, screenshot marketplace) → JPEG lewat Playwright yang sudah terpasang. Menggantikan 6 file palsu 42–54 byte: 5 di `apps/worker/test/fixtures/` + `apps/web/test/fixtures/worker/struk-tanpa-toko.jpg` (5–37 KB, 446–730 px). Nama fixture dan isi JSON tidak berubah. `--out DIR` menulis set uji sintetis + `<nama>.truth.json` (untuk harness M1). |
+| Guard F-117 | `scripts/check-secrets.sh` | Pola `sk-ant-[A-Za-z0-9_-]{20,}`; file `*.jpg/jpeg/png/heic/heif/webp/gif/avif` yang dilacak di luar `apps/worker/test/fixtures/`, `apps/web/test/fixtures/`, `apps/web/e2e/fixtures/`, `apps/web/public/icons/`, `docs/wireframes/` → gagal (F-124). Diuji manual dengan file bocor sementara (keduanya tertangkap). |
+| Dependensi | `apps/worker/package.json` | `sharp` 0.35.5 (prebuilt `@img/*`, sudah di `onlyBuiltDependencies`), `heic-decode` 2.1.0 (libheif-js 1.23.5, LGPL-3.0, server saja), `@anthropic-ai/sdk` 1.3.0, `zod` 4 (langsung, untuk skema LLM). Skrip `synthetic`. |
+
+### 18.2 Hasil test
+
+| Lapisan | Hasil | Catatan |
+|---|---|---|
+| L1 SQL `bash db/tests/run.sh` | **569 pengecekan lulus** | Tidak ada perubahan SQL. Dijalankan di PostgreSQL **16** (lihat di bawah). |
+| L2 worker baru | `ai.test.ts` 33, `convert.test.ts` 19, `images.test.ts` 16 + **1 dilewati** (HEIC asli) | Klien palsu (`test/claude-fake.ts`): sukses, fallback (biaya per iterasi), refusal, `max_tokens` 1/2, JSON rusak, skema tidak lolos, 13 kelas error SDK, abort tenggat; harga; skema JSON; prompt. Gambar: 5 tipe magic bytes, WebP/PNG/JPEG, PNG besar dan transparan, resize 4032 → 2576, EXIF Orientation 6/8 (dicek warna piksel), GPS + Make terbuang, 0 byte/teks/GIF/JPEG terpotong/header palsu/HEIC rusak, sisi pendek 199 px, bom 56 MP, > 12 gambar, semua fixture CI bisa didekode. |
+| L3 worker | `vision-pipeline.test.ts` 9; e2e/jobs/concurrency lama tetap lulus dengan fixture JPEG | Pipeline penuh dengan `VisionExtractor` + respons rekaman: struk-aeon → `needs_confirmation` (5 baris, `member_discount` diterima, transkripsi tanpa HP, biaya US$0,084 tercatat), label-milo (dua item, harga member tanpa toko → catatan, F-57), refusal, `max_tokens` 16.000 → 32.000 → gagal, skema tidak lolos, bukan struk, gambar rusak (Claude tidak dipanggil), 429 → ulang → sukses, tenggat lewat → signal aborted → sementara. |
+| Worker total | **114 lulus, 1 dilewati** (sebelumnya 37) | |
+| `pnpm -r --workspace-concurrency=1 test` | contracts 62, worker 114 (+1 skip), ai-tools 21, web **577** | Semua lulus. |
+| L5c browser (`test:browser`, Chromium terpasang via `PW_CHROMIUM_PATH`) | **12 lulus** | Fixture struk-aeon sekarang JPEG sungguhan → jalur "lewati kompresi" (`kept`), sha256 tetap = fixture stub. |
+| `pnpm -r typecheck`, lint + format web, `check-secrets.sh`, `pnpm install --frozen-lockfile` | lulus | |
+| Waktu `prepareImage` (4 vCPU, JPEG derau terburuk) | 12 MP (8,7 MB): ±370 ms; 4,9 MP (1920 × 2560): ±220 ms | HEIC belum diukur (tanpa sampel). |
+
+**Tidak dijalankan di sesi ini:** `db/scripts/snapshot.sh --check` (PostgreSQL 17 tidak bisa dipasang: `apt.postgresql.org` ditolak proxy; tidak ada perubahan SQL sehingga snapshot tidak terpengaruh), L4 dan e2e Playwright (butuh Supabase CLI, hanya di job CI `supabase-e2e`). Dampak ke e2e dianalisis: fixture baru ≤ 1,5 MB, ≤ 2048 px, tanpa GPS → aturan lewati kompresi (docs/07 §6.3) mengunggah byte asli, sehingga sha256 tetap dikenali stub; worker e2e menjalankan `prepareImages` dengan `sharp` prebuilt dari `pnpm install`.
+
+### 18.3 Penyimpangan dari desain dan alasannya
+
+| Desain | Implementasi M0 | Alasan |
+|---|---|---|
+| §5.2 sketsa `messages.parse` | `beta.messages.create` + `betaZodOutputFormat` + `safeParse` manual (jalur cadangan §5.2) | F-123 |
+| §4.2/F-117 daftar folder gambar | + `apps/web/test/fixtures/`, `apps/web/public/icons/` | F-124 |
+| §6 langkah 5 "PNG dikirim apa adanya" | PNG di-encode ulang lossless (piksel sama) | Chunk `eXIf`/`tEXt` bisa memuat lokasi; "apa adanya" akan melewatkan pembuangan metadata §6 langkah 3. |
+| §5.4 "`max_tokens` sementara sekali, lalu permanen; berikutnya × 2" | Berdasarkan nomor percobaan, bukan alasan percobaan sebelumnya | F-128 |
+| §5.3 Σ baris vs total | + Σ − voucher = total diterima; diskon/void positif dibalik negatif | F-129 |
+| §5.5 batas 12 gambar (M2) | Sudah di `prepareImages` (M0) | Murah, dan berlaku juga untuk stub. |
+| §14 `VisionExtractor` di M1 | Kelas dibuat di M0 (tidak dipasang) | L3 §13.2 butuh extractor dengan respons rekaman; harness M1 memakai kelas yang sama (Q-120). |
+| §13.2 L2 "HEIC sintetis" | Test HEIC asli dilewati tanpa sampel; HEIC rusak + magic bytes diuji | libheif di Node tidak punya encoder (§15 no. 8). |
+
+### 18.4 Temuan baru
+
+| # | Temuan | Dampak | Usulan | Ke |
+|---|---|---|---|---|
+| F-123 | **Helper `beta.messages.parse` (SDK 1.3.0) melempar `AnthropicError` saat JSON tidak lolos skema atau terpotong**, sebelum `stop_reason` bisa diperiksa, dan tanpa teks mentah. (Pertanyaan §5.2 terjawab: `parse` ada di namespace beta, `fallbacks: 'default'` bertipe di SDK.) | Refusal/`max_tokens` akan terbaca sebagai "output tidak valid", dan output mentah untuk audit hilang. | `create` + skema dari `betaZodOutputFormat` (batasan dibuang SDK seperti `parse`) + validasi zod setelah cek `stop_reason`. | selesai |
+| F-124 | Daftar folder gambar F-117 tidak memuat file gambar yang **sudah** dilacak: `apps/web/public/icons/*.png` (ikon PWA) dan `apps/web/test/fixtures/worker/struk-tanpa-toko.jpg`. `apps/web/e2e/fixtures/` belum ada. | Guard akan langsung gagal di CI. | Allowlist ditambah dua folder itu; `apps/web/e2e/fixtures/` tetap diizinkan untuk nanti. | Q-126 |
+| F-125 | **Fixture web ikut bergantung pada fixture palsu (F-40):** `struk-tanpa-toko.jpg` (web), test L5a/L5c yang mengharapkan `undecodable`/`sniffMime = null`, dan sha256 di `rpc.json`. `scenario.ts` juga menyalin isi folder fixture tanpa melewati subfolder (akan gagal begitu `heic/` ada). | Test web rusak setelah fixture diganti. | Fixture web diganti JPEG sintetis; dua test diperbarui ke perilaku JPEG sungguhan (`kept`, ukuran terbaca); di `rpc.json` hanya nilai sha256 yang diganti (membangkitkan ulang penuh mengubah semua tanggal relatif dan jam sesi yang dipakai M4, F-75); `scenario.ts` hanya menyalin file. Prosedur di docs/06 §2.6. | selesai |
+| F-126 | **Timeout 120 dtk tanpa streaming vs output struk panjang.** Output struk ±3.400–4.600 token (§12.1) + thinking; percobaan kedua menaikkan `max_tokens` ke 32.000 tetapi timeout tetap 120 dtk. | Struk sangat panjang bisa habis waktu (sementara, diulang) walaupun model masih menulis. | Ukur latensi p50/p95 per jenis di harness M1. Jika p95 struk > 60 dtk: ekstraksi pakai streaming (`stream().finalMessage()`) dengan tenggat yang sama, timeout per panggilan dinaikkan. | Q-122 |
+| F-127 | Pipeline lama menyimpan `processing_run` mentah **hanya jika extract berhasil**. Refusal/`max_tokens`/output tidak valid sudah memakan biaya. | Biaya dan bukti audit hilang untuk run gagal; anggaran harian (§12.3) jadi kurang hitung. | `TransientError`/`PermanentError` membawa `runOutput` opsional; pipeline menulis `record_run_output` sebelum `fail_run`. `raw_ai_output` vision = `{ llm, meta }` (kontrak `Extraction.rawOutput` aditif). Job redaksi sudah mengosongkan kunci `pii` di kedalaman mana pun. | selesai |
+| F-128 | Aturan `max_tokens` §5.4 butuh tahu alasan percobaan sebelumnya, yang tidak disimpan di claim. | — | `max_tokens` = 16.000 di percobaan 1, 32.000 di percobaan ≥ 2 (apa pun alasan gagal sebelumnya); `max_tokens` di percobaan ≥ 2 → permanen. Batas lebih besar tidak menambah biaya kecuali dipakai. | Q-121 |
+| F-129 | **Cek total §5.3 menghitung salah untuk struk dengan voucher** yang dicetak di bawah sebagai adjustment (TOTAL tercetak sudah dikurangi voucher), dan model kadang menulis diskon tanpa tanda minus. | Peringatan total palsu (`field_confidence.total` ≤ 0,7) dan Σ salah. | Konverter menerima Σ baris = total **atau** Σ baris − voucher = total; diskon/void selalu dinormalkan negatif; baris `other` tidak dihitung; prompt: `tax` hanya untuk pajak yang menambah total. Diukur di harness (metrik "Σ baris = total"). | Q-123 |
+| F-130 | **Lease untuk tenggat diambil dari `PipelineDeps.leaseSeconds` (default 300)**, bukan dari `app.config.capture_processing_timeout_seconds`. Waktu mulai diambil tepat sebelum query claim (sedikit lebih awal dari `started_at` di DB, jadi konservatif). | Jika config diubah tanpa mengubah worker, tenggat bisa lebih panjang dari lease. | M2: env `CAPTURE_LEASE_SECONDS` (default 300) dan pemeriksaan saat start bahwa nilainya ≤ config (lewat query baca saja). | Q-124 |
+| F-131 | Harga **baca cache Haiku 5.5** tidak ada di cache skill; harga model cadangan (`claude-opus-5`, `claude-opus-4-8`) diambil dari tabel skill. 400 "gambar" dikenali dari pesan error (API tidak punya kode khusus). | Biaya Haiku dengan cache bisa sedikit meleset; 400 gambar yang pesannya lain dianggap kesalahan konfigurasi (sementara, diulang 3×, lalu `failed`). | Harga dicek di halaman pricing resmi di M1 (§17) dan `PRICING_AS_OF` diperbarui. Pola pesan diperiksa dengan uji live M1 (gambar rusak sengaja). | M1 |
+| F-132 | **Fixture sintetis bergantung pada font mesin** yang merendernya; Playwright global (1.63) di lingkungan cloud tidak cocok dengan browser terpasang (build 1243). | Menjalankan ulang generator mengubah sha256 (rpc.json, test L5c). | Gambar di-commit; generator hanya dijalankan saat fixture perlu berubah, dengan prosedur docs/06 §2.6. Opsi `CHROMIUM_PATH` untuk biner Chromium lain. | selesai |
+| F-133 | **Belum ada sampel HEIC.** `heic-decode` tidak memeriksa ukuran sebelum mengalokasikan RGBA (bom piksel lewat HEIC). | Jalur HEIC hanya diuji untuk file rusak dan magic bytes; waktu dekode HEIC belum diukur (§6 memperkirakan 0,5–2 dtk). | Dimensi dicek lewat `heic-decode.all()` sebelum `decode()`. Test HEIC asli otomatis aktif begitu `apps/worker/test/fixtures/heic/sample.heic` ada (lolos guard F-117) dan mencetak waktu dekode. | Q-125 |
+
+**F-105 (Q-101):** tetap terbuka, tidak memblokir. Tidak ada perubahan UI di M0.
+
+### 18.5 Pertanyaan (Q-120 dst.)
+
+| ID | Pertanyaan | Usulan default |
+|---|---|---|
+| Q-120 | `VisionExtractor` dibuat di M0 (tidak dipasang ke `buildDeps`) supaya L3 bisa menguji pipeline penuh dengan respons rekaman, dan harness M1 memakai kelas yang sama. Diterima? | **Ya.** Pemasangan (env `EXTRACTOR=vision`, kunci wajib saat start) tetap di M2. |
+| Q-121 | Aturan `max_tokens` berbasis nomor percobaan (F-128): 16.000 di percobaan 1, 32.000 sesudahnya, `max_tokens` di percobaan ≥ 2 → permanen? | **Ya.** |
+| Q-122 | Streaming untuk ekstraksi jika latensi mendekati timeout (F-126)? | **Diputuskan dari data M1:** p95 struk > 60 dtk → streaming + timeout per panggilan dinaikkan, tenggat lease tetap. Selain itu tetap tanpa streaming. |
+| Q-123 | Cek total menerima Σ − voucher, diskon/void dinormalkan negatif, `tax` hanya pajak tambahan (F-129)? | **Ya**, dan diukur di harness; aturan diubah lewat prompt v2 jika data menunjukkan pola lain. |
+| Q-124 | Sumber lease untuk tenggat AI (F-130)? | **Env `CAPTURE_LEASE_SECONDS` (default 300) di M2**, worker menolak start jika lebih besar dari `app.config`. |
+| Q-125 | Sampel HEIC (§15 no. 8) masih dibutuhkan. Sampai ada, test HEIC dilewati dan HEIC hanya diuji di uji live/harness M1 (foto HEIC asli di `.data/ocr-eval/`)? | **Ya.** Pemilik proyek menaruh satu foto dinding polos (lokasi mati) di `apps/worker/test/fixtures/heic/sample.heic` kapan saja. |
+| Q-126 | Allowlist gambar F-117 ditambah `apps/web/test/fixtures/` dan `apps/web/public/icons/` (F-124)? | **Ya.** Folder lain butuh perubahan skrip yang ditinjau. |
+
+### 18.6 Berikutnya
+
+M1 (uji OCR D-16) dan M5 (Tanya) bisa dimulai paralel sesuai §14. M1 butuh dari pemilik proyek: foto (§15 no. 1–4), kunci Anthropic + Google Vision, dan akses jaringan sesi bila uji live dijalankan di sesi cloud (§15 no. 7).
 
 ---
 

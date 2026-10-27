@@ -14,6 +14,8 @@
 | Node.js | ≥ 22 | A, B |
 | pnpm | 10 (`corepack enable`) | A, B |
 | Supabase CLI + Docker | terbaru | B |
+| `sharp` (libvips prebuilt, lewat paket npm `@img/*`) dan `heic-decode` (libheif WASM, LGPL-3.0) | dipasang `pnpm install` (dependensi worker, 6b M0) | A, B |
+| Playwright + Chromium | hanya untuk membangkitkan ulang fixture sintetis (§2.6); bukan dependensi worker | — |
 
 ```bash
 pnpm install
@@ -37,6 +39,9 @@ db/schema.sql          snapshot hasil generate dari migration (D-72) — jangan 
 db/tests/              harness SQL (L1): run.sh, build_db.sh, smoke.sql (43 test lama), flows/*
 db/scripts/            dev-db.sh, snapshot.sh, privileges.sh, gen_inventory_test.sh
 apps/worker/           worker Node.js: pipeline capture + job (stub extractor, fixture di test/fixtures)
+  src/images/          prepareImages: dekode + EXIF + resize sebelum extractor (docs/08 §6)
+  src/ai/, extractors/ klien Claude, harga, skema LLM, prompt v1, konverter, VisionExtractor (belum dipasang, M2)
+  eval/synthetic/      generator gambar sintetis (HTML → JPEG lewat Playwright)
 apps/web/              PWA Next.js 16 (Tahap 5b): /masuk, layout (app), service worker; POST /api/account/delete
 packages/contracts/    zod: input/output RPC, kode error, kontrak extra, unitPrice()
 packages/ai-tools/     6 tool AI (skema + handler ke RPC), belum disambungkan ke Claude
@@ -157,6 +162,8 @@ Dari UI (M3): S-08 "Perlu dicek" atau S-09 "Cek sekarang" membuka S-10 `/struk?i
 
 Fixture ada di `apps/worker/test/fixtures/` (dipakai juga oleh test L3). Satu fixture = satu file JSON + file gambar. Gambar dipetakan ke fixture lewat **sha256 gambar posisi 1**, sehingga isi file gambar menentukan hasil "OCR".
 
+Sejak 6b M0 setiap gambar melewati `prepareImages` (docs/08 §6) sebelum extractor, termasuk stub. Karena itu file gambar fixture harus **JPEG/PNG/WebP/HEIC sungguhan** dengan sisi pendek ≥ 200 px; byte acak gagal sebagai `unsupported` ("Gambar tidak bisa dibuka. Coba foto ulang atau pilih foto lain."). Gambar fixture adalah **JPEG sintetis** (F-118, Q-72): struk/label/screenshot buatan dari template HTML, tanpa data pribadi, isinya sama dengan `raw_text`/`output` JSON-nya.
+
 | Fixture | Jenis | Hasil yang diharapkan |
 |---|---|---|
 | `struk-aeon` | struk AEON BSD | `needs_confirmation`: Milo (barcode) auto-save dengan diskon member → promo + `member_hint`; Indomie dan SNACK (saran AI tier 4) perlu konfirmasi; pii terpisah |
@@ -178,7 +185,21 @@ Bentuk file fixture:
 }
 ```
 
-Gambar tanpa fixture → `PermanentError('unsupported')`. Untuk fixture baru: buat file gambar apa saja (isinya harus unik), lalu JSON dengan `images` menunjuk file itu. Direktori lain bisa dipakai lewat `STUB_FIXTURES_DIR`.
+Gambar tanpa fixture → `PermanentError('unsupported')`. Direktori lain bisa dipakai lewat `STUB_FIXTURES_DIR`. Subfolder (mis. `heic/`) diabaikan oleh registry fixture.
+
+**Membuat atau mengubah gambar fixture** (generator `apps/worker/eval/synthetic/`, spesifikasi per fixture di `specs.ts`):
+
+```bash
+pnpm --filter @priceatlas/worker synthetic                          # tulis ulang semua gambar fixture (worker + web)
+CHROMIUM_PATH=/opt/pw-browsers/chromium pnpm --filter @priceatlas/worker synthetic   # jika versi Playwright ≠ browser terpasang
+pnpm --filter @priceatlas/worker synthetic --out .data/ocr-eval-synthetic           # set uji sintetis: <nama>.jpg + <nama>.truth.json
+```
+
+Generator memakai Playwright yang sudah terpasang di lingkungan (jangan `playwright install`); CI tidak menjalankannya. Hasil render bergantung pada font mesin, jadi menjalankan ulang mengubah sha256. Setelah gambar berubah: perbarui nilai `sha256` di `apps/web/test/fixtures/rpc.json` (ganti hash lama dengan yang baru; tidak perlu bangkitkan ulang seluruh file) dan konstanta `STRUK_AEON_SHA` di `apps/web/test/browser/media.browser.test.ts`. Fixture baru: tambah entri di `specs.ts`, jalankan generator, lalu tulis JSON dengan `images` menunjuk file itu.
+
+**Sampel HEIC:** test dekode HEIC asli (`apps/worker/test/images.test.ts`) dilewati sampai `apps/worker/test/fixtures/heic/sample.heic` ada (foto polos dari iPhone tanpa data pribadi, lokasi mati; docs/08 §15 no. 8). libheif di Node tidak punya encoder, jadi sampel tidak bisa dibuat sendiri.
+
+**Gambar di repo (F-117):** `scripts/check-secrets.sh` menolak file gambar yang dilacak di luar `apps/worker/test/fixtures/`, `apps/web/test/fixtures/`, `apps/web/e2e/fixtures/`, `apps/web/public/icons/`, dan `docs/wireframes/`, serta pola kunci `sk-ant-…`. Foto asli untuk uji OCR hanya di `.data/ocr-eval/` (di-gitignore).
 
 ### 2.7 Test
 
@@ -186,6 +207,7 @@ Gambar tanpa fixture → `PermanentError('unsupported')`. Untuk fixture baru: bu
 bash db/tests/run.sh                  # L1: smoke (43, tidak diubah) + flows/*, satu DB baru per file
 bash db/tests/run.sh 70_              # hanya flow yang namanya memuat "70_"
 pnpm -r --workspace-concurrency=1 test   # L2 + L3 + L5a/L5b web (membangun DB uji sendiri: priceatlas_l2_*, priceatlas_l3_*)
+                                         # worker 6b M0: images/ai/convert (L2), vision-pipeline (L3, klien Claude palsu)
 pnpm -r typecheck
 bash db/scripts/snapshot.sh --check   # db/schema.sql tanpa drift
 bash scripts/check-secrets.sh

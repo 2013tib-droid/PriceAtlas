@@ -42,7 +42,8 @@ export function buildDeps(args: { workerId: string }) {
 
   const extractorKind = process.env.EXTRACTOR ?? 'stub';
   if (extractorKind !== 'stub') {
-    throw new Error(`EXTRACTOR=${extractorKind} belum tersedia di Tahap 4 (D-16, Tahap 6). Pakai EXTRACTOR=stub.`);
+    // VisionExtractor sudah ada (src/extractors/vision.ts) tetapi baru dipasang di 6b M2 (docs/08 §14).
+    throw new Error(`EXTRACTOR=${extractorKind} belum dipasang (D-16, docs/08 §14 M2). Pakai EXTRACTOR=stub.`);
   }
   const fixtures = new FixtureRegistry(resolve(process.env.STUB_FIXTURES_DIR ?? DEFAULT_FIXTURES_DIR));
   return { db, blob, extractor: new StubExtractor(fixtures), ai: new StubAiMatcher(fixtures), workerId: args.workerId };

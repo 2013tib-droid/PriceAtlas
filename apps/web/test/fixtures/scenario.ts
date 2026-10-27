@@ -133,8 +133,10 @@ const WEB_WORKER_FIXTURES = resolve(import.meta.dirname, 'worker');
 function createWorker(pool: pg.Pool, url: string) {
   setLogSink(() => undefined);
   const dir = mkdtempSync(join(tmpdir(), 'pa-web-fxdir-'));
+  // Hanya file (subfolder seperti heic/ dilewati).
   for (const src of [DEFAULT_FIXTURES_DIR, WEB_WORKER_FIXTURES])
-    for (const f of readdirSync(src)) copyFileSync(join(src, f), join(dir, f));
+    for (const f of readdirSync(src, { withFileTypes: true }))
+      if (f.isFile()) copyFileSync(join(src, f.name), join(dir, f.name));
   const workerDb = createPool(url, { role: 'service_role', max: 2 });
   const blob = new LocalBlobStore(mkdtempSync(join(tmpdir(), 'pa-web-fx-')), workerDb);
   const fixtures = new FixtureRegistry(dir);
