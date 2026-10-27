@@ -4,8 +4,8 @@
 //   pnpm --filter @priceatlas/worker synthetic            # tulis ulang fixture (worker + web)
 //   pnpm --filter @priceatlas/worker synthetic --out DIR  # set uji: <nama>.jpg + <nama>.truth.json
 //   CHROMIUM_PATH=/opt/pw-browsers/chromium …            # jika versi Playwright ≠ browser terpasang
-// Setelah fixture berubah, sha256 berubah: bangkitkan ulang apps/web/test/fixtures/rpc.json dan
-// perbarui konstanta sha di apps/web/test/browser/media.browser.test.ts (docs/06 §2.7).
+// Setelah fixture berubah, sha256 berubah: ganti nilai sha256 lama di apps/web/test/fixtures/rpc.json
+// dan konstanta sha di apps/web/test/browser/media.browser.test.ts (docs/06 §2.6, F-125).
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join, resolve } from 'node:path';

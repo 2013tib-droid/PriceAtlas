@@ -9,7 +9,7 @@ keputusan: [`PROJECT.md`](PROJECT.md).
 | 3 Wireframe | [`docs/04-wireframe.md`](docs/04-wireframe.md) |
 | 4 Backend | [`docs/05-backend-design.md`](docs/05-backend-design.md) (desain + implementasi 4b), [`docs/06-local-dev.md`](docs/06-local-dev.md) (menjalankan lokal) |
 | 5 Frontend | [`docs/07-frontend-design.md`](docs/07-frontend-design.md) (desain 5a disetujui; 5b M0 selesai dan disetujui, §1.4; M1 selesai, §1.5; M2 selesai dan disetujui (D-86), §1.6; M3 selesai dan disetujui (D-87), §1.7; M4 selesai dan disetujui (D-88), §1.8; M5 selesai dan disetujui (D-89), §1.9; M6 selesai dan disetujui (D-90), §1.10; M7 selesai dan disetujui (D-91), §1.11), [`docs/06-local-dev.md`](docs/06-local-dev.md) §4 (menjalankan frontend) |
-| 6 AI Integration | [`docs/08-ai-integration.md`](docs/08-ai-integration.md) (desain 6a + rancangan uji OCR D-16, disetujui (D-92); 6b M0 fondasi selesai, menunggu review, [§18](docs/08-ai-integration.md#18-tahap-6b-m0-hasil-dan-temuan-baru-f-123-dst)) |
+| 6 AI Integration | [`docs/08-ai-integration.md`](docs/08-ai-integration.md) (desain 6a + rancangan uji OCR D-16, disetujui (D-92); 6b M0 fondasi selesai, menunggu review (Q-122/Q-124/Q-125 → D-93), [§18](docs/08-ai-integration.md#18-tahap-6b-m0-hasil-dan-temuan-baru-f-123-dst)) |
 
 ## Isi repo (Tahap 6b M0)
 
