@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anotasi uji OCR</title>
+<style>
+  :root { --bg:#fff; --fg:#1a1a1a; --muted:#666; --line:#ddd; --warn:#fff3c4; --ok:#e3f6e8; --err:#fde2e2; --accent:#0b5cad; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#16181b; --fg:#e8e8e8; --muted:#a0a0a0; --line:#333; --warn:#4a3f12; --ok:#173a22; --err:#4a1d1d; --accent:#6fb0ff; } }
+  * { box-sizing: border-box; }
+  body { margin:0; font:14px/1.4 system-ui, sans-serif; background:var(--bg); color:var(--fg); }
+  header { display:flex; gap:12px; align-items:center; padding:8px 12px; border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--bg); z-index:2; flex-wrap:wrap; }
+  header select { max-width:320px; }
+  main { display:grid; grid-template-columns: minmax(280px, 45%) 1fr; height: calc(100vh - 50px); }
+  #imgs { overflow:auto; border-right:1px solid var(--line); padding:8px; }
+  #imgs img { width:100%; display:block; margin-bottom:8px; border:1px solid var(--line); }
+  #form { overflow:auto; padding:12px; }
+  fieldset { border:1px solid var(--line); margin:0 0 12px; padding:8px; }
+  legend { font-weight:600; }
+  label { display:inline-flex; gap:4px; align-items:center; margin:2px 10px 2px 0; }
+  input, select, textarea { font:inherit; color:inherit; background:transparent; border:1px solid var(--line); padding:2px 4px; }
+  input[type=number] { width:96px; } input.w { width:220px; } input.s { width:56px; }
+  textarea { width:100%; min-height:60px; font-family: ui-monospace, monospace; font-size:12px; }
+  table { border-collapse:collapse; width:100%; } td, th { border-bottom:1px solid var(--line); padding:2px; text-align:left; vertical-align:top; }
+  .unchecked { background:var(--warn); }
+  .muted { color:var(--muted); }
+  #status.ok { background:var(--ok); } #status.err { background:var(--err); } #status { padding:4px 8px; }
+  button { font:inherit; padding:4px 10px; cursor:pointer; }
+  button.primary { background:var(--accent); color:#fff; border:0; }
+  details { margin-bottom:12px; }
+  @media (max-width: 800px) { main { grid-template-columns: 1fr; height:auto; } #imgs { max-height:50vh; } }
+</style>
+</head>
+<body>
+<header>
+  <strong>Anotasi uji OCR</strong>
+  <select id="pick" aria-label="Capture"></select>
+  <span id="info" class="muted"></span>
+  <span id="unchecked" class="muted"></span>
+  <button class="primary" id="save">Simpan</button>
+  <span id="status" role="status" aria-live="polite"></span>
+</header>
+<main>
+  <section id="imgs" aria-label="Gambar"></section>
+  <section id="form" aria-label="Ground truth">
+    <details>
+      <summary>Aturan anotasi (docs/08 §4.3)</summary>
+      <ul>
+        <li><code>raw_text</code> = deskripsi item saja, persis seperti tercetak (huruf besar, singkatan). Kuantitas/harga di kolom sendiri.</li>
+        <li>Nominal rupiah bulat. Diskon/void negatif dan menempel ke baris produk (<code>applies_to</code> = nomor baris).</li>
+        <li>Item timbang: <code>qty</code> = berat kg (3 desimal), <code>harga satuan</code> = harga per kg, centang "timbang".</li>
+        <li>Baris yang tidak terbaca oleh manusia: centang "tak terbaca" (tidak dinilai).</li>
+        <li>PII (HP, digit kartu, nama/ID member): isi di kolom PII dan daftar "nilai PII di struk" (untuk uji kebocoran).</li>
+        <li>Field berlatar kuning = pra-isi model yang <b>belum diperiksa</b>. Sentuh/ubah setiap field setelah dicocokkan dengan gambar.</li>
+      </ul>
+    </details>
+    <div id="body"></div>
+  </section>
+</main>
+<script>
+(() => {
+  const $ = (s, el = document) => el.querySelector(s);
+  const h = (tag, attrs = {}, ...kids) => {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === 'class') el.className = v; else if (k.startsWith('on')) el.addEventListener(k.slice(2), v); else if (v !== null && v !== undefined && v !== false) el.setAttribute(k, v === true ? '' : v);
+    }
+    for (const k of kids.flat()) if (k !== null && k !== undefined) el.append(k instanceof Node ? k : document.createTextNode(String(k)));
+    return el;
+  };
+  const CATS = ['minimarket','supermarket','hypermarket','apotek','lokal','marketplace','lainnya'];
+  const CONDS = ['long','faded','skewed','crumpled','dark','glare','handwritten','blurry','low_confidence'];
+  const TYPES = ['product','discount','void','non_product','tax','other'];
+  let cur = null; // { entry, truth, prefill, prefill_arm }
+
+  const refreshUnchecked = () => { const n = document.querySelectorAll('.unchecked').length; $('#unchecked').textContent = n ? `${n} field belum diperiksa` : ''; return n; };
+  const touch = (e) => { e.target.classList.remove('unchecked'); refreshUnchecked(); };
+  const input = (value, opts = {}) => {
+    const el = h('input', { type: opts.type || 'text', class: [opts.cls, opts.prefilled && value !== null && value !== '' ? 'unchecked' : ''].filter(Boolean).join(' '), 'aria-label': opts.label, step: opts.step });
+    if (opts.type === 'checkbox') el.checked = !!value; else el.value = value ?? '';
+    el.addEventListener('focus', touch); el.addEventListener('input', touch); el.addEventListener('click', touch);
+    if (opts.name) el.dataset.name = opts.name;
+    return el;
+  };
+  const sel = (value, options, opts = {}) => {
+    const el = h('select', { 'aria-label': opts.label, class: opts.prefilled && value ? 'unchecked' : '' }, ...options.map((o) => h('option', { value: o, selected: o === value }, o || '—')));
+    el.addEventListener('focus', touch); el.addEventListener('change', touch);
+    if (opts.name) el.dataset.name = opts.name;
+    return el;
+  };
+  const num = (s) => { const t = String(s ?? '').trim().replace(/\./g, '').replace(',', '.'); return t === '' ? null : Number(t); };
+  const numDec = (s) => { const t = String(s ?? '').trim().replace(',', '.'); return t === '' ? null : Number(t); };
+  const str = (s) => { const t = String(s ?? '').trim(); return t === '' ? null : t; };
+
+  async function loadList() {
+    const list = await (await fetch('/api/list')).json();
+    const pick = $('#pick'); pick.innerHTML = '';
+    for (const it of list) pick.append(h('option', { value: it.id }, `${it.status === 'verified' ? '✓' : it.status === 'draft' ? '•' : ' '} ${it.id} · ${it.kind} · ${it.split}`));
+    const next = list.find((i) => i.status !== 'verified') || list[0];
+    if (next) { pick.value = next.id; await load(next.id); }
+  }
+
+  async function load(id) {
+    cur = await (await fetch(`/api/item/${id}`)).json();
+    const { entry, truth, prefill } = cur;
+    $('#info').textContent = `${entry.kind} · split ${entry.split}${prefill ? ` · pra-isi ${cur.prefill_arm}` : truth ? ' · tersimpan' : ' · tanpa pra-isi'}`;
+    const imgs = $('#imgs'); imgs.innerHTML = '';
+    entry.images.forEach((f, i) => imgs.append(h('div', {}, h('div', { class: 'muted' }, `Bagian ${i + 1}`), h('img', { src: `/images/${f}`, alt: `Bagian ${i + 1}` }))));
+    const exp = truth ? truth.expected : prefill;
+    const pf = !truth && !!prefill;
+    render(entry, truth, exp, pf);
+    refreshUnchecked();
+    $('#status').textContent = ''; $('#status').className = '';
+  }
+
+  function render(entry, truth, exp, pf) {
+    const body = $('#body'); body.innerHTML = '';
+    const ann = truth?.annotations ?? { lines: {}, transcript_pii: [] };
+    const meta = h('fieldset', {}, h('legend', {}, 'Capture'),
+      h('label', {}, 'Kategori toko ', sel(truth?.store_category ?? entry.store_category ?? '', ['', ...CATS], { name: 'store_category', label: 'Kategori toko' })),
+      h('label', {}, input(truth ? truth.expected === null : false, { type: 'checkbox', name: 'unreadable_all', label: 'Seluruh gambar tidak terbaca' }), 'Seluruh gambar tidak terbaca'),
+      h('div', {}, 'Kondisi: ', ...CONDS.map((c) => h('label', {}, input((truth?.conditions ?? []).includes(c), { type: 'checkbox', name: `cond:${c}`, label: c }), c))),
+      h('label', {}, 'Catatan ', input(ann.notes ?? '', { cls: 'w', name: 'notes', label: 'Catatan' })));
+    body.append(meta);
+    if (entry.kind === 'receipt') renderReceipt(body, exp, ann, pf); else renderObservation(body, exp, pf);
+  }
+
+  function renderReceipt(body, exp, ann, pf) {
+    const hd = exp?.header ?? {};
+    const store = exp?.store_hint ?? {};
+    body.append(h('fieldset', {}, h('legend', {}, 'Header'),
+      h('label', {}, 'Toko ', input(store.name, { cls: 'w', name: 'store', prefilled: pf, label: 'Toko' })),
+      h('label', {}, 'Cabang ', input(store.branch_name, { name: 'branch', prefilled: pf, label: 'Cabang' })),
+      h('label', {}, 'Tanggal ', input(hd.transaction_date, { type: 'date', name: 'date', prefilled: pf, label: 'Tanggal' })),
+      h('label', {}, 'Jam ', input(hd.transaction_time, { cls: 's', name: 'time', prefilled: pf, label: 'Jam' })),
+      h('label', {}, 'Total ', input(hd.total_amount, { type: 'number', name: 'total', prefilled: pf, label: 'Total' })),
+      h('label', {}, 'Subtotal ', input(hd.subtotal_amount, { type: 'number', name: 'subtotal', prefilled: pf, label: 'Subtotal' })),
+      h('label', {}, 'Bayar ', sel(hd.payment_method ?? '', ['', 'cash', 'debit', 'credit', 'qris', 'ewallet', 'other'], { name: 'payment', prefilled: pf, label: 'Metode bayar' }))));
+    const tbody = h('tbody');
+    const addLine = (l = {}, a = {}) => {
+      const tr = h('tr', { class: 'line' },
+        h('td', { class: 'no muted' }),
+        h('td', {}, sel(l.line_type ?? 'product', TYPES, { name: 'type', prefilled: pf, label: 'Jenis baris' })),
+        h('td', {}, input(l.raw_text, { cls: 'w', name: 'text', prefilled: pf, label: 'Teks item' })),
+        h('td', {}, input(l.quantity, { type: 'number', step: 'any', cls: 's', name: 'qty', prefilled: pf, label: 'Qty' })),
+        h('td', {}, input(l.unit_amount, { type: 'number', name: 'unit', prefilled: pf, label: 'Harga satuan' })),
+        h('td', {}, input(l.line_amount, { type: 'number', name: 'amount', prefilled: pf, label: 'Nominal' })),
+        h('td', {}, input(l.applies_to_line_no, { type: 'number', cls: 's', name: 'applies', prefilled: pf, label: 'Menempel ke baris' })),
+        h('td', {}, input(l.barcode, { cls: 's', name: 'barcode', prefilled: pf, label: 'Barcode' })),
+        h('td', {}, input(a.weighed, { type: 'checkbox', name: 'weighed', label: 'Timbang' }), input(a.member_discount ?? l.member_discount, { type: 'checkbox', name: 'member', label: 'Diskon member' }), input(a.unreadable, { type: 'checkbox', name: 'unreadable', label: 'Tak terbaca' })),
+        h('td', {}, h('button', { type: 'button', onclick: () => { tr.remove(); renumber(); } }, '✕')));
+      tbody.append(tr); renumber();
+    };
+    const renumber = () => [...tbody.querySelectorAll('tr')].forEach((tr, i) => (tr.querySelector('.no').textContent = String(i + 1)));
+    (exp?.lines ?? []).forEach((l) => addLine(l, ann.lines?.[String(l.line_no)] ?? {}));
+    body.append(h('fieldset', {}, h('legend', {}, 'Baris'),
+      h('table', {}, h('thead', {}, h('tr', {}, ...['#', 'jenis', 'teks item', 'qty', 'harga satuan', 'nominal', 'menempel', 'barcode', 'timbang / member / tak terbaca', ''].map((x) => h('th', {}, x)))), tbody),
+      h('button', { type: 'button', onclick: () => addLine() }, '+ baris')));
+    const pii = exp?.pii ?? {};
+    body.append(h('fieldset', {}, h('legend', {}, 'PII'),
+      h('div', { class: 'muted' }, 'pii (kunci=nilai per baris, mis. phone=0812…, card_last4=4321)'),
+      Object.assign(h('textarea', { 'data-name': 'pii', 'aria-label': 'PII', class: pf && Object.keys(pii).length ? 'unchecked' : '' }), { value: Object.entries(pii).map(([k, v]) => `${k}=${v}`).join('\n') }),
+      h('div', { class: 'muted' }, 'Nilai PII yang tercetak di struk (satu per baris; tidak boleh bocor setelah redaksi)'),
+      Object.assign(h('textarea', { 'data-name': 'transcript_pii', 'aria-label': 'Nilai PII di struk' }), { value: (ann.transcript_pii ?? []).join('\n') })));
+    body.append(h('fieldset', {}, h('legend', {}, 'Lainnya (JSON)'),
+      h('div', { class: 'muted' }, 'adjustments dan member_hint, bentuk kontrak ParsedReceipt'),
+      Object.assign(h('textarea', { 'data-name': 'extra', 'aria-label': 'Adjustments dan member hint' }), { value: JSON.stringify({ adjustments: exp?.adjustments ?? [], member_hint: exp?.member_hint ?? null }, null, 1) })));
+    body.querySelectorAll('textarea').forEach((t) => { t.addEventListener('focus', touch); t.addEventListener('input', touch); });
+  }
+
+  const OBS_FIELDS = [
+    ['raw_text', 'nama produk', 'text', 'w'], ['listing_title', 'judul listing', 'text', 'w'], ['normal_price', 'normal', 'number'], ['promo_price', 'promo', 'number'],
+    ['promo_min_qty', 'min qty', 'number', 's'], ['promo_valid_from', 'promo dari', 'date'], ['promo_valid_until', 'promo s/d', 'date'], ['member_price', 'member', 'number'],
+    ['member_program_name', 'program', 'text'], ['seller_name', 'seller', 'text'], ['shipping_fee', 'ongkir', 'number'], ['image_position', 'gambar ke-', 'number', 's'],
+  ];
+  function renderObservation(body, exp, pf) {
+    const store = exp?.store_hint ?? {};
+    body.append(h('fieldset', {}, h('legend', {}, 'Toko'),
+      h('label', {}, 'Toko/platform ', input(store.name, { cls: 'w', name: 'store', prefilled: pf, label: 'Toko' })),
+      h('label', {}, 'Cabang ', input(store.branch_name, { name: 'branch', prefilled: pf, label: 'Cabang' }))));
+    const list = h('div');
+    const addItem = (it = {}) => {
+      const box = h('fieldset', { class: 'item' }, h('legend', {}, 'Item'),
+        ...OBS_FIELDS.map(([k, label, type, cls]) => h('label', {}, `${label} `, input(it[k], { type, cls, name: k, prefilled: pf, label }))),
+        h('button', { type: 'button', onclick: () => box.remove() }, 'hapus item'));
+      list.append(box);
+    };
+    (exp?.items ?? []).forEach(addItem);
+    body.append(list, h('button', { type: 'button', onclick: () => addItem() }, '+ item'));
+  }
+
+  function collect() {
+    const { entry } = cur;
+    const v = (name, root = document) => root.querySelector(`[data-name="${name}"]`);
+    const conditions = CONDS.filter((c) => v(`cond:${c}`).checked);
+    const unreadableAll = v('unreadable_all').checked;
+    const truth = { store_category: v('store_category').value || null, conditions, expected: null, annotations: { lines: {}, transcript_pii: [], notes: str(v('notes').value) ?? undefined } };
+    if (unreadableAll) return truth;
+    const store_hint = { name: str(v('store').value), branch_name: str(v('branch').value) };
+    if (entry.kind === 'receipt') {
+      const rows = [...document.querySelectorAll('tr.line')];
+      const lines = rows.map((tr, i) => {
+        const g = (n) => v(n, tr);
+        const ln = { line_no: i + 1, line_type: g('type').value, raw_text: g('text').value.trim(), quantity: numDec(g('qty').value), unit_amount: num(g('unit').value), line_amount: num(g('amount').value) ?? 0, applies_to_line_no: num(g('applies').value), barcode: str(g('barcode').value) };
+        if (g('member').checked) ln.member_discount = true;
+        const a = {}; if (g('weighed').checked) a.weighed = true; if (g('member').checked) a.member_discount = true; if (g('unreadable').checked) a.unreadable = true;
+        if (Object.keys(a).length) truth.annotations.lines[String(i + 1)] = a;
+        return ln;
+      });
+      const pii = Object.fromEntries(v('pii').value.split('\n').map((x) => x.split('=')).filter((p) => p.length >= 2 && p[0].trim()).map(([k, ...r]) => [k.trim(), r.join('=').trim()]));
+      truth.annotations.transcript_pii = v('transcript_pii').value.split('\n').map((x) => x.trim()).filter(Boolean);
+      let extra = { adjustments: [], member_hint: null };
+      try { extra = JSON.parse(v('extra').value || '{}'); } catch { throw new Error('JSON "Lainnya" tidak valid'); }
+      truth.expected = {
+        kind: 'receipt', ...(store_hint.name || store_hint.branch_name ? { store_hint } : {}),
+        header: { transaction_date: str(v('date').value), transaction_time: str(v('time').value), total_amount: num(v('total').value), subtotal_amount: num(v('subtotal').value), payment_method: v('payment').value || null, currency: 'IDR' },
+        pii, lines, adjustments: extra.adjustments ?? [], ...(extra.member_hint ? { member_hint: extra.member_hint } : {}),
+      };
+    } else {
+      const items = [...document.querySelectorAll('fieldset.item')].map((box) => {
+        const it = {};
+        for (const [k, , type] of OBS_FIELDS) { const raw = v(k, box).value; it[k] = type === 'number' ? num(raw) : str(raw); }
+        it.raw_text = it.raw_text ?? '';
+        return it;
+      });
+      truth.expected = { kind: entry.kind, ...(store_hint.name ? { store_hint } : {}), items };
+    }
+    return truth;
+  }
+
+  $('#pick').addEventListener('change', (e) => load(e.target.value));
+  $('#save').addEventListener('click', async () => {
+    const st = $('#status');
+    try {
+      const n = refreshUnchecked();
+      if (n && !confirm(`${n} field pra-isi belum diperiksa. Tetap simpan?`)) return;
+      const res = await fetch(`/api/item/${cur.entry.id}`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ truth: collect(), unchecked: n, prefill_arm: cur.prefill_arm }) });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.issues ? body.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ') : body.error);
+      st.textContent = 'Tersimpan.'; st.className = 'ok';
+      await loadList();
+    } catch (e) { st.textContent = `Gagal: ${e.message}`; st.className = 'err'; }
+  });
+  loadList();
+})();
+</script>
+</body>
+</html>
