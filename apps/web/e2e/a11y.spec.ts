@@ -107,13 +107,13 @@ test('setelah login: layar utama tanpa pelanggaran serius; S-02 → S-20 Tanya',
     expect(await seriousViolations(page), path).toEqual([]);
   }
 
-  // S-02 → baris "Tanya: milo" → S-20 (kerangka; kirim nonaktif sampai Tahap 6, D-57).
+  // S-02 → baris "Tanya: milo" → S-20 mengirim pertanyaan itu sekali (6b M5, ASK_ENGINE=stub di e2e).
+  // Alur lengkap Tanya: e2e/ask.spec.ts.
   await page.goto('/cari?q=milo');
   await page.getByRole('link', { name: /Tanya: milo/ }).click();
-  await expect(page).toHaveURL(/\/tanya\?q=milo$/);
+  await expect(page).toHaveURL(/\/tanya$/);
   await expect(page.getByRole('heading', { name: 'Tanya', exact: true })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Lihat hasil cari "milo"' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Kirim' })).toBeDisabled();
-  await page.getByRole('button', { name: 'harga per gram?' }).click();
-  await expect(page.getByLabel('Pertanyaan', { exact: true })).toHaveValue('milo harga per gram?');
+  await expect(page.getByRole('heading', { name: 'Maksudmu yang mana?' }).last()).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Kirim' })).toBeDisabled(); // kolom kosong setelah kirim
+  expect(await seriousViolations(page), '/tanya (balasan)').toEqual([]);
 });

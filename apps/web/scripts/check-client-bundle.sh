@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Pengaman bundle klien (docs/07 §11.4, §11.6). Dijalankan setelah `next build`.
-#   1. .next/static tidak memuat nama/nilai kunci service role (D-61). GAGAL jika ada.
+#   1. .next/static tidak memuat nama/nilai kunci service role (D-61), kunci Anthropic, atau SDK
+#      Anthropic (Tanya, docs/08 §3.1). GAGAL jika ada.
 #   2. Anggaran JS halaman utama (gzip, modul saja; polyfill noModule ditampilkan terpisah, D-91):
 #      PERINGATAN jika > 350 KiB; 200 KiB tetap target. Tidak pernah gagal.
 set -euo pipefail
@@ -15,6 +16,17 @@ if [[ -n "${SUPABASE_SERVICE_ROLE_KEY:-}" ]] && grep -rIlF -- "$SUPABASE_SERVICE
   echo "GAGAL: bundle klien memuat NILAI SUPABASE_SERVICE_ROLE_KEY"; fail=1
 fi
 [[ $fail -eq 0 ]] && echo "ok  : bundle klien tanpa service role"
+
+# Tanya (docs/08 §3.1): kunci Anthropic dan SDK hanya di route server /api/ask.
+afail=0
+if grep -rIl -E 'ANTHROPIC_API_KEY|sk-ant-|anthropic-version|server-side-fallback-' .next/static; then
+  echo "GAGAL: bundle klien memuat nama kunci/SDK Anthropic"; afail=1
+fi
+if [[ -n "${ANTHROPIC_API_KEY:-}" ]] && grep -rIlF -- "$ANTHROPIC_API_KEY" .next/static; then
+  echo "GAGAL: bundle klien memuat NILAI ANTHROPIC_API_KEY"; afail=1
+fi
+[[ $afail -eq 0 ]] && echo "ok  : bundle klien tanpa kunci/SDK Anthropic"
+fail=$((fail | afail))
 
 limit=$((350 * 1024))
 target=$((200 * 1024))

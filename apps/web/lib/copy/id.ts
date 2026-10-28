@@ -86,6 +86,11 @@ export const ERROR_COPY: Record<ErrorCode, ErrorCopy> = {
   },
   FORBIDDEN: { message: 'Kamu tidak punya izin untuk aksi ini.' },
   INVALID_INPUT: { message: 'Isian tidak valid. Periksa lagi lalu coba simpan.' },
+  // Tanya (docs/08 §11.3); S-20 memakai teks per alasan di ASK_COPY.quota.
+  AI_QUOTA_EXCEEDED: { message: 'Batas pertanyaan Tanya sudah tercapai. Coba lagi besok.' },
+  AI_UNAVAILABLE: {
+    message: 'Tanya sedang tidak tersedia. Pakai hasil cari, Bandingkan ukuran, dan Lebih hemat di mana.',
+  },
 };
 
 /** §8.2 — error Postgres bawaan (SQLSTATE). 23505 pada create dengan id klien = sukses (idempoten). */
@@ -1328,6 +1333,20 @@ export const ASK_COPY = {
   send: 'Kirim',
   comingSoon: 'Segera hadir. Untuk sekarang, pakai hasil cari, Bandingkan ukuran, dan Lebih hemat di mana.',
   searchFor: 'Lihat hasil cari "{q}"',
+  conversation: 'Percakapan',
+  inputHint: 'Jawaban hanya dari histori hargamu. Maks 200 karakter.',
+  offlineHint: 'Tanya butuh sinyal. Hasil cari tetap bisa dipakai offline.',
+  failed: 'Gagal menjawab. Coba lagi.',
+  retry: 'Coba lagi',
+  quota: {
+    daily: 'Batas pertanyaan hari ini sudah tercapai. Coba lagi besok, atau pakai hasil cari.',
+    monthly: 'Batas pertanyaan bulan ini sudah tercapai. Untuk sekarang, pakai hasil cari.',
+    budget: 'Tanya sedang istirahat karena batas pemakaian AI hari ini tercapai. Coba lagi besok.',
+    other: 'Batas pertanyaan Tanya sudah tercapai. Coba lagi nanti.',
+  },
+  /** Pengumuman pembaca layar (aria-live) saat jawaban datang. */
+  answered: 'Jawaban: {text}',
+  basisCount: '{n} data',
   examplesTitle: 'Contoh pertanyaan',
   examples: ['termurah di mana?', 'naik atau turun?', 'harga per gram?'],
   loading: 'Mencari di historimu…',
@@ -1338,6 +1357,7 @@ export const ASK_COPY = {
   screens: {
     'S-02': 'Lihat hasil cari',
     'S-03': 'Lihat detail produk',
+    'S-03b': 'Buka Cek harga rak',
     'S-04': 'Lihat perbandingan ukuran',
     'S-05': 'Lihat lebih hemat di mana',
   },

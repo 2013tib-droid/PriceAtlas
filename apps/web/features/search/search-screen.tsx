@@ -1,6 +1,6 @@
 'use client';
 // S-02 Hasil cari (docs/07 §7.3): R3 dari `q` URL (≥ 2 huruf, debounce di SearchLayout),
-// dikelompokkan per Product Group di klien, baris "Tanya: …" → S-20 (kerangka, D-57). Offline tanpa
+// dikelompokkan per Product Group di klien, baris "Tanya: …" → S-20 (D-57). Offline tanpa
 // hasil R3 tersimpan: cari di kartu R5 (`offline_cards`, D-60, §5.6) dengan label "data tersimpan".
 import type { ProductCard as Card } from '@priceatlas/contracts';
 import type { UseQueryResult } from '@tanstack/react-query';
@@ -30,7 +30,7 @@ export function CardSkeleton() {
   );
 }
 
-/** Baris "Tanya: …" (U-18) → S-20. Jawaban sungguhan di Tahap 6 (D-57); M7 hanya kerangka. */
+/** Baris "Tanya: …" (U-18) → S-20, yang langsung mengirim pertanyaan ini (D-57, 6b M5). */
 function AskRow({ q }: { q: string }) {
   return (
     <Link

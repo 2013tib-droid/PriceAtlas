@@ -1792,6 +1792,7 @@ export type Database = {
     };
     Functions: {
       begin_account_deletion: { Args: { p_user_id: string }; Returns: Json };
+      begin_ask: { Args: Record<PropertyKey, never>; Returns: Json };
       compare_sizes: {
         Args: { p_group_id: string; p_window?: string };
         Returns: Json[];
@@ -1944,6 +1945,15 @@ export type Database = {
         Returns: Json;
       };
       recent_locations: { Args: { p_limit?: number }; Returns: Json[] };
+      record_ask_usage: {
+        Args: {
+          p_cost_usd?: number;
+          p_day: string;
+          p_input_tokens: number;
+          p_output_tokens: number;
+        };
+        Returns: undefined;
+      };
       retry_capture: { Args: { p_capture_id: string }; Returns: Json };
       search_products: {
         Args: { p_limit?: number; p_query: string };

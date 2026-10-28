@@ -2,7 +2,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type pg from 'pg';
 import { newPool } from '@priceatlas/testkit';
-import { ERROR_HTTP, RPC_INPUTS, RPC_NAMES, UNITS, isValidPriceExtra, unitPrice, type UnitPriceProduct } from '../src/index.ts';
+import { ASK_RPC_INPUTS, ERROR_HTTP, RPC_INPUTS, RPC_NAMES, UNITS, isValidPriceExtra, unitPrice, type UnitPriceProduct } from '../src/index.ts';
 import { EXTRA_CASES } from './extra-cases.ts';
 
 let pool: pg.Pool;
@@ -100,7 +100,7 @@ describe('daftar RPC kontrak = fungsi di schema public', () => {
     const r = await pool.query<{ proname: string }>(
       `select proname from pg_proc where pronamespace = 'public'::regnamespace and prokind = 'f' order by 1`,
     );
-    const contract = [...RPC_NAMES.read, ...RPC_NAMES.write, ...RPC_NAMES.serviceRole].sort();
+    const contract = [...RPC_NAMES.read, ...RPC_NAMES.write, ...RPC_NAMES.serviceRole, ...RPC_NAMES.askRoute].sort();
     expect(r.rows.map((x) => x.proname)).toEqual(contract);
   });
 });
@@ -109,13 +109,16 @@ describe('RPC_INPUTS = argumen fungsi SQL', () => {
   it('kunci = RPC_NAMES.read + write', () => {
     expect(Object.keys(RPC_INPUTS).sort()).toEqual([...RPC_NAMES.read, ...RPC_NAMES.write].sort());
   });
+  it('ASK_RPC_INPUTS = RPC_NAMES.askRoute', () => {
+    expect(Object.keys(ASK_RPC_INPUTS).sort()).toEqual([...RPC_NAMES.askRoute].sort());
+  });
   it('setiap field input ada sebagai argumen fungsi, dan argumen wajib ada di skema', async () => {
     const r = await pool.query<{ proname: string; args: string[] | null; nreq: number }>(
       `select proname, proargnames as args, pronargs - pronargdefaults as nreq
          from pg_proc where pronamespace = 'public'::regnamespace and prokind = 'f'`,
     );
     for (const row of r.rows) {
-      const schema = (RPC_INPUTS as Record<string, { shape?: Record<string, unknown> } | undefined>)[row.proname];
+      const schema = ({ ...RPC_INPUTS, ...ASK_RPC_INPUTS } as Record<string, { shape?: Record<string, unknown> } | undefined>)[row.proname];
       if (!schema) continue;
       // where_cheaper memakai .refine(): bentuknya ada di schema dalam (ZodPipe/innerType).
       const shape = schema.shape ?? (schema as unknown as { def: { in?: { shape: Record<string, unknown> } } }).def.in?.shape;

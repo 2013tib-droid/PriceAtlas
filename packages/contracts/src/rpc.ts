@@ -658,6 +658,8 @@ export const RPC_NAMES = {
     'update_capture_item',
   ],
   serviceRole: ['begin_account_deletion'],
+  /** Dipanggil route server /api/ask dengan JWT user (bukan dari klien); input di ASK_RPC_INPUTS. */
+  askRoute: ['begin_ask', 'record_ask_usage'],
 } as const;
 
 // ---------------------------------------------------------------------------
