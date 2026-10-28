@@ -2,7 +2,7 @@
 
 > Dasar: `docs/05-backend-design.md` (§1.4 penjadwalan, §1.5 struktur repo, §5 pipeline, §7.7 rahasia, §8 test).
 > Dua mode: **A** (PostgreSQL biasa + stub, tanpa Supabase) dan **B** (Supabase CLI).
-> Extractor dan matcher AI worker masih **stub berbasis fixture** (extractor sungguhan di 6b M2). Tanya (`/api/ask`, 6b M5) memakai Claude jika `ANTHROPIC_API_KEY` web diisi, atau `ASK_ENGINE=stub` tanpa kunci: §4.11. Frontend (`apps/web`, Tahap 5b) butuh mode B: lihat §4.
+> Extractor dan matcher AI worker masih **stub berbasis fixture** (extractor sungguhan di 6b M2). Uji OCR D-16 (harness `ocr-eval`, 6b M1) dijalankan pemilik proyek di mesinnya: §2.8; uji live sintetis: §2.9. Tanya (`/api/ask`, 6b M5) memakai Claude jika `ANTHROPIC_API_KEY` web diisi, atau `ASK_ENGINE=stub` tanpa kunci: §4.11. Frontend (`apps/web`, Tahap 5b) butuh mode B: lihat §4.
 
 ---
 
@@ -168,7 +168,9 @@ Sejak 6b M0 setiap gambar melewati `prepareImages` (docs/08 §6) sebelum extract
 |---|---|---|
 | `struk-aeon` | struk AEON BSD | `needs_confirmation`: Milo (barcode) auto-save dengan diskon member → promo + `member_hint`; Indomie dan SNACK (saran AI tier 4) perlu konfirmasi; pii terpisah |
 | `label-milo` | label harga | Milo 200 g (barcode, promo aktif) auto-accept jika toko diketahui (sesi/manual); Milo 3in1 harga member menunggu konfirmasi |
-| `shopee-milo` | screenshot marketplace | toko Shopee dari `store_hint`, seller global "Nestle Official Store", ongkir di `extra`; tier fuzzy confidence 1 → **auto-save** (`done`). Unggahan kedua file yang sama = duplikat hash → `needs_confirmation` (D-71, dipakai e2e alur 5) |
+| `shopee-milo` | screenshot marketplace | toko Shopee dari `store_hint`, seller global "Nestle Official Store", ongkir di `extra`; tier fuzzy confidence 1 → **auto-save** (`done`). Unggahan kedua file yang sama = duplikat hash → `needs_confirmation` (D-71) |
+| `shopee-milo-uht` | screenshot marketplace (6b M4, Q-78) | confidence harga 0,7 < τ → **`needs_confirmation` dari unggahan pertama** (e2e alur 5); saran Milo UHT 180 ml, ongkir Rp5.000 |
+| `label-indomie` | label harga (6b M1) | satu label promo berperiode; label kedua untuk uji live §2.9 |
 | `struk-buram` | struk | gagal permanen `blurry` |
 | `struk-alfamart-timeout` | struk Alfamart Serpong | 2× gagal sementara → retry otomatis dengan backoff (30 dtk, 2 mnt) → sukses dan auto-save penuh |
 
@@ -187,15 +189,22 @@ Bentuk file fixture:
 
 Gambar tanpa fixture → `PermanentError('unsupported')`. Direktori lain bisa dipakai lewat `STUB_FIXTURES_DIR`. Subfolder (mis. `heic/`) diabaikan oleh registry fixture.
 
+**`STUB_FALLBACK_FIXTURE` (KHUSUS worker e2e, Q-82/Q-118):** nama fixture yang dipakai untuk gambar yang tidak dikenal (mis. frame kamera palsu Chromium yang sha256-nya tidak pernah sama dengan fixture, F-63), **hanya jika jenis capture sama** dengan jenis output fixture itu (`label-milo` → hanya capture label). Nama yang tidak ada → worker gagal start. Tidak pernah default; jangan diisi di dev/produksi. Job CI `supabase-e2e` menjalankan worker dengan `STUB_FALLBACK_FIXTURE=label-milo`. Mencoba lokal:
+
+```bash
+STUB_FALLBACK_FIXTURE=label-milo pnpm --filter @priceatlas/worker dev   # foto kamera label apa pun → isi label-milo
+```
+
 **Membuat atau mengubah gambar fixture** (generator `apps/worker/eval/synthetic/`, spesifikasi per fixture di `specs.ts`):
 
 ```bash
 pnpm --filter @priceatlas/worker synthetic                          # tulis ulang semua gambar fixture (worker + web)
 CHROMIUM_PATH=/opt/pw-browsers/chromium pnpm --filter @priceatlas/worker synthetic   # jika versi Playwright ≠ browser terpasang
-pnpm --filter @priceatlas/worker synthetic --out .data/ocr-eval-synthetic           # set uji sintetis: <nama>.jpg + <nama>.truth.json
+pnpm --filter @priceatlas/worker synthetic --out .data/ocr-eval-synthetic           # set uji sintetis: <nama>.jpg + <nama>.truth.json (§2.8)
+pnpm --filter @priceatlas/worker synthetic --only shopee-milo-uht   # hanya fixture ini; gambar lain tidak dirender ulang (F-132)
 ```
 
-Generator memakai Playwright yang sudah terpasang di lingkungan (jangan `playwright install`); CI tidak menjalankannya. Hasil render bergantung pada font mesin, jadi menjalankan ulang mengubah sha256. Setelah gambar berubah: perbarui nilai `sha256` di `apps/web/test/fixtures/rpc.json` (ganti hash lama dengan yang baru; tidak perlu bangkitkan ulang seluruh file) dan konstanta `STRUK_AEON_SHA` di `apps/web/test/browser/media.browser.test.ts`. Fixture baru: tambah entri di `specs.ts`, jalankan generator, lalu tulis JSON dengan `images` menunjuk file itu.
+Generator memakai Playwright yang sudah terpasang di lingkungan (jangan `playwright install`); CI tidak menjalankannya. Hasil render bergantung pada font mesin, jadi menjalankan ulang mengubah sha256. Setelah gambar berubah: perbarui nilai `sha256` di `apps/web/test/fixtures/rpc.json` (ganti hash lama dengan yang baru; tidak perlu bangkitkan ulang seluruh file) dan konstanta `STRUK_AEON_SHA` di `apps/web/test/browser/media.browser.test.ts`. Fixture baru: tambah entri di `specs.ts` (termasuk `storeCategory` dan anotasi uji untuk harness), jalankan generator dengan `--only <nama>`, lalu tulis JSON dengan `images` menunjuk file itu.
 
 **Sampel HEIC:** test dekode HEIC asli (`apps/worker/test/images.test.ts`) dilewati sampai `apps/worker/test/fixtures/heic/sample.heic` ada (foto polos dari iPhone tanpa data pribadi, lokasi mati; docs/08 §15 no. 8). libheif di Node tidak punya encoder, jadi sampel tidak bisa dibuat sendiri.
 
@@ -209,6 +218,8 @@ bash db/tests/run.sh 70_              # hanya flow yang namanya memuat "70_"
 pnpm -r --workspace-concurrency=1 test   # L2 + L3 + L5a/L5b web (membangun DB uji sendiri: priceatlas_l2_*, priceatlas_l3_*)
                                          # worker 6b M0: images/ai/convert (L2), vision-pipeline (L3, klien Claude palsu)
                                          # 6b M5: ai-tools ask (loop Tanya, klien Claude palsu), web test/ask (route, S-20, set emas)
+                                         # 6b M1: worker eval-score / eval-harness (harness uji OCR, klien palsu, tanpa jaringan)
+                                         # test/live/* TIDAK ikut (hanya `test:live`, §2.9)
 pnpm -r typecheck
 bash db/scripts/snapshot.sh --check   # db/schema.sql tanpa drift
 bash scripts/check-secrets.sh
@@ -222,9 +233,100 @@ bash db/scripts/gen_inventory_test.sh       # tulis ulang whitelist hak akses 99
 pnpm --filter @priceatlas/db-types gen      # butuh mode B (§3.5); CI memeriksa drift
 ```
 
-Tanpa PostgreSQL 17 lokal, `snapshot.sh` dengan `pg_dump` 16 menghasilkan berkas yang identik untuk skema ini (diperiksa di 6b M5, `docs/08` §19); CI tetap memeriksa dengan 17.
+Tanpa PostgreSQL 17 lokal, `snapshot.sh` dengan `pg_dump` 16 menghasilkan berkas yang identik untuk skema ini (diperiksa di 6b M5 dan M4, `docs/08` §19, §20); CI tetap memeriksa dengan 17.
+
+Perubahan RPC yang **menambah field** keluaran (mis. 6b M4: R18, R20): `UPDATE_FIXTURES=fields pnpm --filter @priceatlas/web test fixtures` menambahkan field baru ke `apps/web/test/fixtures/rpc.json` tanpa mengubah nilai lama (tanggal relatif dan jam sesi yang dipakai test tetap, F-75/F-125). Nilai yang berubah karena perilaku baru disalin dari keluaran server secara terarah, lalu `prettier --write`.
 
 Test L1 `60_public_share.sql`, `70_capture_pipeline.sql`, dan `86_ask_quota.sql` membuka sesi kedua lewat `dblink` ke database yang sama (`dbname=… user=postgres`, koneksi socket lokal). Server harus mengizinkan koneksi lokal itu tanpa kata sandi (default image Docker `postgres` dan paket Ubuntu dengan `peer` untuk user `postgres`). Socket dicari di direktori default libpq server itu: jika biner PostgreSQL berasal dari paket lain (mis. biner portabel yang memakai `/tmp`), jalankan server dengan `-k /var/run/postgresql,/tmp`.
+
+### 2.8 Uji OCR D-16: harness `ocr-eval` (6b M1, dijalankan pemilik proyek)
+
+Desain: `docs/08` §4 (data §4.2, ground truth §4.3, arm §4.5, metrik §4.7, kriteria §4.8); hasil pembangunan: `docs/08` §20. Harness dijalankan **di mesin pemilik proyek** (Q-105 → D-92): foto asli dan ground truth tidak pernah masuk repo atau sesi cloud. Yang dikirim balik hanya laporan **agregat**.
+
+**Persiapan (sekali).**
+
+| Butuh | Isi |
+|---|---|
+| Repo + `pnpm install` | Node 22. PostgreSQL/Supabase **tidak** dibutuhkan. |
+| `ANTHROPIC_API_KEY` | Kunci **worker** (docs/08 §15 no. 5), workspace dengan batas pengeluaran. Diisi di shell, bukan di file yang di-commit. |
+| `GOOGLE_VISION_API_KEY` | Hanya untuk arm `ocr-gcv+opus-low` (§15 no. 6): kunci API dibatasi ke Vision API. Tanpa kunci ini, jalankan `--arms` tanpa arm OCR. |
+| Folder data | `.data/ocr-eval/` (di-gitignore). Folder lain lewat `OCR_EVAL_DIR`; harness **menolak berjalan** jika folder datanya di dalam repo git dan tidak di-ignore (F-117). |
+| Uji live sekali | `test:live` (§2.9, ±US$0,40) untuk memastikan kunci, model, dan pola error (Q-138). |
+
+```bash
+export ANTHROPIC_API_KEY=sk-ant-…            # kunci worker
+export GOOGLE_VISION_API_KEY=…               # arm OCR saja
+alias ocr-eval='pnpm --filter @priceatlas/worker ocr-eval'
+```
+
+**Lima langkah** (docs/08 §4.2):
+
+| # | Langkah | Perintah |
+|---|---|---|
+| 1 | Salin foto apa adanya (HEIC boleh, jangan disunting) ke `.data/ocr-eval/inbox/`, dikelompokkan per jenis dan kategori toko (lihat di bawah). | — |
+| 2 | Buat manifest: id acak, nama file standar, split dev 30 % / test 70 % berstrata per kategori. Aman dijalankan ulang (hanya foto baru yang ditambah). | `ocr-eval init` |
+| 3 | Anotasi: pra-isi dari `vision-opus-medium` (dijalankan otomatis untuk foto yang belum punya hasil, ±US$6, dengan anggaran), lalu buka `http://localhost:4317`. 5 struk pertama tanpa pra-isi (ukur bias). Field kuning = belum diperiksa: ubah nilainya atau tekan ✓. "Simpan terverifikasi" hanya jika semua field sudah diperiksa; "Simpan draf" untuk melanjutkan nanti. Ctrl+C untuk berhenti. | `ocr-eval annotate --prefill vision-opus-medium` |
+| 4 | Jalankan semua arm pada split test: batch (diskon 50 %, hasil bisa sampai 24 jam; biarkan terminal terbuka) + subset realtime untuk latensi. Cek perkiraan dulu. | `ocr-eval run --set test --arms all --repeat 2 --estimate` lalu tanpa `--estimate` |
+| 5 | Buat laporan dan kirim **hanya** `reports/<waktu>.agg.json` (cara kirim di bawah). | `ocr-eval report` |
+
+Susunan `inbox/`:
+
+```
+.data/ocr-eval/inbox/
+  struk/minimarket/IMG_0101.HEIC            satu foto = satu capture
+  struk/supermarket/IMG_0110.jpg
+  struk/supermarket/panjang-1/IMG_0120.jpg   folder = struk panjang multi-bagian (urut nama file)
+  struk/supermarket/panjang-1/IMG_0121.jpg
+  struk/apotek/…   struk/lokal/…   struk/hypermarket/…   struk/IMG_0130.jpg (tanpa kategori = bebas)
+  label/supermarket/IMG_0200.jpg             label harga
+  screenshot/IMG_0300.PNG                    screenshot belanja online (kategori marketplace)
+```
+
+Nama folder jenis: `struk`/`receipt`, `label`/`price_label`, `screenshot`/`marketplace`. Kategori: `minimarket`, `supermarket`, `hypermarket`, `apotek`, `lokal`, `marketplace`, `bebas` (kategori dan kondisi bisa diubah di alat anotasi). Nama file/folder asli tidak disimpan di manifest; jangan memakai nama toko di nama file pun tidak masalah, tetapi tetap disarankan.
+
+**Opsi lain.**
+
+```bash
+ocr-eval run --set dev --arms vision-opus-medium            # iterasi prompt di split dev (split test dikunci, §4.4)
+ocr-eval run --set all --arms vision-opus-medium --repeat 1 # sekali di dev+test: dibutuhkan untuk ukuran bias pra-isi (§4.2)
+ocr-eval run … --mode batch | realtime | both               # default both
+ocr-eval run … --budget 20                                  # batas per run (US$); batas keras kumulatif US$75 di spend.json
+ocr-eval run … --ids r-7f3a,l-02c1                          # capture tertentu
+ocr-eval score --set test                                   # skor per capture (lokal, berisi id) → reports/<waktu>.scores.json
+ocr-eval report --set test --tau 0.9                        # laporan; --prefill-arm untuk ukuran bias
+ocr-eval annotate --no-run                                  # tanpa menjalankan pra-isi
+```
+
+Run yang terputus (mis. batch belum selesai): status batch tersimpan di `runs/<run>/batch.json`; jalankan ulang `run` untuk capture yang belum punya hasil (`--ids`). Biaya yang sudah terpakai tercatat di `spend.json` dan dihitung terhadap batas US$75.
+
+**Isi folder data** (semuanya tetap di mesin): `manifest.json`, `images/`, `truth/`, `runs/<waktu>-<arm>/<id>.r<n>.json` (output mentah, transkripsi, usage, biaya, latensi), `reports/` (`*.agg.json` agregat, `*.md` ringkasan agregat, `*.scores.json` per capture), `spend.json`.
+
+**Mengirim laporan agregat.** Hanya `reports/<waktu>.agg.json` (dan boleh `.md` pasangannya). File ini hanya berisi angka per metrik/arm/jenis/kategori/kondisi: tanpa teks struk, nama toko, PII, id capture, atau path; `report` menolak menulis jika ada teks dari ground truth yang lolos. Cara kirim (pilih satu): lampirkan file itu di percakapan sesi berikutnya, atau commit ke `docs/ocr-eval/<tanggal>.agg.json` di branch baru dan buka PR. **Jangan** mengirim `truth/`, `images/`, `runs/`, `*.scores.json`, atau `manifest.json`.
+
+**Mencoba harness tanpa data asli dan tanpa kunci** (set sintetis + klien palsu; hasilnya **bukan** hasil model):
+
+```bash
+export OCR_EVAL_DIR=$PWD/.data/ocr-eval-demo
+pnpm --filter @priceatlas/worker synthetic --out .data/ocr-eval-synthetic     # atau set dari fixture: lihat eval/synthetic/set.ts
+ocr-eval init --synthetic .data/ocr-eval-synthetic
+ocr-eval run --set all --arms all --repeat 2 --client fake --poll 0
+ocr-eval report --set all
+ocr-eval annotate --prefill vision-opus-medium --client fake                 # alat anotasi dengan pra-isi palsu
+```
+
+Contoh keluaran dari set sintetis: `apps/worker/eval/examples/report-synthetic.md`.
+
+### 2.9 Uji live sintetis (`test:live`, manual)
+
+`VisionExtractor` sungguhan pada set sintetis (3 struk + 2 label + 1 screenshot) + satu gambar rusak yang sengaja dikirim ke API (400 harus terbaca sebagai `unsupported`, F-131). Tidak pernah di CI (`vitest.config.ts` mengecualikan `test/live/`).
+
+```bash
+LIVE_AI=1 ANTHROPIC_API_KEY=sk-ant-… pnpm --filter @priceatlas/worker test:live              # ±US$0,40 (Opus 5.5)
+SYNTHETIC_DIR=.data/ocr-eval-synthetic LIVE_AI=1 ANTHROPIC_API_KEY=… pnpm --filter @priceatlas/worker test:live
+LIVE_MODEL=claude-haiku-5-5 LIVE_EFFORT=medium LIVE_AI=1 ANTHROPIC_API_KEY=… pnpm --filter @priceatlas/worker test:live
+```
+
+Set dari `synthetic --out` jika ada (default `.data/ocr-eval-synthetic`), selain itu salinan fixture yang di-commit (keluaran generator yang sama). Ringkasan token, biaya, dan latensi per kasus (tanpa teks) → `.data/live/<waktu>.json`. Tanpa `LIVE_AI=1` atau kunci, semua kasus dilewati.
 
 ---
 
@@ -445,9 +547,9 @@ Offline: DevTools → Network → Offline (atau mode pesawat di HP) → foto →
 
 ### 4.7 Sesi belanja dan kamera label dari UI (M4)
 
-**Alur** (`docs/07` §1.8): tab Belanja (S-13) → "Mulai belanja" → S-12 mode sesi (`/lokasi?mode=sesi`: toko → cabang; cabang tutup tidak bisa dipilih, tanpa "Tidak tahu cabangnya", "+ Cabang baru" cepat) → W11 → S-13 aktif + banner "● Belanja di AEON BSD · 0m · 0 label [Foto label]" di semua layar (app). "Foto label" (banner, S-13, atau sheet foto yang kini menaruh "Label harga" di atas) → kamera label `/kamera?jenis=label`: jendela bidik tetap terbuka, setiap shutter = satu capture label dengan `shopping_session_id` sesi aktif → antrean → W1. S-13 menampilkan kartu per foto (diproses / gagal dibaca / perlu dicek → S-11 / tersimpan dengan harga, label, dan pembanding `vs_best_pct`), "Perpanjang" saat sisa < 30 mnt (W12, +2 jam), "Akhiri sesi" (W13). Tanpa sesi, "Label harga" di sheet → S-12 mode manual (`untuk=label`) → kamera label dengan lokasi manual (`toko`, `cabang`).
+**Alur** (`docs/07` §1.8): tab Belanja (S-13) → "Mulai belanja" → S-12 mode sesi (`/lokasi?mode=sesi`: toko → cabang; cabang tutup tidak bisa dipilih, tanpa "Tidak tahu cabangnya", "+ Cabang baru" cepat) → W11 → S-13 aktif + banner "● Belanja di AEON BSD · 0m · 0 label [Foto label]" di semua layar (app). "Foto label" (banner, S-13, atau sheet foto yang kini menaruh "Label harga" di atas) → kamera label `/kamera?jenis=label`: jendela bidik tetap terbuka, setiap shutter = satu capture label dengan `shopping_session_id` sesi aktif → antrean → W1. S-13 menampilkan kartu per foto dan, sejak 6b M4, **per item** dengan thumbnail foto (diproses / gagal dibaca / item perlu dicek → S-11 / item tersimpan dengan harga, label, dan pembanding `vs_best_pct` terhadap termurah 90 hari tanpa record sesi ini), "Perpanjang" saat sisa < 30 mnt (W12, +2 jam), "Akhiri sesi" (W13). Tanpa sesi, "Label harga" di sheet → S-12 mode manual (`untuk=label`) → kamera label dengan lokasi manual (`toko`, `cabang`).
 
-**Mencoba (mode B):** jalankan Supabase + worker stub + web seperti §4.5. Kamera butuh secure context: `localhost` di desktop, atau HTTPS di HP (§4.1). Di desktop tanpa kamera: izin ditolak / kamera tidak ada → "Pilih dari galeri"; pilih `apps/worker/test/fixtures/label-milo.jpg` → dalam beberapa detik kartu "perlu dicek" (Milo 200 g tersimpan otomatis karena lokasi dari sesi, Milo 3in1 menunggu konfirmasi) → S-11 → Simpan → kartu tersimpan. Foto kamera sungguhan tidak punya fixture stub → "gagal dibaca" (`unsupported`). Kamera palsu Chromium untuk mencoba jendela bidik:
+**Mencoba (mode B):** jalankan Supabase + worker stub + web seperti §4.5. Kamera butuh secure context: `localhost` di desktop, atau HTTPS di HP (§4.1). Di desktop tanpa kamera: izin ditolak / kamera tidak ada → "Pilih dari galeri"; pilih `apps/worker/test/fixtures/label-milo.jpg` → dalam beberapa detik kartu "perlu dicek" (Milo 200 g tersimpan otomatis karena lokasi dari sesi, Milo 3in1 menunggu konfirmasi) → S-11 → Simpan → kartu tersimpan. Foto kamera sungguhan tidak punya fixture stub → "gagal dibaca" (`unsupported`), kecuali worker dijalankan dengan `STUB_FALLBACK_FIXTURE=label-milo` (§2.6): foto label apa pun lalu dibaca sebagai label-milo. Kamera palsu Chromium untuk mencoba jendela bidik:
 
 ```bash
 node --experimental-strip-types -e "import('./apps/web/e2e/support/fake-camera.ts').then(m => console.log(m.writeFakeCameraFile()))"
@@ -459,7 +561,7 @@ chromium --use-fake-device-for-media-stream --use-fake-ui-for-media-stream \
 
 **Fixture R18/W11/W12/W13.** `apps/web/test/fixtures/scenario.ts` (`collectSessions`, user Ani, dijalankan paling akhir supaya fixture M1–M3 tidak berubah): tanpa sesi, W11 `BRANCH_CLOSED` (AEON Lama), mulai + ulang id yang sama, label-milo dengan sesi lewat pipeline worker asli (uploaded → needs_confirmation), label-milo lagi (duplikat hash) diterima → done, gambar tanpa fixture → failed, satu capture diklaim → processing, R18 sebelum dan sesudah antrean ringkasan (F-60), hampir kedaluwarsa (`expires_at` dimajukan, data test), W12, W13 (+ ulang), `SESSION_NOT_ACTIVE` setelah berakhir dan setelah kedaluwarsa. Dibangkitkan ulang seperti §4.4.
 
-**e2e.** `e2e/session.spec.ts` (alur 4) di job `supabase-e2e`. Chromium memakai kamera palsu: `playwright.config.ts` membangkitkan file Y4M 1280×720 (`e2e/support/fake-camera.ts`, sisi test, tidak di-commit sebagai biner) dan memberi `--use-fake-device-for-media-stream --use-fake-ui-for-media-stream --use-file-for-fake-video-capture=…` + izin `camera`. Frame kamera palsu diperiksa sampai capture terdaftar dengan sesi yang benar (JPEG ≤ 2048 px, sha256 cocok) dan tampil "gagal dibaca" (stub memetakan fixture lewat sha256, F-63); isi kartu dari label-milo lewat galeri di kamera label yang sama. WebKit tidak punya kamera palsu: langkah shutter dilewati (F-64). Helper `e2e/support/session.ts` (service role di proses test) membaca sesi/capture/gambar dan memajukan `expires_at` untuk "Perpanjang"; migration, RPC, dan logika worker tidak diubah.
+**e2e.** `e2e/session.spec.ts` (alur 4) di job `supabase-e2e`. Chromium memakai kamera palsu: `playwright.config.ts` membangkitkan file Y4M 1280×720 (`e2e/support/fake-camera.ts`, sisi test, tidak di-commit sebagai biner) dan memberi `--use-fake-device-for-media-stream --use-fake-ui-for-media-stream --use-file-for-fake-video-capture=…` + izin `camera`. Frame kamera palsu diperiksa sampai capture terdaftar dengan sesi yang benar (JPEG ≤ 2048 px, sha256 cocok); sejak 6b M4 worker e2e memakai `STUB_FALLBACK_FIXTURE=label-milo`, sehingga frame itu dibaca sebagai label-milo dan kartu S-13 (per item, thumbnail, pembanding) berasal dari foto kamera itu sendiri (Q-82). WebKit tidak punya kamera palsu: label-milo lewat galeri di kamera label yang sama (F-64). Helper `e2e/support/session.ts` (service role di proses test) membaca sesi/capture/gambar dan memajukan `expires_at` untuk "Perpanjang"; migration, RPC, dan logika worker tidak diubah.
 
 ### 4.8 Koreksi & katalog dari UI (M5)
 

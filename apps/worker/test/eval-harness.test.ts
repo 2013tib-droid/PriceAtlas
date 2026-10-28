@@ -15,7 +15,7 @@ import { main } from '../eval/cli.ts';
 import { GuardError, TruthSchema, assertIgnored, readAllTruths, readManifest, stripConfidence } from '../eval/data.ts';
 import { FakeEvalClient, FakeOcr } from '../eval/fake-client.ts';
 import { assignSplits, importSynthetic, initData } from '../eval/init.ts';
-import { REPORT_SCHEMA } from '../eval/report.ts';
+import { REPORT_SCHEMA, assertNoText } from '../eval/report.ts';
 import { Budget, customId, estimateCostUsd, readRecords, runBatch, runRealtime, selectCaptures, type EvalClient } from '../eval/run.ts';
 import { writeSyntheticSet } from '../eval/synthetic/set.ts';
 import { GoogleVisionOcr, linesFromAnnotation, type FetchLike } from '../src/extractors/ocr/google-vision.ts';
@@ -342,6 +342,18 @@ describe('CLI end-to-end pada set sintetis dengan klien palsu', () => {
     expect(existsSync(join(dir, 'spend.json'))).toBe(false);
     expect(report.spend_total_usd).toBeNull();
     expect(out.join('\n')).toMatch(/agregat \(boleh dikirim\/di-commit\)/);
+  });
+  it('run --estimate: perkiraan biaya tanpa API; laporan yang memuat teks ground truth ditolak', async () => {
+    const dir = tmp('est');
+    const env = { OCR_EVAL_DIR: dir } as NodeJS.ProcessEnv;
+    await main(['init', '--synthetic', synthDir], env, quiet);
+    const out: string[] = [];
+    expect(await main(['run', '--set', 'all', '--arms', 'vision-opus-medium', '--repeat', '2', '--estimate'], env, (s) => out.push(s))).toBe(0);
+    expect(out.join('\n')).toMatch(/perkiraan total US\$\d+\.\d{2}/);
+    expect(existsSync(join(dir, 'runs'))).toBe(false);
+    const truths = readAllTruths(dir);
+    expect(() => assertNoText('{"x":"MILO ORI 500G"}', truths)).toThrow(/F-117/);
+    expect(() => assertNoText('{"x":"0812 98"}', truths)).not.toThrow();
   });
   it('tanpa kunci API → pesan jelas; folder data di repo tanpa ignore → ditolak', async () => {
     const dir = tmp('cli2');

@@ -63,7 +63,8 @@ async function main() {
   if (only && specs.length !== only.size) throw new Error(`--only: nama tidak dikenal (${[...only].join(', ')})`);
   const images = await render(specs);
   if (outIdx >= 0) {
-    const dir = resolve(argv[outIdx + 1] ?? '.data/ocr-eval-synthetic');
+    // Relatif ke folder tempat perintah diketik (pnpm --filter menjalankan dari apps/worker); default di root repo.
+    const dir = argv[outIdx + 1] ? resolve(process.env.INIT_CWD || process.cwd(), argv[outIdx + 1]!) : join(ROOT, '.data/ocr-eval-synthetic');
     const n = writeSyntheticSet(dir, images, specs);
     console.log(`${n} gambar + truth → ${dir}`);
     return;

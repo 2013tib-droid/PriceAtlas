@@ -19,7 +19,7 @@ import { systemPrompt } from '../../src/extractors/prompts/index.ts';
 import { VisionExtractor } from '../../src/extractors/vision.ts';
 import { prepareImages } from '../../src/images/prepare.ts';
 import { PermanentError } from '../../src/pipeline/types.ts';
-import { REPO_ROOT, writeJson } from '../../eval/data.ts';
+import { REPO_ROOT, userPath, writeJson } from '../../eval/data.ts';
 import { writeSyntheticSet, type SyntheticTruthFile } from '../../eval/synthetic/set.ts';
 
 const LIVE = process.env.LIVE_AI === '1' && !!process.env.ANTHROPIC_API_KEY;
@@ -28,7 +28,7 @@ const EFFORT = (process.env.LIVE_EFFORT || 'medium') as Effort;
 const CASES = ['struk-aeon', 'struk-alfamart-timeout', 'struk-tanpa-toko', 'label-milo', 'label-indomie', 'shopee-milo'];
 
 function setDir(): string {
-  const d = process.env.SYNTHETIC_DIR || join(REPO_ROOT, '.data/ocr-eval-synthetic');
+  const d = process.env.SYNTHETIC_DIR ? userPath(process.env.SYNTHETIC_DIR) : join(REPO_ROOT, '.data/ocr-eval-synthetic');
   if (existsSync(join(d, 'struk-aeon.truth.json'))) return d;
   const tmp = mkdtempSync(join(tmpdir(), 'pa-live-'));
   writeSyntheticSet(tmp);

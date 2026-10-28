@@ -407,11 +407,41 @@ export function reportMarkdown(r: Report): string {
   return `${L.join('\n')}\n`;
 }
 
-export function writeReport(dir: string, report: Report): { json: string; md: string } {
+/**
+ * Pengaman terakhir (F-117): teks dari ground truth (teks item, nama toko/cabang, judul listing, PII)
+ * tidak boleh muncul di laporan agregat. Jika ada, laporan TIDAK ditulis.
+ */
+export function assertNoText(serialized: string, truths: Truth[]): void {
+  const secrets = new Set<string>();
+  const addStr = (v: unknown) => {
+    if (typeof v === 'string' && v.trim().length >= 4) secrets.add(v.trim());
+  };
+  for (const t of truths) {
+    t.annotations.transcript_pii.forEach(addStr);
+    const e = t.expected;
+    if (!e) continue;
+    addStr(e.store_hint?.name);
+    addStr(e.store_hint?.branch_name);
+    if (e.kind === 'receipt') {
+      e.lines.forEach((l) => addStr(l.raw_text));
+      Object.values(e.pii ?? {}).forEach(addStr);
+    } else {
+      e.items.forEach((i) => [i.raw_text, i.listing_title, i.seller_name, i.member_program_name, i.listing_url].forEach(addStr));
+    }
+  }
+  const hay = serialized.toLowerCase();
+  const leaked = [...secrets].filter((s) => hay.includes(s.toLowerCase()));
+  if (leaked.length) throw new Error(`Laporan agregat memuat ${leaked.length} teks dari ground truth; tidak ditulis (F-117).`);
+}
+
+export function writeReport(dir: string, report: Report, truths: Truth[] = []): { json: string; md: string } {
   const ts = report.generated_at.replace(/[-:]/g, '').replace(/\..+/, 'Z');
   const json = join(dir, 'reports', `${ts}.agg.json`);
   const md = join(dir, 'reports', `${ts}.md`);
+  const md0 = reportMarkdown(report);
+  assertNoText(JSON.stringify(report), truths);
+  assertNoText(md0, truths);
   writeJson(json, report);
-  writeFileSync(md, reportMarkdown(report));
+  writeFileSync(md, md0);
   return { json, md };
 }

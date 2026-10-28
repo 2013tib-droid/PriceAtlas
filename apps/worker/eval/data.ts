@@ -17,8 +17,13 @@ import { ParsedObservationSchema, ParsedReceiptSchema, type CaptureKind, type Pa
 export const REPO_ROOT = resolve(import.meta.dirname, '../../..');
 export const DEFAULT_DATA_DIR = join(REPO_ROOT, '.data/ocr-eval');
 
+/** Path dari pengguna relatif ke folder tempat perintah diketik (`pnpm --filter` menjalankan dari apps/worker). */
+export function userPath(p: string, env: NodeJS.ProcessEnv = process.env): string {
+  return resolve(env.INIT_CWD || process.cwd(), p);
+}
+
 export function dataDir(env: NodeJS.ProcessEnv = process.env): string {
-  return resolve(env.OCR_EVAL_DIR || DEFAULT_DATA_DIR);
+  return env.OCR_EVAL_DIR ? userPath(env.OCR_EVAL_DIR, env) : DEFAULT_DATA_DIR;
 }
 
 export class GuardError extends Error {

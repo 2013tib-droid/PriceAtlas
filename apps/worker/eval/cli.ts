@@ -3,7 +3,7 @@
 //   pnpm --filter @priceatlas/worker ocr-eval init [--seed N] [--synthetic DIR]
 //   pnpm --filter @priceatlas/worker ocr-eval annotate [--prefill ARM] [--no-run] [--blind 5] [--port 4317]
 //   pnpm --filter @priceatlas/worker ocr-eval run --set dev|test|all --arms all|a,b [--repeat 1]
-//        [--mode both|batch|realtime] [--budget 75] [--ids a,b] [--client real|fake] [--poll 60]
+//        [--mode both|batch|realtime] [--budget 75] [--ids a,b] [--client real|fake] [--poll 60] [--estimate]
 //   pnpm --filter @priceatlas/worker ocr-eval score [--set test]
 //   pnpm --filter @priceatlas/worker ocr-eval report [--set test] [--tau 0.9] [--prefill-arm vision-opus-medium]
 // Env: OCR_EVAL_DIR (default <repo>/.data/ocr-eval), ANTHROPIC_API_KEY, GOOGLE_VISION_API_KEY (arm OCR).
@@ -14,7 +14,7 @@ import type { OcrEngine } from '../src/extractors/ocr-parse.ts';
 import { GoogleVisionOcr } from '../src/extractors/ocr/google-vision.ts';
 import { ANNOTATE_PORT, BLIND_RECEIPTS, blindIds, createAnnotateServer, latestOk, listen } from './annotate/server.ts';
 import { armById, parseArms } from './arms.ts';
-import { assertIgnored, dataDir, readAllTruths, readJson, readManifest, writeJson, type Split } from './data.ts';
+import { assertIgnored, dataDir, readAllTruths, readJson, readManifest, userPath, writeJson, type Split } from './data.ts';
 import { FakeEvalClient, FakeOcr } from './fake-client.ts';
 import { importSynthetic, initData } from './init.ts';
 import { buildReport, writeReport } from './report.ts';
@@ -27,6 +27,7 @@ import {
   runRealtime,
   selectCaptures,
   countsForAccuracy,
+  estimateCostUsd,
   type EvalClient,
   type RunOptions,
 } from './run.ts';
@@ -86,7 +87,7 @@ async function clients(dir: string, f: Args['flags'], entries: ReturnType<typeof
 export async function main(argv: string[], env: NodeJS.ProcessEnv = process.env, out: (s: string) => void = console.log): Promise<number> {
   const { cmd, flags } = parseArgs(argv);
   if (cmd === 'help' || flags.help) {
-    out('ocr-eval init | annotate | run | score | report  (docs/08 §4.2, docs/06 §2.9)');
+    out('ocr-eval init | annotate | run | score | report  (docs/08 §4.2, docs/06 §2.8)');
     return 0;
   }
   const dir = dataDir(env);
@@ -95,7 +96,7 @@ export async function main(argv: string[], env: NodeJS.ProcessEnv = process.env,
   if (!flags.verbose) setLogSink((line) => (/"event":"(ai\.|worker\.)/.test(line) ? out(line) : undefined));
 
   if (cmd === 'init') {
-    const synthetic = str(flags, 'synthetic');
+    const synthetic = str(flags, 'synthetic') && userPath(str(flags, 'synthetic')!, env);
     const r = synthetic
       ? importSynthetic(dir, synthetic, { seed: flags.seed ? num(flags, 'seed', 0) : undefined })
       : initData(dir, { seed: flags.seed ? num(flags, 'seed', 0) : undefined });
@@ -110,6 +111,19 @@ export async function main(argv: string[], env: NodeJS.ProcessEnv = process.env,
     const arms = parseArms(str(flags, 'arms', 'all'));
     const repeat = num(flags, 'repeat', 1);
     const mode = str(flags, 'mode', 'both');
+    if (flags.estimate) {
+      // Perkiraan biaya (§12.1) tanpa memanggil API.
+      let total = 0;
+      for (const arm of arms) {
+        const per = (m: 'batch' | 'realtime', list: typeof entries, r: number) => list.reduce((s, e) => s + estimateCostUsd(arm, e.kind, e.images.length, m), 0) * r;
+        const batch = mode === 'realtime' ? 0 : per('batch', entries, repeat);
+        const rt = mode === 'batch' ? 0 : mode === 'realtime' ? per('realtime', entries, repeat) : per('realtime', latencySubset(entries), 1);
+        total += batch + rt;
+        out(`  ${arm.id}: batch US$${batch.toFixed(2)} + realtime US$${rt.toFixed(2)}`);
+      }
+      out(`perkiraan total US$${total.toFixed(2)} (asumsi token docs/08 §12.1; sisa anggaran US$${new Budget(dir, num(flags, 'budget', HARD_CAP_USD)).remaining().toFixed(2)})`);
+      return 0;
+    }
     const fake = str(flags, 'client', 'real') === 'fake';
     const budget = new Budget(dir, num(flags, 'budget', HARD_CAP_USD), { persist: !fake });
     const { client, ocr } = await clients(dir, flags, entries, arms.some((a) => a.engine === 'ocr'), env);
@@ -187,7 +201,7 @@ export async function main(argv: string[], env: NodeJS.ProcessEnv = process.env,
       }
     })();
     const report = buildReport(scores, truths, { split: set, tau: num(flags, 'tau', 0.9), spendTotalUsd: spend, prefillArm: str(flags, 'prefill-arm', 'vision-opus-medium') });
-    const paths = writeReport(dir, report);
+    const paths = writeReport(dir, report, truths);
     out(`laporan → ${paths.md}\nagregat (boleh dikirim/di-commit) → ${paths.json}`);
     for (const [kind, d] of Object.entries(report.decision)) out(`  ${kind}: ${d.chosen ?? '—'} (${d.reason})`);
     return 0;
