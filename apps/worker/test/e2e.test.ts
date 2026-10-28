@@ -235,7 +235,8 @@ describe('gagal dan retry (§5.3)', () => {
 
   it('log worker tidak memuat teks OCR atau pii', async () => {
     const { logs } = await import('./helpers.ts');
-    const all = logs.join('\n');
+    // UUID capture/run acak bisa memuat "4321" (flaky, F-155): dibuang sebelum dicocokkan.
+    const all = logs.join('\n').replace(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/g, '<uuid>');
     expect(all).toContain('capture.applied');
     expect(all).not.toMatch(/4321|081298765432|MILO ORI/);
   });

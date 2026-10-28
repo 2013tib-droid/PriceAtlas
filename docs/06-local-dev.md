@@ -168,7 +168,9 @@ Sejak 6b M0 setiap gambar melewati `prepareImages` (docs/08 §6) sebelum extract
 |---|---|---|
 | `struk-aeon` | struk AEON BSD | `needs_confirmation`: Milo (barcode) auto-save dengan diskon member → promo + `member_hint`; Indomie dan SNACK (saran AI tier 4) perlu konfirmasi; pii terpisah |
 | `label-milo` | label harga | Milo 200 g (barcode, promo aktif) auto-accept jika toko diketahui (sesi/manual); Milo 3in1 harga member menunggu konfirmasi |
-| `shopee-milo` | screenshot marketplace | toko Shopee dari `store_hint`, seller global "Nestle Official Store", ongkir di `extra`; tier fuzzy confidence 1 → **auto-save** (`done`). Unggahan kedua file yang sama = duplikat hash → `needs_confirmation` (D-71, dipakai e2e alur 5) |
+| `shopee-milo` | screenshot marketplace | toko Shopee dari `store_hint`, seller global "Nestle Official Store", ongkir di `extra`; tier fuzzy confidence 1 → **auto-save** (`done`). Unggahan kedua file yang sama = duplikat hash → `needs_confirmation` (D-71) |
+| `shopee-milo-ragu` | screenshot marketplace (agak buram) | confidence harga 0,55 (Q-78) → `needs_confirmation` pada unggahan **pertama** (e2e alur 5, 6b M4) |
+| `label-kamera` | label harga | Indomie 85 g Rp3.500 + saran AI 0,8; fixture cadangan frame kamera di e2e (`STUB_FALLBACK_FIXTURE`, 6b M4) |
 | `struk-buram` | struk | gagal permanen `blurry` |
 | `struk-alfamart-timeout` | struk Alfamart Serpong | 2× gagal sementara → retry otomatis dengan backoff (30 dtk, 2 mnt) → sukses dan auto-save penuh |
 
@@ -185,7 +187,7 @@ Bentuk file fixture:
 }
 ```
 
-Gambar tanpa fixture → `PermanentError('unsupported')`. Direktori lain bisa dipakai lewat `STUB_FIXTURES_DIR`. Subfolder (mis. `heic/`) diabaikan oleh registry fixture.
+Gambar tanpa fixture → `PermanentError('unsupported')`, kecuali worker dijalankan dengan `STUB_FALLBACK_FIXTURE=<nama>` (6b M4, Q-82): gambar tanpa fixture diproses sebagai fixture itu (log `worker.stub_fallback`; nama tak dikenal → worker gagal start). **Hanya untuk worker e2e** (job `supabase-e2e`: `label-kamera`, supaya frame kamera palsu Chromium yang hash-nya tidak tetap tetap menghasilkan kartu); jangan dipasang di produksi atau mode B biasa. Direktori lain bisa dipakai lewat `STUB_FIXTURES_DIR`. Subfolder (mis. `heic/`) diabaikan oleh registry fixture.
 
 **Membuat atau mengubah gambar fixture** (generator `apps/worker/eval/synthetic/`, spesifikasi per fixture di `specs.ts`):
 
@@ -193,9 +195,10 @@ Gambar tanpa fixture → `PermanentError('unsupported')`. Direktori lain bisa di
 pnpm --filter @priceatlas/worker synthetic                          # tulis ulang semua gambar fixture (worker + web)
 CHROMIUM_PATH=/opt/pw-browsers/chromium pnpm --filter @priceatlas/worker synthetic   # jika versi Playwright ≠ browser terpasang
 pnpm --filter @priceatlas/worker synthetic --out .data/ocr-eval-synthetic           # set uji sintetis: <nama>.jpg + <nama>.truth.json
+pnpm --filter @priceatlas/worker synthetic --only shopee-milo-ragu,label-kamera      # hanya fixture tertentu (sha256 yang lain tetap)
 ```
 
-Generator memakai Playwright yang sudah terpasang di lingkungan (jangan `playwright install`); CI tidak menjalankannya. Hasil render bergantung pada font mesin, jadi menjalankan ulang mengubah sha256. Setelah gambar berubah: perbarui nilai `sha256` di `apps/web/test/fixtures/rpc.json` (ganti hash lama dengan yang baru; tidak perlu bangkitkan ulang seluruh file) dan konstanta `STRUK_AEON_SHA` di `apps/web/test/browser/media.browser.test.ts`. Fixture baru: tambah entri di `specs.ts`, jalankan generator, lalu tulis JSON dengan `images` menunjuk file itu.
+Generator memakai Playwright yang sudah terpasang di lingkungan (jangan `playwright install`); CI tidak menjalankannya. Hasil render bergantung pada font mesin, jadi menjalankan ulang mengubah sha256. Setelah gambar berubah: perbarui nilai `sha256` di `apps/web/test/fixtures/rpc.json` (ganti hash lama dengan yang baru; tidak perlu bangkitkan ulang seluruh file) dan konstanta `STRUK_AEON_SHA` di `apps/web/test/browser/media.browser.test.ts`. Fixture baru: tambah entri di `specs.ts`, jalankan generator dengan `--only <nama>` (supaya gambar fixture lain tidak dirender ulang), lalu tulis JSON dengan `images` menunjuk file itu.
 
 **Sampel HEIC:** test dekode HEIC asli (`apps/worker/test/images.test.ts`) dilewati sampai `apps/worker/test/fixtures/heic/sample.heic` ada (foto polos dari iPhone tanpa data pribadi, lokasi mati; docs/08 §15 no. 8). libheif di Node tidak punya encoder, jadi sampel tidak bisa dibuat sendiri.
 
@@ -209,6 +212,8 @@ bash db/tests/run.sh 70_              # hanya flow yang namanya memuat "70_"
 pnpm -r --workspace-concurrency=1 test   # L2 + L3 + L5a/L5b web (membangun DB uji sendiri: priceatlas_l2_*, priceatlas_l3_*)
                                          # worker 6b M0: images/ai/convert (L2), vision-pipeline (L3, klien Claude palsu)
                                          # 6b M5: ai-tools ask (loop Tanya, klien Claude palsu), web test/ask (route, S-20, set emas)
+                                         # 6b M1-harness: worker eval.test.ts (skor, pengaman, alur ocr-eval sintetis + klien palsu)
+LIVE_AI=1 ANTHROPIC_API_KEY=… pnpm --filter @priceatlas/worker test:live   # VisionExtractor sungguhan, 6 gambar sintetis (manual, berbayar ±US$0,1, §2.8)
 pnpm -r typecheck
 bash db/scripts/snapshot.sh --check   # db/schema.sql tanpa drift
 bash scripts/check-secrets.sh
@@ -225,6 +230,38 @@ pnpm --filter @priceatlas/db-types gen      # butuh mode B (§3.5); CI memeriksa
 Tanpa PostgreSQL 17 lokal, `snapshot.sh` dengan `pg_dump` 16 menghasilkan berkas yang identik untuk skema ini (diperiksa di 6b M5, `docs/08` §19); CI tetap memeriksa dengan 17.
 
 Test L1 `60_public_share.sql`, `70_capture_pipeline.sql`, dan `86_ask_quota.sql` membuka sesi kedua lewat `dblink` ke database yang sama (`dbname=… user=postgres`, koneksi socket lokal). Server harus mengizinkan koneksi lokal itu tanpa kata sandi (default image Docker `postgres` dan paket Ubuntu dengan `peer` untuk user `postgres`). Socket dicari di direktori default libpq server itu: jika biner PostgreSQL berasal dari paket lain (mis. biner portabel yang memakai `/tmp`), jalankan server dengan `-k /var/run/postgresql,/tmp`.
+
+### 2.8 Uji OCR (`ocr-eval`, D-16)
+
+Harness lokal untuk membandingkan lima arm (docs/08 §4.5) pada foto asli pemilik proyek. **Tidak pernah di CI**; data asli tidak pernah masuk git atau sesi cloud (Q-105, F-117). Data di `.data/ocr-eval/` (di-gitignore) atau `OCR_EVAL_DIR` (di luar repo boleh; di dalam repo wajib di-ignore, kalau tidak harness menolak berjalan).
+
+```bash
+# 0. Kunci (hanya di shell mesin sendiri, jangan di .env yang di-commit)
+export ANTHROPIC_API_KEY=sk-ant-…        GOOGLE_VISION_API_KEY=…   # GCV hanya untuk arm ocr-gcv+opus-low
+
+# 1. Foto ke inbox: .data/ocr-eval/inbox/<struk|label|screenshot>/[<kategori>/]<foto>
+#    satu foto = satu capture; satu FOLDER berisi beberapa foto = satu struk multi-bagian (urut nama file)
+#    kategori: minimarket | supermarket | hypermarket | apotek | lokal | marketplace | lainnya
+pnpm --filter @priceatlas/worker ocr-eval init                     # id acak, manifest, split dev 30 % / test 70 %
+
+# 2. Pra-isi lalu anotasi (5 struk pertama sengaja tanpa pra-isi, §4.2)
+pnpm --filter @priceatlas/worker ocr-eval run --set all --arms vision-opus-medium --repeat 1 --mode realtime
+pnpm --filter @priceatlas/worker ocr-eval annotate --prefill vision-opus-medium   # buka http://localhost:4317
+
+# 3. Run kecil dulu (Q-135), lalu split test penuh
+pnpm --filter @priceatlas/worker ocr-eval run --set dev --arms vision-opus-low --repeat 1 --mode batch
+pnpm --filter @priceatlas/worker ocr-eval run --set test --arms all --repeat 2          # batch (default), diskon 50 %
+pnpm --filter @priceatlas/worker ocr-eval run --arms all --mode latency                  # realtime: 10 struk + 5 label
+pnpm --filter @priceatlas/worker ocr-eval run --resume <folder run batch>              # jika proses terputus saat menunggu batch
+
+# 4. Laporan
+pnpm --filter @priceatlas/worker ocr-eval report    # .data/ocr-eval/reports/<waktu>.md + <waktu>.agg.json
+```
+
+- **Batas biaya:** buku `.data/ocr-eval/spend.json` kumulatif lintas run; `--budget` (default US$75) menolak permintaan yang akan melewatinya **sebelum** dikirim. Batch: diskon 50 % untuk bagian Claude, tanpa server-side fallback (F-116).
+- **Yang dikirim balik:** hanya `reports/<waktu>.agg.json` (angka per arm/jenis/kategori/kondisi, tanpa teks struk, nama toko, atau id). `.md` juga tanpa teks, tetapi cukup `.agg.json`.
+- **Anotasi:** form kanan mengikuti aturan docs/08 §4.3 (ringkas di halaman). Field kuning = pra-isi yang belum diperiksa. Simpan memvalidasi bentuk kontrak; jumlah field yang diubah dari pra-isi dicatat (ukuran bias pra-isi).
+- **Tanpa data asli / tanpa kunci** (mencoba harness): `OCR_EVAL_DIR=.data/ocr-eval-synth`, lalu `ocr-eval init --synthetic --from-fixtures` dan `run … --client fake`. Klien palsu membangun respons dari ground truth dengan derau per arm dan memakai buku biaya terpisah; laporannya ditandai "Data sintetis" (contoh: `docs/ocr-eval/contoh-sintetis.md`). `init --synthetic` tanpa `--from-fixtures` merender ulang lewat Playwright (`CHROMIUM_PATH` jika perlu).
 
 ---
 
@@ -437,17 +474,17 @@ Offline: DevTools → Network → Offline (atau mode pesawat di HP) → foto →
 
 **Alur** (`docs/07` §1.7): S-08 "Perlu dicek" → S-10 (struk) / S-11 (label, screenshot). S-10: Benar / Ganti (S-14, lapisan `?pilih=produk`) / Bukan produk / ⋯ bundle / Lewati → "Simpan N harga" (W4) → toast + "Ringkasan sedang diperbarui…" sampai `price_summary.refreshed_at` menyusul (pg_cron, ± 10 dtk). Toko belum dikenali / ubah toko → S-12 → kembali → `PATCH receipt` (filter `updated_at`). S-11: setiap perubahan harga/tanggal/lokasi/produk dikirim lewat W18 (jeda 600 ms) dan "Dihitung untukmu" diperbarui dari R16 `computed`; Simpan → W5.
 
-**Mencoba (mode B):** jalankan Supabase + worker stub + web seperti §4.5, unggah `struk-aeon.jpg` → tab Unggahan → "Perlu dicek" → S-10. Unggah file yang sama lagi → dialog "Foto ini sudah pernah diunggah … (struk AEON BSD)" → "Tetap unggah" → S-10 struk baru menampilkan banner duplikat. `shopee-milo.jpg` pertama tersimpan otomatis; unggah lagi → S-11 dengan ongkir sebagai info. Isi struk (R15) dan item (R16) tidak di-persist ke IndexedDB (DevTools → IndexedDB → `qcache` tidak memuat `get_receipt`/`get_capture_items`).
+**Mencoba (mode B):** jalankan Supabase + worker stub + web seperti §4.5, unggah `struk-aeon.jpg` → tab Unggahan → "Perlu dicek" → S-10. Unggah file yang sama lagi → dialog "Foto ini sudah pernah diunggah … (struk AEON BSD)" → "Tetap unggah" → S-10 struk baru menampilkan banner duplikat. `shopee-milo.jpg` pertama tersimpan otomatis; unggah lagi → S-11 dengan ongkir sebagai info. `shopee-milo-ragu.jpg` (confidence harga rendah) → S-11 langsung pada unggahan pertama. Isi struk (R15) dan item (R16) tidak di-persist ke IndexedDB (DevTools → IndexedDB → `qcache` tidak memuat `get_receipt`/`get_capture_items`).
 
 **Fixture R15/R16/R17.** `apps/web/test/fixtures/scenario.ts` menjalankan pipeline worker asli (mode A) untuk Citra: struk-aeon, struk-aeon lagi (duplikat), struk tanpa toko + field ragu (fixture tambahan khusus web di `apps/web/test/fixtures/worker/`, digabung dengan fixture worker di folder sementara; fixture dan logika worker tidak diubah), label-milo, shopee-milo (auto-save + unggahan kedua), lalu memanggil R15/R16/R17/R21, W4/W5/W8/W17/W18 (sukses dan error) dan REST store/branch/category sebagai user. Dibangkitkan ulang seperti §4.4 (`UPDATE_FIXTURES=1 …`, lalu `prettier --write test/fixtures/rpc.json`).
 
-**e2e.** `e2e/confirm.spec.ts`: alur 3 (S-10 sampai harga tampil di S-02/S-03 dan S-10 mode tersimpan dari S-09), 3b (dialog U-10 → banner → buang), 5 (screenshot → S-11 → simpan). Jalan di job `supabase-e2e` (Chromium + WebKit) bersama worker stub. Data tambahan e2e hanya lewat helper test (`e2e/support/captures.ts`, service role di proses test).
+**e2e.** `e2e/confirm.spec.ts`: alur 3 (S-10 sampai harga tampil di S-02/S-03 dan S-10 mode tersimpan dari S-09), 3b (dialog U-10 → banner → buang), 5 (screenshot `shopee-milo-ragu` → S-11 pada unggahan pertama → simpan, 6b M4). Jalan di job `supabase-e2e` (Chromium + WebKit) bersama worker stub. Data tambahan e2e hanya lewat helper test (`e2e/support/captures.ts`, service role di proses test).
 
 ### 4.7 Sesi belanja dan kamera label dari UI (M4)
 
 **Alur** (`docs/07` §1.8): tab Belanja (S-13) → "Mulai belanja" → S-12 mode sesi (`/lokasi?mode=sesi`: toko → cabang; cabang tutup tidak bisa dipilih, tanpa "Tidak tahu cabangnya", "+ Cabang baru" cepat) → W11 → S-13 aktif + banner "● Belanja di AEON BSD · 0m · 0 label [Foto label]" di semua layar (app). "Foto label" (banner, S-13, atau sheet foto yang kini menaruh "Label harga" di atas) → kamera label `/kamera?jenis=label`: jendela bidik tetap terbuka, setiap shutter = satu capture label dengan `shopping_session_id` sesi aktif → antrean → W1. S-13 menampilkan kartu per foto (diproses / gagal dibaca / perlu dicek → S-11 / tersimpan dengan harga, label, dan pembanding `vs_best_pct`), "Perpanjang" saat sisa < 30 mnt (W12, +2 jam), "Akhiri sesi" (W13). Tanpa sesi, "Label harga" di sheet → S-12 mode manual (`untuk=label`) → kamera label dengan lokasi manual (`toko`, `cabang`).
 
-**Mencoba (mode B):** jalankan Supabase + worker stub + web seperti §4.5. Kamera butuh secure context: `localhost` di desktop, atau HTTPS di HP (§4.1). Di desktop tanpa kamera: izin ditolak / kamera tidak ada → "Pilih dari galeri"; pilih `apps/worker/test/fixtures/label-milo.jpg` → dalam beberapa detik kartu "perlu dicek" (Milo 200 g tersimpan otomatis karena lokasi dari sesi, Milo 3in1 menunggu konfirmasi) → S-11 → Simpan → kartu tersimpan. Foto kamera sungguhan tidak punya fixture stub → "gagal dibaca" (`unsupported`). Kamera palsu Chromium untuk mencoba jendela bidik:
+**Mencoba (mode B):** jalankan Supabase + worker stub + web seperti §4.5. Kamera butuh secure context: `localhost` di desktop, atau HTTPS di HP (§4.1). Di desktop tanpa kamera: izin ditolak / kamera tidak ada → "Pilih dari galeri"; pilih `apps/worker/test/fixtures/label-milo.jpg` → dalam beberapa detik kartu "perlu dicek" (Milo 200 g tersimpan otomatis karena lokasi dari sesi, Milo 3in1 menunggu konfirmasi) → S-11 → Simpan → kartu tersimpan. Foto kamera sungguhan tidak punya fixture stub → "gagal dibaca" (`unsupported`), kecuali worker dijalankan dengan `STUB_FALLBACK_FIXTURE=label-kamera` (§2.6, hanya untuk mencoba). S-13 menampilkan item tersimpan sebagai kartu sendiri walau foto yang sama masih punya item "perlu dicek" (Q-81), dengan thumbnail label (satu `createSignedUrls` untuk semua kartu; gambar di-purge → ikon). Kamera palsu Chromium untuk mencoba jendela bidik:
 
 ```bash
 node --experimental-strip-types -e "import('./apps/web/e2e/support/fake-camera.ts').then(m => console.log(m.writeFakeCameraFile()))"
@@ -459,7 +496,7 @@ chromium --use-fake-device-for-media-stream --use-fake-ui-for-media-stream \
 
 **Fixture R18/W11/W12/W13.** `apps/web/test/fixtures/scenario.ts` (`collectSessions`, user Ani, dijalankan paling akhir supaya fixture M1–M3 tidak berubah): tanpa sesi, W11 `BRANCH_CLOSED` (AEON Lama), mulai + ulang id yang sama, label-milo dengan sesi lewat pipeline worker asli (uploaded → needs_confirmation), label-milo lagi (duplikat hash) diterima → done, gambar tanpa fixture → failed, satu capture diklaim → processing, R18 sebelum dan sesudah antrean ringkasan (F-60), hampir kedaluwarsa (`expires_at` dimajukan, data test), W12, W13 (+ ulang), `SESSION_NOT_ACTIVE` setelah berakhir dan setelah kedaluwarsa. Dibangkitkan ulang seperti §4.4.
 
-**e2e.** `e2e/session.spec.ts` (alur 4) di job `supabase-e2e`. Chromium memakai kamera palsu: `playwright.config.ts` membangkitkan file Y4M 1280×720 (`e2e/support/fake-camera.ts`, sisi test, tidak di-commit sebagai biner) dan memberi `--use-fake-device-for-media-stream --use-fake-ui-for-media-stream --use-file-for-fake-video-capture=…` + izin `camera`. Frame kamera palsu diperiksa sampai capture terdaftar dengan sesi yang benar (JPEG ≤ 2048 px, sha256 cocok) dan tampil "gagal dibaca" (stub memetakan fixture lewat sha256, F-63); isi kartu dari label-milo lewat galeri di kamera label yang sama. WebKit tidak punya kamera palsu: langkah shutter dilewati (F-64). Helper `e2e/support/session.ts` (service role di proses test) membaca sesi/capture/gambar dan memajukan `expires_at` untuk "Perpanjang"; migration, RPC, dan logika worker tidak diubah.
+**e2e.** `e2e/session.spec.ts` (alur 4) di job `supabase-e2e`. Chromium memakai kamera palsu: `playwright.config.ts` membangkitkan file Y4M 1280×720 (`e2e/support/fake-camera.ts`, sisi test, tidak di-commit sebagai biner) dan memberi `--use-fake-device-for-media-stream --use-fake-ui-for-media-stream --use-file-for-fake-video-capture=…` + izin `camera`. Frame kamera palsu diperiksa sampai capture terdaftar dengan sesi yang benar (JPEG ≤ 2048 px, sha256 cocok) dan, karena worker e2e memakai `STUB_FALLBACK_FIXTURE=label-kamera` (6b M4), tampil sebagai kartu Indomie "perlu dicek" (sebelumnya "gagal dibaca", F-63); isi kartu dari label-milo lewat galeri di kamera label yang sama. WebKit tidak punya kamera palsu: langkah shutter dilewati (F-64). Helper `e2e/support/session.ts` (service role di proses test) membaca sesi/capture/gambar dan memajukan `expires_at` untuk "Perpanjang"; migration, RPC, dan logika worker tidak diubah.
 
 ### 4.8 Koreksi & katalog dari UI (M5)
 

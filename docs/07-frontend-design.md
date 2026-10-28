@@ -313,6 +313,8 @@ Karena tidak bisa dijalankan, setiap butir L4 diperiksa dari kode dan dokumentas
 | Hampir kedaluwarsa (helper test memajukan `expires_at`) → Perpanjang (W12) | ya | ya |
 | Akhiri (W13) → ajakan, banner hilang | ya | ya |
 
+**Pembaruan Tahap 6b M4 (docs/08 §20).** Q-80/Q-81/Q-97/Q-87 diimplementasikan lewat perubahan RPC aditif: R18 membawa `item_status`, `thumbnail_path`, dan `vs_best_pct` tanpa record dari capture sesi itu; R20 membawa `source_text`. Akibatnya beberapa penanganan di atas berubah: **F-61** — S-13 kini menampilkan item tersimpan sebagai kartu sendiri (harga, label, pembanding) walau foto yang sama masih punya item pending, sisanya satu baris "perlu dicek ›" per foto; **F-66/F-101** — kartu label memakai thumbnail (satu `createSignedUrls` untuk semua label, purge/gagal → ikon); **F-72** — teks alias S-16/S-18 dari `source_text` (label, judul listing, baris struk); **F-63/Q-82** — frame kamera palsu e2e tidak lagi "gagal dibaca" karena worker e2e memakai fixture cadangan `label-kamera` (docs/08 F-149); **F-50/Q-78** — alur 5 memakai `shopee-milo-ragu` sehingga S-11 tercapai pada unggahan pertama. Baris "Shutter kamera palsu … → gagal dibaca" pada tabel cakupan di atas kini berakhir di kartu "perlu dicek" Indomie.
+
 **Lingkungan pembuatan M4.** `supabase start` tetap tidak bisa (CDN image). L1–L3 dan fixture web dijalankan di PostgreSQL 17 lokal (`@embedded-postgres/linux-x64` 17.10). L5c dijalankan lokal di Chromium `/opt/pw-browsers`; kamera palsu Y4M diperiksa lokal di Chromium yang sama (1280×720, pola label terbaca di canvas). e2e alur 4 (Chromium + WebKit) **hanya diverifikasi di job CI `supabase-e2e`**; "Supabase tiruan" lokal M1/M2 tidak dibangun ulang.
 
 ### 1.9 Tahap 5b M5: hasil dan temuan baru (F-68 dst.)
@@ -1105,8 +1107,8 @@ Tanpa membaca email: setup test memakai service role untuk `auth.admin.generateL
 | 2 | Detail | Kartu → S-03 → grafik, 3 toko teratas, Cek harga rak (lebih murah / mendekati / lebih mahal) → S-04 → S-05 |
 | 3 | Struk | Galeri fixture `struk-aeon.jpg` → antrean → W1 → worker stub → polling S-08 → "perlu dicek" → S-10 → Benar/Ganti/Bukan produk → Simpan → "N harga baru tersimpan" |
 | 3b | Duplikat | Unggah file yang sama → dialog hash; konfirmasi → banner duplikat → buang |
-| 4 | Sesi | Mulai sesi (S-12) → banner → foto label fixture (kamera palsu Chromium `--use-file-for-fake-video-capture`) → S-13 kartu → perpanjang → akhiri |
-| 5 | Screenshot | `shopee-milo` → S-11 → ongkir sebagai info → simpan |
+| 4 | Sesi | Mulai sesi (S-12) → banner → foto label (kamera palsu Chromium `--use-file-for-fake-video-capture`; worker e2e `STUB_FALLBACK_FIXTURE=label-kamera` → kartu "perlu dicek" sendiri, 6b M4) + galeri `label-milo` → S-13 status per item (tersimpan / perlu dicek, Q-81) → S-11 → perpanjang → akhiri |
+| 5 | Screenshot | `shopee-milo-ragu` (confidence harga rendah, Q-78) → S-11 pada unggahan pertama → ongkir sebagai info → simpan |
 | 6 | Koreksi | S-16 ubah harga observasi; record struk → editor baris; `STALE_WRITE` (dua tab) |
 | 7 | Pengaturan | Member on → S-11 `computed` berubah; berbagi publik on/off; hapus akun (login ulang + teks) |
 | 8 | Onboarding | Login OTP pertama → S-00b → S-00c → S-01 keadaan kosong |
