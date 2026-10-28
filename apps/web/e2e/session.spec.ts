@@ -3,8 +3,9 @@
 // supabase-e2e). Logika dan fixture worker tidak diubah, sehingga:
 //   * Frame kamera palsu (Chromium) melewati pipeline klien asli (canvas → JPEG → sha256 → antrean →
 //     Storage → W1) dan diperiksa sampai capture terdaftar dengan sesi yang benar + byte JPEG ≤ 2048 px.
-//     Stub worker memetakan fixture lewat sha256, jadi frame ini selesai `failed` (unsupported) dan
-//     tampil "gagal dibaca" di S-13 (F-63).
+//     Stub worker memetakan fixture lewat sha256; frame ini tidak punya fixture, jadi worker e2e memakai
+//     STUB_FALLBACK_FIXTURE=label-kamera (6b M4, Q-82/Q-118): Indomie 85 g dengan saran AI → kartu
+//     "perlu dicek" sendiri di S-13 (dulu "gagal dibaca", F-63).
 //   * Isi kartu (produk, harga, label, vs_best_pct) dari label-milo lewat "Galeri" di kamera label yang
 //     sama (sesi sama, sha256 = fixture): Milo 200 g auto-accept (lokasi dari sesi), Milo 3in1 perlu
 //     dicek → S-11 → simpan → kartu tersimpan.
@@ -104,9 +105,16 @@ test('alur 4: mulai sesi (S-12) → banner → foto label → S-13 kartu → per
   await expect(page.getByText(`Label di sesi ini (${n})`)).toBeVisible({ timeout: 20_000 });
   await expect(banner).toContainText(`${n} label`);
   const labels = page.getByTestId('session-label');
-  if (camera) await expect(labels.filter({ hasText: 'gagal dibaca' })).toBeVisible({ timeout: 60_000 });
-  const check = labels.filter({ hasText: 'perlu dicek' });
-  await expect(check).toContainText('Milo Original 200 g', { timeout: 60_000 });
+  if (camera) {
+    await expect(labels.filter({ hasText: /Indomie Goreng|INDOMIE GRG/ })).toContainText('perlu dicek', {
+      timeout: 60_000,
+    });
+    await expect(labels.filter({ hasText: 'gagal dibaca' })).toHaveCount(0);
+  }
+  // Status per item (Q-81, 6b M4): item tersimpan tampil sebagai baris sendiri, sisanya "perlu dicek".
+  await expect(labels.filter({ hasText: 'Milo Original 200 g' }).first()).toBeVisible({ timeout: 60_000 });
+  const check = labels.filter({ hasText: 'perlu dicek' }).filter({ hasNotText: /Indomie|INDOMIE/ });
+  await expect(check).toHaveCount(1, { timeout: 60_000 });
 
   // "perlu dicek ›" → S-11 → simpan (lokasi dari sesi, docs/05 §4.2 langkah 4).
   await check.getByRole('link').click();

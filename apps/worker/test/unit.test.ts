@@ -28,6 +28,18 @@ describe('StubExtractor (fixture per hash gambar)', () => {
       new StubExtractor(reg).extract({ images: [{ position: 1, storagePath: 'x', sha256: sha256(data), data }], ctx: ctx(1) }),
     ).rejects.toMatchObject({ name: 'PermanentError', code: 'unsupported' });
   });
+  it('STUB_FALLBACK_FIXTURE (khusus e2e, Q-82): gambar tanpa fixture → fixture cadangan; hash dikenal tetap', async () => {
+    const fb = new FixtureRegistry(FIXTURES_DIR, { fallback: 'label-milo' });
+    const data = Buffer.from('frame kamera playwright');
+    const x = await new StubExtractor(fb).extract({
+      images: [{ position: 1, storagePath: 'x', sha256: sha256(data), data }],
+      ctx: ctx(1),
+    });
+    expect(x.rawText).toContain('MILO ORIGINAL 200G');
+    expect(fb.get(img('struk-aeon').sha256)?.name).toBe('struk-aeon');
+    expect(reg.fallback).toBeUndefined();
+    expect(() => new FixtureRegistry(FIXTURES_DIR, { fallback: 'tidak-ada' })).toThrow(/STUB_FALLBACK_FIXTURE/);
+  });
   it('failures dipakai per percobaan', async () => {
     const ex = new StubExtractor(reg);
     await expect(ex.extract({ images: [img('struk-alfamart-timeout')], ctx: ctx(1) })).rejects.toBeInstanceOf(TransientError);

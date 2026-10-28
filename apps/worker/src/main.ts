@@ -2,7 +2,8 @@
 //   tsx src/main.ts [--dev-scheduler] [--once] [--worker-id <id>]
 // Env: DATABASE_URL, WORKER_DB_ROLE, STORAGE_BACKEND (supabase|local), LOCAL_STORAGE_DIR,
 //      NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (backend supabase),
-//      EXTRACTOR (Tahap 4: hanya "stub"), STUB_FIXTURES_DIR.
+//      EXTRACTOR (Tahap 4: hanya "stub"), STUB_FIXTURES_DIR,
+//      STUB_FALLBACK_FIXTURE (KHUSUS worker e2e: nama fixture untuk gambar tanpa fixture; jangan di produksi).
 import { hostname } from 'node:os';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -45,7 +46,9 @@ export function buildDeps(args: { workerId: string }) {
     // VisionExtractor sudah ada (src/extractors/vision.ts) tetapi baru dipasang di 6b M2 (docs/08 §14).
     throw new Error(`EXTRACTOR=${extractorKind} belum dipasang (D-16, docs/08 §14 M2). Pakai EXTRACTOR=stub.`);
   }
-  const fixtures = new FixtureRegistry(resolve(process.env.STUB_FIXTURES_DIR ?? DEFAULT_FIXTURES_DIR));
+  const fallback = process.env.STUB_FALLBACK_FIXTURE?.trim() || undefined;
+  const fixtures = new FixtureRegistry(resolve(process.env.STUB_FIXTURES_DIR ?? DEFAULT_FIXTURES_DIR), { fallback });
+  if (fallback) log('worker.stub_fallback', { fixture: fallback });
   return { db, blob, extractor: new StubExtractor(fixtures), ai: new StubAiMatcher(fixtures), workerId: args.workerId };
 }
 

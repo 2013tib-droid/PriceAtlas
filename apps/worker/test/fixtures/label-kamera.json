@@ -1,0 +1,15 @@
+{
+  "images": ["label-kamera.jpg"],
+  "raw_text": "INDOMIE GRG 85G Rp3.500",
+  "output": {
+    "kind": "price_label",
+    "items": [
+      {
+        "raw_text": "INDOMIE GRG 85G", "normal_price": 3500,
+        "image_position": 1, "region": { "x": 0.05, "y": 0.1, "w": 0.9, "h": 0.8 },
+        "field_confidence": { "price": 0.96 }
+      }
+    ]
+  },
+  "ai_matches": { "INDOMIE GRG 85G": { "product_id": "70000000-0000-0000-0000-000000000085", "confidence": 0.8 } }
+}

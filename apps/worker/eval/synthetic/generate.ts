@@ -3,6 +3,7 @@
 // di-commit sebagai fixture.
 //   pnpm --filter @priceatlas/worker synthetic            # tulis ulang fixture (worker + web)
 //   pnpm --filter @priceatlas/worker synthetic --out DIR  # set uji: <nama>.jpg + <nama>.truth.json
+//   pnpm --filter @priceatlas/worker synthetic --only a,b # hanya fixture baru (sha256 lain tetap)
 //   CHROMIUM_PATH=/opt/pw-browsers/chromium …            # jika versi Playwright ≠ browser terpasang
 // Setelah fixture berubah, sha256 berubah: ganti nilai sha256 lama di apps/web/test/fixtures/rpc.json
 // dan konstanta sha di apps/web/test/browser/media.browser.test.ts (docs/06 §2.6, F-125).
@@ -54,11 +55,15 @@ export async function render(specs: SyntheticSpec[] = SPECS): Promise<Map<string
 async function main() {
   const argv = process.argv.slice(2);
   const outIdx = argv.indexOf('--out');
-  const images = await render();
+  const onlyIdx = argv.indexOf('--only');
+  const only = onlyIdx >= 0 ? new Set((argv[onlyIdx + 1] ?? '').split(',')) : null;
+  const specs = only ? SPECS.filter((s) => only.has(s.name)) : SPECS;
+  if (only && specs.length !== only.size) throw new Error(`--only: nama tidak dikenal (${[...only].join(', ')})`);
+  const images = await render(specs);
   if (outIdx >= 0) {
     const dir = resolve(argv[outIdx + 1] ?? '.data/ocr-eval-synthetic');
     mkdirSync(dir, { recursive: true });
-    for (const s of SPECS) {
+    for (const s of specs) {
       const img = images.get(s.name)!;
       writeFileSync(join(dir, `${s.name}.jpg`), img);
       const fx = JSON.parse(readFileSync(join(ROOT, s.fixtureDir, `${s.name}.json`), 'utf8')) as { output: unknown; failures?: unknown[] };
@@ -66,10 +71,10 @@ async function main() {
       const truth = { id: s.name, kind: s.kind, images: [`${s.name}.jpg`], conditions: s.conditions, synthetic: true, expected: unreadable ? null : fx.output };
       writeFileSync(join(dir, `${s.name}.truth.json`), `${JSON.stringify(truth, null, 2)}\n`);
     }
-    console.log(`${SPECS.length} gambar + truth → ${dir}`);
+    console.log(`${specs.length} gambar + truth → ${dir}`);
     return;
   }
-  for (const s of SPECS) {
+  for (const s of specs) {
     const path = join(ROOT, s.fixtureDir, `${s.name}.jpg`);
     writeFileSync(path, images.get(s.name)!);
     console.log(`${path} (${images.get(s.name)!.length} byte)`);

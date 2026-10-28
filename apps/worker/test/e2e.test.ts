@@ -1,8 +1,9 @@
 // L3: worker end-to-end dengan fixture (docs/05 §8.1): unggah → claim → apply → konfirmasi.
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { USERS, rpcOk } from '@priceatlas/testkit';
+import { FixtureRegistry, StubAiMatcher, StubExtractor } from '../src/extractors/stub.ts';
 import { processNextCapture } from '../src/pipeline/process-capture.ts';
-import { captureRow, setupEnv, skipBackoff, submitFixture, type Env } from './helpers.ts';
+import { FIXTURES_DIR, captureRow, fixtureImages, setupEnv, skipBackoff, submitFixture, type Env } from './helpers.ts';
 
 let env: Env;
 beforeAll(() => {
@@ -149,6 +150,37 @@ describe('screenshot marketplace', () => {
     const rec = await env.admin.query('select * from public.price_record where capture_id = $1', [captureId]);
     expect(rec.rows[0]).toMatchObject({ source_type: 'marketplace', branch_id: '30000000-0000-0000-0000-000000000005' });
     expect(Number(rec.rows[0].effective_price)).toBe(47000);
+  });
+});
+
+describe('fixture 6b M4 (Q-78, Q-82)', () => {
+  it('screenshot confidence harga rendah → perlu dicek pada unggahan PERTAMA (e2e alur 5)', async () => {
+    const { captureId } = await submitFixture(env, 'shopee-milo-ragu', { user: USERS.b });
+    expect(await processNextCapture(env.deps)).toMatchObject({ captureId, status: 'needs_confirmation' });
+    const row = await env.admin.query('select status, normal_price, extra, suggested_product_id, store_id from public.capture_item where capture_id = $1', [captureId]);
+    expect(row.rows).toHaveLength(1);
+    expect(row.rows[0]).toMatchObject({
+      status: 'pending',
+      extra: { shipping_fee: 9000 },
+      suggested_product_id: '70000000-0000-0000-0000-000000000500',
+      store_id: '20000000-0000-0000-0000-000000000004',
+    });
+    expect(Number(row.rows[0].normal_price)).toBe(46500);
+  });
+
+  it('STUB_FALLBACK_FIXTURE: gambar tanpa fixture (frame kamera) diproses sebagai fixture cadangan', async () => {
+    const fb = new FixtureRegistry(FIXTURES_DIR, { fallback: 'label-kamera' });
+    const { uploadAndSubmit } = await import('../scripts/client-sim.ts');
+    const { captureId } = await uploadAndSubmit({
+      pool: env.admin, blob: env.blob, userId: USERS.b, kind: 'price_label',
+      // JPEG valid dengan sha256 tanpa fixture (seperti frame kamera palsu Chromium).
+      images: [Buffer.concat([fixtureImages('label-milo')[0]!, Buffer.from('frame kamera')])],
+    });
+    const r = await processNextCapture({ ...env.deps, extractor: new StubExtractor(fb), ai: new StubAiMatcher(fb) });
+    expect(r).toMatchObject({ captureId });
+    expect(await captureRow(env, captureId)).toMatchObject({ error_code: null });
+    const row = await env.admin.query('select raw_text from public.capture_item where capture_id = $1', [captureId]);
+    expect(row.rows.map((x) => x.raw_text)).toEqual(['INDOMIE GRG 85G']);
   });
 });
 

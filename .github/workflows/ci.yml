@@ -191,6 +191,8 @@ jobs:
           WORKER_DB_ROLE: service_role
           STORAGE_BACKEND: supabase
           EXTRACTOR: stub
+          # 6b M4 (Q-82, Q-118): KHUSUS e2e — frame kamera palsu (hash tak tetap) diproses sebagai label-kamera.
+          STUB_FALLBACK_FIXTURE: label-kamera
 
       - name: e2e Playwright (login OTP, shell offline, alur 1–8, O antrean, G gagal; kamera palsu Chromium untuk alur 4)
         run: pnpm --filter @priceatlas/web test:e2e

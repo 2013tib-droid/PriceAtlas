@@ -3,9 +3,8 @@
 //   3 : galeri struk-aeon → … → perlu dicek → S-10 → Benar / Ganti (S-14) / Bukan produk → Simpan →
 //       "N harga baru tersimpan" → harga muncul di S-02/S-03.
 //   3b: file yang sama lagi → dialog hash U-10 → "Tetap unggah" → banner duplikat S-10 → buang.
-//   5 : screenshot shopee-milo → S-11 → ongkir sebagai info → simpan. shopee-milo pertama di-auto-save
-//       (confidence ≥ τ, D-12), jadi S-11 dicapai lewat unggahan kedua: duplikat hash tidak pernah
-//       di-auto-save (D-71) → perlu dicek (F-50).
+//   5 : screenshot shopee-milo-ragu (confidence harga rendah, Q-78, 6b M4) → perlu dicek pada unggahan
+//       PERTAMA → S-11 → ongkir sebagai info → simpan (dulu lewat unggahan duplikat kedua, F-50).
 import { expect, test, type Page } from '@playwright/test';
 import { login } from './support/auth';
 import { capturesOf, fixture, householdOf } from './support/captures';
@@ -158,20 +157,12 @@ test('alur 3b: struk yang sama lagi → dialog hash U-10 → Tetap unggah → ba
   await expect(page.getByRole('region', { name: 'Perlu dicek (1)' })).toBeVisible({ timeout: 30_000 });
 });
 
-test('alur 5: screenshot shopee-milo → S-11 → ongkir sebagai info → simpan', async ({ page }, info) => {
+test('alur 5: screenshot ber-confidence rendah → S-11 → ongkir sebagai info → simpan', async ({ page }, info) => {
   test.setTimeout(180_000);
   const { userId } = await login(page, `m3-a5-${info.project.name}`);
   const hh = await householdOf(userId);
 
-  // Pertama: auto-save (D-12), S-09 "Lihat harga" membuka S-11 tersimpan.
-  await upload(page, 'screenshot', 'shopee-milo');
-  await waitStatus(hh, 1, 'done');
-
-  // Kedua (Tetap unggah): duplikat hash → perlu dicek di S-11.
-  await page.goto('/unggahan');
-  const dialog = (await upload(page, 'screenshot', 'shopee-milo', true))!;
-  await dialog.getByRole('button', { name: 'Tetap unggah' }).click();
-  await expect(page).not.toHaveURL(/\/kamera/, { timeout: 20_000 });
+  await upload(page, 'screenshot', 'shopee-milo-ragu');
   await waitStatus(hh, 1, 'needs_confirmation');
 
   await page.goto('/unggahan');
@@ -185,11 +176,11 @@ test('alur 5: screenshot shopee-milo → S-11 → ongkir sebagai info → simpan
   await expect(item).toContainText('Seller: Nestle Official Store');
   await expect(item.getByTestId('marketplace-extra')).toHaveText('Ongkir Rp9.000 (info, tidak mengubah harga)');
   await expect(item).toContainText('harga belum termasuk ongkir');
-  await expect(item.getByTestId('computed')).toContainText('Rp47.000');
+  await expect(item.getByTestId('computed')).toContainText('Rp46.500');
 
   await page.getByTestId('save-items').click();
   await expect(page.getByText('1 harga baru tersimpan')).toBeVisible();
   await expect(page.getByRole('heading', { level: 1, name: 'Harga dari foto' })).toBeVisible();
   await expect(item.getByTestId('item-accepted')).toBeVisible();
-  await waitStatus(hh, 2, 'done');
+  await waitStatus(hh, 1, 'done');
 });

@@ -11,7 +11,9 @@
 //     "ai_matches": { "<raw_text>": { "product_id": "<uuid>", "confidence": 0.8 } },
 //     "usage": { "inputTokens": 0, "outputTokens": 0, "costUsd": 0 }
 //   }
-// failures[n-1] dipakai pada percobaan ke-n (attempt). Tanpa fixture → PermanentError('unsupported').
+// failures[n-1] dipakai pada percobaan ke-n (attempt). Tanpa fixture → PermanentError('unsupported'),
+// kecuali registry dibuat dengan `fallback` (env STUB_FALLBACK_FIXTURE, KHUSUS worker e2e: frame kamera
+// Playwright tidak punya hash tetap, Q-82/Q-118). Tidak pernah default.
 import { createHash } from 'node:crypto';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -42,7 +44,13 @@ export interface StubFixture {
 export class FixtureRegistry {
   private readonly bySha = new Map<string, StubFixture>();
 
-  constructor(readonly dir: string) {
+  /** Fixture untuk gambar tanpa fixture (hanya e2e, lihat header). */
+  readonly fallback: StubFixture | undefined;
+
+  constructor(
+    readonly dir: string,
+    opts: { fallback?: string } = {},
+  ) {
     for (const file of readdirSync(dir).filter((f) => f.endsWith('.json')).sort()) {
       const fx = JSON.parse(readFileSync(join(dir, file), 'utf8')) as Omit<StubFixture, 'name'>;
       const name = file.replace(/\.json$/, '');
@@ -53,10 +61,14 @@ export class FixtureRegistry {
         this.bySha.set(sha256(readFileSync(join(dir, fx.images[0]))), fixture);
       }
     }
+    if (opts.fallback) {
+      this.fallback = this.byName(opts.fallback);
+      if (!this.fallback) throw new Error(`STUB_FALLBACK_FIXTURE=${opts.fallback} tidak ada di ${dir}`);
+    }
   }
 
   get(sha: string): StubFixture | undefined {
-    return this.bySha.get(sha);
+    return this.bySha.get(sha) ?? this.fallback;
   }
 
   /** Nama fixture → fixture (untuk skrip dev dan test). */

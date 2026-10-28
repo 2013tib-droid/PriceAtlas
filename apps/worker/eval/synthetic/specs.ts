@@ -124,4 +124,32 @@ export const SPECS: SyntheticSpec[] = [
       urlText: 'https://shopee.co.id/milo-original-500g',
     }),
   },
+  {
+    // Q-78 (6b M4): screenshot agak buram, confidence harga rendah → perlu dicek (S-11) pada unggahan
+    // PERTAMA (e2e alur 5 tanpa unggahan kedua).
+    name: 'shopee-milo-ragu',
+    kind: 'marketplace',
+    fixtureDir: WORKER,
+    conditions: ['blurry', 'low_confidence'],
+    html: listingHtml(
+      {
+        marketplace: 'Shopee',
+        title: 'Milo Original 500 g Nestle',
+        price: 'Rp46.500',
+        strikePrice: 'Rp52.000',
+        seller: 'Nestle Official Store',
+        shipping: 'Rp9.000',
+      },
+      { blurPx: 1.4, noise: 700, seed: 61 },
+    ),
+  },
+  {
+    // Fixture cadangan worker e2e (STUB_FALLBACK_FIXTURE, Q-82/Q-118): frame kamera palsu Chromium
+    // diproses sebagai label ini (produk berbeda dari label-milo supaya baris S-13 bisa dibedakan).
+    name: 'label-kamera',
+    kind: 'price_label',
+    fixtureDir: WORKER,
+    conditions: [],
+    html: labelHtml([{ name: 'INDOMIE GRG 85G', price: 'Rp3.500' }], { rotateDeg: 0.4, noise: 400, seed: 67 }),
+  },
 ];
