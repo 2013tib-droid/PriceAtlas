@@ -388,9 +388,9 @@ export type Database = {
           promo_price: number | null;
           promo_valid_from: string | null;
           promo_valid_until: string | null;
+          raw_text: string;
           read_member_price: number | null;
           read_member_program_name: string | null;
-          raw_text: string;
           region: Json | null;
           seller_name: string | null;
           seller_ref: string | null;
@@ -426,9 +426,9 @@ export type Database = {
           promo_price?: number | null;
           promo_valid_from?: string | null;
           promo_valid_until?: string | null;
+          raw_text: string;
           read_member_price?: number | null;
           read_member_program_name?: string | null;
-          raw_text: string;
           region?: Json | null;
           seller_name?: string | null;
           seller_ref?: string | null;
@@ -463,9 +463,9 @@ export type Database = {
           promo_price?: number | null;
           promo_valid_from?: string | null;
           promo_valid_until?: string | null;
+          raw_text?: string;
           read_member_price?: number | null;
           read_member_program_name?: string | null;
-          raw_text?: string;
           region?: Json | null;
           seller_name?: string | null;
           seller_ref?: string | null;
