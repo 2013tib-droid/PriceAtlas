@@ -104,6 +104,32 @@ export function useDeleteCapture() {
   });
 }
 
+/**
+ * Banyak signed URL dalam SATU panggilan Storage (D-79; S-13 thumbnail label, 6b M4/Q-97), bukan N
+ * panggilan R14. Hasil: path → URL; path yang gagal ditandatangani (mis. objek sudah dihapus) tidak
+ * ada di hasil, sehingga kartu kembali ke ikon. Kunci ['storage', …] tidak pernah di-persist (§4.3).
+ */
+export function useSignedUrls(paths: readonly string[]) {
+  const signedIn = useAuth().status === 'signed-in';
+  const sorted = [...new Set(paths)].sort();
+  return useQuery({
+    queryKey: ['storage', 'signed-many', sorted],
+    queryFn: async () => {
+      const { data, error } = await getSupabaseBrowserClient()
+        .storage.from('captures')
+        .createSignedUrls(sorted, SIGNED_URL_SECONDS);
+      if (error || !data) throw error ?? new Error('signed urls');
+      const out: Record<string, string> = {};
+      for (const d of data) if (d.path && d.signedUrl && !d.error) out[d.path] = d.signedUrl;
+      return out;
+    },
+    enabled: sorted.length > 0 && signedIn,
+    staleTime: (SIGNED_URL_SECONDS - 60) * 1000,
+    gcTime: SIGNED_URL_SECONDS * 1000,
+    retry: false,
+  });
+}
+
 /** Signed URL 300 dtk dengan JWT user. Kunci ['storage', …] tidak pernah di-persist (§4.3). */
 export function useSignedUrl(path: string | null) {
   const signedIn = useAuth().status === 'signed-in';

@@ -366,13 +366,21 @@ export type MyProgram = z.infer<typeof MyProgramSchema>;
 // ---------------------------------------------------------------------------
 /**
  * Satu baris label sesi: per capture sesi dan per item yang tidak ditolak. Capture tanpa item
- * (uploaded/processing/failed) → `item_id` null. Harga = record tersimpan, atau `computed` live untuk
- * item pending (app.observation_price). vs_*_pct terhadap price_summary saat ini (1 desimal).
+ * (uploaded/processing/failed) → `item_id` dan `item_status` null. Harga = record tersimpan, atau
+ * `computed` live untuk item pending (app.observation_price). `vs_best_pct` terhadap termurah 90 hari
+ * TANPA record dari capture sesi ini (6b M4, Q-80); `vs_last_pct` terhadap price_summary (1 desimal).
+ * `thumbnail_path` = storage_path gambar posisi 1, null jika sudah di-purge (Q-97).
  */
 export const SessionLabelSchema = z.looseObject({
   capture_id: Uuid,
   status: CaptureStatusSchema,
   item_id: Uuid.nullable(),
+  /**
+   * 6b M4 (Q-81): status item; null untuk foto tanpa item. Opsional: cache R18 di perangkat dari
+   * sebelum M4 tidak memuatnya (UI kembali ke status per foto, F-61).
+   */
+  item_status: z.enum(['pending', 'accepted']).nullish(),
+  thumbnail_path: z.string().nullish(),
   product: ProductLiteSchema.nullable(),
   effective_price: Num.nullable(),
   price_basis: PriceBasis.nullable(),
@@ -465,6 +473,11 @@ export const PriceRecordDetailSchema = z.looseObject({
     .nullable(),
   /** Gambar sumber (posisi item, atau posisi 1); `purged_at` terisi = dihapus retensi (D-32). */
   image: z.looseObject({ storage_path: z.string(), position: Num, purged_at: Timestamp.nullable() }).nullable(),
+  /**
+   * 6b M4 (Q-87, F-72): teks sumber yang dipakai alias W6 `p_update_alias`: baris struk, teks label,
+   * atau judul listing (screenshot). Null jika tidak ada (mis. record manual).
+   */
+  source_text: z.string().nullish(),
   history: z.array(AuditEntrySchema),
 });
 export type PriceRecordDetail = z.infer<typeof PriceRecordDetailSchema>;

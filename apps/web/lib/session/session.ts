@@ -57,6 +57,18 @@ export interface SessionCapture {
   status: SessionLabel['status'];
   /** Item yang tidak ditolak; kosong untuk uploaded/processing/failed. */
   items: SessionLabel[];
+  /** storage_path gambar posisi 1 (6b M4, Q-97); null jika sudah di-purge atau R18 lama. */
+  thumbnail_path: string | null;
+}
+
+/**
+ * Status per item (6b M4, Q-81). R18 lama (cache di perangkat sebelum M4) tidak membawa
+ * `item_status`: item foto `needs_confirmation` dianggap perlu dicek (perilaku per foto, F-61).
+ */
+export function itemNeedsCheck(c: Pick<SessionCapture, 'status'>, l: SessionLabel): boolean {
+  if (l.item_status === 'pending') return true;
+  if (l.item_status === 'accepted') return false;
+  return c.status === 'needs_confirmation';
 }
 
 /**
@@ -69,7 +81,7 @@ export function groupSessionLabels(labels: readonly SessionLabel[]): SessionCapt
   for (const l of labels) {
     let g = byId.get(l.capture_id);
     if (!g) {
-      g = { capture_id: l.capture_id, status: l.status, items: [] };
+      g = { capture_id: l.capture_id, status: l.status, items: [], thumbnail_path: l.thumbnail_path ?? null };
       byId.set(l.capture_id, g);
       out.push(g);
     }

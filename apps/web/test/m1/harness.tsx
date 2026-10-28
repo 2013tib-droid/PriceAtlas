@@ -302,6 +302,15 @@ export const state = {
       } | null,
       error: null as unknown,
     })),
+    /** 6b M4 (D-79): satu panggilan untuk semua thumbnail label S-13. */
+    createSignedUrls: vi.fn(async (paths: string[], seconds: number) => ({
+      data: paths.map((path) => ({
+        path,
+        signedUrl: `https://supabase.test/storage/v1/object/sign/captures/${path}?expires=${seconds}`,
+        error: null as string | null,
+      })) as { path: string | null; signedUrl: string; error: string | null }[] | null,
+      error: null as unknown,
+    })),
   },
 };
 
@@ -327,6 +336,7 @@ export const sb = {
     from: vi.fn(() => ({
       upload: (path: string, blob: Blob, opts?: unknown) => state.storage.upload(path, blob, opts),
       createSignedUrl: (path: string, seconds: number) => state.storage.createSignedUrl(path, seconds),
+      createSignedUrls: (paths: string[], seconds: number) => state.storage.createSignedUrls(paths, seconds),
     })),
   },
   from: vi.fn((table: keyof typeof state.rest) => {
@@ -387,6 +397,14 @@ export async function resetHarness() {
   }));
   state.storage.createSignedUrl.mockImplementation(async (path: string, seconds: number) => ({
     data: { signedUrl: `https://supabase.test/storage/v1/object/sign/captures/${path}?expires=${seconds}` },
+    error: null,
+  }));
+  state.storage.createSignedUrls.mockImplementation(async (paths: string[], seconds: number) => ({
+    data: paths.map((path) => ({
+      path,
+      signedUrl: `https://supabase.test/storage/v1/object/sign/captures/${path}?expires=${seconds}`,
+      error: null,
+    })),
     error: null,
   }));
   setUrl('/');

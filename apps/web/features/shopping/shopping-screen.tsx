@@ -39,7 +39,7 @@ import {
   sessionPlace,
   type RememberedSession,
 } from '@/lib/session/session';
-import { CaptureLabels, LocalLabel } from './session-labels';
+import { SessionLabelList } from './session-labels';
 
 const START_HREF = '/lokasi?mode=sesi';
 /** Ketukan jam S-13: sisa menit dan batas 30 mnt cukup per 15 dtk. */
@@ -203,14 +203,7 @@ export function ShoppingScreen() {
         {n === 0 ? (
           <p className="rounded-lg bg-muted p-4 text-base">{C.emptyLabels}</p>
         ) : (
-          <ul className="flex flex-col">
-            {local.map((i) => (
-              <LocalLabel key={i.capture_id} item={i} online={online} />
-            ))}
-            {groups.map((c) => (
-              <CaptureLabels key={c.capture_id} c={c} nearPct={config.near_best_threshold_pct} />
-            ))}
-          </ul>
+          <SessionLabelList groups={groups} local={local} online={online} nearPct={config.near_best_threshold_pct} />
         )}
       </section>
 
