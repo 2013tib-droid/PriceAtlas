@@ -122,3 +122,28 @@ export function useSignedUrl(path: string | null) {
     retry: false,
   });
 }
+
+/**
+ * Banyak signed URL dalam SATU panggilan `createSignedUrls` (thumbnail S-13, D-79, Q-97).
+ * Path yang gagal tidak ada di peta (kartu memakai ikon). Tidak di-persist (kunci ['storage', …]).
+ */
+export function useSignedUrls(paths: readonly string[]) {
+  const signedIn = useAuth().status === 'signed-in';
+  const sorted = [...new Set(paths)].sort();
+  return useQuery({
+    queryKey: ['storage', 'signed-many', sorted],
+    queryFn: async () => {
+      const { data, error } = await getSupabaseBrowserClient()
+        .storage.from('captures')
+        .createSignedUrls(sorted, SIGNED_URL_SECONDS);
+      if (error || !data) throw error ?? new Error('signed urls');
+      const out: Record<string, string> = {};
+      for (const d of data) if (!d.error && d.path && d.signedUrl) out[d.path] = d.signedUrl;
+      return out;
+    },
+    enabled: sorted.length > 0 && signedIn,
+    staleTime: (SIGNED_URL_SECONDS - 60) * 1000,
+    gcTime: SIGNED_URL_SECONDS * 1000,
+    retry: false,
+  });
+}

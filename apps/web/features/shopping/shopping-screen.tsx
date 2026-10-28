@@ -15,6 +15,7 @@ import { StickyAction } from '@/components/app/sticky-action';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { fill, SESSION_COPY, SHOPPING_COPY as C } from '@/lib/copy/id';
+import { useSignedUrls } from '@/lib/data/captures';
 import { useRecentLocations } from '@/lib/data/confirm';
 import { useClientConfig } from '@/lib/data/queries';
 import { useActiveSession, useEndSession, useExtendSession, useStartSession } from '@/lib/data/session';
@@ -59,6 +60,10 @@ export function ShoppingScreen() {
   const [err, setErr] = useState<{ message: string; action: SessionErrorAction } | null>(null);
 
   const active = activeOrNull(q.data, now);
+  // Thumbnail semua label sesi: satu panggilan createSignedUrls (D-79, Q-97).
+  const thumbs = useSignedUrls(
+    (active?.labels ?? []).flatMap((l) => (l.thumbnail_path ? [l.thumbnail_path] : [])),
+  ).data;
   const notice = expiredNotice(remembered.value, q.data ?? null, now);
   const forget = () => void remembered.update(() => null);
 
@@ -208,7 +213,7 @@ export function ShoppingScreen() {
               <LocalLabel key={i.capture_id} item={i} online={online} />
             ))}
             {groups.map((c) => (
-              <CaptureLabels key={c.capture_id} c={c} nearPct={config.near_best_threshold_pct} />
+              <CaptureLabels key={c.capture_id} c={c} nearPct={config.near_best_threshold_pct} thumbs={thumbs} />
             ))}
           </ul>
         )}

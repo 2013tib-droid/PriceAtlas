@@ -194,14 +194,17 @@ describe('S-13 Sesi belanja', () => {
       'Foto labelgagal dibaca',
       'Milo Original 200 gRp17.500PROMO3% lebih murah dari biasanya',
       'Milo 3in1 10 × 35 gRp23.000NORMAL',
-      'Milo Original 200 gMilo 3in1 10 × 35 gperlu dicek',
+      // 6b M4 (Q-81): foto yang masih perlu dicek — item yang sudah tersimpan tampil dengan harga,
+      // item pending dengan "perlu dicek".
+      'Milo Original 200 gRp17.500PROMO3% lebih murah dari biasanya',
+      'Milo 3in1 10 × 35 gperlu dicek',
     ]);
     const failed = s.labels.find((l) => l.status === 'failed')!.capture_id;
     const needs = s.labels.find((l) => l.status === 'needs_confirmation')!.capture_id;
     expect(within(rows[1]!).getByRole('link').getAttribute('href')).toBe(`/unggahan/detail?id=${failed}`);
     expect(
-      within(rows[4]!)
-        .getByRole('link', { name: /Cek label Milo Original/ })
+      within(rows[5]!)
+        .getByRole('link', { name: /Cek label Milo 3in1/ })
         .getAttribute('href'),
     ).toBe(`/konfirmasi?capture=${needs}`);
   });
@@ -211,10 +214,13 @@ describe('S-13 Sesi belanja', () => {
     clockAt(s.session.started_at, 30 * MIN);
     withSession('session_labels_refreshed');
     await open();
-    // Milo 200 g: −2,8 % terhadap histori di luar sesi. Milo 3in1 hanya punya record dari sesi ini → tanpa pembanding.
-    expect((await screen.findAllByText('3% lebih murah dari biasanya')).length).toBe(1);
+    // Milo 200 g (dua label): −2,8 % terhadap histori di luar sesi. Milo 3in1 hanya punya record dari sesi ini
+    // → tanpa pembanding.
+    expect((await screen.findAllByText('3% lebih murah dari biasanya')).length).toBe(2);
     expect(screen.queryByText('setara harga terbaikmu')).toBeNull();
-    expect(screen.getAllByTestId('session-label').map((r) => r.textContent)).toContain('Milo 3in1 10 × 35 gRp23.000NORMAL');
+    expect(screen.getAllByTestId('session-label').map((r) => r.textContent)).toContain(
+      'Milo 3in1 10 × 35 gRp23.000NORMAL',
+    );
   });
 
   it('hampir kedaluwarsa (< 30 mnt) → "Perpanjang" (W12) → toast jam berakhir baru', async () => {

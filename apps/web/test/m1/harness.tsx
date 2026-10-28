@@ -302,6 +302,14 @@ export const state = {
       } | null,
       error: null as unknown,
     })),
+    createSignedUrls: vi.fn(async (paths: string[], seconds: number) => ({
+      data: paths.map((path) => ({
+        path,
+        error: null as string | null,
+        signedUrl: `https://supabase.test/storage/v1/object/sign/captures/${path}?expires=${seconds}`,
+      })) as { path: string; error: string | null; signedUrl: string }[] | null,
+      error: null as unknown,
+    })),
   },
 };
 
@@ -327,6 +335,7 @@ export const sb = {
     from: vi.fn(() => ({
       upload: (path: string, blob: Blob, opts?: unknown) => state.storage.upload(path, blob, opts),
       createSignedUrl: (path: string, seconds: number) => state.storage.createSignedUrl(path, seconds),
+      createSignedUrls: (paths: string[], seconds: number) => state.storage.createSignedUrls(paths, seconds),
     })),
   },
   from: vi.fn((table: keyof typeof state.rest) => {
