@@ -206,12 +206,15 @@ describe('S-13 Sesi belanja', () => {
     ).toBe(`/konfirmasi?capture=${needs}`);
   });
 
-  it('setelah ringkasan diperbarui: "setara harga terbaikmu" (F-60)', async () => {
+  it('setelah ringkasan diperbarui: tetap "lebih murah dari biasanya" (F-60 → Q-80/Q-81, 6b M4)', async () => {
     const s = fx<ActiveSession>('session_labels_refreshed');
     clockAt(s.session.started_at, 30 * MIN);
     withSession('session_labels_refreshed');
     await open();
-    expect((await screen.findAllByText('setara harga terbaikmu')).length).toBe(2);
+    // Milo 200 g: −2,8 % terhadap histori di luar sesi. Milo 3in1 hanya punya record dari sesi ini → tanpa pembanding.
+    expect((await screen.findAllByText('3% lebih murah dari biasanya')).length).toBe(1);
+    expect(screen.queryByText('setara harga terbaikmu')).toBeNull();
+    expect(screen.getAllByTestId('session-label').map((r) => r.textContent)).toContain('Milo 3in1 10 × 35 gRp23.000NORMAL');
   });
 
   it('hampir kedaluwarsa (< 30 mnt) → "Perpanjang" (W12) → toast jam berakhir baru', async () => {

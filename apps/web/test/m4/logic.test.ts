@@ -116,11 +116,13 @@ describe('vs_best_pct (wireframe S-13, W-08 ≤ 5 %)', () => {
     expect(comparisonText(null, 5)).toBeNull();
   });
 
-  it('keluaran R18 asli: sebelum antrean ringkasan −2,8 % (lebih murah), sesudahnya 0 (F-60)', () => {
+  it('keluaran R18 asli: −2,8 % (lebih murah) sebelum DAN sesudah antrean ringkasan (F-60 → Q-80/Q-81, 6b M4)', () => {
     const before = fx<ActiveSession>('session_labels').labels.find((l) => l.status === 'done' && l.vs_best_pct != null);
     const after = fx<ActiveSession>('session_labels_refreshed').labels.find((l) => l.item_id === before?.item_id);
     expect(comparisonText(before!.vs_best_pct, 5)).toBe('3% lebih murah dari biasanya');
-    expect(comparisonText(after!.vs_best_pct, 5)).toBe('setara harga terbaikmu');
+    // Pembanding R18 = termurah 90 hari tanpa record dari sesi ini, jadi tidak menjadi 0 setelah ringkasan.
+    expect(after!.vs_best_pct).toBe(before!.vs_best_pct);
+    expect(comparisonText(after!.vs_best_pct, 5)).toBe('3% lebih murah dari biasanya');
   });
 });
 

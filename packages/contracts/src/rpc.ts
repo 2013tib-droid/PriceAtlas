@@ -367,12 +367,16 @@ export type MyProgram = z.infer<typeof MyProgramSchema>;
 /**
  * Satu baris label sesi: per capture sesi dan per item yang tidak ditolak. Capture tanpa item
  * (uploaded/processing/failed) → `item_id` null. Harga = record tersimpan, atau `computed` live untuk
- * item pending (app.observation_price). vs_*_pct terhadap price_summary saat ini (1 desimal).
+ * item pending (app.observation_price). vs_last_pct terhadap price_summary saat ini; vs_best_pct
+ * terhadap termurah 90 hari TANPA record dari capture sesi ini (6b M4, Q-80/Q-81), 1 desimal.
+ * `item_status` dan `thumbnail_path` (storage_path gambar item; null jika di-purge) ditambah di 6b M4.
  */
 export const SessionLabelSchema = z.looseObject({
   capture_id: Uuid,
   status: CaptureStatusSchema,
   item_id: Uuid.nullable(),
+  item_status: z.enum(['pending', 'accepted', 'rejected']).nullable(),
+  thumbnail_path: z.string().nullable(),
   product: ProductLiteSchema.nullable(),
   effective_price: Num.nullable(),
   price_basis: PriceBasis.nullable(),
@@ -430,6 +434,8 @@ export type AuditEntry = z.infer<typeof AuditEntrySchema>;
 /** R20: record + baris struk (record struk) + header struk + gambar sumber + riwayat audit. */
 export const PriceRecordDetailSchema = z.looseObject({
   record: PriceRecordFullSchema,
+  /** Teks terbaca dari sumber (baris struk, label, judul listing); null untuk input manual (6b M4, Q-87). */
+  source_text: z.string().nullable(),
   receipt_line: z
     .looseObject({
       id: Uuid,

@@ -322,13 +322,7 @@ begin
         'cashback', v_item -> 'cashback', 'points', v_item -> 'points',
         'listing_title', v_item -> 'listing_title', 'listing_url', v_item -> 'listing_url'));
       if v_member is not null then
-        select mp.id into v_prog from public.member_program mp
-         where mp.store_id = v_store
-           and (app.normalize_text(mp.name) = app.normalize_text(v_item ->> 'member_program_name')
-                or (v_item ->> 'member_program_name' is null
-                    and (select count(*) from public.member_program x where x.store_id = v_store and x.status = 'active') = 1
-                    and mp.status = 'active'))
-         limit 1;
+        v_prog := app.match_member_program(v_store, v_item ->> 'member_program_name');
         if v_prog is null then
           v_extra := v_extra || jsonb_build_object('member_note',
                        left(coalesce(v_item ->> 'member_program_name', 'Harga member') || ' ' || v_member::text, 200));
@@ -343,7 +337,8 @@ begin
         capture_id, household_id, position, image_position, region, raw_text, suggested_product_id,
         candidate_product_ids, match_tier, match_confidence, store_id, branch_id, seller_name, seller_ref,
         transaction_date, currency, normal_price, promo_price, promo_min_qty, promo_valid_from, promo_valid_until,
-        member_price, member_program_id, is_bundle, extra, field_confidence)
+        member_price, member_program_id, is_bundle, extra, field_confidence,
+        read_member_price, read_member_program_name)
       values (
         v_c.id, v_c.household_id, v_pos, (v_item ->> 'image_position')::smallint, v_item -> 'region',
         coalesce(v_item ->> 'raw_text', ''), v_prod,
@@ -363,7 +358,8 @@ begin
         (v_item ->> 'promo_valid_until')::date, v_member, v_prog,
         coalesce((v_item ->> 'is_bundle')::boolean, false), v_extra,
         coalesce((select jsonb_object_agg(e.key, e.value) from jsonb_each(coalesce(v_item -> 'field_confidence', '{}')) e
-                   where e.key in ('product', 'price', 'date', 'store') and jsonb_typeof(e.value) = 'number'), '{}'))
+                   where e.key in ('product', 'price', 'date', 'store') and jsonb_typeof(e.value) = 'number'), '{}'),
+        (v_item ->> 'member_price')::numeric, left(v_item ->> 'member_program_name', 200))
       returning id into v_iid;
 
       -- 3. Auto-accept: confidence ≥ τ, toko diketahui, ada harga berlaku, bukan bundle,
@@ -492,6 +488,23 @@ begin
   -- Langkah ini idempoten: household yang sudah diarsipkan dan job yang sudah antre tidak digandakan.
   return jsonb_build_object('archived_households', v_archived, 'memberships_removed', v_removed);
 end $$;
+
+--
+-- Name: best_unit_price_excluding(uuid, uuid, uuid[]); Type: FUNCTION; Schema: app; Owner: -
+--
+
+CREATE FUNCTION app.best_unit_price_excluding(p_product uuid, p_household uuid, p_capture_ids uuid[]) RETURNS numeric
+    LANGUAGE sql STABLE
+    SET search_path TO ''
+    AS $$
+  select min(pr.unit_price)
+    from public.price_record pr
+   where pr.household_id = p_household and pr.product_id = p_product
+     and pr.status = 'active' and not pr.is_bundle
+     and pr.currency = (select h.default_currency from public.household h where h.id = p_household)
+     and pr.transaction_date > current_date - app.config_numeric('best_price_window_days')::integer
+     and (pr.capture_id is null or not (pr.capture_id = any (coalesce(p_capture_ids, '{}'))))
+$$;
 
 --
 -- Name: branch_json(uuid); Type: FUNCTION; Schema: app; Owner: -
@@ -1312,6 +1325,24 @@ CREATE FUNCTION app.mark_rpc() RETURNS void
     LANGUAGE sql
     SET search_path TO ''
     AS $$ select set_config('app.via_rpc', 'on', true); $$;
+
+--
+-- Name: match_member_program(uuid, text); Type: FUNCTION; Schema: app; Owner: -
+--
+
+CREATE FUNCTION app.match_member_program(p_store uuid, p_name text) RETURNS uuid
+    LANGUAGE sql STABLE
+    SET search_path TO ''
+    AS $$
+  select mp.id from public.member_program mp
+   where p_store is not null and mp.store_id = p_store
+     and (app.normalize_text(mp.name) = app.normalize_text(p_name)
+          or (p_name is null
+              and (select count(*) from public.member_program x where x.store_id = p_store and x.status = 'active') = 1
+              and mp.status = 'active'))
+   order by mp.id
+   limit 1
+$$;
 
 --
 -- Name: match_products(uuid, uuid, jsonb); Type: FUNCTION; Schema: app; Owner: -
@@ -3156,7 +3187,11 @@ CREATE FUNCTION public.get_active_session() RETURNS jsonb
                    'product', app.product_lite(coalesce(pr.product_id, i.suggested_product_id)),
                    'effective_price', coalesce(pr.effective_price, op.effective_price),
                    'price_basis', coalesce(pr.price_basis, op.price_basis),
-                   'vs_best_pct', round((u.unit_price - sm.best_90d_unit_price) / nullif(sm.best_90d_unit_price, 0) * 100, 1),
+                   'item_status', i.status,
+                   'thumbnail_path', (select ci.storage_path from public.capture_image ci
+                                       where ci.capture_id = c.id and ci.position = coalesce(i.image_position, 1)
+                                         and ci.purged_at is null),
+                   'vs_best_pct', round((u.unit_price - bx.unit_price) / nullif(bx.unit_price, 0) * 100, 1),
                    'vs_last_pct', round((u.unit_price - sm.last_unit_price) / nullif(sm.last_unit_price, 0) * 100, 1)) as j
             from public.capture c
             left join public.capture_item i on i.capture_id = c.id and i.status <> 'rejected'
@@ -3167,6 +3202,11 @@ CREATE FUNCTION public.get_active_session() RETURNS jsonb
             left join lateral (select coalesce(pr.unit_price,
                                                app.unit_price_for(i.suggested_product_id, op.effective_price)) as unit_price) u on true
             left join public.price_summary sm on sm.product_id = coalesce(pr.product_id, i.suggested_product_id)
+            -- Q-80/Q-81: pembanding = termurah 90 hari TANPA record dari capture sesi ini.
+            left join lateral (select app.best_unit_price_excluding(
+                                 coalesce(pr.product_id, i.suggested_product_id), c.household_id,
+                                 array(select x.id from public.capture x where x.shopping_session_id = s.id)) as unit_price) bx
+                   on true
            where c.shopping_session_id = s.id) l), '[]'::jsonb))
     from public.shopping_session s
     join public.branch b on b.id = s.branch_id
@@ -3940,6 +3980,10 @@ begin
 
   return jsonb_build_object(
     'record', v_rec,
+    -- Q-87/F-72: teks yang terbaca dari sumbernya (baris struk, label, judul listing).
+    'source_text', coalesce(v_line.raw_text,
+                            (select nullif(it.raw_text, '') from public.capture_item it where it.price_record_id = v_pr.id),
+                            v_pr.extra ->> 'listing_title'),
     'receipt_line', case when v_line.id is null then null else
       jsonb_build_object('id', v_line.id, 'receipt_id', v_line.receipt_id, 'line_no', v_line.line_no,
                          'raw_text', v_line.raw_text, 'quantity', v_line.quantity,
@@ -4341,7 +4385,10 @@ CREATE FUNCTION public.update_capture_item(p_item_id uuid, p_patch jsonb, p_expe
     SET search_path TO ''
     AS $$
 declare
-  v_i public.capture_item;
+  v_i    public.capture_item;
+  v_n    public.capture_item;
+  v_prog uuid;
+  v_note jsonb;
 begin
   perform app.check_patch_keys(p_patch, array[
     'product_id', 'store_id', 'branch_id', 'seller_name', 'seller_ref', 'transaction_date', 'currency',
@@ -4382,6 +4429,30 @@ begin
     is_bundle         = case when p_patch ? 'is_bundle'         then coalesce((p_patch ->> 'is_bundle')::boolean, false) else is_bundle end,
     extra             = case when p_patch ? 'extra'             then p_patch -> 'extra' else extra end
    where id = v_i.id;
+
+  -- Q-77 (docs/08 §11.1 #6): lokasi berubah dan harga member terbaca ada → petakan ulang program
+  -- dengan aturan yang sama dengan apply_extraction. Tidak menyentuh harga member yang diisi user di
+  -- patch yang sama.
+  select * into v_n from public.capture_item where id = v_i.id;
+  if p_patch ? 'store_id' and not (p_patch ? 'member_price' or p_patch ? 'member_program_id')
+     and v_n.read_member_price is not null
+     and (v_n.member_program_id is null
+          or (select mp.store_id from public.member_program mp where mp.id = v_n.member_program_id)
+             is distinct from v_n.store_id) then
+    v_prog := app.match_member_program(v_n.store_id, v_n.read_member_program_name);
+    if v_prog is not null then
+      update public.capture_item
+         set member_price = v_n.read_member_price, member_program_id = v_prog, extra = extra - 'member_note'
+       where id = v_i.id;
+    else
+      v_note := jsonb_build_object('member_note',
+                  left(coalesce(v_n.read_member_program_name, 'Harga member') || ' ' || trim_scale(v_n.read_member_price)::text, 200));
+      update public.capture_item
+         set member_price = null, member_program_id = null,
+             extra = case when app.valid_price_extra(extra || v_note) then extra || v_note else extra end
+       where id = v_i.id;
+    end if;
+  end if;
 
   return app.capture_item_json(v_i.id);
 end $$;
@@ -4658,6 +4729,8 @@ CREATE TABLE public.capture_item (
     decided_at timestamp with time zone,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
     updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    read_member_price numeric(14,2),
+    read_member_program_name text,
     CONSTRAINT capture_item_candidate_product_ids_check CHECK ((cardinality(candidate_product_ids) <= 5)),
     CONSTRAINT capture_item_check CHECK (((store_id IS NOT NULL) OR (branch_id IS NULL))),
     CONSTRAINT capture_item_check1 CHECK (((member_price IS NULL) OR (member_program_id IS NOT NULL))),
@@ -4674,8 +4747,22 @@ CREATE TABLE public.capture_item (
     CONSTRAINT capture_item_position_check CHECK (("position" >= 1)),
     CONSTRAINT capture_item_promo_min_qty_check CHECK ((promo_min_qty >= 2)),
     CONSTRAINT capture_item_promo_price_check CHECK ((promo_price >= (0)::numeric)),
+    CONSTRAINT capture_item_read_member_price_check CHECK ((read_member_price >= (0)::numeric)),
+    CONSTRAINT capture_item_read_member_program_name_check CHECK ((char_length(read_member_program_name) <= 200)),
     CONSTRAINT capture_item_status_check CHECK ((status = ANY (ARRAY['pending'::text, 'accepted'::text, 'rejected'::text])))
 );
+
+--
+-- Name: COLUMN capture_item.read_member_price; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.capture_item.read_member_price IS 'Harga member yang terbaca worker (Q-77). Tidak diubah user; dipakai W18 untuk memetakan ulang program.';
+
+--
+-- Name: COLUMN capture_item.read_member_program_name; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.capture_item.read_member_program_name IS 'Nama program member yang terbaca worker (Q-77), maks 200 karakter.';
 
 --
 -- Name: category; Type: TABLE; Schema: public; Owner: -
@@ -6862,6 +6949,14 @@ REVOKE ALL ON FUNCTION app.begin_account_deletion(p_user_id uuid) FROM PUBLIC;
 GRANT ALL ON FUNCTION app.begin_account_deletion(p_user_id uuid) TO service_role;
 
 --
+-- Name: FUNCTION best_unit_price_excluding(p_product uuid, p_household uuid, p_capture_ids uuid[]); Type: ACL; Schema: app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION app.best_unit_price_excluding(p_product uuid, p_household uuid, p_capture_ids uuid[]) FROM PUBLIC;
+GRANT ALL ON FUNCTION app.best_unit_price_excluding(p_product uuid, p_household uuid, p_capture_ids uuid[]) TO authenticated;
+GRANT ALL ON FUNCTION app.best_unit_price_excluding(p_product uuid, p_household uuid, p_capture_ids uuid[]) TO service_role;
+
+--
 -- Name: FUNCTION branch_json(p_branch_id uuid); Type: ACL; Schema: app; Owner: -
 --
 
@@ -7115,6 +7210,14 @@ GRANT ALL ON FUNCTION app.mark_images_purged(p_image_ids uuid[]) TO service_role
 REVOKE ALL ON FUNCTION app.mark_rpc() FROM PUBLIC;
 GRANT ALL ON FUNCTION app.mark_rpc() TO authenticated;
 GRANT ALL ON FUNCTION app.mark_rpc() TO service_role;
+
+--
+-- Name: FUNCTION match_member_program(p_store uuid, p_name text); Type: ACL; Schema: app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION app.match_member_program(p_store uuid, p_name text) FROM PUBLIC;
+GRANT ALL ON FUNCTION app.match_member_program(p_store uuid, p_name text) TO authenticated;
+GRANT ALL ON FUNCTION app.match_member_program(p_store uuid, p_name text) TO service_role;
 
 --
 -- Name: FUNCTION match_products(p_household uuid, p_store_id uuid, p_items jsonb); Type: ACL; Schema: app; Owner: -
