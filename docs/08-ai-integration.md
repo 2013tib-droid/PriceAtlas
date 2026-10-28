@@ -1,6 +1,6 @@
 # Tahap 6a — Desain AI Integration (termasuk uji OCR D-16)
 
-> Status: **Disetujui (2026-10-27).** Semua usulan default §16 diterima → **D-92**. Dokumen ini tidak mengubah keputusan D-01 s/d D-91. **6b M0 selesai dan disetujui (2026-10-27):** §18. Q-122, Q-124, Q-125 → **D-93**; Q-120, Q-121, Q-123, Q-126 → **D-94** (semua usulan default). **6b M5 (Tanya) selesai, menunggu review:** §19 (F-134–F-147, Q-127–Q-131).
+> Status: **Disetujui (2026-10-27).** Semua usulan default §16 diterima → **D-92**. Dokumen ini tidak mengubah keputusan D-01 s/d D-91. **6b M0 selesai dan disetujui (2026-10-27):** §18. Q-122, Q-124, Q-125 → **D-93**; Q-120, Q-121, Q-123, Q-126 → **D-94** (semua usulan default). **6b M5 (Tanya) selesai dan disetujui (2026-10-28):** §19 (F-134–F-147); Q-127–Q-131 → **D-95** (semua usulan default). Uji live set emas menunggu pemilik proyek (Q-129).
 > Rujukan: `PROJECT.md` §3, §5.4, §5.9, D-16, D-50, D-57, D-61, D-70, D-74, D-75, D-82, D-86–D-91; `docs/05-backend-design.md` §5–§7, §9; `docs/06-local-dev.md` §2; `docs/07-frontend-design.md` §6, §9, §13.
 
 ## Daftar Isi
@@ -934,7 +934,7 @@ M1 (uji OCR D-16) dan M5 (Tanya) bisa dimulai paralel sesuai §14. M1 butuh dari
 
 ## 19. Tahap 6b M5: hasil dan temuan baru (F-134 dst.)
 
-> Status: **selesai, menunggu review** (2026-10-27). Basis: branch D-94 (`claude/practical-clarke-i5q34e`, belum di-merge ke `master` saat M5 dimulai). Satu migration baru (aditif), dua RPC baru (`begin_ask`, `record_ask_usage`), dua kode error baru. RLS tidak berubah. Worker hanya berubah di tabel harga yang kini dipakai bersama (F-135). CI tetap tanpa API berbayar dan tanpa `ANTHROPIC_API_KEY`. Set pertanyaan emas **belum** dijalankan terhadap Claude sungguhan (F-146, Q-129).
+> Status: **selesai dan disetujui** (2026-10-28): Q-127 s/d Q-131 → D-95 (semua usulan default). Basis: branch D-94 (`claude/practical-clarke-i5q34e`, belum di-merge ke `master` saat M5 dimulai). Satu migration baru (aditif), dua RPC baru (`begin_ask`, `record_ask_usage`), dua kode error baru. RLS tidak berubah. Worker hanya berubah di tabel harga yang kini dipakai bersama (F-135). CI tetap tanpa API berbayar dan tanpa `ANTHROPIC_API_KEY`. Set pertanyaan emas **belum** dijalankan terhadap Claude sungguhan (F-146, Q-129).
 
 ### 19.1 Yang dibangun
 
@@ -1012,9 +1012,11 @@ M1 (uji OCR D-16) dan M5 (Tanya) bisa dimulai paralel sesuai §14. M1 butuh dari
 | Q-130 | Bentuk `basis` sebagai objek dan perluasan pemetaan §10.3 (F-139, F-140)? | **Ya.** |
 | Q-131 | Penyimpangan F-134 (`ai_spend_today` di M5), F-135 (tabel harga bersama), F-136 (migration per milestone), F-137 (cek kunci sebelum kuota)? | **Ya, semuanya.** |
 
+**Hasil review M5 (2026-10-28):** pemilik proyek menerima semua usulan default Q-127 s/d Q-131 → **D-95**.
+
 ### 19.6 Berikutnya
 
-Review M5 (Q-127–Q-131) dan uji live set emas oleh pemilik proyek (Q-129). M1 (uji OCR D-16) tetap menunggu foto dan anotasi (§15). Setelah D-16: M2 (extractor produksi, worker memakai `app.ai_spend_today()` sebelum claim).
+Review M5 selesai (D-95). PR ke `master` menjalankan job `supabase-e2e` (e2e S-20, L4 429, drift `db-types`). Uji live set emas oleh pemilik proyek (Q-129). M1 (uji OCR D-16) tetap menunggu foto dan anotasi (§15). Setelah D-16: M2 (extractor produksi, worker memakai `app.ai_spend_today()` sebelum claim).
 
 ---
 
