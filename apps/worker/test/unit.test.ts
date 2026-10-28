@@ -2,7 +2,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { FixtureRegistry, StubAiMatcher, StubExtractor, sha256 } from '../src/extractors/stub.ts';
+import { FixtureRegistry, StubAiMatcher, StubExtractor, fallbackFixture, sha256 } from '../src/extractors/stub.ts';
 import { REDACTED, redactJson, redactText } from '../src/jobs/redact.ts';
 import { classify } from '../src/pipeline/process-capture.ts';
 import { PermanentError, TransientError, type ImageBlob } from '../src/pipeline/types.ts';
@@ -18,25 +18,41 @@ const ctx = (attempt: number) => ({ captureId: 'c', householdId: 'h', attempt, u
 
 describe('StubExtractor (fixture per hash gambar)', () => {
   it('memetakan gambar ke fixture lewat sha256', async () => {
-    const x = await new StubExtractor(reg).extract({ images: [img('struk-aeon')], ctx: ctx(1) });
+    const x = await new StubExtractor(reg).extract({ kind: 'receipt', images: [img('struk-aeon')], ctx: ctx(1) });
     expect(x.output.kind).toBe('receipt');
     expect(x.rawText).toContain('AEON BSD');
   });
   it('tanpa fixture → PermanentError unsupported', async () => {
     const data = Buffer.from('gambar tak dikenal');
     await expect(
-      new StubExtractor(reg).extract({ images: [{ position: 1, storagePath: 'x', sha256: sha256(data), data }], ctx: ctx(1) }),
+      new StubExtractor(reg).extract({ kind: 'receipt', images: [{ position: 1, storagePath: 'x', sha256: sha256(data), data }], ctx: ctx(1) }),
     ).rejects.toMatchObject({ name: 'PermanentError', code: 'unsupported' });
   });
   it('failures dipakai per percobaan', async () => {
     const ex = new StubExtractor(reg);
-    await expect(ex.extract({ images: [img('struk-alfamart-timeout')], ctx: ctx(1) })).rejects.toBeInstanceOf(TransientError);
-    await expect(ex.extract({ images: [img('struk-alfamart-timeout')], ctx: ctx(2) })).rejects.toBeInstanceOf(TransientError);
-    await expect(ex.extract({ images: [img('struk-alfamart-timeout')], ctx: ctx(3) })).resolves.toHaveProperty('output.kind', 'receipt');
-    await expect(ex.extract({ images: [img('struk-buram')], ctx: ctx(1) })).rejects.toMatchObject({ code: 'blurry' });
+    await expect(ex.extract({ kind: 'receipt', images: [img('struk-alfamart-timeout')], ctx: ctx(1) })).rejects.toBeInstanceOf(TransientError);
+    await expect(ex.extract({ kind: 'receipt', images: [img('struk-alfamart-timeout')], ctx: ctx(2) })).rejects.toBeInstanceOf(TransientError);
+    await expect(ex.extract({ kind: 'receipt', images: [img('struk-alfamart-timeout')], ctx: ctx(3) })).resolves.toHaveProperty('output.kind', 'receipt');
+    await expect(ex.extract({ kind: 'receipt', images: [img('struk-buram')], ctx: ctx(1) })).rejects.toMatchObject({ code: 'blurry' });
   });
   it('fixture <sha256>.json juga dikenali', () => {
     expect(reg.get(sha256(fixtureImages('label-milo')[0]!))?.name).toBe('label-milo');
+  });
+  it('STUB_FALLBACK_FIXTURE (Q-82, Q-118): gambar tak dikenal → fixture fallback, hanya jenis yang sama', async () => {
+    const data = Buffer.from('frame kamera palsu');
+    const unknown: ImageBlob = { position: 1, storagePath: 'x', sha256: sha256(data), data };
+    const fb = fallbackFixture(reg, 'label-milo');
+    const ex = new StubExtractor(reg, fb);
+    const x = await ex.extract({ kind: 'price_label', images: [unknown], ctx: ctx(1) });
+    expect(x.output).toEqual(reg.byName('label-milo')!.output);
+    // Jenis lain tetap ditolak seperti tanpa fallback; gambar yang dikenal tetap fixture-nya sendiri.
+    await expect(ex.extract({ kind: 'receipt', images: [unknown], ctx: ctx(1) })).rejects.toMatchObject({ code: 'unsupported' });
+    await expect(ex.extract({ kind: 'receipt', images: [img('struk-aeon')], ctx: ctx(1) })).resolves.toHaveProperty('output.kind', 'receipt');
+    // Tidak pernah default: tanpa env → null; nama salah → gagal start.
+    expect(fallbackFixture(reg, undefined)).toBeNull();
+    expect(() => fallbackFixture(reg, 'tidak-ada')).toThrow(/STUB_FALLBACK_FIXTURE=tidak-ada/);
+    const ai = new StubAiMatcher(reg, fb);
+    expect(await ai.match([{ key: 1, raw_text: 'X' }], { householdId: 'h', storeId: null, kind: 'price_label', imageSha256s: [unknown.sha256] })).toEqual([]);
   });
   it('StubAiMatcher: saran dari fixture, kosong jika tidak ada', async () => {
     const ai = new StubAiMatcher(reg);

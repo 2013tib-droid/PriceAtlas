@@ -124,4 +124,20 @@ export const SPECS: SyntheticSpec[] = [
       urlText: 'https://shopee.co.id/milo-original-500g',
     }),
   },
+  {
+    // 6b M4 (Q-78): screenshot ber-confidence rendah (field_confidence.price 0,7 < τ) sehingga e2e
+    // alur 5 mencapai S-11 dari unggahan pertama, tanpa unggahan kedua (F-50).
+    name: 'shopee-milo-uht',
+    kind: 'marketplace',
+    fixtureDir: WORKER,
+    conditions: ['low_confidence'],
+    html: listingHtml({
+      marketplace: 'Shopee',
+      title: 'Milo UHT 180 ml Nestle',
+      price: 'Rp6.500',
+      seller: 'Toko Susu Segar',
+      shipping: 'Rp5.000',
+      urlText: 'https://shopee.co.id/milo-uht-180ml',
+    }),
+  },
 ];

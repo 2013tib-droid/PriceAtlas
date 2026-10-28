@@ -191,6 +191,8 @@ jobs:
           WORKER_DB_ROLE: service_role
           STORAGE_BACKEND: supabase
           EXTRACTOR: stub
+          # Q-82/Q-118 (docs/08 §13.2): frame kamera palsu (sha256 tak dikenal) → fixture label-milo.
+          STUB_FALLBACK_FIXTURE: label-milo
 
       - name: e2e Playwright (login OTP, shell offline, alur 1–8, O antrean, G gagal; kamera palsu Chromium untuk alur 4)
         run: pnpm --filter @priceatlas/web test:e2e

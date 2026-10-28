@@ -2,7 +2,8 @@
 //   tsx src/main.ts [--dev-scheduler] [--once] [--worker-id <id>]
 // Env: DATABASE_URL, WORKER_DB_ROLE, STORAGE_BACKEND (supabase|local), LOCAL_STORAGE_DIR,
 //      NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (backend supabase),
-//      EXTRACTOR (Tahap 4: hanya "stub"), STUB_FIXTURES_DIR.
+//      EXTRACTOR (Tahap 4: hanya "stub"), STUB_FIXTURES_DIR,
+//      STUB_FALLBACK_FIXTURE (khusus worker e2e: nama fixture untuk gambar tak dikenal, Q-82/Q-118).
 import { hostname } from 'node:os';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -10,7 +11,7 @@ import { createClient } from '@supabase/supabase-js';
 import { LocalBlobStore } from './adapters/local-blob-store.ts';
 import { SupabaseBlobStore } from './adapters/supabase-blob-store.ts';
 import { createPool } from './db.ts';
-import { FixtureRegistry, StubAiMatcher, StubExtractor } from './extractors/stub.ts';
+import { FixtureRegistry, StubAiMatcher, StubExtractor, fallbackFixture } from './extractors/stub.ts';
 import { log } from './log.ts';
 import type { BlobStore } from './pipeline/types.ts';
 import { Worker } from './worker.ts';
@@ -46,7 +47,15 @@ export function buildDeps(args: { workerId: string }) {
     throw new Error(`EXTRACTOR=${extractorKind} belum dipasang (D-16, docs/08 §14 M2). Pakai EXTRACTOR=stub.`);
   }
   const fixtures = new FixtureRegistry(resolve(process.env.STUB_FIXTURES_DIR ?? DEFAULT_FIXTURES_DIR));
-  return { db, blob, extractor: new StubExtractor(fixtures), ai: new StubAiMatcher(fixtures), workerId: args.workerId };
+  const fallback = fallbackFixture(fixtures, process.env.STUB_FALLBACK_FIXTURE || undefined);
+  if (fallback) log('worker.stub_fallback', { fixture: fallback.name, kind: fallback.output.kind });
+  return {
+    db,
+    blob,
+    extractor: new StubExtractor(fixtures, fallback),
+    ai: new StubAiMatcher(fixtures, fallback),
+    workerId: args.workerId,
+  };
 }
 
 async function main(): Promise<void> {
