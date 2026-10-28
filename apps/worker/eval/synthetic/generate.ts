@@ -2,15 +2,16 @@
 // sudah terpasang di lingkungan (jangan `playwright install`). CI tidak menjalankan ini: hasilnya
 // di-commit sebagai fixture.
 //   pnpm --filter @priceatlas/worker synthetic            # tulis ulang fixture (worker + web)
-//   pnpm --filter @priceatlas/worker synthetic --out DIR  # set uji: <nama>.jpg + <nama>.truth.json
+//   pnpm --filter @priceatlas/worker synthetic --out DIR  # set uji: <nama>.jpg + <nama>.truth.json (§4.3)
 //   pnpm --filter @priceatlas/worker synthetic --only a,b # hanya fixture ini (fixture lain tidak dirender
 //                                                         # ulang, sha256-nya tetap; F-132)
 //   CHROMIUM_PATH=/opt/pw-browsers/chromium …            # jika versi Playwright ≠ browser terpasang
 // Setelah fixture berubah, sha256 berubah: ganti nilai sha256 lama di apps/web/test/fixtures/rpc.json
 // dan konstanta sha di apps/web/test/browser/media.browser.test.ts (docs/06 §2.6, F-125).
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join, resolve } from 'node:path';
+import { writeSyntheticSet } from './set.ts';
 import { SPECS, type SyntheticSpec } from './specs.ts';
 
 const ROOT = resolve(import.meta.dirname, '../../../..');
@@ -63,16 +64,8 @@ async function main() {
   const images = await render(specs);
   if (outIdx >= 0) {
     const dir = resolve(argv[outIdx + 1] ?? '.data/ocr-eval-synthetic');
-    mkdirSync(dir, { recursive: true });
-    for (const s of specs) {
-      const img = images.get(s.name)!;
-      writeFileSync(join(dir, `${s.name}.jpg`), img);
-      const fx = JSON.parse(readFileSync(join(ROOT, s.fixtureDir, `${s.name}.json`), 'utf8')) as { output: unknown; failures?: unknown[] };
-      const unreadable = s.name === 'struk-buram';
-      const truth = { id: s.name, kind: s.kind, images: [`${s.name}.jpg`], conditions: s.conditions, synthetic: true, expected: unreadable ? null : fx.output };
-      writeFileSync(join(dir, `${s.name}.truth.json`), `${JSON.stringify(truth, null, 2)}\n`);
-    }
-    console.log(`${specs.length} gambar + truth → ${dir}`);
+    const n = writeSyntheticSet(dir, images, specs);
+    console.log(`${n} gambar + truth → ${dir}`);
     return;
   }
   for (const s of specs) {

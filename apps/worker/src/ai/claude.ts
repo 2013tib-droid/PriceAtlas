@@ -79,6 +79,12 @@ export interface StructuredResult<T> {
   usage: NonNullable<Extraction['usage']>;
 }
 
+/** Batch (harness, F-116): parameter sama dengan panggilan biasa, tanpa `fallbacks` (ditolak Batches API). */
+export function buildBatchParams<T>(req: StructuredRequest<T>): MessageCreateParamsNonStreaming {
+  const { betas: _betas, fallbacks: _fallbacks, ...params } = buildParams(req);
+  return params;
+}
+
 export function buildParams<T>(req: StructuredRequest<T>): MessageCreateParamsNonStreaming {
   const params: MessageCreateParamsNonStreaming = {
     model: req.model,
@@ -104,6 +110,14 @@ export async function callStructured<T>(client: ClaudeClient, req: StructuredReq
     throw mapClaudeError(e, req.signal);
   }
 
+  return interpretMessage(req, msg);
+}
+
+/**
+ * Respons Messages API → hasil terstruktur (dipakai panggilan biasa dan hasil batch harness): cek
+ * `stop_reason` dulu (refusal, max_tokens), lalu JSON + zod. Error membawa output mentah (F-127).
+ */
+export function interpretMessage<T>(req: StructuredRequest<T>, msg: BetaMessage): StructuredResult<T> {
   const meta = metaOf(req, msg);
   const usage = { inputTokens: meta.input_tokens, outputTokens: meta.output_tokens, costUsd: meta.cost_usd };
   const text = msg.content.flatMap((b) => (b.type === 'text' ? [b.text] : [])).join('');

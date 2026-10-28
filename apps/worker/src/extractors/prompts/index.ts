@@ -23,3 +23,14 @@ export function systemPrompt(kind: CaptureKind, version = PROMPT_VERSION): strin
   }
   return text;
 }
+
+/** Tambahan instruksi untuk input teks OCR (OcrThenParseExtractor, §5.6), versi sama dengan prompt. */
+export function ocrNote(version = PROMPT_VERSION): string {
+  const file = `ocr.${version}.md`;
+  let text = cache.get(file);
+  if (text === undefined) {
+    text = readFileSync(join(import.meta.dirname, file), 'utf8');
+    cache.set(file, text);
+  }
+  return text;
+}

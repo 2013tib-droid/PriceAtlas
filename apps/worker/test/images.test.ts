@@ -168,7 +168,7 @@ describe('prepareImages (semua gambar capture)', () => {
   });
 
   it('fixture sintetis CI semuanya bisa didekode (F-118)', async () => {
-    for (const f of ['struk-aeon', 'struk-alfamart-timeout', 'struk-buram', 'label-milo', 'shopee-milo', 'shopee-milo-uht']) {
+    for (const f of ['struk-aeon', 'struk-alfamart-timeout', 'struk-buram', 'label-milo', 'shopee-milo', 'shopee-milo-uht', 'label-indomie']) {
       const p = await prepareImage(readFileSync(resolve(FIXTURES_DIR, `${f}.jpg`)));
       expect(p.sourceType).toBe('jpeg');
       expect(Math.min(p.width, p.height)).toBeGreaterThanOrEqual(IMAGE_RULES.minShortSide);

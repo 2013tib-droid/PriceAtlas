@@ -1,0 +1,14 @@
+{
+  "images": ["label-indomie.jpg"],
+  "raw_text": "INDOMIE GORENG 85G 089686010947 Rp3.500 PROMO Rp3.100 s/d 31 Des 2099",
+  "output": {
+    "kind": "price_label",
+    "items": [
+      {
+        "raw_text": "INDOMIE GORENG 85G", "barcode": "089686010947",
+        "normal_price": 3500, "promo_price": 3100, "promo_valid_until": "2099-12-31",
+        "image_position": 1, "field_confidence": { "product": 0.97, "price": 0.96 }
+      }
+    ]
+  }
+}

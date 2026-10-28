@@ -10,6 +10,10 @@ export interface SyntheticSpec {
   fixtureDir: string;
   html: string;
   conditions: string[];
+  /** Kategori toko untuk harness (§4.4). */
+  storeCategory: 'minimarket' | 'supermarket' | 'hypermarket' | 'apotek' | 'lokal' | 'marketplace' | 'bebas';
+  /** Anotasi uji (§4.3): per line_no / nomor item, dan nilai PII di gambar. */
+  annotations?: { lines?: Record<string, { weighed?: boolean; member_discount?: boolean }>; transcript_pii?: string[] };
 }
 
 const WORKER = 'apps/worker/test/fixtures';
@@ -20,7 +24,9 @@ export const SPECS: SyntheticSpec[] = [
     name: 'struk-aeon',
     kind: 'receipt',
     fixtureDir: WORKER,
-    conditions: ['skewed'],
+    conditions: ['skewed', 'member'],
+    storeCategory: 'supermarket',
+    annotations: { lines: { '2': { member_discount: true } }, transcript_pii: ['081298765432', '4321'] },
     html: receiptHtml(
       {
         header: ['AEON BSD', 'AEON STORE BSD CITY', 'JL. BSD RAYA UTAMA', '15/10/2026 19:02   KS:03'],
@@ -44,6 +50,7 @@ export const SPECS: SyntheticSpec[] = [
     kind: 'receipt',
     fixtureDir: WORKER,
     conditions: [],
+    storeCategory: 'minimarket',
     html: receiptHtml(
       {
         header: ['ALFAMART', 'SERPONG', '14/10/2026 08:15'],
@@ -63,6 +70,7 @@ export const SPECS: SyntheticSpec[] = [
     kind: 'receipt',
     fixtureDir: WORKER,
     conditions: ['faded', 'blurry'],
+    storeCategory: 'lokal',
     html: receiptHtml(
       {
         header: ['TOKO SERBA ADA', '13/10/2026'],
@@ -81,6 +89,7 @@ export const SPECS: SyntheticSpec[] = [
     kind: 'receipt',
     fixtureDir: WEB,
     conditions: ['faded'],
+    storeCategory: 'lokal',
     html: receiptHtml(
       {
         header: ['TOKO MAKMUR JAYA', '14/10/2026'],
@@ -101,7 +110,8 @@ export const SPECS: SyntheticSpec[] = [
     name: 'label-milo',
     kind: 'price_label',
     fixtureDir: WORKER,
-    conditions: [],
+    conditions: ['multi_label', 'member'],
+    storeCategory: 'supermarket',
     html: labelHtml(
       [
         { name: 'MILO ORIGINAL 200G', barcode: '8992696404442', price: 'Rp19.500', promo: { price: 'Rp17.500', until: 's/d 31 Des 2099' } },
@@ -111,10 +121,23 @@ export const SPECS: SyntheticSpec[] = [
     ),
   },
   {
+    // Label kedua untuk uji live (§13.2: 3 struk + 2 label + 1 screenshot): satu label promo berperiode.
+    name: 'label-indomie',
+    kind: 'price_label',
+    fixtureDir: WORKER,
+    conditions: [],
+    storeCategory: 'minimarket',
+    html: labelHtml(
+      [{ name: 'INDOMIE GORENG 85G', barcode: '089686010947', price: 'Rp3.500', promo: { price: 'Rp3.100', until: 's/d 31 Des 2099' } }],
+      { rotateDeg: 0.9, noise: 500, seed: 61 },
+    ),
+  },
+  {
     name: 'shopee-milo',
     kind: 'marketplace',
     fixtureDir: WORKER,
     conditions: [],
+    storeCategory: 'marketplace',
     html: listingHtml({
       marketplace: 'Shopee',
       title: 'Milo Original 500 g Nestle',
@@ -131,6 +154,7 @@ export const SPECS: SyntheticSpec[] = [
     kind: 'marketplace',
     fixtureDir: WORKER,
     conditions: ['low_confidence'],
+    storeCategory: 'marketplace',
     html: listingHtml({
       marketplace: 'Shopee',
       title: 'Milo UHT 180 ml Nestle',

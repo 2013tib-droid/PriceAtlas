@@ -6,6 +6,12 @@
 
 export const PRICING_AS_OF = '2026-10-06';
 
+/**
+ * Message Batches API: 50 % dari harga biasa untuk semua token (skill claude-api, cache 2026-10-06).
+ * Hanya harness uji OCR (F-116); pipeline interaktif tidak memakai batch.
+ */
+export const BATCH_PRICE_FACTOR = 0.5;
+
 export interface ModelPrice {
   /** US$ per 1 juta token. */
   input: number;
