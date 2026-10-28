@@ -72,8 +72,7 @@ test('S-20: Tanya dari S-02 → ambigu → jawaban + tautan layar sumber; S-03b;
   await conversation(page).getByRole('link', { name: 'Buka Cek harga rak' }).click();
   await expect(page).toHaveURL(/sheet=cek-harga/);
   await expect(page.getByRole('dialog', { name: 'Cek harga rak' })).toBeVisible();
-  await page.goBack();
-  await page.goBack();
+  await page.goBack(); // satu entri riwayat: /produk?id=…&sheet=cek-harga
   await expect(page).toHaveURL(/\/tanya$/);
 
   // Di luar kemampuan (D-57).
