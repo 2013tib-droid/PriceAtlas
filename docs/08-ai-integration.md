@@ -1,6 +1,6 @@
 # Tahap 6a — Desain AI Integration (termasuk uji OCR D-16)
 
-> Status: **Disetujui (2026-10-27).** Semua usulan default §16 diterima → **D-92**. Dokumen ini tidak mengubah keputusan D-01 s/d D-91. **6b M0 selesai dan disetujui (2026-10-27):** §18. Q-122, Q-124, Q-125 → **D-93**; Q-120, Q-121, Q-123, Q-126 → **D-94** (semua usulan default). **6b M5 (Tanya) selesai dan disetujui (2026-10-28):** §19 (F-134–F-147); Q-127–Q-131 → **D-95** (semua usulan default). Uji live set emas menunggu pemilik proyek (Q-129). **6b M1-harness + M4 selesai, menunggu review (2026-10-28):** §20 (F-148–F-158, Q-132–Q-138); harness siap dijalankan pemilik proyek, keputusan D-16 menunggu foto + anotasi.
+> Status: **Disetujui (2026-10-27).** Semua usulan default §16 diterima → **D-92**. Dokumen ini tidak mengubah keputusan D-01 s/d D-91. **6b M0 selesai dan disetujui (2026-10-27):** §18. Q-122, Q-124, Q-125 → **D-93**; Q-120, Q-121, Q-123, Q-126 → **D-94** (semua usulan default). **6b M5 (Tanya) selesai dan disetujui (2026-10-28):** §19 (F-134–F-147); Q-127–Q-131 → **D-95** (semua usulan default). Uji live set emas menunggu pemilik proyek (Q-129). **6b M1-harness + M4 selesai dan disetujui (2026-10-30):** §20 (F-148–F-158); Q-132–Q-138 → **D-96** (semua usulan default); harness siap dijalankan pemilik proyek, keputusan D-16 menunggu foto + anotasi.
 > Rujukan: `PROJECT.md` §3, §5.4, §5.9, D-16, D-50, D-57, D-61, D-70, D-74, D-75, D-82, D-86–D-91; `docs/05-backend-design.md` §5–§7, §9; `docs/06-local-dev.md` §2; `docs/07-frontend-design.md` §6, §9, §13.
 
 ## Daftar Isi
@@ -1024,7 +1024,7 @@ Review M5 selesai (D-95). PR ke `master` menjalankan job `supabase-e2e` (e2e S-2
 
 ## 20. Tahap 6b M1-harness + M4: hasil dan temuan baru (F-148 dst.)
 
-> Status: **selesai, menunggu review** (2026-10-28). Basis: `master` setelah PR #22 (M5, D-94, D-95). Dua bagian: (A) harness uji OCR M1 — dibangun dan diuji dengan data sintetis + klien palsu, **dijalankan pemilik proyek** pada foto asli (Q-105 → D-92), sehingga keputusan D-16 dan Lampiran A menunggu foto + anotasi; (B) item tinjauan M4. Satu migration baru (aditif). RLS tidak berubah. Kontrak hanya bertambah field. `EXTRACTOR` produksi tetap `stub`; `VisionExtractor`/`OcrThenParseExtractor` tidak dipasang ke `buildDeps` (M2, D-94). CI tetap tanpa API berbayar dan tanpa kunci. M4 dikerjakan sebelum M2–M3 (F-149).
+> Status: **selesai dan disetujui** (2026-10-30): Q-132 s/d Q-138 → D-96 (semua usulan default). Basis: `master` setelah PR #22 (M5, D-94, D-95). Dua bagian: (A) harness uji OCR M1 — dibangun dan diuji dengan data sintetis + klien palsu, **dijalankan pemilik proyek** pada foto asli (Q-105 → D-92), sehingga keputusan D-16 dan Lampiran A menunggu foto + anotasi; (B) item tinjauan M4. Satu migration baru (aditif). RLS tidak berubah. Kontrak hanya bertambah field. `EXTRACTOR` produksi tetap `stub`; `VisionExtractor`/`OcrThenParseExtractor` tidak dipasang ke `buildDeps` (M2, D-94). CI tetap tanpa API berbayar dan tanpa kunci. M4 dikerjakan sebelum M2–M3 (F-149).
 
 ### 20.1 Yang dibangun
 
@@ -1116,6 +1116,8 @@ Review M5 selesai (D-95). PR ke `master` menjalankan job `supabase-e2e` (e2e S-2
 | Q-136 | Field keluaran baru R18/R20 `nullish` di kontrak, UI kembali ke perilaku lama untuk cache tanpa field, buster cache tidak dinaikkan (F-150)? | **Ya.** |
 | Q-137 | Penyimpangan urutan: M4 sebelum M2–M3 (F-149)? | **Ya.** M2 dimulai setelah D-16 (laporan Lampiran A). |
 | Q-138 | Sebelum `ocr-eval run`, pemilik proyek menjalankan `test:live` sekali (±US$0,40) untuk membuktikan kunci, model, dan pola error 400 gambar (F-155, F-131)? | **Ya.** Jika gagal, kirim pesan error tanpa gambar; harness tidak dijalankan sampai lulus. |
+
+**Hasil review (2026-10-30):** pemilik proyek menerima semua usulan default Q-132 s/d Q-138 → **D-96**.
 
 ### 20.6 Berikutnya
 
