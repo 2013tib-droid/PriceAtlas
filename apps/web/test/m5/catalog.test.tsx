@@ -234,7 +234,7 @@ describe('S-18 Pisahkan', () => {
     expect(screen.getByTestId('split-count').textContent).toBe('1 dicentang');
     await user.click(next());
     // Langkah 3: alias dari teks baris struk (R20 record struk yang dicentang).
-    const alias = await screen.findByRole('checkbox', { name: /Teks struk 'MILO ORI 500G' di AEON/ });
+    const alias = await screen.findByRole('checkbox', { name: /Teks 'MILO ORI 500G' di AEON/ });
     await user.click(alias);
     await user.click(next());
     expect(screen.getByTestId('split-summary').textContent).toBe(

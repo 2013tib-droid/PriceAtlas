@@ -1,0 +1,4056 @@
+{
+  "schema": "priceatlas.ocr-eval.report/1",
+  "generated_at": "2026-10-28T05:31:53.386Z",
+  "prompt_version": "v1",
+  "pricing_as_of": "2026-10-06",
+  "split": "all",
+  "synthetic": true,
+  "data": {
+    "verified_truths": 8,
+    "by_kind": {
+      "price_label": 2,
+      "receipt": 4,
+      "marketplace": 2
+    },
+    "by_store_category": {
+      "minimarket": 2,
+      "supermarket": 2,
+      "lokal": 2,
+      "marketplace": 2
+    }
+  },
+  "arms": {
+    "vision-opus-low": {
+      "model": "claude-opus-5-5",
+      "engine": "vision",
+      "kinds": {
+        "receipt": {
+          "captures": 4,
+          "records": 8,
+          "metrics": {
+            "store": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "date": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "total": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "payment": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "line.type": {
+              "rate": 1,
+              "n": 16,
+              "d": 16
+            },
+            "line.text": {
+              "rate": 1,
+              "n": 16,
+              "d": 16
+            },
+            "line.recall": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "line.amount": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "line.quantity": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "line.unit": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "line.precision": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "perfect": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "sum_equals_total": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "unreadable_detected": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "branch": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "time": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "line.discount": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "member.recall": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "member.regex_recall": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "member.precision": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "line.non_product": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "pii.recall": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "pii.no_leak": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            }
+          },
+          "confidence": {
+            "tau": 0.9,
+            "autosave_precision": 1,
+            "autosave_coverage": 1,
+            "ece": 0.03,
+            "min_tau_precision_98": 0,
+            "isotonic_dev": [
+              {
+                "from": 0.97,
+                "p": 1,
+                "n": 1
+              },
+              {
+                "from": 0.97,
+                "p": 1,
+                "n": 1
+              },
+              {
+                "from": 0.97,
+                "p": 1,
+                "n": 1
+              },
+              {
+                "from": 0.97,
+                "p": 1,
+                "n": 1
+              }
+            ]
+          },
+          "cost": {
+            "mean_per_capture_usd": 0.0426,
+            "total_usd": 0.3408
+          },
+          "latency": {
+            "n": 3,
+            "p50_ms": 9,
+            "p95_ms": 9
+          },
+          "failures": {
+            "rate": 0,
+            "refusal": 0,
+            "schema": 0,
+            "timeout": 0,
+            "unsupported": 0,
+            "other": 0,
+            "n": 8
+          },
+          "pii_leaks": 0,
+          "mean_corrections": 0,
+          "by_store_category": {
+            "lokal": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "minimarket": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "supermarket": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            }
+          },
+          "by_condition": {
+            "blurry": {},
+            "faded": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "member": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "skewed": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            }
+          }
+        },
+        "price_label": {
+          "captures": 2,
+          "records": 4,
+          "metrics": {
+            "item.recall": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "price.normal": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "price": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "price.promo": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "promo_period": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "image_position": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "product.text": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "item.precision": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "perfect": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "price.member": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "member_program": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            }
+          },
+          "confidence": {
+            "tau": 0.9,
+            "autosave_precision": 1,
+            "autosave_coverage": 1,
+            "ece": 0.03,
+            "min_tau_precision_98": 0,
+            "isotonic_dev": null
+          },
+          "cost": {
+            "mean_per_capture_usd": 0.0238,
+            "total_usd": 0.0952
+          },
+          "latency": {
+            "n": 2,
+            "p50_ms": 8,
+            "p95_ms": 9
+          },
+          "failures": {
+            "rate": 0,
+            "refusal": 0,
+            "schema": 0,
+            "timeout": 0,
+            "unsupported": 0,
+            "other": 0,
+            "n": 4
+          },
+          "pii_leaks": 0,
+          "mean_corrections": null,
+          "by_store_category": {
+            "minimarket": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "price": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "supermarket": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "price": {
+                "rate": 1,
+                "n": 8,
+                "d": 8
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              }
+            }
+          },
+          "by_condition": {
+            "member": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "price": {
+                "rate": 1,
+                "n": 8,
+                "d": 8
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              }
+            },
+            "multi_label": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "price": {
+                "rate": 1,
+                "n": 8,
+                "d": 8
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              }
+            }
+          }
+        },
+        "marketplace": {
+          "captures": 2,
+          "records": 4,
+          "metrics": {
+            "item.recall": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "price.normal": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "price": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "product.text": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "listing_title": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "shipping_fee": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "item.precision": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "store": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "perfect": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            }
+          },
+          "confidence": {
+            "tau": 0.9,
+            "autosave_precision": 1,
+            "autosave_coverage": 1,
+            "ece": 0.03,
+            "min_tau_precision_98": 0,
+            "isotonic_dev": [
+              {
+                "from": 0.97,
+                "p": 1,
+                "n": 1
+              },
+              {
+                "from": 0.97,
+                "p": 1,
+                "n": 1
+              }
+            ]
+          },
+          "cost": {
+            "mean_per_capture_usd": 0.0238,
+            "total_usd": 0.0952
+          },
+          "latency": {
+            "n": 2,
+            "p50_ms": 11,
+            "p95_ms": 12
+          },
+          "failures": {
+            "rate": 0,
+            "refusal": 0,
+            "schema": 0,
+            "timeout": 0,
+            "unsupported": 0,
+            "other": 0,
+            "n": 4
+          },
+          "pii_leaks": 0,
+          "mean_corrections": null,
+          "by_store_category": {
+            "marketplace": {
+              "perfect": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "store": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "price": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              }
+            }
+          },
+          "by_condition": {
+            "low_confidence": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "price": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            }
+          }
+        }
+      },
+      "stability_diff": {
+        "rate": 0,
+        "n": 0,
+        "d": 35
+      }
+    },
+    "vision-opus-medium": {
+      "model": "claude-opus-5-5",
+      "engine": "vision",
+      "kinds": {
+        "receipt": {
+          "captures": 4,
+          "records": 8,
+          "metrics": {
+            "store": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "date": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "total": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "payment": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "line.type": {
+              "rate": 1,
+              "n": 16,
+              "d": 16
+            },
+            "line.text": {
+              "rate": 1,
+              "n": 16,
+              "d": 16
+            },
+            "line.recall": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "line.amount": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "line.quantity": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "line.unit": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "line.precision": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "perfect": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "sum_equals_total": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "unreadable_detected": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "branch": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "time": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "line.discount": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "member.recall": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "member.regex_recall": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "member.precision": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "line.non_product": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "pii.recall": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "pii.no_leak": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            }
+          },
+          "confidence": {
+            "tau": 0.9,
+            "autosave_precision": 1,
+            "autosave_coverage": 1,
+            "ece": 0.03,
+            "min_tau_precision_98": 0,
+            "isotonic_dev": [
+              {
+                "from": 0.97,
+                "p": 1,
+                "n": 1
+              },
+              {
+                "from": 0.97,
+                "p": 1,
+                "n": 1
+              },
+              {
+                "from": 0.97,
+                "p": 1,
+                "n": 1
+              },
+              {
+                "from": 0.97,
+                "p": 1,
+                "n": 1
+              }
+            ]
+          },
+          "cost": {
+            "mean_per_capture_usd": 0.0426,
+            "total_usd": 0.3408
+          },
+          "latency": {
+            "n": 3,
+            "p50_ms": 9,
+            "p95_ms": 9
+          },
+          "failures": {
+            "rate": 0,
+            "refusal": 0,
+            "schema": 0,
+            "timeout": 0,
+            "unsupported": 0,
+            "other": 0,
+            "n": 8
+          },
+          "pii_leaks": 0,
+          "mean_corrections": 0,
+          "by_store_category": {
+            "lokal": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "minimarket": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "supermarket": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            }
+          },
+          "by_condition": {
+            "blurry": {},
+            "faded": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "member": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "skewed": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            }
+          }
+        },
+        "price_label": {
+          "captures": 2,
+          "records": 4,
+          "metrics": {
+            "item.recall": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "price.normal": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "price": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "price.promo": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "promo_period": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "image_position": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "product.text": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "item.precision": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "perfect": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "price.member": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "member_program": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            }
+          },
+          "confidence": {
+            "tau": 0.9,
+            "autosave_precision": 1,
+            "autosave_coverage": 1,
+            "ece": 0.03,
+            "min_tau_precision_98": 0,
+            "isotonic_dev": null
+          },
+          "cost": {
+            "mean_per_capture_usd": 0.0238,
+            "total_usd": 0.0952
+          },
+          "latency": {
+            "n": 2,
+            "p50_ms": 8,
+            "p95_ms": 9
+          },
+          "failures": {
+            "rate": 0,
+            "refusal": 0,
+            "schema": 0,
+            "timeout": 0,
+            "unsupported": 0,
+            "other": 0,
+            "n": 4
+          },
+          "pii_leaks": 0,
+          "mean_corrections": null,
+          "by_store_category": {
+            "minimarket": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "price": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "supermarket": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "price": {
+                "rate": 1,
+                "n": 8,
+                "d": 8
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              }
+            }
+          },
+          "by_condition": {
+            "member": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "price": {
+                "rate": 1,
+                "n": 8,
+                "d": 8
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              }
+            },
+            "multi_label": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "price": {
+                "rate": 1,
+                "n": 8,
+                "d": 8
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              }
+            }
+          }
+        },
+        "marketplace": {
+          "captures": 2,
+          "records": 4,
+          "metrics": {
+            "item.recall": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "price.normal": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "price": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "product.text": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "listing_title": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "shipping_fee": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "item.precision": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "store": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "perfect": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            }
+          },
+          "confidence": {
+            "tau": 0.9,
+            "autosave_precision": 1,
+            "autosave_coverage": 1,
+            "ece": 0.03,
+            "min_tau_precision_98": 0,
+            "isotonic_dev": [
+              {
+                "from": 0.97,
+                "p": 1,
+                "n": 1
+              },
+              {
+                "from": 0.97,
+                "p": 1,
+                "n": 1
+              }
+            ]
+          },
+          "cost": {
+            "mean_per_capture_usd": 0.0238,
+            "total_usd": 0.0952
+          },
+          "latency": {
+            "n": 2,
+            "p50_ms": 12,
+            "p95_ms": 12
+          },
+          "failures": {
+            "rate": 0,
+            "refusal": 0,
+            "schema": 0,
+            "timeout": 0,
+            "unsupported": 0,
+            "other": 0,
+            "n": 4
+          },
+          "pii_leaks": 0,
+          "mean_corrections": null,
+          "by_store_category": {
+            "marketplace": {
+              "perfect": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "store": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "price": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              }
+            }
+          },
+          "by_condition": {
+            "low_confidence": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "price": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            }
+          }
+        }
+      },
+      "stability_diff": {
+        "rate": 0,
+        "n": 0,
+        "d": 35
+      }
+    },
+    "vision-sonnet": {
+      "model": "claude-sonnet-5-5",
+      "engine": "vision",
+      "kinds": {
+        "receipt": {
+          "captures": 4,
+          "records": 8,
+          "metrics": {
+            "store": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "date": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "total": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "payment": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "line.type": {
+              "rate": 1,
+              "n": 16,
+              "d": 16
+            },
+            "line.text": {
+              "rate": 1,
+              "n": 16,
+              "d": 16
+            },
+            "line.recall": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "line.amount": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "line.quantity": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "line.unit": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "line.precision": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "perfect": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "sum_equals_total": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "unreadable_detected": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "branch": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "time": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "line.discount": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "member.recall": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "member.regex_recall": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "member.precision": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "line.non_product": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "pii.recall": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "pii.no_leak": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            }
+          },
+          "confidence": {
+            "tau": 0.9,
+            "autosave_precision": 1,
+            "autosave_coverage": 1,
+            "ece": 0.07,
+            "min_tau_precision_98": 0,
+            "isotonic_dev": [
+              {
+                "from": 0.93,
+                "p": 1,
+                "n": 1
+              },
+              {
+                "from": 0.93,
+                "p": 1,
+                "n": 1
+              },
+              {
+                "from": 0.93,
+                "p": 1,
+                "n": 1
+              },
+              {
+                "from": 0.93,
+                "p": 1,
+                "n": 1
+              }
+            ]
+          },
+          "cost": {
+            "mean_per_capture_usd": 0.0213,
+            "total_usd": 0.1704
+          },
+          "latency": {
+            "n": 3,
+            "p50_ms": 8,
+            "p95_ms": 10
+          },
+          "failures": {
+            "rate": 0,
+            "refusal": 0,
+            "schema": 0,
+            "timeout": 0,
+            "unsupported": 0,
+            "other": 0,
+            "n": 8
+          },
+          "pii_leaks": 0,
+          "mean_corrections": 0,
+          "by_store_category": {
+            "lokal": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "minimarket": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "supermarket": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            }
+          },
+          "by_condition": {
+            "blurry": {},
+            "faded": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "member": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "skewed": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            }
+          }
+        },
+        "price_label": {
+          "captures": 2,
+          "records": 4,
+          "metrics": {
+            "item.recall": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "price.normal": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "price": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "price.promo": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "promo_period": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "image_position": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "product.text": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "item.precision": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "perfect": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "price.member": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "member_program": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            }
+          },
+          "confidence": {
+            "tau": 0.9,
+            "autosave_precision": 1,
+            "autosave_coverage": 1,
+            "ece": 0.07,
+            "min_tau_precision_98": 0,
+            "isotonic_dev": null
+          },
+          "cost": {
+            "mean_per_capture_usd": 0.0119,
+            "total_usd": 0.0476
+          },
+          "latency": {
+            "n": 2,
+            "p50_ms": 8,
+            "p95_ms": 10
+          },
+          "failures": {
+            "rate": 0,
+            "refusal": 0,
+            "schema": 0,
+            "timeout": 0,
+            "unsupported": 0,
+            "other": 0,
+            "n": 4
+          },
+          "pii_leaks": 0,
+          "mean_corrections": null,
+          "by_store_category": {
+            "minimarket": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "price": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "supermarket": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "price": {
+                "rate": 1,
+                "n": 8,
+                "d": 8
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              }
+            }
+          },
+          "by_condition": {
+            "member": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "price": {
+                "rate": 1,
+                "n": 8,
+                "d": 8
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              }
+            },
+            "multi_label": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "price": {
+                "rate": 1,
+                "n": 8,
+                "d": 8
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              }
+            }
+          }
+        },
+        "marketplace": {
+          "captures": 2,
+          "records": 4,
+          "metrics": {
+            "item.recall": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "price.normal": {
+              "rate": 0.5,
+              "n": 2,
+              "d": 4
+            },
+            "price": {
+              "rate": 0.5,
+              "n": 2,
+              "d": 4
+            },
+            "product.text": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "listing_title": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "shipping_fee": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "item.precision": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "store": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "perfect": {
+              "rate": 0.5,
+              "n": 2,
+              "d": 4
+            }
+          },
+          "confidence": {
+            "tau": 0.9,
+            "autosave_precision": 0.5,
+            "autosave_coverage": 1,
+            "ece": 0.43,
+            "min_tau_precision_98": null,
+            "isotonic_dev": [
+              {
+                "from": 0.93,
+                "p": 1,
+                "n": 1
+              },
+              {
+                "from": 0.93,
+                "p": 1,
+                "n": 1
+              }
+            ]
+          },
+          "cost": {
+            "mean_per_capture_usd": 0.0119,
+            "total_usd": 0.0476
+          },
+          "latency": {
+            "n": 2,
+            "p50_ms": 12,
+            "p95_ms": 12
+          },
+          "failures": {
+            "rate": 0,
+            "refusal": 0,
+            "schema": 0,
+            "timeout": 0,
+            "unsupported": 0,
+            "other": 0,
+            "n": 4
+          },
+          "pii_leaks": 0,
+          "mean_corrections": null,
+          "by_store_category": {
+            "marketplace": {
+              "perfect": {
+                "rate": 0.5,
+                "n": 2,
+                "d": 4
+              },
+              "store": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "price": {
+                "rate": 0.5,
+                "n": 2,
+                "d": 4
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              }
+            }
+          },
+          "by_condition": {
+            "low_confidence": {
+              "perfect": {
+                "rate": 0,
+                "n": 0,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "price": {
+                "rate": 0,
+                "n": 0,
+                "d": 2
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            }
+          }
+        }
+      },
+      "stability_diff": {
+        "rate": 0,
+        "n": 0,
+        "d": 35
+      }
+    },
+    "vision-haiku": {
+      "model": "claude-haiku-5-5",
+      "engine": "vision",
+      "kinds": {
+        "receipt": {
+          "captures": 4,
+          "records": 8,
+          "metrics": {
+            "store": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "date": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "total": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "payment": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "line.type": {
+              "rate": 1,
+              "n": 14,
+              "d": 14
+            },
+            "line.text": {
+              "rate": 1,
+              "n": 14,
+              "d": 14
+            },
+            "line.recall": {
+              "rate": 0.8333,
+              "n": 10,
+              "d": 12
+            },
+            "line.amount": {
+              "rate": 0.8333,
+              "n": 10,
+              "d": 12
+            },
+            "line.quantity": {
+              "rate": 0.8333,
+              "n": 10,
+              "d": 12
+            },
+            "line.unit": {
+              "rate": 0.8333,
+              "n": 10,
+              "d": 12
+            },
+            "line.precision": {
+              "rate": 1,
+              "n": 10,
+              "d": 10
+            },
+            "perfect": {
+              "rate": 0.6667,
+              "n": 4,
+              "d": 6
+            },
+            "sum_equals_total": {
+              "rate": 0.6667,
+              "n": 4,
+              "d": 6
+            },
+            "unreadable_detected": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "branch": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "time": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "line.discount": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "member.recall": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "member.regex_recall": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "member.precision": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "line.non_product": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "pii.recall": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "pii.no_leak": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            }
+          },
+          "confidence": {
+            "tau": 0.9,
+            "autosave_precision": null,
+            "autosave_coverage": 0,
+            "ece": 0.14,
+            "min_tau_precision_98": 0,
+            "isotonic_dev": [
+              {
+                "from": 0.86,
+                "p": 1,
+                "n": 1
+              },
+              {
+                "from": 0.86,
+                "p": 1,
+                "n": 1
+              }
+            ]
+          },
+          "cost": {
+            "mean_per_capture_usd": 0.001065,
+            "total_usd": 0.00852
+          },
+          "latency": {
+            "n": 3,
+            "p50_ms": 9,
+            "p95_ms": 11
+          },
+          "failures": {
+            "rate": 0,
+            "refusal": 0,
+            "schema": 0,
+            "timeout": 0,
+            "unsupported": 0,
+            "other": 0,
+            "n": 8
+          },
+          "pii_leaks": 0,
+          "mean_corrections": 0.33,
+          "by_store_category": {
+            "lokal": {
+              "perfect": {
+                "rate": 0,
+                "n": 0,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 0.5,
+                "n": 2,
+                "d": 4
+              },
+              "line.recall": {
+                "rate": 0.5,
+                "n": 2,
+                "d": 4
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "minimarket": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "supermarket": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            }
+          },
+          "by_condition": {
+            "blurry": {},
+            "faded": {
+              "perfect": {
+                "rate": 0,
+                "n": 0,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 0.5,
+                "n": 2,
+                "d": 4
+              },
+              "line.recall": {
+                "rate": 0.5,
+                "n": 2,
+                "d": 4
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "member": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "skewed": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            }
+          }
+        },
+        "price_label": {
+          "captures": 2,
+          "records": 4,
+          "metrics": {
+            "item.recall": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "price.normal": {
+              "rate": 0.6667,
+              "n": 4,
+              "d": 6
+            },
+            "price": {
+              "rate": 0.8333,
+              "n": 10,
+              "d": 12
+            },
+            "price.promo": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "promo_period": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "image_position": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "product.text": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "item.precision": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "perfect": {
+              "rate": 0.5,
+              "n": 2,
+              "d": 4
+            },
+            "price.member": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "member_program": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            }
+          },
+          "confidence": {
+            "tau": 0.9,
+            "autosave_precision": null,
+            "autosave_coverage": 0,
+            "ece": 0.1933,
+            "min_tau_precision_98": null,
+            "isotonic_dev": null
+          },
+          "cost": {
+            "mean_per_capture_usd": 0.000595,
+            "total_usd": 0.00238
+          },
+          "latency": {
+            "n": 2,
+            "p50_ms": 7,
+            "p95_ms": 12
+          },
+          "failures": {
+            "rate": 0,
+            "refusal": 0,
+            "schema": 0,
+            "timeout": 0,
+            "unsupported": 0,
+            "other": 0,
+            "n": 4
+          },
+          "pii_leaks": 0,
+          "mean_corrections": null,
+          "by_store_category": {
+            "minimarket": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "price": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "supermarket": {
+              "perfect": {
+                "rate": 0,
+                "n": 0,
+                "d": 2
+              },
+              "price": {
+                "rate": 0.75,
+                "n": 6,
+                "d": 8
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              }
+            }
+          },
+          "by_condition": {
+            "member": {
+              "perfect": {
+                "rate": 0,
+                "n": 0,
+                "d": 2
+              },
+              "price": {
+                "rate": 0.75,
+                "n": 6,
+                "d": 8
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              }
+            },
+            "multi_label": {
+              "perfect": {
+                "rate": 0,
+                "n": 0,
+                "d": 2
+              },
+              "price": {
+                "rate": 0.75,
+                "n": 6,
+                "d": 8
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              }
+            }
+          }
+        },
+        "marketplace": {
+          "captures": 2,
+          "records": 4,
+          "metrics": {
+            "item.recall": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "price.normal": {
+              "rate": 0.5,
+              "n": 2,
+              "d": 4
+            },
+            "price": {
+              "rate": 0.5,
+              "n": 2,
+              "d": 4
+            },
+            "product.text": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "listing_title": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "shipping_fee": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "item.precision": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "store": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "perfect": {
+              "rate": 0.5,
+              "n": 2,
+              "d": 4
+            }
+          },
+          "confidence": {
+            "tau": 0.9,
+            "autosave_precision": null,
+            "autosave_coverage": 0,
+            "ece": 0.36,
+            "min_tau_precision_98": null,
+            "isotonic_dev": [
+              {
+                "from": 0.86,
+                "p": 0,
+                "n": 1
+              },
+              {
+                "from": 0.86,
+                "p": 0,
+                "n": 1
+              }
+            ]
+          },
+          "cost": {
+            "mean_per_capture_usd": 0.000595,
+            "total_usd": 0.00238
+          },
+          "latency": {
+            "n": 2,
+            "p50_ms": 12,
+            "p95_ms": 14
+          },
+          "failures": {
+            "rate": 0,
+            "refusal": 0,
+            "schema": 0,
+            "timeout": 0,
+            "unsupported": 0,
+            "other": 0,
+            "n": 4
+          },
+          "pii_leaks": 0,
+          "mean_corrections": null,
+          "by_store_category": {
+            "marketplace": {
+              "perfect": {
+                "rate": 0.5,
+                "n": 2,
+                "d": 4
+              },
+              "store": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "price": {
+                "rate": 0.5,
+                "n": 2,
+                "d": 4
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              }
+            }
+          },
+          "by_condition": {
+            "low_confidence": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "price": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            }
+          }
+        }
+      },
+      "stability_diff": {
+        "rate": 0,
+        "n": 0,
+        "d": 34
+      }
+    },
+    "ocr-gcv+opus-low": {
+      "model": "claude-opus-5-5",
+      "engine": "ocr",
+      "kinds": {
+        "receipt": {
+          "captures": 4,
+          "records": 8,
+          "metrics": {
+            "store": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "date": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "total": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "payment": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "line.type": {
+              "rate": 1,
+              "n": 16,
+              "d": 16
+            },
+            "line.text": {
+              "rate": 1,
+              "n": 16,
+              "d": 16
+            },
+            "line.recall": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "line.amount": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "line.quantity": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "line.unit": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "line.precision": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "perfect": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "sum_equals_total": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "unreadable_detected": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "branch": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "time": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "line.discount": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "member.recall": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "member.regex_recall": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "member.precision": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "line.non_product": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "pii.recall": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "pii.no_leak": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            }
+          },
+          "confidence": {
+            "tau": 0.9,
+            "autosave_precision": 1,
+            "autosave_coverage": 1,
+            "ece": 0.1,
+            "min_tau_precision_98": 0,
+            "isotonic_dev": [
+              {
+                "from": 0.9,
+                "p": 1,
+                "n": 1
+              },
+              {
+                "from": 0.9,
+                "p": 1,
+                "n": 1
+              },
+              {
+                "from": 0.9,
+                "p": 1,
+                "n": 1
+              },
+              {
+                "from": 0.9,
+                "p": 1,
+                "n": 1
+              }
+            ]
+          },
+          "cost": {
+            "mean_per_capture_usd": 0.035,
+            "total_usd": 0.28
+          },
+          "latency": {
+            "n": 3,
+            "p50_ms": 10,
+            "p95_ms": 10
+          },
+          "failures": {
+            "rate": 0,
+            "refusal": 0,
+            "schema": 0,
+            "timeout": 0,
+            "unsupported": 0,
+            "other": 0,
+            "n": 8
+          },
+          "pii_leaks": 0,
+          "mean_corrections": 0,
+          "by_store_category": {
+            "lokal": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "minimarket": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "supermarket": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            }
+          },
+          "by_condition": {
+            "blurry": {},
+            "faded": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "member": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "skewed": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "line.amount": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "line.recall": {
+                "rate": 1,
+                "n": 6,
+                "d": 6
+              },
+              "date": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "total": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            }
+          }
+        },
+        "price_label": {
+          "captures": 2,
+          "records": 4,
+          "metrics": {
+            "item.recall": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "price.normal": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "price": {
+              "rate": 1,
+              "n": 12,
+              "d": 12
+            },
+            "price.promo": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "promo_period": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "image_position": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "product.text": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "item.precision": {
+              "rate": 1,
+              "n": 6,
+              "d": 6
+            },
+            "perfect": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "price.member": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            },
+            "member_program": {
+              "rate": 1,
+              "n": 2,
+              "d": 2
+            }
+          },
+          "confidence": {
+            "tau": 0.9,
+            "autosave_precision": 1,
+            "autosave_coverage": 1,
+            "ece": 0.1,
+            "min_tau_precision_98": 0,
+            "isotonic_dev": null
+          },
+          "cost": {
+            "mean_per_capture_usd": 0.0215,
+            "total_usd": 0.086
+          },
+          "latency": {
+            "n": 2,
+            "p50_ms": 9,
+            "p95_ms": 10
+          },
+          "failures": {
+            "rate": 0,
+            "refusal": 0,
+            "schema": 0,
+            "timeout": 0,
+            "unsupported": 0,
+            "other": 0,
+            "n": 4
+          },
+          "pii_leaks": 0,
+          "mean_corrections": null,
+          "by_store_category": {
+            "minimarket": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "price": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            },
+            "supermarket": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "price": {
+                "rate": 1,
+                "n": 8,
+                "d": 8
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              }
+            }
+          },
+          "by_condition": {
+            "member": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "price": {
+                "rate": 1,
+                "n": 8,
+                "d": 8
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              }
+            },
+            "multi_label": {
+              "perfect": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "price": {
+                "rate": 1,
+                "n": 8,
+                "d": 8
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              }
+            }
+          }
+        },
+        "marketplace": {
+          "captures": 2,
+          "records": 4,
+          "metrics": {
+            "item.recall": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "price.normal": {
+              "rate": 0.5,
+              "n": 2,
+              "d": 4
+            },
+            "price": {
+              "rate": 0.5,
+              "n": 2,
+              "d": 4
+            },
+            "product.text": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "listing_title": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "shipping_fee": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "item.precision": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "store": {
+              "rate": 1,
+              "n": 4,
+              "d": 4
+            },
+            "perfect": {
+              "rate": 0.5,
+              "n": 2,
+              "d": 4
+            }
+          },
+          "confidence": {
+            "tau": 0.9,
+            "autosave_precision": 0.5,
+            "autosave_coverage": 1,
+            "ece": 0.4,
+            "min_tau_precision_98": null,
+            "isotonic_dev": [
+              {
+                "from": 0.9,
+                "p": 1,
+                "n": 1
+              },
+              {
+                "from": 0.9,
+                "p": 1,
+                "n": 1
+              }
+            ]
+          },
+          "cost": {
+            "mean_per_capture_usd": 0.0215,
+            "total_usd": 0.086
+          },
+          "latency": {
+            "n": 2,
+            "p50_ms": 12,
+            "p95_ms": 13
+          },
+          "failures": {
+            "rate": 0,
+            "refusal": 0,
+            "schema": 0,
+            "timeout": 0,
+            "unsupported": 0,
+            "other": 0,
+            "n": 4
+          },
+          "pii_leaks": 0,
+          "mean_corrections": null,
+          "by_store_category": {
+            "marketplace": {
+              "perfect": {
+                "rate": 0.5,
+                "n": 2,
+                "d": 4
+              },
+              "store": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              },
+              "price": {
+                "rate": 0.5,
+                "n": 2,
+                "d": 4
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 4,
+                "d": 4
+              }
+            }
+          },
+          "by_condition": {
+            "low_confidence": {
+              "perfect": {
+                "rate": 0,
+                "n": 0,
+                "d": 2
+              },
+              "store": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              },
+              "price": {
+                "rate": 0,
+                "n": 0,
+                "d": 2
+              },
+              "item.recall": {
+                "rate": 1,
+                "n": 2,
+                "d": 2
+              }
+            }
+          }
+        }
+      },
+      "stability_diff": {
+        "rate": 0,
+        "n": 0,
+        "d": 35
+      }
+    }
+  },
+  "decision": {
+    "receipt": {
+      "checks": {
+        "vision-opus-low": {
+          "autosave_precision": {
+            "label": "presisi auto-save @τ",
+            "value": 1,
+            "min": 0.98,
+            "pass": true
+          },
+          "autosave_coverage": {
+            "label": "coverage @τ",
+            "value": 1,
+            "min": 0.6,
+            "pass": true
+          },
+          "line.amount": {
+            "label": "nominal baris produk",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "line.recall": {
+            "label": "recall baris produk",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "date": {
+            "label": "tanggal",
+            "value": 1,
+            "min": 0.98,
+            "pass": true
+          },
+          "total": {
+            "label": "total",
+            "value": 1,
+            "min": 0.98,
+            "pass": true
+          },
+          "store": {
+            "label": "toko",
+            "value": 1,
+            "min": 0.95,
+            "pass": true
+          },
+          "pii_leaks": {
+            "label": "kebocoran PII",
+            "value": 0,
+            "max": 0,
+            "pass": true
+          },
+          "failure_rate": {
+            "label": "kegagalan (refusal + skema + timeout)",
+            "value": 0,
+            "max": 0.02,
+            "pass": true
+          }
+        },
+        "vision-opus-medium": {
+          "autosave_precision": {
+            "label": "presisi auto-save @τ",
+            "value": 1,
+            "min": 0.98,
+            "pass": true
+          },
+          "autosave_coverage": {
+            "label": "coverage @τ",
+            "value": 1,
+            "min": 0.6,
+            "pass": true
+          },
+          "line.amount": {
+            "label": "nominal baris produk",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "line.recall": {
+            "label": "recall baris produk",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "date": {
+            "label": "tanggal",
+            "value": 1,
+            "min": 0.98,
+            "pass": true
+          },
+          "total": {
+            "label": "total",
+            "value": 1,
+            "min": 0.98,
+            "pass": true
+          },
+          "store": {
+            "label": "toko",
+            "value": 1,
+            "min": 0.95,
+            "pass": true
+          },
+          "pii_leaks": {
+            "label": "kebocoran PII",
+            "value": 0,
+            "max": 0,
+            "pass": true
+          },
+          "failure_rate": {
+            "label": "kegagalan (refusal + skema + timeout)",
+            "value": 0,
+            "max": 0.02,
+            "pass": true
+          }
+        },
+        "vision-sonnet": {
+          "autosave_precision": {
+            "label": "presisi auto-save @τ",
+            "value": 1,
+            "min": 0.98,
+            "pass": true
+          },
+          "autosave_coverage": {
+            "label": "coverage @τ",
+            "value": 1,
+            "min": 0.6,
+            "pass": true
+          },
+          "line.amount": {
+            "label": "nominal baris produk",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "line.recall": {
+            "label": "recall baris produk",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "date": {
+            "label": "tanggal",
+            "value": 1,
+            "min": 0.98,
+            "pass": true
+          },
+          "total": {
+            "label": "total",
+            "value": 1,
+            "min": 0.98,
+            "pass": true
+          },
+          "store": {
+            "label": "toko",
+            "value": 1,
+            "min": 0.95,
+            "pass": true
+          },
+          "pii_leaks": {
+            "label": "kebocoran PII",
+            "value": 0,
+            "max": 0,
+            "pass": true
+          },
+          "failure_rate": {
+            "label": "kegagalan (refusal + skema + timeout)",
+            "value": 0,
+            "max": 0.02,
+            "pass": true
+          }
+        },
+        "vision-haiku": {
+          "autosave_precision": {
+            "label": "presisi auto-save @τ",
+            "value": null,
+            "min": 0.98,
+            "pass": false
+          },
+          "autosave_coverage": {
+            "label": "coverage @τ",
+            "value": 0,
+            "min": 0.6,
+            "pass": false
+          },
+          "line.amount": {
+            "label": "nominal baris produk",
+            "value": 0.8333,
+            "min": 0.97,
+            "pass": false
+          },
+          "line.recall": {
+            "label": "recall baris produk",
+            "value": 0.8333,
+            "min": 0.97,
+            "pass": false
+          },
+          "date": {
+            "label": "tanggal",
+            "value": 1,
+            "min": 0.98,
+            "pass": true
+          },
+          "total": {
+            "label": "total",
+            "value": 1,
+            "min": 0.98,
+            "pass": true
+          },
+          "store": {
+            "label": "toko",
+            "value": 1,
+            "min": 0.95,
+            "pass": true
+          },
+          "pii_leaks": {
+            "label": "kebocoran PII",
+            "value": 0,
+            "max": 0,
+            "pass": true
+          },
+          "failure_rate": {
+            "label": "kegagalan (refusal + skema + timeout)",
+            "value": 0,
+            "max": 0.02,
+            "pass": true
+          }
+        },
+        "ocr-gcv+opus-low": {
+          "autosave_precision": {
+            "label": "presisi auto-save @τ",
+            "value": 1,
+            "min": 0.98,
+            "pass": true
+          },
+          "autosave_coverage": {
+            "label": "coverage @τ",
+            "value": 1,
+            "min": 0.6,
+            "pass": true
+          },
+          "line.amount": {
+            "label": "nominal baris produk",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "line.recall": {
+            "label": "recall baris produk",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "date": {
+            "label": "tanggal",
+            "value": 1,
+            "min": 0.98,
+            "pass": true
+          },
+          "total": {
+            "label": "total",
+            "value": 1,
+            "min": 0.98,
+            "pass": true
+          },
+          "store": {
+            "label": "toko",
+            "value": 1,
+            "min": 0.95,
+            "pass": true
+          },
+          "pii_leaks": {
+            "label": "kebocoran PII",
+            "value": 0,
+            "max": 0,
+            "pass": true
+          },
+          "failure_rate": {
+            "label": "kegagalan (refusal + skema + timeout)",
+            "value": 0,
+            "max": 0.02,
+            "pass": true
+          }
+        }
+      },
+      "passing": [
+        "vision-opus-low",
+        "vision-opus-medium",
+        "vision-sonnet",
+        "ocr-gcv+opus-low"
+      ],
+      "chosen": "vision-sonnet",
+      "reason": "lolos semua batas dan biaya per capture terendah (§4.8 no. 2)",
+      "risk": null
+    },
+    "price_label": {
+      "checks": {
+        "vision-opus-low": {
+          "autosave_precision": {
+            "label": "presisi auto-save @τ",
+            "value": 1,
+            "min": 0.98,
+            "pass": true
+          },
+          "autosave_coverage": {
+            "label": "coverage @τ",
+            "value": 1,
+            "min": 0.6,
+            "pass": true
+          },
+          "price": {
+            "label": "harga",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "item.recall": {
+            "label": "recall item",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "failure_rate": {
+            "label": "kegagalan (refusal + skema + timeout)",
+            "value": 0,
+            "max": 0.02,
+            "pass": true
+          }
+        },
+        "vision-opus-medium": {
+          "autosave_precision": {
+            "label": "presisi auto-save @τ",
+            "value": 1,
+            "min": 0.98,
+            "pass": true
+          },
+          "autosave_coverage": {
+            "label": "coverage @τ",
+            "value": 1,
+            "min": 0.6,
+            "pass": true
+          },
+          "price": {
+            "label": "harga",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "item.recall": {
+            "label": "recall item",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "failure_rate": {
+            "label": "kegagalan (refusal + skema + timeout)",
+            "value": 0,
+            "max": 0.02,
+            "pass": true
+          }
+        },
+        "vision-sonnet": {
+          "autosave_precision": {
+            "label": "presisi auto-save @τ",
+            "value": 1,
+            "min": 0.98,
+            "pass": true
+          },
+          "autosave_coverage": {
+            "label": "coverage @τ",
+            "value": 1,
+            "min": 0.6,
+            "pass": true
+          },
+          "price": {
+            "label": "harga",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "item.recall": {
+            "label": "recall item",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "failure_rate": {
+            "label": "kegagalan (refusal + skema + timeout)",
+            "value": 0,
+            "max": 0.02,
+            "pass": true
+          }
+        },
+        "vision-haiku": {
+          "autosave_precision": {
+            "label": "presisi auto-save @τ",
+            "value": null,
+            "min": 0.98,
+            "pass": false
+          },
+          "autosave_coverage": {
+            "label": "coverage @τ",
+            "value": 0,
+            "min": 0.6,
+            "pass": false
+          },
+          "price": {
+            "label": "harga",
+            "value": 0.8333,
+            "min": 0.97,
+            "pass": false
+          },
+          "item.recall": {
+            "label": "recall item",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "failure_rate": {
+            "label": "kegagalan (refusal + skema + timeout)",
+            "value": 0,
+            "max": 0.02,
+            "pass": true
+          }
+        },
+        "ocr-gcv+opus-low": {
+          "autosave_precision": {
+            "label": "presisi auto-save @τ",
+            "value": 1,
+            "min": 0.98,
+            "pass": true
+          },
+          "autosave_coverage": {
+            "label": "coverage @τ",
+            "value": 1,
+            "min": 0.6,
+            "pass": true
+          },
+          "price": {
+            "label": "harga",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "item.recall": {
+            "label": "recall item",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "failure_rate": {
+            "label": "kegagalan (refusal + skema + timeout)",
+            "value": 0,
+            "max": 0.02,
+            "pass": true
+          }
+        }
+      },
+      "passing": [
+        "vision-opus-low",
+        "vision-opus-medium",
+        "vision-sonnet",
+        "ocr-gcv+opus-low"
+      ],
+      "chosen": "vision-sonnet",
+      "reason": "lolos semua batas dan biaya per capture terendah (§4.8 no. 2)",
+      "risk": null
+    },
+    "marketplace": {
+      "checks": {
+        "vision-opus-low": {
+          "autosave_precision": {
+            "label": "presisi auto-save @τ",
+            "value": 1,
+            "min": 0.98,
+            "pass": true
+          },
+          "autosave_coverage": {
+            "label": "coverage @τ",
+            "value": 1,
+            "min": 0.6,
+            "pass": true
+          },
+          "price": {
+            "label": "harga",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "item.recall": {
+            "label": "recall item",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "failure_rate": {
+            "label": "kegagalan (refusal + skema + timeout)",
+            "value": 0,
+            "max": 0.02,
+            "pass": true
+          }
+        },
+        "vision-opus-medium": {
+          "autosave_precision": {
+            "label": "presisi auto-save @τ",
+            "value": 1,
+            "min": 0.98,
+            "pass": true
+          },
+          "autosave_coverage": {
+            "label": "coverage @τ",
+            "value": 1,
+            "min": 0.6,
+            "pass": true
+          },
+          "price": {
+            "label": "harga",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "item.recall": {
+            "label": "recall item",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "failure_rate": {
+            "label": "kegagalan (refusal + skema + timeout)",
+            "value": 0,
+            "max": 0.02,
+            "pass": true
+          }
+        },
+        "vision-sonnet": {
+          "autosave_precision": {
+            "label": "presisi auto-save @τ",
+            "value": 0.5,
+            "min": 0.98,
+            "pass": false
+          },
+          "autosave_coverage": {
+            "label": "coverage @τ",
+            "value": 1,
+            "min": 0.6,
+            "pass": true
+          },
+          "price": {
+            "label": "harga",
+            "value": 0.5,
+            "min": 0.97,
+            "pass": false
+          },
+          "item.recall": {
+            "label": "recall item",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "failure_rate": {
+            "label": "kegagalan (refusal + skema + timeout)",
+            "value": 0,
+            "max": 0.02,
+            "pass": true
+          }
+        },
+        "vision-haiku": {
+          "autosave_precision": {
+            "label": "presisi auto-save @τ",
+            "value": null,
+            "min": 0.98,
+            "pass": false
+          },
+          "autosave_coverage": {
+            "label": "coverage @τ",
+            "value": 0,
+            "min": 0.6,
+            "pass": false
+          },
+          "price": {
+            "label": "harga",
+            "value": 0.5,
+            "min": 0.97,
+            "pass": false
+          },
+          "item.recall": {
+            "label": "recall item",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "failure_rate": {
+            "label": "kegagalan (refusal + skema + timeout)",
+            "value": 0,
+            "max": 0.02,
+            "pass": true
+          }
+        },
+        "ocr-gcv+opus-low": {
+          "autosave_precision": {
+            "label": "presisi auto-save @τ",
+            "value": 0.5,
+            "min": 0.98,
+            "pass": false
+          },
+          "autosave_coverage": {
+            "label": "coverage @τ",
+            "value": 1,
+            "min": 0.6,
+            "pass": true
+          },
+          "price": {
+            "label": "harga",
+            "value": 0.5,
+            "min": 0.97,
+            "pass": false
+          },
+          "item.recall": {
+            "label": "recall item",
+            "value": 1,
+            "min": 0.97,
+            "pass": true
+          },
+          "failure_rate": {
+            "label": "kegagalan (refusal + skema + timeout)",
+            "value": 0,
+            "max": 0.02,
+            "pass": true
+          }
+        }
+      },
+      "passing": [
+        "vision-opus-low",
+        "vision-opus-medium"
+      ],
+      "chosen": "vision-opus-low",
+      "reason": "lolos semua batas dan biaya per capture terendah (§4.8 no. 2)",
+      "risk": null
+    }
+  },
+  "q34_member_regex": {
+    "recall": 1,
+    "n": 2,
+    "recommendation": "Regex D-74 cukup (recall ≥ 95 %): kolom receipt_line.is_member_discount tidak dibuat (Q-110)."
+  },
+  "q122_streaming": {
+    "p95_receipt_ms": 10,
+    "arm": "vision-sonnet",
+    "recommendation": "p95 struk ≤ 60 dtk: tetap tanpa streaming (D-93)."
+  },
+  "prefill_bias": {
+    "arm": "vision-opus-medium",
+    "error_blind": 0,
+    "error_prefilled": null,
+    "diff_points": null,
+    "recommendation": "Belum bisa diukur (butuh capture tanpa pra-isi dan dengan pra-isi)."
+  },
+  "spend_total_usd": null
+}

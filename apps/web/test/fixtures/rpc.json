@@ -5772,7 +5772,9 @@
           "70000000-0000-0000-0000-000000000500",
           "70000000-0000-0000-0000-000000000200",
           "70000000-0000-0000-0000-000000001000"
-        ]
+        ],
+        "read_member_price": null,
+        "read_member_program_name": null
       }
     ],
     "items_label": [
@@ -5899,7 +5901,9 @@
           "70000000-0000-0000-0000-000000000200",
           "70000000-0000-0000-0000-000000000500",
           "70000000-0000-0000-0000-000000001000"
-        ]
+        ],
+        "read_member_price": null,
+        "read_member_program_name": null
       },
       {
         "id": "1847acf4-932d-4fd2-bfcf-dc04ad9f387e",
@@ -5987,7 +5991,9 @@
         "member_program_id": null,
         "promo_valid_until": null,
         "suggested_product_id": "70000000-0000-0000-0000-000000000310",
-        "candidate_product_ids": ["70000000-0000-0000-0000-000000000310"]
+        "candidate_product_ids": ["70000000-0000-0000-0000-000000000310"],
+        "read_member_price": 21000,
+        "read_member_program_name": "AEON Member"
       }
     ],
     "capture_label": {
@@ -6052,9 +6058,7 @@
     },
     "update_item_member_only": {
       "id": "1847acf4-932d-4fd2-bfcf-dc04ad9f387e",
-      "extra": {
-        "member_note": "AEON Member 21000"
-      },
+      "extra": {},
       "region": {
         "h": 0.3,
         "w": 0.4,
@@ -6067,7 +6071,7 @@
         "unit_price": null,
         "price_basis": null,
         "effective_price": null,
-        "member_eligible": null
+        "member_eligible": false
       },
       "currency": "IDR",
       "position": 2,
@@ -6122,7 +6126,7 @@
       "promo_price": null,
       "seller_name": null,
       "household_id": "6f1b8230-4de7-48c2-b154-dd995268eed6",
-      "member_price": null,
+      "member_price": 21000,
       "normal_price": null,
       "promo_min_qty": null,
       "image_position": 1,
@@ -6133,16 +6137,16 @@
       "match_confidence": 0.706,
       "promo_valid_from": null,
       "transaction_date": "2026-10-23",
-      "member_program_id": null,
+      "member_program_id": "40000000-0000-0000-0000-000000000001",
       "promo_valid_until": null,
       "suggested_product_id": "70000000-0000-0000-0000-000000000310",
-      "candidate_product_ids": ["70000000-0000-0000-0000-000000000310"]
+      "candidate_product_ids": ["70000000-0000-0000-0000-000000000310"],
+      "read_member_price": 21000,
+      "read_member_program_name": "AEON Member"
     },
     "update_item_member_price": {
       "id": "1847acf4-932d-4fd2-bfcf-dc04ad9f387e",
-      "extra": {
-        "member_note": "AEON Member 21000"
-      },
+      "extra": {},
       "region": {
         "h": 0.3,
         "w": 0.4,
@@ -6224,7 +6228,9 @@
       "member_program_id": "40000000-0000-0000-0000-000000000001",
       "promo_valid_until": null,
       "suggested_product_id": "70000000-0000-0000-0000-000000000310",
-      "candidate_product_ids": ["70000000-0000-0000-0000-000000000310"]
+      "candidate_product_ids": ["70000000-0000-0000-0000-000000000310"],
+      "read_member_price": 21000,
+      "read_member_program_name": "AEON Member"
     },
     "confirm_items_no_price": {
       "error": {
@@ -6357,7 +6363,9 @@
         "70000000-0000-0000-0000-000000000200",
         "70000000-0000-0000-0000-000000000500",
         "70000000-0000-0000-0000-000000001000"
-      ]
+      ],
+      "read_member_price": null,
+      "read_member_program_name": null
     },
     "items_label_updated": [
       {
@@ -6483,13 +6491,13 @@
           "70000000-0000-0000-0000-000000000200",
           "70000000-0000-0000-0000-000000000500",
           "70000000-0000-0000-0000-000000001000"
-        ]
+        ],
+        "read_member_price": null,
+        "read_member_program_name": null
       },
       {
         "id": "1847acf4-932d-4fd2-bfcf-dc04ad9f387e",
-        "extra": {
-          "member_note": "AEON Member 21000"
-        },
+        "extra": {},
         "region": {
           "h": 0.3,
           "w": 0.4,
@@ -6571,7 +6579,9 @@
         "member_program_id": "40000000-0000-0000-0000-000000000001",
         "promo_valid_until": null,
         "suggested_product_id": "70000000-0000-0000-0000-000000000310",
-        "candidate_product_ids": ["70000000-0000-0000-0000-000000000310"]
+        "candidate_product_ids": ["70000000-0000-0000-0000-000000000310"],
+        "read_member_price": 21000,
+        "read_member_program_name": "AEON Member"
       }
     ],
     "confirm_items_ok": {
@@ -6705,7 +6715,9 @@
           "70000000-0000-0000-0000-000000000500",
           "70000000-0000-0000-0000-000000000200",
           "70000000-0000-0000-0000-000000001000"
-        ]
+        ],
+        "read_member_price": null,
+        "read_member_program_name": null
       }
     ],
     "capture_shopee": {
@@ -7148,7 +7160,9 @@
           "price_basis": null,
           "vs_best_pct": null,
           "vs_last_pct": null,
-          "effective_price": null
+          "effective_price": null,
+          "item_status": null,
+          "thumbnail_path": "7afe03ed-ad75-42aa-9cfa-5a3bdf73ef26/34a73895-3f80-42c1-b649-da74b9791fd6/1.jpg"
         }
       ],
       "session": {
@@ -7180,7 +7194,9 @@
           "price_basis": null,
           "vs_best_pct": null,
           "vs_last_pct": null,
-          "effective_price": null
+          "effective_price": null,
+          "item_status": null,
+          "thumbnail_path": "7afe03ed-ad75-42aa-9cfa-5a3bdf73ef26/5dffb0d1-b8f9-4431-b313-de8b3573b555/1.jpg"
         },
         {
           "status": "failed",
@@ -7190,7 +7206,9 @@
           "price_basis": null,
           "vs_best_pct": null,
           "vs_last_pct": null,
-          "effective_price": null
+          "effective_price": null,
+          "item_status": null,
+          "thumbnail_path": "7afe03ed-ad75-42aa-9cfa-5a3bdf73ef26/0dd67041-faf7-4659-8587-000e03630886/1.jpg"
         },
         {
           "status": "done",
@@ -7216,7 +7234,9 @@
           "price_basis": "promo",
           "vs_best_pct": -2.8,
           "vs_last_pct": -10.3,
-          "effective_price": 17500
+          "effective_price": 17500,
+          "item_status": "accepted",
+          "thumbnail_path": "7afe03ed-ad75-42aa-9cfa-5a3bdf73ef26/4d9dadbd-f236-4b1c-9a06-7bfacc686d45/1.jpg"
         },
         {
           "status": "done",
@@ -7242,7 +7262,9 @@
           "price_basis": "normal",
           "vs_best_pct": null,
           "vs_last_pct": -28.1,
-          "effective_price": 23000
+          "effective_price": 23000,
+          "item_status": "accepted",
+          "thumbnail_path": "7afe03ed-ad75-42aa-9cfa-5a3bdf73ef26/4d9dadbd-f236-4b1c-9a06-7bfacc686d45/1.jpg"
         },
         {
           "status": "needs_confirmation",
@@ -7268,7 +7290,9 @@
           "price_basis": "promo",
           "vs_best_pct": -2.8,
           "vs_last_pct": -10.3,
-          "effective_price": 17500
+          "effective_price": 17500,
+          "item_status": "accepted",
+          "thumbnail_path": "7afe03ed-ad75-42aa-9cfa-5a3bdf73ef26/34a73895-3f80-42c1-b649-da74b9791fd6/1.jpg"
         },
         {
           "status": "needs_confirmation",
@@ -7294,7 +7318,9 @@
           "price_basis": "normal",
           "vs_best_pct": null,
           "vs_last_pct": -28.1,
-          "effective_price": 23000
+          "effective_price": 23000,
+          "item_status": "pending",
+          "thumbnail_path": "7afe03ed-ad75-42aa-9cfa-5a3bdf73ef26/34a73895-3f80-42c1-b649-da74b9791fd6/1.jpg"
         }
       ],
       "session": {
@@ -7326,7 +7352,9 @@
           "price_basis": null,
           "vs_best_pct": null,
           "vs_last_pct": null,
-          "effective_price": null
+          "effective_price": null,
+          "item_status": null,
+          "thumbnail_path": "7afe03ed-ad75-42aa-9cfa-5a3bdf73ef26/5dffb0d1-b8f9-4431-b313-de8b3573b555/1.jpg"
         },
         {
           "status": "failed",
@@ -7336,7 +7364,9 @@
           "price_basis": null,
           "vs_best_pct": null,
           "vs_last_pct": null,
-          "effective_price": null
+          "effective_price": null,
+          "item_status": null,
+          "thumbnail_path": "7afe03ed-ad75-42aa-9cfa-5a3bdf73ef26/0dd67041-faf7-4659-8587-000e03630886/1.jpg"
         },
         {
           "status": "done",
@@ -7360,9 +7390,11 @@
           },
           "capture_id": "4d9dadbd-f236-4b1c-9a06-7bfacc686d45",
           "price_basis": "promo",
-          "vs_best_pct": 0,
+          "vs_best_pct": -2.8,
           "vs_last_pct": 0,
-          "effective_price": 17500
+          "effective_price": 17500,
+          "item_status": "accepted",
+          "thumbnail_path": "7afe03ed-ad75-42aa-9cfa-5a3bdf73ef26/4d9dadbd-f236-4b1c-9a06-7bfacc686d45/1.jpg"
         },
         {
           "status": "done",
@@ -7386,9 +7418,11 @@
           },
           "capture_id": "4d9dadbd-f236-4b1c-9a06-7bfacc686d45",
           "price_basis": "normal",
-          "vs_best_pct": 0,
+          "vs_best_pct": null,
           "vs_last_pct": 0,
-          "effective_price": 23000
+          "effective_price": 23000,
+          "item_status": "accepted",
+          "thumbnail_path": "7afe03ed-ad75-42aa-9cfa-5a3bdf73ef26/4d9dadbd-f236-4b1c-9a06-7bfacc686d45/1.jpg"
         },
         {
           "status": "needs_confirmation",
@@ -7412,9 +7446,11 @@
           },
           "capture_id": "34a73895-3f80-42c1-b649-da74b9791fd6",
           "price_basis": "promo",
-          "vs_best_pct": 0,
+          "vs_best_pct": -2.8,
           "vs_last_pct": 0,
-          "effective_price": 17500
+          "effective_price": 17500,
+          "item_status": "accepted",
+          "thumbnail_path": "7afe03ed-ad75-42aa-9cfa-5a3bdf73ef26/34a73895-3f80-42c1-b649-da74b9791fd6/1.jpg"
         },
         {
           "status": "needs_confirmation",
@@ -7438,9 +7474,11 @@
           },
           "capture_id": "34a73895-3f80-42c1-b649-da74b9791fd6",
           "price_basis": "normal",
-          "vs_best_pct": 0,
+          "vs_best_pct": null,
           "vs_last_pct": 0,
-          "effective_price": 23000
+          "effective_price": 23000,
+          "item_status": "pending",
+          "thumbnail_path": "7afe03ed-ad75-42aa-9cfa-5a3bdf73ef26/34a73895-3f80-42c1-b649-da74b9791fd6/1.jpg"
         }
       ],
       "session": {
@@ -7472,7 +7510,9 @@
           "price_basis": null,
           "vs_best_pct": null,
           "vs_last_pct": null,
-          "effective_price": null
+          "effective_price": null,
+          "item_status": null,
+          "thumbnail_path": "7afe03ed-ad75-42aa-9cfa-5a3bdf73ef26/5dffb0d1-b8f9-4431-b313-de8b3573b555/1.jpg"
         },
         {
           "status": "failed",
@@ -7482,7 +7522,9 @@
           "price_basis": null,
           "vs_best_pct": null,
           "vs_last_pct": null,
-          "effective_price": null
+          "effective_price": null,
+          "item_status": null,
+          "thumbnail_path": "7afe03ed-ad75-42aa-9cfa-5a3bdf73ef26/0dd67041-faf7-4659-8587-000e03630886/1.jpg"
         },
         {
           "status": "done",
@@ -7506,9 +7548,11 @@
           },
           "capture_id": "4d9dadbd-f236-4b1c-9a06-7bfacc686d45",
           "price_basis": "promo",
-          "vs_best_pct": 0,
+          "vs_best_pct": -2.8,
           "vs_last_pct": 0,
-          "effective_price": 17500
+          "effective_price": 17500,
+          "item_status": "accepted",
+          "thumbnail_path": "7afe03ed-ad75-42aa-9cfa-5a3bdf73ef26/4d9dadbd-f236-4b1c-9a06-7bfacc686d45/1.jpg"
         },
         {
           "status": "done",
@@ -7532,9 +7576,11 @@
           },
           "capture_id": "4d9dadbd-f236-4b1c-9a06-7bfacc686d45",
           "price_basis": "normal",
-          "vs_best_pct": 0,
+          "vs_best_pct": null,
           "vs_last_pct": 0,
-          "effective_price": 23000
+          "effective_price": 23000,
+          "item_status": "accepted",
+          "thumbnail_path": "7afe03ed-ad75-42aa-9cfa-5a3bdf73ef26/4d9dadbd-f236-4b1c-9a06-7bfacc686d45/1.jpg"
         },
         {
           "status": "needs_confirmation",
@@ -7558,9 +7604,11 @@
           },
           "capture_id": "34a73895-3f80-42c1-b649-da74b9791fd6",
           "price_basis": "promo",
-          "vs_best_pct": 0,
+          "vs_best_pct": -2.8,
           "vs_last_pct": 0,
-          "effective_price": 17500
+          "effective_price": 17500,
+          "item_status": "accepted",
+          "thumbnail_path": "7afe03ed-ad75-42aa-9cfa-5a3bdf73ef26/34a73895-3f80-42c1-b649-da74b9791fd6/1.jpg"
         },
         {
           "status": "needs_confirmation",
@@ -7584,9 +7632,11 @@
           },
           "capture_id": "34a73895-3f80-42c1-b649-da74b9791fd6",
           "price_basis": "normal",
-          "vs_best_pct": 0,
+          "vs_best_pct": null,
           "vs_last_pct": 0,
-          "effective_price": 23000
+          "effective_price": 23000,
+          "item_status": "pending",
+          "thumbnail_path": "7afe03ed-ad75-42aa-9cfa-5a3bdf73ef26/34a73895-3f80-42c1-b649-da74b9791fd6/1.jpg"
         }
       ],
       "session": {
@@ -7701,7 +7751,8 @@
       },
       "history": [],
       "receipt_line": null,
-      "receipt_header": null
+      "receipt_header": null,
+      "source_text": "MILO ORIGINAL 200G"
     },
     "record_receipt": {
       "image": {
@@ -7796,7 +7847,8 @@
         "total_amount": 114700,
         "transaction_date": "2026-10-15",
         "transaction_time": "19:02:00"
-      }
+      },
+      "source_text": "MILO ORI 500G"
     },
     "record_shopee": {
       "image": {
@@ -7852,7 +7904,8 @@
       },
       "history": [],
       "receipt_line": null,
-      "receipt_header": null
+      "receipt_header": null,
+      "source_text": "Milo Original 500 g Nestle"
     },
     "record_unknown": {
       "error": {
@@ -8171,7 +8224,8 @@
         }
       ],
       "receipt_line": null,
-      "receipt_header": null
+      "receipt_header": null,
+      "source_text": "MILO ORIGINAL 200G"
     },
     "correct_stale": {
       "error": {
@@ -8518,7 +8572,8 @@
         }
       ],
       "receipt_line": null,
-      "receipt_header": null
+      "receipt_header": null,
+      "source_text": "Milo Original 500 g Nestle"
     },
     "correct_product_alias": {
       "id": "634cbcd8-9c99-44f0-a616-2ecf21c7b6f5",
@@ -8746,7 +8801,8 @@
         "total_amount": 114700,
         "transaction_date": "2026-10-15",
         "transaction_time": "19:02:00"
-      }
+      },
+      "source_text": "MILO ORI 500G"
     },
     "correct_line_ok": {
       "line": {
@@ -9146,7 +9202,8 @@
         "total_amount": 114700,
         "transaction_date": "2026-10-15",
         "transaction_time": "19:02:00"
-      }
+      },
+      "source_text": "MILO ORI 500G"
     },
     "record_label_purged": {
       "image": {
@@ -9274,7 +9331,8 @@
         }
       ],
       "receipt_line": null,
-      "receipt_header": null
+      "receipt_header": null,
+      "source_text": "MILO ORIGINAL 200G"
     },
     "create_product_plu": {
       "group": {

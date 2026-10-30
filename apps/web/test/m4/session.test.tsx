@@ -194,24 +194,91 @@ describe('S-13 Sesi belanja', () => {
       'Foto labelgagal dibaca',
       'Milo Original 200 gRp17.500PROMO3% lebih murah dari biasanya',
       'Milo 3in1 10 × 35 gRp23.000NORMAL',
-      'Milo Original 200 gMilo 3in1 10 × 35 gperlu dicek',
+      // 6b M4 (Q-81): foto "perlu dicek" yang item Milo 200 g-nya sudah di-auto-accept → per item.
+      'Milo Original 200 gRp17.500PROMO3% lebih murah dari biasanya',
+      'Milo 3in1 10 × 35 gperlu dicek',
     ]);
     const failed = s.labels.find((l) => l.status === 'failed')!.capture_id;
     const needs = s.labels.find((l) => l.status === 'needs_confirmation')!.capture_id;
     expect(within(rows[1]!).getByRole('link').getAttribute('href')).toBe(`/unggahan/detail?id=${failed}`);
-    expect(
-      within(rows[4]!)
-        .getByRole('link', { name: /Cek label Milo Original/ })
-        .getAttribute('href'),
-    ).toBe(`/konfirmasi?capture=${needs}`);
+    expect(within(rows[4]!).queryByRole('link')).toBeNull();
+    expect(within(rows[5]!).getByRole('link', { name: 'Cek label Milo 3in1 10 × 35 g' }).getAttribute('href')).toBe(
+      `/konfirmasi?capture=${needs}`,
+    );
   });
 
-  it('setelah ringkasan diperbarui: "setara harga terbaikmu" (F-60)', async () => {
+  it('6b M4 (Q-97): thumbnail per foto lewat SATU createSignedUrls; purged/gagal → ikon', async () => {
+    const s = fx<ActiveSession>('session_labels');
+    clockAt(s.session.started_at, 30 * MIN);
+    const paths = [...new Set(s.labels.map((l) => l.thumbnail_path).filter(Boolean))] as string[];
+    expect(paths.length).toBe(4);
+    // Foto pertama (diproses) sudah di-purge; satu path gagal ditandatangani.
+    const purged = s.labels[0]!.capture_id;
+    const failing = s.labels.find((l) => l.status === 'failed')!.thumbnail_path!;
+    state.rpcOverride = (fn) =>
+      fn === 'get_active_session'
+        ? {
+            data: {
+              ...s,
+              labels: s.labels.map((l) => (l.capture_id === purged ? { ...l, thumbnail_path: null } : l)),
+            },
+            error: null,
+          }
+        : undefined;
+    state.storage.createSignedUrls.mockImplementation(async (ps: string[], seconds: number) => ({
+      data: ps.map((path) => ({
+        path,
+        signedUrl: path === failing ? '' : `https://supabase.test/sign/${path}?expires=${seconds}`,
+        error: path === failing ? 'Object not found' : null,
+      })),
+      error: null,
+    }));
+    await open();
+    // 4 baris item dari 2 foto yang punya URL (foto dengan dua item: thumbnail di kedua barisnya).
+    await waitFor(() => expect(screen.getAllByTestId('label-thumbnail').length).toBe(4));
+    expect(state.storage.createSignedUrls).toHaveBeenCalledTimes(1);
+    const [asked, seconds] = state.storage.createSignedUrls.mock.calls[0]!;
+    expect([...asked].sort()).toEqual(paths.filter((p) => p !== s.labels[0]!.thumbnail_path).sort());
+    expect(seconds).toBe(300);
+    expect(state.storage.createSignedUrl).not.toHaveBeenCalled();
+    const rows = screen.getAllByTestId('session-label');
+    expect(within(rows[0]!).queryByTestId('label-thumbnail')).toBeNull(); // purged
+    expect(within(rows[1]!).queryByTestId('label-thumbnail')).toBeNull(); // gagal ditandatangani
+    expect(within(rows[2]!).getByTestId('label-thumbnail').getAttribute('alt')).toBe('');
+  });
+
+  it('6b M4: R18 di cache sebelum M4 (tanpa item_status/thumbnail_path) → per foto seperti F-61', async () => {
+    const s = fx<ActiveSession>('session_labels');
+    clockAt(s.session.started_at, 30 * MIN);
+    state.rpcOverride = (fn) =>
+      fn === 'get_active_session'
+        ? {
+            data: {
+              ...s,
+              labels: s.labels.map((l) => {
+                const old: Record<string, unknown> = { ...l };
+                delete old.item_status;
+                delete old.thumbnail_path;
+                return old;
+              }),
+            },
+            error: null,
+          }
+        : undefined;
+    await open();
+    expect(await screen.findByText('Label di sesi ini (4)')).toBeTruthy();
+    const texts = screen.getAllByTestId('session-label').map((r) => r.textContent);
+    expect(texts.slice(4)).toEqual(['Milo Original 200 gperlu dicek', 'Milo 3in1 10 × 35 gperlu dicek']);
+    expect(state.storage.createSignedUrls).not.toHaveBeenCalled();
+  });
+
+  it('setelah ringkasan diperbarui: tetap "3% lebih murah" (6b M4: tanpa record sesi, Q-80; dulu "setara", F-60)', async () => {
     const s = fx<ActiveSession>('session_labels_refreshed');
     clockAt(s.session.started_at, 30 * MIN);
     withSession('session_labels_refreshed');
     await open();
-    expect((await screen.findAllByText('setara harga terbaikmu')).length).toBe(2);
+    expect((await screen.findAllByText('3% lebih murah dari biasanya')).length).toBe(2);
+    expect(screen.queryByText('setara harga terbaikmu')).toBeNull();
   });
 
   it('hampir kedaluwarsa (< 30 mnt) → "Perpanjang" (W12) → toast jam berakhir baru', async () => {

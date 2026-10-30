@@ -315,6 +315,12 @@ Karena tidak bisa dijalankan, setiap butir L4 diperiksa dari kode dan dokumentas
 
 **Lingkungan pembuatan M4.** `supabase start` tetap tidak bisa (CDN image). L1–L3 dan fixture web dijalankan di PostgreSQL 17 lokal (`@embedded-postgres/linux-x64` 17.10). L5c dijalankan lokal di Chromium `/opt/pw-browsers`; kamera palsu Y4M diperiksa lokal di Chromium yang sama (1280×720, pola label terbaca di canvas). e2e alur 4 (Chromium + WebKit) **hanya diverifikasi di job CI `supabase-e2e`**; "Supabase tiruan" lokal M1/M2 tidak dibangun ulang.
 
+**Tinjauan Tahap 6 (6b M4, `docs/08` §20, 2026-10-28).** Perubahan RPC R18/R20 yang ditunda di D-88/D-89/D-91 sudah dibuat (migration `20261028000100_review_items.sql`, kontrak aditif):
+- **S-13 status per item (Q-81, F-61):** R18 `labels[].item_status`. Foto `needs_confirmation` yang sebagian itemnya sudah di-auto-accept kini tampil per item: item tersimpan dengan harga + label + pembanding, item pending "perlu dicek ›" (tautan "Cek label <produk>") → S-11. R18 di cache perangkat dari sebelum M4 (tanpa `item_status`) tetap tampil per foto.
+- **S-13 pembanding (Q-80, F-60):** `vs_best_pct` dibandingkan dengan termurah 90 hari **tanpa** record dari capture sesi itu, sehingga label yang menjadi harga terbaik baru tetap "3% lebih murah dari biasanya" setelah ringkasan diperbarui (sebelumnya berubah menjadi "setara harga terbaikmu").
+- **S-13 thumbnail (Q-97, F-66, F-101):** R18 `thumbnail_path` (gambar posisi 1, null jika sudah di-purge) → **satu** panggilan `createSignedUrls` untuk semua label (D-79), 48 px di kiri kartu, dekoratif (`alt=""`; nama produk ada di teks). Purged atau gagal ditandatangani → ikon label seperti sebelumnya. URL tidak di-persist.
+- **e2e alur 4 (Q-82, F-63):** worker e2e dengan `STUB_FALLBACK_FIXTURE=label-milo` membaca frame kamera palsu sebagai label-milo, jadi kartu S-13 berasal dari foto kamera itu sendiri (Chromium); WebKit tetap lewat galeri (F-64).
+
 ### 1.9 Tahap 5b M5: hasil dan temuan baru (F-68 dst.)
 
 **Dasar.** PR #13 (M4) dan PR #14 (D-88) sudah di-merge; branch M5 dibangun di atas `master`. Tidak ada perubahan skema, RPC, policy, migration, logika worker, fixture worker, atau `db/tests/smoke.sql`. Satu perbaikan kode test: `PgRpcClient` (`packages/testkit`) kini mengembalikan `null` untuk RPC `returns void` seperti PostgREST (F-73).
@@ -371,6 +377,8 @@ Karena tidak bisa dijalankan, setiap butir L4 diperiksa dari kode dan dokumentas
 | 6c: produk privat (helper test) → S-17 pratinjau → Gabungkan (W10) → produk tujuan; S-18 Milo 500 g → produk baru (W8) → centang → W9 → produk baru dengan 1 harga | ya | ya |
 
 **Lingkungan pembuatan M5.** `supabase start` tetap tidak bisa (CDN image). L1–L3 dan fixture web dijalankan di PostgreSQL 17 lokal (`@embedded-postgres/linux-x64` 17.10). "Supabase tiruan" lokal M1/M2 tidak dibangun ulang (butuh PATCH dengan filter + `return=representation` dan RPC `void`), jadi e2e alur 6 (Chromium + WebKit) **hanya diverifikasi di job CI `supabase-e2e`**.
+
+**Tinjauan Tahap 6 (6b M4, `docs/08` §20).** **S-16/S-18 teks alias (Q-87, F-72):** R20 `source_text` (aturan yang sama dengan alias W6: baris struk, teks label, judul listing untuk screenshot). S-16 untuk record label/screenshot kini menawarkan "Perbarui juga alias 'MILO ORIGINAL 200G' di AEON?"; isian alias S-18 terisi dari teks label juga, dan kalimatnya menjadi "Teks '…' di … selanjutnya dikenali sebagai produk tujuan". R20 tanpa `source_text` (cache lama, record manual) → kalimat umum seperti sebelumnya. **S-11 harga member (Q-77, F-57):** memilih toko untuk label yang diproses tanpa toko kini memetakan harga member terbaca ke program toko itu (W18 + `capture_item.read_member_*`); catatan member hilang jika program ditemukan, dan kembali jika toko diganti ke toko tanpa program yang cocok.
 
 ### 1.10 Tahap 5b M6: hasil dan temuan baru (F-80 dst.)
 
@@ -1105,8 +1113,8 @@ Tanpa membaca email: setup test memakai service role untuk `auth.admin.generateL
 | 2 | Detail | Kartu → S-03 → grafik, 3 toko teratas, Cek harga rak (lebih murah / mendekati / lebih mahal) → S-04 → S-05 |
 | 3 | Struk | Galeri fixture `struk-aeon.jpg` → antrean → W1 → worker stub → polling S-08 → "perlu dicek" → S-10 → Benar/Ganti/Bukan produk → Simpan → "N harga baru tersimpan" |
 | 3b | Duplikat | Unggah file yang sama → dialog hash; konfirmasi → banner duplikat → buang |
-| 4 | Sesi | Mulai sesi (S-12) → banner → foto label fixture (kamera palsu Chromium `--use-file-for-fake-video-capture`) → S-13 kartu → perpanjang → akhiri |
-| 5 | Screenshot | `shopee-milo` → S-11 → ongkir sebagai info → simpan |
+| 4 | Sesi | Mulai sesi (S-12) → banner → foto label (kamera palsu Chromium `--use-file-for-fake-video-capture`, dibaca sebagai label-milo lewat `STUB_FALLBACK_FIXTURE`; WebKit: galeri) → S-13 kartu per item (tersimpan + "3% lebih murah dari biasanya", perlu dicek) + thumbnail → S-11 → simpan → pembanding tetap setelah ringkasan diperbarui → perpanjang → akhiri (6b M4) |
+| 5 | Screenshot | `shopee-milo-uht` (confidence harga rendah, Q-78) → perlu dicek dari unggahan pertama → S-11 → ongkir sebagai info → simpan → S-16 record → ganti produk → tawaran alias berisi judul listing (R20 `source_text`, 6b M4) |
 | 6 | Koreksi | S-16 ubah harga observasi; record struk → editor baris; `STALE_WRITE` (dua tab) |
 | 7 | Pengaturan | Member on → S-11 `computed` berubah; berbagi publik on/off; hapus akun (login ulang + teks) |
 | 8 | Onboarding | Login OTP pertama → S-00b → S-00c → S-01 keadaan kosong |

@@ -338,7 +338,8 @@ async function collectAll(pool: pg.Pool, w: Worker): Promise<Fixtures> {
     p_capture_id: labelCapture,
     p_items: [{ item_id: label1!.id, action: 'accept' }],
   });
-  // Hanya harga member, user bukan member → tidak ada harga yang berlaku.
+  // Hanya harga member, user bukan member → tidak ada harga yang berlaku. 6b M4 (Q-77): memilih AEON
+  // memetakan harga member terbaca ke AEON Member (catatan member hilang).
   await call('update_item_member_only', citra, 'update_capture_item', {
     p_item_id: label2!.id,
     p_patch: { normal_price: null, store_id: IDS.aeon },

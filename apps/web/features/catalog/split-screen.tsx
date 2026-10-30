@@ -20,6 +20,7 @@ import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ProductPicker, PICKER_KEYS } from '@/features/picker/product-picker';
 import { splitError } from '@/lib/catalog/errors';
+import { aliasText } from '@/lib/catalog/record-form';
 import {
   aliasSourceRecord,
   aliasStore,
@@ -101,7 +102,7 @@ export function SplitScreen() {
   const rows = history.data?.pages.flat() ?? [];
   const aliasRecord = aliasSourceRecord(rows, selected);
   const aliasDetail = useRecordDetail(step >= 3 ? aliasRecord : null);
-  const aliasDefault = aliasDetail.data?.receipt_line?.raw_text ?? '';
+  const aliasDefault = (aliasDetail.data ? aliasText(aliasDetail.data) : null) ?? '';
   const aliasValue = aliasEdit ?? aliasDefault;
   const store = aliasStore(rows, selected);
 

@@ -1,8 +1,11 @@
 // L3: worker end-to-end dengan fixture (docs/05 §8.1): unggah → claim → apply → konfirmasi.
+import sharp from 'sharp';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { USERS, rpcOk } from '@priceatlas/testkit';
+import { uploadAndSubmit } from '../scripts/client-sim.ts';
+import { StubAiMatcher, StubExtractor, fallbackFixture } from '../src/extractors/stub.ts';
 import { processNextCapture } from '../src/pipeline/process-capture.ts';
-import { captureRow, setupEnv, skipBackoff, submitFixture, type Env } from './helpers.ts';
+import { captureRow, fixtures, setupEnv, skipBackoff, submitFixture, type Env } from './helpers.ts';
 
 let env: Env;
 beforeAll(() => {
@@ -149,6 +152,43 @@ describe('screenshot marketplace', () => {
     const rec = await env.admin.query('select * from public.price_record where capture_id = $1', [captureId]);
     expect(rec.rows[0]).toMatchObject({ source_type: 'marketplace', branch_id: '30000000-0000-0000-0000-000000000005' });
     expect(Number(rec.rows[0].effective_price)).toBe(47000);
+  });
+});
+
+describe('6b M4: fixture screenshot ber-confidence rendah (Q-78) dan fallback e2e (Q-82)', () => {
+  it('shopee-milo-uht: unggahan pertama → needs_confirmation (bukan auto-save), saran Milo UHT', async () => {
+    const { captureId } = await submitFixture(env, 'shopee-milo-uht');
+    expect((await processNextCapture(env.deps))?.status).toBe('needs_confirmation');
+    const items = await rpcOk<{ status: string; suggested_product_id: string; extra: Record<string, unknown> }[]>(
+      env.ani, 'get_capture_items', { p_capture_id: captureId });
+    expect(items).toHaveLength(1);
+    expect(items[0]).toMatchObject({
+      status: 'pending', suggested_product_id: '70000000-0000-0000-0000-000000000180',
+      extra: { shipping_fee: 5000, listing_title: 'Milo UHT 180 ml Nestle' },
+    });
+  });
+
+  it('STUB_FALLBACK_FIXTURE=label-milo: frame kamera tak dikenal → isi label-milo; read_member_* tersimpan', async () => {
+    const frame = await sharp({ create: { width: 640, height: 360, channels: 3, background: { r: 200, g: 180, b: 40 } } })
+      .jpeg().toBuffer();
+    const { captureId } = await uploadAndSubmit({
+      pool: env.admin, blob: env.blob, userId: USERS.a, kind: 'price_label', images: [frame], sessionId: null, storeId: null,
+    });
+    const fb = fallbackFixture(fixtures, 'label-milo');
+    const deps = { ...env.deps, extractor: new StubExtractor(fixtures, fb), ai: new StubAiMatcher(fixtures, fb) };
+    expect((await processNextCapture(deps))?.status).toBe('needs_confirmation');
+    const r = await env.admin.query(
+      'select raw_text, read_member_price, read_member_program_name, extra from public.capture_item where capture_id = $1 order by position',
+      [captureId]);
+    expect(r.rows.map((x) => x.raw_text)).toEqual(['MILO ORIGINAL 200G', 'MILO 3IN1 10X35G']);
+    expect(Number(r.rows[1].read_member_price)).toBe(21000);
+    expect(r.rows[1]).toMatchObject({ read_member_program_name: 'AEON Member', extra: { member_note: 'AEON Member 21000' } });
+    // Tanpa fallback (default) gambar yang sama → failed (unsupported).
+    const again = await uploadAndSubmit({
+      pool: env.admin, blob: env.blob, userId: USERS.a, kind: 'price_label', images: [frame], sessionId: null, storeId: null,
+    });
+    await processNextCapture(env.deps);
+    expect(await captureRow(env, again.captureId)).toMatchObject({ status: 'failed', error_code: 'unsupported' });
   });
 });
 

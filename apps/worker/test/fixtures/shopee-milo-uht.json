@@ -1,0 +1,17 @@
+{
+  "images": ["shopee-milo-uht.jpg"],
+  "raw_text": "Shopee | Toko Susu Segar | Milo UHT 180 ml Nestle | Rp6.500 | Ongkir Rp5.000",
+  "output": {
+    "kind": "marketplace",
+    "store_hint": { "name": "Shopee" },
+    "items": [
+      {
+        "raw_text": "Milo UHT 180 ml", "listing_title": "Milo UHT 180 ml Nestle",
+        "listing_url": "https://shopee.co.id/milo-uht-180ml",
+        "normal_price": 6500, "shipping_fee": 5000,
+        "seller_name": "Toko Susu Segar", "seller_ref": "toko-susu-segar",
+        "field_confidence": { "product": 0.8, "price": 0.7 }
+      }
+    ]
+  }
+}

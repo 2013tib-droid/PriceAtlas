@@ -286,6 +286,40 @@ describe('S-16 record struk dan screenshot', () => {
     );
   });
 
+  it('6b M4 (Q-87, F-72): label: tawaran alias memakai teks label dari R20 source_text', async () => {
+    const id = m5Ids().records.label;
+    setUrl('/harga', `id=${id}&pilih=produk&untuk=record:${id}`);
+    const view = await renderWithProviders(<RecordScreen />);
+    const picker = within(await screen.findByTestId('product-picker'));
+    const user = userEvent.setup();
+    const input = screen.getByLabelText('Cari produk');
+    await user.clear(input);
+    await user.type(input, 'milo');
+    await user.click(await picker.findByRole('button', { name: 'Pilih Milo Original 500 g' }));
+    setUrl('/harga', `id=${id}`);
+    view.rerenderUi(<RecordScreen />);
+    await screen.findByTestId('picked-product');
+    expect(screen.getByRole('checkbox', { name: /Perbarui juga alias 'MILO ORIGINAL 200G' di / })).toBeTruthy();
+    expect(screen.queryByRole('checkbox', { name: /alias teks ini/ })).toBeNull();
+  });
+
+  it('6b M4: R20 tanpa source_text (cache lama) → kalimat umum untuk label', async () => {
+    const id = m5Ids().records.label;
+    const old: Record<string, unknown> = { ...detail('label') };
+    delete old.source_text;
+    state.rpcOverride = (fn) => (fn === 'price_record_detail' ? { data: old, error: null } : undefined);
+    setUrl('/harga', `id=${id}&pilih=produk&untuk=record:${id}`);
+    const view = await renderWithProviders(<RecordScreen />);
+    const picker = within(await screen.findByTestId('product-picker'));
+    const user = userEvent.setup();
+    await user.type(screen.getByLabelText('Cari produk'), 'milo');
+    await user.click(await picker.findByRole('button', { name: 'Pilih Milo Original 500 g' }));
+    setUrl('/harga', `id=${id}`);
+    view.rerenderUi(<RecordScreen />);
+    await screen.findByTestId('picked-product');
+    expect(screen.getByRole('checkbox', { name: /Perbarui juga alias teks ini di / })).toBeTruthy();
+  });
+
   it('screenshot: ongkir/voucher sebagai info; extra dikirim utuh (D-36, D-66)', async () => {
     const { id } = await open('shopee');
     expect(screen.getByText('Dari screenshot')).toBeTruthy();

@@ -208,9 +208,15 @@ export function affectedProducts(r: Pick<PriceRecordFull, 'product_id'>, patch: 
   return patch.product_id && patch.product_id !== r.product_id ? [r.product_id, patch.product_id] : [r.product_id];
 }
 
-/** Teks alias yang dialihkan W6 p_update_alias: teks baris struk, atau teks item label/judul listing. */
-export function aliasText(detail: { receipt_line: { raw_text: string | null } | null }): string | null {
-  return detail.receipt_line?.raw_text ?? null;
+/**
+ * Teks alias yang dialihkan W6 p_update_alias: teks baris struk, atau teks item label/judul listing.
+ * 6b M4 (Q-87, F-72): R20 `source_text` (aturan server yang sama dengan W6); R20 lama (cache) → baris struk.
+ */
+export function aliasText(detail: {
+  source_text?: string | null;
+  receipt_line: { raw_text: string | null } | null;
+}): string | null {
+  return detail.source_text?.trim() || detail.receipt_line?.raw_text || null;
 }
 
 // ---------------------------------------------------------------------------

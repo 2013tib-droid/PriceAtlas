@@ -1,14 +1,13 @@
 // M4 kriteria selesai (docs/07 §12, §11.3 alur 4): mulai sesi (S-12) → banner → foto label (kamera
 // palsu Chromium) → S-13 kartu → perpanjang → akhiri, terhadap Supabase lokal + worker stub (job CI
-// supabase-e2e). Logika dan fixture worker tidak diubah, sehingga:
-//   * Frame kamera palsu (Chromium) melewati pipeline klien asli (canvas → JPEG → sha256 → antrean →
-//     Storage → W1) dan diperiksa sampai capture terdaftar dengan sesi yang benar + byte JPEG ≤ 2048 px.
-//     Stub worker memetakan fixture lewat sha256, jadi frame ini selesai `failed` (unsupported) dan
-//     tampil "gagal dibaca" di S-13 (F-63).
-//   * Isi kartu (produk, harga, label, vs_best_pct) dari label-milo lewat "Galeri" di kamera label yang
-//     sama (sesi sama, sha256 = fixture): Milo 200 g auto-accept (lokasi dari sesi), Milo 3in1 perlu
-//     dicek → S-11 → simpan → kartu tersimpan.
-//   * WebKit tidak punya kamera palsu: alur yang sama tanpa langkah kamera (F-64).
+// supabase-e2e).
+//   * 6b M4 (Q-82, Q-118): worker e2e berjalan dengan STUB_FALLBACK_FIXTURE=label-milo, jadi frame kamera
+//     palsu Chromium (sha256 tak dikenal) dibaca sebagai label-milo. Frame melewati pipeline klien asli
+//     (canvas → JPEG → sha256 → antrean → Storage → W1) dan diperiksa sampai byte JPEG ≤ 2048 px.
+//   * Isi kartu per item (6b M4, Q-81): Milo 200 g auto-accept (lokasi dari sesi) → harga + label +
+//     "3% lebih murah dari biasanya" (vs_best_pct tanpa record sesi, Q-80; tetap setelah ringkasan
+//     diperbarui); Milo 3in1 "perlu dicek" → S-11 → simpan. Thumbnail foto (Q-97, satu createSignedUrls).
+//   * WebKit tidak punya kamera palsu: label-milo lewat "Galeri" di kamera label yang sama (F-64).
 import { createHash } from 'node:crypto';
 import { expect, test } from '@playwright/test';
 import { login } from './support/auth';
@@ -67,19 +66,17 @@ test('alur 4: mulai sesi (S-12) → banner → foto label → S-13 kartu → per
   await expect(page).toHaveURL(/\/kamera\?jenis=label$/);
   await expect(page.getByTestId('label-target')).toHaveText('Label masuk ke AEON BSD (sesi belanja).');
 
-  let n = 0;
+  const n = 1;
   if (camera) {
     // Kamera palsu: jendela bidik menyala, shutter → foto tersimpan, kamera tetap terbuka.
     const shutter = page.getByRole('button', { name: 'Ambil foto label' });
     await expect(shutter).toBeEnabled({ timeout: 20_000 });
     await shutter.click();
-    n += 1;
-    await expect(page.getByTestId('label-shot').nth(0)).toHaveText('Label 1: tersimpan', { timeout: 20_000 });
     await expect(page).toHaveURL(/\/kamera\?jenis=label$/);
+  } else {
+    await page.getByTestId('label-gallery').setInputFiles(fixture('label-milo'));
   }
-  await page.getByTestId('label-gallery').setInputFiles(fixture('label-milo'));
-  n += 1;
-  await expect(page.getByTestId('label-shot').nth(n - 1)).toHaveText(`Label ${n}: tersimpan`, { timeout: 20_000 });
+  await expect(page.getByTestId('label-shot').nth(0)).toHaveText('Label 1: tersimpan', { timeout: 20_000 });
 
   // Semua foto terdaftar (W1) dengan sesi yang benar; lokasi capture diisi dari cabang sesi.
   await expect
@@ -104,9 +101,19 @@ test('alur 4: mulai sesi (S-12) → banner → foto label → S-13 kartu → per
   await expect(page.getByText(`Label di sesi ini (${n})`)).toBeVisible({ timeout: 20_000 });
   await expect(banner).toContainText(`${n} label`);
   const labels = page.getByTestId('session-label');
-  if (camera) await expect(labels.filter({ hasText: 'gagal dibaca' })).toBeVisible({ timeout: 60_000 });
+  // Status per item (Q-81): Milo 200 g sudah tersimpan (auto), Milo 3in1 perlu dicek, dari foto yang sama.
   const check = labels.filter({ hasText: 'perlu dicek' });
-  await expect(check).toContainText('Milo Original 200 g', { timeout: 60_000 });
+  await expect(check).toContainText('Milo 3in1', { timeout: 60_000 });
+  await expect(check).toHaveCount(1);
+  const auto = labels.filter({ hasText: 'Milo Original 200 g' });
+  await expect(auto).toContainText('Rp17.500');
+  await expect(auto).toContainText('3% lebih murah dari biasanya');
+  // Thumbnail foto label (Q-97): signed URL Storage asli, gambar termuat.
+  const thumb = auto.getByTestId('label-thumbnail');
+  await expect(thumb).toBeVisible({ timeout: 20_000 });
+  await expect
+    .poll(() => thumb.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0), { timeout: 20_000 })
+    .toBe(true);
 
   // "perlu dicek ›" → S-11 → simpan (lokasi dari sesi, docs/05 §4.2 langkah 4).
   await check.getByRole('link').click();
@@ -123,7 +130,9 @@ test('alur 4: mulai sesi (S-12) → banner → foto label → S-13 kartu → per
   const saved = labels.filter({ hasText: 'Milo Original 200 g' });
   await expect(saved).toContainText('Rp17.500', { timeout: 30_000 });
   await expect(saved).toContainText('PROMO');
-  await expect(saved).toContainText(/lebih murah dari biasanya|setara harga terbaikmu/);
+  // Setelah ringkasan diperbarui (pg_cron) pembanding tetap "lebih murah" (tanpa record sesi, Q-80/F-60).
+  await expect(saved).toContainText('3% lebih murah dari biasanya');
+  await expect(labels.filter({ hasText: 'Milo 3in1' })).toContainText('Rp23.000');
   await expect(page.getByText(/^Sesi berakhir (19|20) menit lagi\.$/)).toBeVisible();
   await page.getByRole('button', { name: 'Perpanjang' }).click();
   await expect(page.getByText(/^Sesi diperpanjang sampai \d{2}:\d{2}\.$/)).toBeVisible();

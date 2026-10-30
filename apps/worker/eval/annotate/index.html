@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anotasi uji OCR</title>
+<style>
+  :root { --bg: #fff; --fg: #1a1a1a; --muted: #666; --line: #ddd; --todo: #fff4d6; --ok: #e7f6ea; --bad: #fde2e1; --accent: #0b5cad; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #16181b; --fg: #eee; --muted: #aaa; --line: #333; --todo: #3a3214; --ok: #173a20; --bad: #4a1c1a; --accent: #6db0ff; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.4 system-ui, sans-serif; background: var(--bg); color: var(--fg); }
+  header { display: flex; gap: 12px; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--bg); z-index: 2; flex-wrap: wrap; }
+  main { display: grid; grid-template-columns: minmax(280px, 45%) 1fr; height: calc(100vh - 52px); }
+  #images { overflow: auto; border-right: 1px solid var(--line); padding: 8px; }
+  #images img { width: 100%; display: block; margin-bottom: 8px; cursor: zoom-in; }
+  #images img.zoom { width: 220%; cursor: zoom-out; }
+  #form { overflow: auto; padding: 8px 12px 80px; }
+  fieldset { border: 1px solid var(--line); border-radius: 6px; margin: 0 0 12px; }
+  label.f { display: grid; grid-template-columns: 170px 1fr 28px; gap: 6px; align-items: center; margin: 3px 0; }
+  input, select, textarea { font: inherit; padding: 3px 5px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--fg); width: 100%; }
+  input[type=checkbox] { width: auto; }
+  .todo input, .todo select { background: var(--todo); }
+  .done input, .done select { background: var(--ok); }
+  .invalid input { background: var(--bad); }
+  table { border-collapse: collapse; width: 100%; min-width: 1000px; }
+  td select { min-width: 115px; }
+  td input[data-path$=".raw_text"] { min-width: 200px; }
+  fieldset.lines { overflow-x: auto; }
+  td, th { border-bottom: 1px solid var(--line); padding: 2px; vertical-align: top; font-weight: normal; text-align: left; }
+  th { font-size: 12px; color: var(--muted); }
+  button { font: inherit; padding: 4px 10px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--fg); cursor: pointer; }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .muted { color: var(--muted); }
+  #status { min-height: 1.4em; }
+  details { margin-bottom: 12px; }
+  .chk { width: 22px; height: 22px; }
+</style>
+</head>
+<body>
+<header>
+  <strong>Anotasi uji OCR</strong>
+  <select id="pick" aria-label="Capture"></select>
+  <span id="meta" class="muted"></span>
+  <span id="progress" class="muted"></span>
+  <button id="save-draft">Simpan draf</button>
+  <button id="save" class="primary">Simpan terverifikasi</button>
+  <span id="status" role="status" aria-live="polite"></span>
+</header>
+<main>
+  <section id="images" aria-label="Gambar"></section>
+  <section id="form" aria-label="Ground truth"></section>
+</main>
+<script type="module">
+import * as F from './form.js';
+
+const $ = (s) => document.querySelector(s);
+// Isi gambar/model adalah data (F-122): semua nilai di-escape sebelum masuk HTML.
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+let list = [];
+let state = null;
+
+const RULES = `<details><summary>Aturan anotasi (docs/08 §4.3)</summary><ul>
+<li><b>Teks item</b> = deskripsi saja, persis tercetak (huruf besar, singkatan); qty/harga di kolomnya (Q-28).</li>
+<li>Nominal rupiah bulat. Item timbang: qty = berat kg (3 desimal), harga satuan = per kg; centang "timbang".</li>
+<li>Diskon/void negatif dan "menempel ke" nomor baris produknya. Diskon karena kartu member: centang "member".</li>
+<li>Baris yang tidak terbaca manusia: centang "tak terbaca" (tidak dinilai).</li>
+<li>PII di gambar (HP, digit kartu, nama/nomor member, alamat): tulis di daftar PII (satu per baris).</li>
+<li>Setiap field kuning = belum diperiksa. Ubah nilainya atau tekan ✓ untuk menandai sudah benar.</li>
+</ul></details>`;
+
+async function api(path, init) {
+  const r = await fetch(path, init);
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw Object.assign(new Error(j.error || r.status), { body: j });
+  return j;
+}
+
+async function loadList() {
+  const j = await api('/api/captures');
+  list = j.captures;
+  const done = list.filter((c) => c.status === 'verified').length;
+  $('#progress').textContent = `${done}/${list.length} terverifikasi${j.prefill_arm ? ` · pra-isi: ${j.prefill_arm}` : ''}`;
+  const cur = $('#pick').value;
+  $('#pick').innerHTML = list.map((c) => `<option value="${c.id}">${c.status === 'verified' ? '✓' : c.status === 'draft' ? '…' : '○'} ${c.id} · ${c.kind} · ${c.split}${c.blind ? ' · tanpa pra-isi' : ''}</option>`).join('');
+  if (cur) $('#pick').value = cur;
+}
+
+async function open(id) {
+  const j = await api(`/api/capture/${id}`);
+  const t = j.truth;
+  const expected = t ? (t.expected ?? F.blankExpected(j.entry.kind)) : (j.prefill ?? F.blankExpected(j.entry.kind));
+  state = {
+    id, entry: j.entry, prefillArm: t ? t.verified?.prefill ?? null : j.prefill_arm,
+    expected: structuredClone(expected),
+    // Truth terverifikasi: semua field sudah diperiksa sebelumnya.
+    checked: new Set(t?.verified ? F.fieldPaths(expected) : []),
+    annotations: t?.annotations ?? { lines: {}, transcript_pii: j.prefill_pii ?? [], notes: '' },
+    store_category: t?.store_category ?? j.entry.store_category,
+    conditions: t?.conditions ?? j.entry.conditions,
+    unreadable: t ? t.expected === null : false,
+  };
+  $('#meta').textContent = `${j.entry.images.length} gambar${j.blind ? ' · TANPA pra-isi (ukur bias)' : j.prefill ? ` · pra-isi ${j.prefill_arm}` : ''}`;
+  $('#images').innerHTML = j.entry.images.map((f, i) => `<img src="/images/${f}" alt="Gambar ${i + 1} dari ${j.entry.images.length}">`).join('');
+  for (const img of $('#images').querySelectorAll('img')) img.onclick = () => img.classList.toggle('zoom');
+  render();
+}
+
+function input(path, type, value) {
+  const v = value == null ? '' : Number.isNaN(value) ? '' : value;
+  if (type === 'line_type') return `<select data-path="${path}" data-type="text">${F.LINE_TYPES.map((o) => `<option ${o === v ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
+  if (type === 'payment') return `<select data-path="${path}" data-type="text">${F.PAYMENT_METHODS.map((o) => `<option value="${o}" ${o === v ? 'selected' : ''}>${o || '—'}</option>`).join('')}</select>`;
+  return `<input data-path="${path}" data-type="${type}" value="${esc(v)}">`;
+}
+
+function cls(path) {
+  const v = F.getPath(state.expected, path);
+  return Number.isNaN(v) ? 'invalid' : state.checked.has(path) ? 'done' : 'todo';
+}
+
+function field(path, label, type) {
+  return `<label class="f ${cls(path)}"><span>${label}</span>${input(path, type, F.getPath(state.expected, path))}<button type="button" data-check="${path}" title="Tandai benar">✓</button></label>`;
+}
+
+function render() {
+  const e = state.expected;
+  const ann = state.annotations;
+  let h = RULES;
+  h += `<fieldset><legend>Capture</legend>
+    <label class="f"><span>Kategori toko</span><select id="cat">${['minimarket', 'supermarket', 'hypermarket', 'apotek', 'lokal', 'marketplace', 'bebas'].map((c) => `<option ${c === state.store_category ? 'selected' : ''}>${c}</option>`).join('')}</select><span></span></label>
+    <label class="f"><span>Kondisi (koma)</span><input id="cond" value="${esc(state.conditions.join(', '))}"><span></span></label>
+    <label><input type="checkbox" id="unreadable" ${state.unreadable ? 'checked' : ''}> Gambar tidak terbaca oleh manusia (yang benar: ditolak buram)</label></fieldset>`;
+  if (!state.unreadable) {
+    if (e.kind === 'receipt') {
+      h += `<fieldset><legend>Header</legend>${F.HEADER_FIELDS.map((f) => field(f.path, f.label, f.type)).join('')}</fieldset>`;
+      h += `<fieldset class="lines"><legend>Baris (${e.lines.length})</legend><table><tr><th>#</th>${F.LINE_FIELDS.map((f) => `<th>${f.label}</th>`).join('')}<th>timbang</th><th>member</th><th>tak terbaca</th><th></th></tr>`;
+      e.lines.forEach((l, i) => {
+        const a = ann.lines?.[String(l.line_no)] ?? {};
+        h += `<tr><td>${l.line_no}</td>${F.LINE_FIELDS.map((f) => `<td class="${cls(`lines.${i}.${f.key}`)}">${input(`lines.${i}.${f.key}`, f.type, l[f.key])}</td>`).join('')}
+          ${['weighed', 'member_discount', 'unreadable'].map((k) => `<td><input class="chk" type="checkbox" data-ann="${l.line_no}" data-flag="${k}" ${a[k] ? 'checked' : ''}></td>`).join('')}
+          <td><button type="button" data-rowcheck="lines.${i}">✓ baris</button><button type="button" data-del="${i}" title="Hapus baris">✕</button></td></tr>`;
+      });
+      h += `</table><button type="button" id="add">+ Baris</button></fieldset>`;
+    } else {
+      h += `<fieldset><legend>Toko / platform</legend>${field('store_hint.name', 'Toko / platform', 'text')}</fieldset>`;
+      e.items.forEach((it, i) => {
+        h += `<fieldset><legend>Item ${i + 1} <button type="button" data-rowcheck="items.${i}">✓ item</button> <button type="button" data-del="${i}">✕</button></legend>${F.ITEM_FIELDS.map((f) => field(`items.${i}.${f.key}`, f.label, f.type)).join('')}</fieldset>`;
+      });
+      h += `<button type="button" id="add">+ Item</button>`;
+    }
+  }
+  h += `<fieldset><legend>PII di gambar (satu per baris; tidak boleh muncul setelah redaksi)</legend><textarea id="pii" rows="3">${esc((ann.transcript_pii ?? []).join('\n'))}</textarea></fieldset>`;
+  h += `<fieldset><legend>Catatan</legend><textarea id="notes" rows="2">${esc(ann.notes)}</textarea></fieldset>`;
+  const left = state.unreadable ? 0 : F.uncheckedPaths(e, state.checked).length;
+  h += `<p class="muted">${left ? `${left} field belum diperiksa.` : 'Semua field sudah diperiksa.'}</p>`;
+  $('#form').innerHTML = h;
+  bind();
+}
+
+function bind() {
+  for (const el of $('#form').querySelectorAll('[data-path]')) {
+    el.onchange = () => {
+      F.setPath(state.expected, el.dataset.path, F.parseValue(el.dataset.type, el.value));
+      state.checked.add(el.dataset.path);
+      render();
+    };
+  }
+  for (const b of $('#form').querySelectorAll('[data-check]')) b.onclick = () => { state.checked.add(b.dataset.check); render(); };
+  for (const b of $('#form').querySelectorAll('[data-rowcheck]')) b.onclick = () => {
+    for (const p of F.fieldPaths(state.expected)) if (p.startsWith(`${b.dataset.rowcheck}.`)) state.checked.add(p);
+    render();
+  };
+  for (const b of $('#form').querySelectorAll('[data-del]')) b.onclick = () => {
+    const i = Number(b.dataset.del);
+    const coll = state.expected.kind === 'receipt' ? 'lines' : 'items';
+    if (coll === 'lines') F.removeLine(state.expected, i); else state.expected.items.splice(i, 1);
+    state.checked = F.shiftChecked(state.checked, coll, i);
+    render();
+  };
+  const add = $('#add');
+  if (add) add.onclick = () => {
+    if (state.expected.kind === 'receipt') F.addLine(state.expected); else state.expected.items.push(F.blankItem());
+    render();
+  };
+  for (const c of $('#form').querySelectorAll('[data-ann]')) c.onchange = () => {
+    const k = c.dataset.ann;
+    state.annotations.lines = state.annotations.lines ?? {};
+    state.annotations.lines[k] = { ...(state.annotations.lines[k] ?? {}), [c.dataset.flag]: c.checked };
+  };
+  $('#cat').onchange = (ev) => { state.store_category = ev.target.value; };
+  $('#cond').onchange = (ev) => { state.conditions = ev.target.value.split(',').map((s) => s.trim()).filter(Boolean); };
+  $('#unreadable').onchange = (ev) => { state.unreadable = ev.target.checked; render(); };
+  $('#pii').onchange = (ev) => { state.annotations.transcript_pii = ev.target.value.split('\n'); };
+  $('#notes').onchange = (ev) => { state.annotations.notes = ev.target.value; };
+}
+
+async function save(verified) {
+  const p = F.truthPayload(state);
+  if (verified && !p.complete) {
+    $('#status').textContent = 'Masih ada field belum diperiksa atau tidak valid. Simpan sebagai draf, atau periksa semua.';
+    return;
+  }
+  try {
+    await api(`/api/truth/${state.id}`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ...p, complete: verified, prefill_arm: state.prefillArm }) });
+    $('#status').textContent = verified ? 'Tersimpan (terverifikasi).' : 'Draf tersimpan.';
+    await loadList();
+  } catch (e) {
+    $('#status').textContent = `Gagal: ${(e.body?.issues ?? []).map((i) => `${i.path}: ${i.message}`).join('; ') || e.message}`;
+  }
+}
+
+$('#pick').onchange = () => open($('#pick').value);
+$('#save').onclick = () => save(true);
+$('#save-draft').onclick = () => save(false);
+await loadList();
+if (list.length) open(list.find((c) => c.status !== 'verified')?.id ?? list[0].id);
+</script>
+</body>
+</html>

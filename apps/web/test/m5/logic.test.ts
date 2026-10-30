@@ -24,6 +24,7 @@ import {
 } from '@/lib/catalog/product-edit';
 import {
   affectedProducts,
+  aliasText,
   checkRecordPatch,
   extraFromForm,
   loadRecordDraft,
@@ -178,6 +179,18 @@ describe('S-16 isian → p_patch W6', () => {
     expect(loadRecordDraft(r.id, '2000-01-01T00:00:00Z')).toBeNull();
     saveRecordDraft(r.id, null);
     expect(loadRecordDraft(r.id, r.updated_at)).toBeNull();
+  });
+});
+
+describe('6b M4: teks alias S-16/S-18 dari R20 source_text (Q-87, F-72)', () => {
+  it('struk, label, screenshot dari keluaran R20 asli; tanpa source_text → baris struk / null', () => {
+    const d = (k: string) => fx<PriceRecordDetail>(`record_${k}`);
+    expect(aliasText(d('receipt'))).toBe('MILO ORI 500G');
+    expect(aliasText(d('label'))).toBe('MILO ORIGINAL 200G');
+    expect(aliasText(d('shopee'))).toBe('Milo Original 500 g Nestle');
+    expect(aliasText({ receipt_line: { raw_text: 'MILO ORI 500G' } })).toBe('MILO ORI 500G');
+    expect(aliasText({ source_text: '  ', receipt_line: null })).toBeNull();
+    expect(aliasText({ source_text: null, receipt_line: null })).toBeNull();
   });
 });
 

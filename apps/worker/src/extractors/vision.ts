@@ -3,10 +3,10 @@
 // hanya `stub`); dipakai test L3 dengan klien palsu dan oleh harness/uji live di M1. Dipasang di M2.
 import type { Extraction } from '@priceatlas/contracts';
 import type { BetaContentBlockParam } from '@anthropic-ai/sdk/resources/beta/messages/messages';
-import { callStructured, maxTokensFor, type ClaudeClient, type Effort } from '../ai/claude.ts';
+import { callStructured, maxTokensFor, type ClaudeClient, type Effort, type StructuredRequest, type StructuredResult } from '../ai/claude.ts';
 import { PermanentError, type CaptureExtractor, type CaptureKind, type ExtractContext, type ImageBlob } from '../pipeline/types.ts';
 import { convertOutput } from './convert.ts';
-import { llmSchemaFor } from './llm-schema.ts';
+import { llmSchemaFor, type LlmOutput } from './llm-schema.ts';
 import { PROMPT_VERSION, systemPrompt } from './prompts/index.ts';
 
 export interface VisionConfig {
@@ -41,6 +41,35 @@ export function buildUserContent(kind: CaptureKind, images: ImageBlob[], ctx: Ex
   return content;
 }
 
+export type ExtractInput = { kind: CaptureKind; images: ImageBlob[]; ctx: ExtractContext };
+
+/** LLM → kontrak (convert.ts) + rawOutput `{ llm, meta }`; error permanen tetap membawa output mentah. */
+export function finishExtraction(
+  input: ExtractInput,
+  res: StructuredResult<LlmOutput>,
+  extra: { promptVersion: string; rawText?: string; meta?: Record<string, unknown> },
+): Extraction {
+  const { kind, images, ctx } = input;
+  const rawOutput = (flags: string[]) => ({
+    llm: res.raw,
+    meta: { ...res.meta, ...extra.meta, prompt_version: extra.promptVersion, kind, flags },
+  });
+  try {
+    const conv = convertOutput(res.data, { kind, uploadedAt: ctx.uploadedAt, imageCount: images.length });
+    return { rawText: extra.rawText ?? conv.rawText, output: conv.output, rawOutput: rawOutput(conv.flags), usage: res.usage };
+  } catch (e) {
+    // Bukan struk / buram dll.: output mentah dan biaya tetap tercatat.
+    if (e instanceof PermanentError) {
+      throw new PermanentError(e.code, e.message, {
+        rawText: extra.rawText ?? res.data.transcript,
+        rawOutput: rawOutput([]),
+        usage: res.usage,
+      });
+    }
+    throw e;
+  }
+}
+
 export class VisionExtractor implements CaptureExtractor {
   readonly engine = 'claude-vision';
   readonly promptVersion = PROMPT_VERSION;
@@ -53,29 +82,26 @@ export class VisionExtractor implements CaptureExtractor {
     this.model = cfg.model;
   }
 
-  async extract(input: { kind: CaptureKind; images: ImageBlob[]; ctx: ExtractContext }): Promise<Extraction> {
+  /** Permintaan Claude untuk capture ini (dipakai juga mode batch harness). */
+  request(input: ExtractInput): StructuredRequest<LlmOutput> {
     const { kind, images, ctx } = input;
-    const effort = kind === 'receipt' ? this.cfg.effortReceipt : this.cfg.effortObservation;
-    const res = await callStructured(this.client, {
+    return {
       model: this.cfg.model,
-      effort,
+      effort: kind === 'receipt' ? this.cfg.effortReceipt : this.cfg.effortObservation,
       system: systemPrompt(kind),
       content: buildUserContent(kind, images, ctx),
       schema: llmSchemaFor(kind),
       maxTokens: maxTokensFor(ctx.attempt),
       attempt: ctx.attempt,
       signal: ctx.signal,
-    });
-    const rawOutput = (flags: string[]) => ({ llm: res.raw, meta: { ...res.meta, prompt_version: this.promptVersion, kind, flags } });
-    try {
-      const conv = convertOutput(res.data, { kind, uploadedAt: ctx.uploadedAt, imageCount: images.length });
-      return { rawText: conv.rawText, output: conv.output, rawOutput: rawOutput(conv.flags), usage: res.usage };
-    } catch (e) {
-      // Bukan struk / buram dll.: output mentah dan biaya tetap tercatat.
-      if (e instanceof PermanentError) {
-        throw new PermanentError(e.code, e.message, { rawText: res.data.transcript, rawOutput: rawOutput([]), usage: res.usage });
-      }
-      throw e;
-    }
+    };
+  }
+
+  finish(input: ExtractInput, res: StructuredResult<LlmOutput>): Extraction {
+    return finishExtraction(input, res, { promptVersion: this.promptVersion });
+  }
+
+  async extract(input: ExtractInput): Promise<Extraction> {
+    return this.finish(input, await callStructured(this.client, this.request(input)));
   }
 }

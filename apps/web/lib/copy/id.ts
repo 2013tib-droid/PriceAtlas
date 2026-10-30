@@ -1136,7 +1136,7 @@ export const CATALOG_COPY = {
     empty: 'Belum ada harga di produk ini.',
     choose: 'Pindahkan harga {date} {store} {price}',
     step3: 'Alias',
-    alias: "Teks struk '{text}' di {store} selanjutnya dikenali sebagai produk tujuan",
+    alias: "Teks '{text}' di {store} selanjutnya dikenali sebagai produk tujuan",
     aliasNoText: 'Teks struk/label di {store} selanjutnya dikenali sebagai produk tujuan',
     aliasText: 'Teks alias',
     aliasHelp: 'Hanya untukmu. Alias katalog umum tidak berubah.',

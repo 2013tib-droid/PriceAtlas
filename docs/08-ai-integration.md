@@ -1,6 +1,6 @@
 # Tahap 6a — Desain AI Integration (termasuk uji OCR D-16)
 
-> Status: **Disetujui (2026-10-27).** Semua usulan default §16 diterima → **D-92**. Dokumen ini tidak mengubah keputusan D-01 s/d D-91. **6b M0 selesai dan disetujui (2026-10-27):** §18. Q-122, Q-124, Q-125 → **D-93**; Q-120, Q-121, Q-123, Q-126 → **D-94** (semua usulan default). **6b M5 (Tanya) selesai dan disetujui (2026-10-28):** §19 (F-134–F-147); Q-127–Q-131 → **D-95** (semua usulan default). Uji live set emas menunggu pemilik proyek (Q-129).
+> Status: **Disetujui (2026-10-27).** Semua usulan default §16 diterima → **D-92**. Dokumen ini tidak mengubah keputusan D-01 s/d D-91. **6b M0 selesai dan disetujui (2026-10-27):** §18. Q-122, Q-124, Q-125 → **D-93**; Q-120, Q-121, Q-123, Q-126 → **D-94** (semua usulan default). **6b M5 (Tanya) selesai dan disetujui (2026-10-28):** §19 (F-134–F-147); Q-127–Q-131 → **D-95** (semua usulan default). Uji live set emas menunggu pemilik proyek (Q-129). **6b M1-harness + M4 selesai, menunggu review (2026-10-28):** §20 (F-148–F-158, Q-132–Q-138); harness siap dijalankan pemilik proyek, keputusan D-16 menunggu foto + anotasi.
 > Rujukan: `PROJECT.md` §3, §5.4, §5.9, D-16, D-50, D-57, D-61, D-70, D-74, D-75, D-82, D-86–D-91; `docs/05-backend-design.md` §5–§7, §9; `docs/06-local-dev.md` §2; `docs/07-frontend-design.md` §6, §9, §13.
 
 ## Daftar Isi
@@ -25,6 +25,8 @@
 17. [Bagian yang belum bisa dirancang penuh](#17-bagian-yang-belum-bisa-dirancang-penuh)
 18. [Tahap 6b M0: hasil dan temuan baru (F-123 dst.)](#18-tahap-6b-m0-hasil-dan-temuan-baru-f-123-dst)
 19. [Tahap 6b M5: hasil dan temuan baru (F-134 dst.)](#19-tahap-6b-m5-hasil-dan-temuan-baru-f-134-dst)
+20. [Tahap 6b M1-harness + M4: hasil dan temuan baru (F-148 dst.)](#20-tahap-6b-m1-harness--m4-hasil-dan-temuan-baru-f-148-dst)
+21. [Lampiran A. Hasil uji OCR](#lampiran-a-hasil-uji-ocr)
 
 ---
 
@@ -1020,6 +1022,153 @@ Review M5 selesai (D-95). PR ke `master` menjalankan job `supabase-e2e` (e2e S-2
 
 ---
 
+## 20. Tahap 6b M1-harness + M4: hasil dan temuan baru (F-148 dst.)
+
+> Status: **selesai, menunggu review** (2026-10-28). Basis: `master` setelah PR #22 (M5, D-94, D-95). Dua bagian: (A) harness uji OCR M1 — dibangun dan diuji dengan data sintetis + klien palsu, **dijalankan pemilik proyek** pada foto asli (Q-105 → D-92), sehingga keputusan D-16 dan Lampiran A menunggu foto + anotasi; (B) item tinjauan M4. Satu migration baru (aditif). RLS tidak berubah. Kontrak hanya bertambah field. `EXTRACTOR` produksi tetap `stub`; `VisionExtractor`/`OcrThenParseExtractor` tidak dipasang ke `buildDeps` (M2, D-94). CI tetap tanpa API berbayar dan tanpa kunci. M4 dikerjakan sebelum M2–M3 (F-149).
+
+### 20.1 Yang dibangun
+
+**Bagian A — harness uji OCR (§4, `apps/worker/eval/`).**
+
+| Bagian | File | Isi |
+|---|---|---|
+| CLI | `eval/cli.ts`, skrip `ocr-eval` | `init` · `annotate` · `run` · `score` · `report` (§3.2, §4.6). Folder data `OCR_EVAL_DIR` (default `<repo>/.data/ocr-eval`). Setiap perintah memanggil guard F-117 lebih dulu. Log per gambar hanya dengan `--verbose` (log tetap tanpa teks/PII). `run --estimate` mencetak perkiraan biaya tanpa memanggil API. |
+| Data + guard | `eval/data.ts` | Guard F-117: folder data di dalam work tree git **wajib** `git check-ignore`; di luar repo boleh; git tidak ada → ditolak. `manifest.json` (id acak, jenis, kategori toko, kondisi, split, nama file standar, tanggal referensi = mtime foto, sha256 sumber; **tanpa** teks/nama file asli). `TruthSchema` = bentuk §4.3 dengan `expected` divalidasi **skema kontrak yang sama dengan worker** (`ParsedReceiptSchema`/`ParsedObservationSchema`), `annotations` (`weighed`, `member_discount`, `unreadable`, `transcript_pii`, catatan), `verified` (`null` = draf; hanya yang terverifikasi dinilai). |
+| `init` | `eval/init.ts` | `inbox/<jenis>/[<kategori>/]<file>`; folder di bawah jenis = struk multi-bagian (urut nama file). Id `r-/l-/s-` + hex acak. Split dev 30 % / test 70 % **berstrata per (jenis, kategori)**, deterministik dari `seed`; menjalankan ulang hanya menambah foto baru (sha256) tanpa memindah split lama. `--synthetic DIR` mengimpor set sintetis sebagai truth terverifikasi (`verified.by = 'synthetic'`). |
+| Arm | `eval/arms.ts` | Lima arm §4.5 (`vision-opus-low`, `vision-opus-medium`, `vision-sonnet`, `vision-haiku`, `ocr-gcv+opus-low`), prompt v1 + skema LLM + konverter yang sama. `slug` aman untuk `custom_id` batch (F-148). |
+| `run` | `eval/run.ts` | **Batch** (Message Batches API lewat `client.beta.messages.batches`, parameter = `buildBatchParams` = panggilan biasa **tanpa** `fallbacks`/`betas`, F-116; biaya × `BATCH_PRICE_FACTOR` 0,5; status batch disimpan di `runs/<run>/batch.json`; item `max_tokens`/error sementara diulang realtime dengan batas × 2, F-128). **Realtime** (panggilan produksi persis, dengan `fallbacks: 'default'`; latensi dari `prepareImages` sampai respons lengkap; percobaan ulang seperti pipeline). Mode `both` (default): batch untuk semua + subset realtime 10 struk / 5 label / 5 screenshot per arm untuk latensi (Q-122 → D-93). **Anggaran**: buku biaya kumulatif `spend.json` dengan batas keras US$75 (§12.2) + `--budget` per run; sebelum setiap panggilan/batch biaya diperkirakan dari asumsi §12.1 dan run berhenti jika melewati sisa anggaran. OCR vendor ditagih di buku yang sama. Klien palsu tidak pernah menulis buku biaya. |
+| `score` | `eval/score.ts`, `eval/stats.ts` | Penyelarasan baris dengan algoritma Hungaria (biaya = 1 − similarity + 0,5 jika nominal beda; similarity < 0,4 dan nominal beda → tidak berpasangan). Semua metrik §4.7 sebagai pembilang/penyebut: toko (nama jaringan ternormalisasi), cabang, tanggal, jam ± 1 mnt, total, subtotal, metode bayar ternormalisasi (F-153), recall/presisi baris produk, `line_type`, nominal/qty/harga satuan, CER teks ≤ 0,1, diskon/void (menempel ke pasangan yang benar), non-produk, timbang, member (flag parser) + **regex D-74 pada teks diskon member asli** (Q-34/Q-110), "struk sempurna", jumlah koreksi, Σ baris = total, confidence (presisi/coverage @τ, ECE 10 rentang, τ minimum untuk 98 %, isotonic dari split dev, §8.1), PII (recall + kebocoran setelah `redactText`), kegagalan (refusal/skema/timeout), stabilitas antar-ulangan. Label/screenshot: item dipasangkan, harga normal/promo/member, min qty, periode, program, posisi gambar, ongkir, judul. Gambar yang memang tak terbaca (`expected: null`) benar jika ditolak buram. Capture gagal dihitung salah di semua metrik akurasinya. |
+| `report` | `eval/report.ts` | `reports/<waktu>.agg.json` + `.md`: angka per arm × jenis × kategori toko × kondisi, biaya per capture, latensi p50/p95, keputusan §4.8 (batas minimum → biaya terendah → vision jika selisih "sempurna" < 1 poin → jika tak ada yang lolos: presisi tertinggi + τ dinaikkan sebagai risiko), label dan screenshot terpisah dengan batas yang sama (§4.8 no. 4), rekomendasi Q-34/Q-110 (regex ≥ 95 %), Q-122 (p95 struk > 60 dtk → streaming), bias pra-isi §4.2. **Pengaman terakhir:** laporan tidak ditulis jika ada teks ground truth (teks item, toko, cabang, judul, PII) di JSON/markdown. |
+| Alat anotasi | `eval/annotate/{server.ts,index.html,form.js}` | `ocr-eval annotate [--prefill ARM]` → `http://localhost:4317`: gambar di kiri (turunan JPEG bersih lewat `prepareImage`, sehingga HEIC tampil di semua browser), form di kanan (header, baris dengan anotasi timbang/member/tak terbaca, item label, PII, kategori, kondisi). Setiap field kuning = **belum diperiksa** sampai diubah atau ditandai ✓; "Simpan terverifikasi" hanya jika semua field diperiksa dan valid; draf boleh. Pra-isi = output arm (catatan run terbaru) tanpa confidence; capture tanpa output arm itu dijalankan realtime lebih dulu (dengan anggaran, `--no-run` untuk melewati). **5 struk pertama tanpa pra-isi** (`--blind`). Server hanya `127.0.0.1`, menolak Host selain localhost (DNS rebinding), hanya melayani file di manifest; nilai dari model di-escape (F-122). Truth divalidasi `TruthSchema` sebelum ditulis. |
+| Klien palsu | `eval/fake-client.ts` | Untuk uji tanpa jaringan dan `run --client fake`: jawaban dibentuk dari ground truth sintetis (kebalikan `convert.ts`) dengan gangguan deterministik per arm; mendukung realtime dan batch; menolak `fallbacks` dan `custom_id` tidak valid seperti API. Laporannya ditandai **sintetis** dan bukan bahan D-16. |
+| Extractor | `src/extractors/ocr-parse.ts`, `src/extractors/ocr/google-vision.ts`, `prompts/ocr.v1.md` | `OcrEngine` + `OcrThenParseExtractor` (§5.6): OCR → teks + kotak baris per bagian → Claude **teks saja** dengan prompt v1 + tambahan OCR (O ↔ 0, I ↔ 1, rp ↔ Rp) → konverter yang sama; `rawText` = teks OCR vendor (§5.3), biaya = Claude + OCR. `GoogleVisionOcr`: `DOCUMENT_TEXT_DETECTION`, satu request per gambar paralel maks 4, kunci di header `x-goog-api-key` (tidak di URL), kata → baris lewat penanda jeda GCV, error 429/5xx/jaringan → sementara, 400 → `unsupported`, 401/403 → sementara + `ai.config_error`, harga US$1,50/1.000 gambar (bertanggal). `VisionExtractor` dan `claude.ts` hanya dipecah (`request`/`finish`, `interpretMessage`, `buildBatchParams`) supaya realtime dan batch memakai pemeriksaan `stop_reason` + zod + konverter yang sama; perilaku pipeline tidak berubah. |
+| Set sintetis | `eval/synthetic/{set.ts,specs.ts,generate.ts}` | Truth set sintetis dalam bentuk §4.3 (kategori toko, kondisi, anotasi member/PII di spesifikasi). `writeSyntheticSet` menyalin JPEG fixture yang di-commit (tanpa Chromium); `synthetic --out DIR` merender ulang. `synthetic --only a,b` merender fixture tertentu saja (fixture lain tidak berubah sha256-nya, F-132). Fixture baru `label-indomie` (label kedua untuk uji live §13.2). |
+| Uji live | `test/live/vision.live.test.ts`, `vitest.live.config.ts`, skrip `test:live` | `LIVE_AI=1 ANTHROPIC_API_KEY=… pnpm --filter @priceatlas/worker test:live`: 3 struk + 2 label + 1 screenshot sintetis lewat `VisionExtractor` sungguhan (lolos kontrak, nominal produk/total/tanggal benar, PII tidak ada di transkripsi, harga label/screenshot benar) + satu gambar rusak yang sengaja dikirim ke API (400 harus terbaca sebagai gambar → `unsupported`, F-131). Ringkasan token/biaya/latensi tanpa teks → `.data/live/<waktu>.json`. Dikecualikan dari `test`/CI (`vitest.config.ts` exclude). Tier 4 belum ada (M3). |
+| Contoh laporan | `eval/examples/report-synthetic.{agg.json,md}` | Laporan agregat dari set sintetis (8 capture) dengan klien palsu, `--set all --repeat 2`, semua arm. Contoh bentuk, **bukan** hasil model (Lampiran A). |
+
+**Bagian B — item tinjauan M4 (§11.1 #6, §11.2, §14 M4).**
+
+| Bagian | File | Isi |
+|---|---|---|
+| Migration | `supabase/migrations/20261028000100_review_items.sql` | **Q-77:** `capture_item.read_member_price numeric(14,2) ≥ 0`, `read_member_program_name text ≤ 200` (tanpa GRANT UPDATE kolom: user tidak bisa mengubahnya). `app.match_member_program(store, nama)` = aturan pencocokan program yang sama dengan `apply_extraction` lama (nama ternormalisasi, atau satu-satunya program aktif jika nama tidak terbaca), dipakai `apply_extraction` (kini juga mengisi kolom terbaca) dan **W18**: jika `store_id` berubah dan patch tidak mengubah harga/program member, harga member terbaca dipetakan ulang ke program toko baru (`member_price`, `member_program_id`, `extra.member_note` dihapus); program toko lama yang tidak berlaku di toko baru → kembali jadi catatan (F-151). **R18** `get_active_session`: `labels[]` + `item_status` (`pending`/`accepted`, null tanpa item) dan `thumbnail_path` (gambar posisi 1, null jika `purged_at`); `vs_best_pct` terhadap `app.best_unit_price_excluding(produk, household, capture sesi)` = termurah `best_price_window_days` tanpa record dari capture sesi itu, aturan ringkasan (aktif, bukan bundle, mata uang default; harga member sudah di `unit_price`). Helper DEFINER dengan batas household pemanggil (F-152). **R20** `price_record_detail` + `source_text` (aturan teks alias W6: baris struk, teks label, judul listing untuk screenshot). Q-34/§11.1 #7 **tidak** dibuat (Q-110, menunggu data uji). REVOKE/GRANT eksplisit (F-09). |
+| Snapshot, inventaris, tipe | `db/schema.sql`, `99_privilege_inventory.sql`, `packages/db-types` | Snapshot dengan `pg_dump` 16 — lebih dulu dibuktikan identik dengan `db/schema.sql` di `master` (F-147). Diff inventaris ditinjau: hanya `app.match_member_program` dan `app.best_unit_price_excluding` untuk `authenticated`. `db-types` ditulis tangan (dua kolom `capture_item`; RPC mengembalikan `Json`), drift diperiksa job CI `supabase-e2e`. |
+| Kontrak | `packages/contracts/src/rpc.ts` | `SessionLabelSchema.item_status`, `.thumbnail_path`; `PriceRecordDetailSchema.source_text`. Semua `nullish` (aditif; cache R18/R20 di perangkat dari sebelum M4 tetap lolos, F-150). |
+| S-13 | `features/shopping/session-labels.tsx`, `lib/session/session.ts`, `lib/data/captures.ts` | Kartu per item (Q-81): item tersimpan → harga + label + pembanding, item pending → "perlu dicek ›" (S-11), meski dari foto yang sama. Thumbnail (Q-97, F-101): `useSignedUrls` = **satu** `createSignedUrls` untuk semua label (D-79), kunci `['storage', …]` tidak di-persist; purged/gagal ditandatangani → ikon label. R18 lama tanpa `item_status` → perilaku per foto lama (F-61). |
+| S-16/S-18 | `lib/catalog/record-form.ts`, `features/catalog/split-screen.tsx`, `lib/copy/id.ts` | Teks alias dari `source_text` (Q-87, F-72): "Perbarui juga alias 'MILO ORIGINAL 200G' di …?" untuk label, judul listing untuk screenshot; isian alias S-18 terisi dari teks label juga. Kalimat S-18 "Teks struk '…'" → "Teks '…'". R20 lama → kalimat umum seperti sebelumnya. |
+| Fixture + worker e2e | `test/fixtures/shopee-milo-uht.{jpg,json}`, `src/extractors/stub.ts`, `src/main.ts`, `.github/workflows/ci.yml` | **Q-78:** `shopee-milo-uht` (screenshot sintetis, `field_confidence.price` 0,7 < τ) → `needs_confirmation` dari unggahan pertama. **Q-82/Q-118:** `STUB_FALLBACK_FIXTURE=<nama>`: gambar tak dikenal dibaca sebagai fixture itu **hanya jika jenis capture sama** dengan jenis output fixture; nama salah → worker gagal start; tanpa env → tidak aktif. Worker e2e CI: `STUB_FALLBACK_FIXTURE=label-milo`. `.env.example` diberi peringatan. |
+| e2e | `e2e/session.spec.ts`, `e2e/confirm.spec.ts` | Alur 4: shutter kamera palsu Chromium → (fallback) label-milo → S-13 per item (Milo 200 g tersimpan "3% lebih murah dari biasanya", Milo 3in1 perlu dicek) + thumbnail termuat → S-11 → simpan → pembanding tetap "3% lebih murah" setelah ringkasan diperbarui; WebKit lewat galeri. Alur 5: `shopee-milo-uht` → S-11 dari unggahan pertama → simpan → S-16 record → ganti produk → tawaran alias berisi judul listing (alur 6 untuk label/screenshot). Alur 6a–c lama tidak berubah. |
+
+### 20.2 Hasil test
+
+| Lapisan | Hasil | Catatan |
+|---|---|---|
+| L1 `bash db/tests/run.sh` | **630 lulus** (M5: 602) | `87_review_items.sql` 28: nilai terbaca (dengan/tanpa nama program, tanpa harga member), user tidak bisa mengubahnya (42501) dan bukan kunci patch W18, W18: toko dipilih → program + catatan dihapus (hasil R16), nama tidak terbaca → satu-satunya program aktif, pratinjau R16 memakai program hasil pemetaan, pindah ke toko lain → catatan lagi, patch member oleh user menang, program yang cocok tidak diubah, tanpa harga terbaca tidak berubah, audit; R18 prasyarat F-60 (ringkasan memuat record sesi) lalu `vs_best_pct` −10 % (bukan 0 %), `item_status` pending/accepted/NULL, `thumbnail_path`, record di luar 90 hari, purged → NULL, helper tidak membaca household lain, pengecualian capture, anon ditolak; R20 `source_text` struk/label/screenshot + kunci lama tetap. `99_privilege_inventory` diperbarui. |
+| `snapshot.sh --check` | lulus | `pg_dump` 16 (F-147). |
+| worker | **152 lulus, 1 dilewati** (M5: 114) | `eval-score.test.ts` 14 (Hungaria, CER, persentil, ECE, isotonic, τ minimum, penyelarasan, toko/cabang/metode bayar, skor struk sempurna dan cacat, member + regex D-74, gagal, tak terbaca, stabilitas, label, keputusan §4.8 tiga cabang). `eval-harness.test.ts` 21 (guard F-117 tiga kasus + folder repo ini, `init` dari inbox, split berstrata, impor sintetis, arm, batch tanpa fallbacks + biaya × 0,5 + OCR, anggaran berhenti sebelum memanggil API, realtime `max_tokens` → × 2, GCV baris/kunci/error, `OcrThenParseExtractor`, server anotasi (daftar, JPEG tanpa EXIF, path traversal, Host, PUT tidak valid/valid), `form.js`, CLI end-to-end init → run → score → report dengan agregat tanpa teks/id, `--estimate`, pengaman laporan, tanpa kunci, folder di repo tanpa ignore). `e2e.test.ts` +2 (`shopee-milo-uht` → perlu dicek; fallback hanya jenis sama + tanpa fallback → `failed`), `unit.test.ts` +1, `images.test.ts` (fixture baru bisa didekode). |
+| web | **626** (M5: 621) | M4 L5: S-13 per item, thumbnail satu `createSignedUrls` (purged dan gagal → ikon), R18 lama → per foto, "3% lebih murah" setelah ringkasan; S-16 label → alias dari `source_text`, R20 lama → kalimat umum; `aliasText` untuk tiga sumber. Fixture `rpc.json`: field baru ditambahkan tanpa membangkitkan ulang (`UPDATE_FIXTURES=fields`, F-125/F-75); nilai yang berubah karena perilaku baru (W18, `vs_best_pct`) disalin dari keluaran server. |
+| contracts, ai-tools | 70, 55 | Tidak ada test baru (kontrak hanya field keluaran). |
+| typecheck, lint + format web, `next build`, `check:bundle`, `check-secrets.sh` | lulus | Web benar-benar dijalankan (F-125). |
+| Harness end-to-end | lulus | Set sintetis (8 capture) → `init --synthetic` → `run --arms all --repeat 2 --client fake` (batch + subset latensi, 120 catatan) → `score` → `report`; agregat tanpa teks/nama toko/PII/id. Alat anotasi dicoba di Chromium sungguhan (pra-isi tampil sebagai "belum diperiksa", simpan terverifikasi). |
+| Uji live | **tidak dijalankan** | Sesi tanpa `ANTHROPIC_API_KEY` (F-155); `test:live` terverifikasi dilewati. |
+
+**Tidak dijalankan di sesi ini:** e2e Playwright alur 4–6 dan L4 (butuh Supabase CLI; job CI `supabase-e2e`), `supabase gen types` (F-147), uji live dan harness terhadap API sungguhan (F-155).
+
+### 20.3 Penyimpangan dari desain dan alasannya
+
+| Desain | Implementasi | Alasan |
+|---|---|---|
+| §14: urutan M0 → (M1 ∥ M5) → M2 → M3 → **M4** | M4 dikerjakan sebelum M2–M3 | F-149 |
+| §4.6 `custom_id = <arm>:<id>:<repeat>` | `<arm.slug>__<id>__r<n>` | F-148 |
+| §11.1 #6 W18 hanya jika `member_program_id` kosong | + program toko lama yang tidak berlaku di toko baru → catatan; patch member oleh user menang | F-151 |
+| §11.2 helper `app.best_unit_price_excluding` (tanpa rincian hak) | DEFINER + batas household pemanggil | F-152 |
+| §11.3 field keluaran baru | `nullish` di kontrak | F-150 |
+| §4.2 langkah 3 "pra-isi dengan arm terbaik" | Pra-isi realtime (harga penuh, ±US$6) dan dicatat terpisah (`purpose: prefill`, tidak masuk akurasi) | Q-134 |
+| §4.6 realtime "subset 10 struk + 5 label" | + 5 screenshot | Latensi screenshot juga dibutuhkan §4.1 no. 5. |
+| §4.8 no. 4 label/screenshot "batas yang sama (harga ≥ 97 %)" | Presisi/coverage @τ + harga + recall item + kegagalan | "Batas yang sama" dibaca termasuk auto-save, karena label juga di-auto-accept dengan τ. |
+| §13.2 Live "tier 4 dengan katalog kecil" | Tidak ada | Matcher tier 4 baru di M3. |
+
+### 20.4 Temuan baru
+
+| # | Temuan | Dampak | Usulan / penanganan | Ke |
+|---|---|---|---|---|
+| F-148 | **`custom_id` batch hanya menerima huruf, angka, `_`, `-` (≤ 64)**; bentuk §4.6 `<arm>:<id>:<repeat>` memakai `:` dan nama arm `ocr-gcv+opus-low` memakai `+`. | Batch ditolak seluruhnya. | `custom_id = <slug>__<id>__r<n>` (slug arm tanpa `+`); pemetaan disimpan di `runs/<run>/batch.json`; klien palsu menolak format lain. | selesai (Q-135) |
+| F-149 | **M4 dikerjakan sebelum M2–M3** (§14). M4 tidak bergantung pada D-16; M2 menunggu foto + anotasi. | Urutan milestone berubah; tidak ada ketergantungan kode yang terlewat (M4 tidak menyentuh extractor/matcher). | Dicatat. M2 (extractor produksi) dimulai setelah D-16. | Q-137 |
+| F-150 | **Cache R18/R20 di perangkat (persist IndexedDB, D-60) dari sebelum M4 tidak memuat field baru**, dan `PERSIST_BUSTER` menghapus juga cache produk offline (R5) jika dinaikkan. | Field wajib membuat kode UI salah membaca `undefined` sampai R18 dimuat ulang. | Field baru `nullish` di kontrak; UI kembali ke perilaku lama tanpa field (status per foto, tanpa thumbnail, kalimat alias umum). Buster tidak dinaikkan. | Q-136 |
+| F-151 | **Pemetaan ulang W18 §11.1 #6 hanya untuk `member_program_id` kosong**, padahal program yang dipetakan dari toko A tetap menempel jika lokasi item lalu diubah ke toko B. | Harga member item menunjuk program toko lain; pratinjau/konfirmasi memakai eligibility program yang salah. | Jika program saat ini bukan milik toko baru: petakan ulang ke program toko baru, atau kembali menjadi `member_note` (teks "Program 21000" seperti `apply_extraction`). Patch yang juga mengubah `member_price`/`member_program_id` tidak dipetakan ulang (pilihan user menang). Item yang diproses sebelum migration tidak punya nilai terbaca, jadi tidak dipetakan ulang. | Q-132 |
+| F-152 | **`app.config` tidak bisa dibaca role `authenticated`** (`app.config_int` hanya `service_role`), padahal R18 berjalan sebagai user (INVOKER). | Helper INVOKER membaca `best_price_window_days` → `permission denied`. | Helper DEFINER dengan filter household pemanggil (`app.my_household_ids()`, pola `missing_storage_paths`); test L1 household lain dan anon. | selesai |
+| F-153 | **`payment_method` kontrak berupa teks bebas** (fixture `struk-tanpa-toko`: `"tunai"`), skema LLM berupa enum (`cash`, …). | Skor metode bayar dan data lama tidak sebanding. | Harness membandingkan enum ternormalisasi (§4.7). Data produksi dari extractor sungguhan sudah enum; fixture stub dibiarkan. | selesai |
+| F-154 | **Matching screenshot memakai `listing_title`, bukan nama produk** (`process-capture.ts`: `raw_text: it.listing_title ?? it.raw_text`). `word_similarity` judul panjang ("Milo UHT 180 ml Susu Cokelat Kotak") terhadap produk "milo uht 180 ml" jauh di bawah 0,5. | Judul marketplace yang panjang jarang mencapai tier 3; sebagian besar akan bergantung pada tier 4/manual. Fixture `shopee-milo-uht` sengaja memakai judul pendek + brand. | M3: kirim `raw_text` (nama produk dari model) lebih dulu, judul sebagai cadangan; diukur di masa kalibrasi. Alias user tetap memakai judul (W6). | **Q-133** |
+| F-155 | **Sesi ini tanpa `ANTHROPIC_API_KEY`/kunci Google Vision.** Uji live dan harness tidak pernah memanggil API sungguhan; perilaku Batches API (bentuk hasil, `errored`) hanya diuji lewat klien palsu yang mengikuti tipe SDK 1.3.0. F-131: harga baca cache Haiku 5.5 sekarang tertulis di skill `claude-api` (0,1× input = US$0,01/MTok, sama dengan tabel); halaman pricing resmi belum dibuka. | Batch pertama dan pola pesan 400 gambar baru terbukti saat pemilik proyek menjalankan. | Pemilik proyek menjalankan `test:live` (±US$0,40) sebelum `ocr-eval run`; jika gagal, kirim pesan error-nya (tanpa gambar). | Q-138 |
+| F-156 | **R18 `vs_last_pct` tetap terhadap `price_summary`** (memuat record label itu sendiri). | Tidak dipakai UI saat ini (hanya `vs_best_pct`). | Dibiarkan; ditinjau jika UI menampilkannya. | — |
+| F-157 | **Mode fallback e2e menggantikan jalur "gagal dibaca" kamera di alur 4** (frame kamera kini terbaca sebagai label-milo). | Kartu "gagal dibaca" tidak lagi dicapai lewat kamera di e2e. | Tetap diuji di L5 (`session.test.tsx`) dan alur G (`struk-buram`); fallback hanya untuk jenis label. | selesai |
+| F-158 | **Pra-isi anotasi dan subset latensi realtime dibayar penuh** (tanpa diskon batch). | Perkiraan uji penuh §4.4 (`run --estimate`, asumsi §12.1): batch 5 arm × 49 capture test × 2 ulangan ±US$14,5, subset latensi ±US$5,6, pra-isi 70 capture ±US$6 → **±US$26**, ditambah iterasi prompt di dev. Di bawah batas US$75. | Dibiarkan: pra-isi realtime juga memberi data latensi tambahan dan anotasi bisa dimulai tanpa menunggu batch (hingga 24 jam). | Q-134 |
+
+**F-105 (Q-101):** tetap terbuka, tidak memblokir. Ada perubahan UI S-13 (thumbnail dekoratif `alt=""`, status per item dengan tautan bernama "Cek label <produk>") yang tercakup audit axe yang ada; butir daftar cek `docs/07` §1.11 tidak berubah.
+
+### 20.5 Pertanyaan (Q-132 dst.)
+
+| ID | Pertanyaan | Usulan default |
+|---|---|---|
+| Q-132 | W18 memetakan ulang juga saat program yang menempel bukan milik toko baru (kembali ke catatan jika tidak ada padanan), dan pilihan member user di patch yang sama menang (F-151)? | **Ya.** |
+| Q-133 | Matching screenshot memakai nama produk (`raw_text`) dulu dan judul listing sebagai cadangan (F-154)? | **Ya, di M3**, bersama matcher tier 4; dampaknya diukur di masa kalibrasi. |
+| Q-134 | Pra-isi anotasi realtime (harga penuh, ±US$6) dan subset latensi realtime termasuk screenshot (F-158)? | **Ya.** Total perkiraan ±US$26 + iterasi dev, batas keras tetap US$75. |
+| Q-135 | Bentuk `custom_id` batch `<slug>__<id>__r<n>` dan mode `run` default `both` (batch semua + subset realtime) (F-148)? | **Ya.** |
+| Q-136 | Field keluaran baru R18/R20 `nullish` di kontrak, UI kembali ke perilaku lama untuk cache tanpa field, buster cache tidak dinaikkan (F-150)? | **Ya.** |
+| Q-137 | Penyimpangan urutan: M4 sebelum M2–M3 (F-149)? | **Ya.** M2 dimulai setelah D-16 (laporan Lampiran A). |
+| Q-138 | Sebelum `ocr-eval run`, pemilik proyek menjalankan `test:live` sekali (±US$0,40) untuk membuktikan kunci, model, dan pola error 400 gambar (F-155, F-131)? | **Ya.** Jika gagal, kirim pesan error tanpa gambar; harness tidak dijalankan sampai lulus. |
+
+### 20.6 Berikutnya
+
+Pemilik proyek: §15 no. 1–6 (foto, kunci), lalu `test:live` (Q-138) dan lima perintah docs/06 §2.8; kirim `reports/<waktu>.agg.json`. Sesi berikutnya mengisi Lampiran A dari agregat itu dan mengusulkan keputusan D-16 (model/engine, τ ekstraksi, Q-34/Q-110, Q-122) → D-9x, lalu M2. PR ke `master` menjalankan job `supabase-e2e` (e2e alur 4–6, L4, drift `db-types`).
+
+---
+
 ## Lampiran A. Hasil uji OCR
 
-*Diisi di 6b M1 (laporan agregat, tanpa teks struk).*
+*Diisi setelah pemilik proyek menjalankan harness pada split test (§4.2, docs/06 §2.8). Sumber: `reports/<waktu>.agg.json` (agregat, tanpa teks struk, nama toko, PII, atau id). Contoh bentuk dari set sintetis + klien palsu: `apps/worker/eval/examples/report-synthetic.md` — **bukan** hasil model.*
+
+### A.1 Data
+
+| | Struk | Label | Screenshot |
+|---|---|---|---|
+| Ground truth terverifikasi (test) | — | — | — |
+| Per kategori toko | — | | |
+| Kondisi (panjang, pudar, timbang, member, void, …) | — | | |
+| Tanggal uji · versi prompt · harga per | — · v1 · — | | |
+| Biaya uji kumulatif (`spend.json`) | — dari US$75 | | |
+
+### A.2 Struk (split test)
+
+| Arm | Sempurna | Toko | Tanggal | Total | Recall baris | Nominal baris | Presisi @τ 0,90 | Coverage @τ | τ min 98 % | ECE | Gagal | Bocor PII | Biaya/struk | p50 | p95 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| vision-opus-low | | | | | | | | | | | | | | | |
+| vision-opus-medium | | | | | | | | | | | | | | | |
+| vision-sonnet | | | | | | | | | | | | | | | |
+| vision-haiku | | | | | | | | | | | | | | | |
+| ocr-gcv+opus-low | | | | | | | | | | | | | | | |
+
+Rincian (diskon, void, non-produk, timbang, member, stabilitas) dan per kategori/kondisi: dari laporan markdown.
+
+### A.3 Label dan screenshot (split test)
+
+| Arm | Label: harga | Label: recall item | Label: presisi @τ | Screenshot: harga | Screenshot: presisi @τ | Biaya label | Biaya screenshot |
+|---|---|---|---|---|---|---|---|
+| … | | | | | | | |
+
+### A.4 Keputusan §4.8 (usulan, keputusan pemilik proyek, Q-102)
+
+| Jenis | Lolos batas | Terpilih | Alasan | Risiko |
+|---|---|---|---|---|
+| Struk | | | | |
+| Label | | | | |
+| Screenshot | | | | |
+
+### A.5 Pertanyaan terbuka yang dijawab data
+
+| ID | Data | Usulan |
+|---|---|---|
+| Q-34/Q-110 | recall regex D-74 pada diskon member asli: — | ≥ 95 % → tetap D-74; < 95 % → kolom `receipt_line.is_member_discount` (§11.1 #7) |
+| Q-122 | p95 latensi struk arm terpilih: — | > 60 dtk → streaming ekstraksi |
+| §8.1 | τ ekstraksi minimum untuk presisi 98 %, tabel isotonic dari dev: — | Disimpan bersama versi prompt (M2) |
+| §4.2 | Bias pra-isi (error arm pra-isi tanpa vs dengan pra-isi): — | > 1 poin → periksa ulang tanpa pra-isi |
+| §12 | Biaya per struk/label/screenshot terukur: — | Perbarui perkiraan §12.2 |
