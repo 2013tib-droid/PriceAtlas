@@ -3,7 +3,9 @@
 // Env: DATABASE_URL, WORKER_DB_ROLE, STORAGE_BACKEND (supabase|local), LOCAL_STORAGE_DIR,
 //      NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (backend supabase),
 //      EXTRACTOR (Tahap 4: hanya "stub"), STUB_FIXTURES_DIR,
-//      STUB_FALLBACK_FIXTURE (khusus worker e2e: nama fixture untuk gambar tak dikenal, Q-82/Q-118).
+//      STUB_FALLBACK_FIXTURE (khusus worker e2e: nama fixture untuk gambar tak dikenal, Q-82/Q-118),
+//      CAPTURE_LEASE_SECONDS (default 300, ≤ capture_processing_timeout_seconds; docs/08 §5.4),
+//      AI_DAILY_BUDGET_USD (override app.config ai_daily_budget_usd; docs/08 §12.3).
 import { hostname } from 'node:os';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -13,6 +15,7 @@ import { SupabaseBlobStore } from './adapters/supabase-blob-store.ts';
 import { createPool } from './db.ts';
 import { FixtureRegistry, StubAiMatcher, StubExtractor, fallbackFixture } from './extractors/stub.ts';
 import { log } from './log.ts';
+import { BudgetGate, DEFAULT_LEASE_SECONDS, checkLeaseSeconds, parsePositiveEnv } from './pipeline/process-capture.ts';
 import type { BlobStore } from './pipeline/types.ts';
 import { Worker } from './worker.ts';
 
@@ -49,12 +52,16 @@ export function buildDeps(args: { workerId: string }) {
   const fixtures = new FixtureRegistry(resolve(process.env.STUB_FIXTURES_DIR ?? DEFAULT_FIXTURES_DIR));
   const fallback = fallbackFixture(fixtures, process.env.STUB_FALLBACK_FIXTURE || undefined);
   if (fallback) log('worker.stub_fallback', { fixture: fallback.name, kind: fallback.output.kind });
+  const leaseSeconds = parsePositiveEnv('CAPTURE_LEASE_SECONDS', process.env.CAPTURE_LEASE_SECONDS, { integer: true }) ?? DEFAULT_LEASE_SECONDS;
+  const budgetUsd = parsePositiveEnv('AI_DAILY_BUDGET_USD', process.env.AI_DAILY_BUDGET_USD);
   return {
     db,
     blob,
     extractor: new StubExtractor(fixtures, fallback),
     ai: new StubAiMatcher(fixtures, fallback),
     workerId: args.workerId,
+    leaseSeconds,
+    budget: new BudgetGate(db, budgetUsd),
   };
 }
 
@@ -64,6 +71,7 @@ async function main(): Promise<void> {
   const idIdx = argv.indexOf('--worker-id');
   const workerId = idIdx >= 0 ? argv[idIdx + 1]! : `${hostname()}-${process.pid}`;
   const deps = buildDeps({ workerId });
+  await checkLeaseSeconds(deps.db, deps.leaseSeconds);
   const worker = new Worker({ ...deps, devScheduler: flag('--dev-scheduler') });
 
   if (flag('--once')) {

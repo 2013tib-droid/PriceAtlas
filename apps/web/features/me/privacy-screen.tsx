@@ -1,6 +1,6 @@
 'use client';
 // S-19 Privasi & data (`/saya/privasi`, docs/07 §3.5, §7.3, §8.2; docs/05 §7.6; D-32, D-76, Q-61):
-// info retensi 12 bulan, lalu hapus akun dalam tiga langkah di halaman yang sama:
+// info retensi 12 bulan, pemroses AI (Q-114, F-115), lalu hapus akun dalam tiga langkah di halaman yang sama:
 //   1. login ulang OTP ke email akun (memperbarui last_sign_in_at; route mewajibkan ≤ 15 menit),
 //   2. ketik `HAPUS AKUN` (ACCOUNT_DELETE_CONFIRMATION),
 //   3. ConfirmTwice → `POST /api/account/delete` (route server satu-satunya yang menulis, D-76).
@@ -36,6 +36,16 @@ export function PrivacyScreen() {
         </h2>
         <ul className="list-disc pl-5 text-base">
           {C.retention.map((t) => (
+            <li key={t}>{t}</li>
+          ))}
+        </ul>
+      </section>
+      <section aria-labelledby="pembacaan-ai" className="flex flex-col gap-1">
+        <h2 id="pembacaan-ai" className="text-base font-semibold">
+          {C.aiTitle}
+        </h2>
+        <ul className="list-disc pl-5 text-base">
+          {C.ai.map((t) => (
             <li key={t}>{t}</li>
           ))}
         </ul>

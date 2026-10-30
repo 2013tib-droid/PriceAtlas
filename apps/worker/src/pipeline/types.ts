@@ -50,15 +50,27 @@ export interface CaptureExtractor {
 
 export interface UnmatchedItem {
   key: number;
+  /** Nama produk dari model (struk: teks baris; label/screenshot: nama produk, Q-133). */
   raw_text: string;
   barcode?: string | null;
+  /** Judul listing screenshot (cadangan matching, Q-133). */
+  title?: string | null;
+  /** Nominal yang terbaca: jumlah baris struk, atau harga (promo/normal) label/screenshot (F-112). */
+  amount?: number | null;
+  quantity?: number | null;
 }
 
 export interface MatchContext {
   householdId: string;
   storeId: string | null;
+  /** Nama toko (katalog, atau yang terbaca jika toko belum dikenal) untuk konteks tier 4 (F-112). */
+  storeName?: string | null;
   kind: CaptureKind;
   imageSha256s: string[];
+  /** Tenggat lease yang sama dengan ekstraksi (F-107). */
+  signal?: AbortSignal;
+  /** Biaya panggilan tier 4, dijumlahkan pipeline ke processing_run (anggaran harian §12.3). */
+  onUsage?: (usage: NonNullable<Extraction['usage']>) => void;
 }
 
 export interface MatchSuggestion {

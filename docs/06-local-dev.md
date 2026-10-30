@@ -2,7 +2,7 @@
 
 > Dasar: `docs/05-backend-design.md` (§1.4 penjadwalan, §1.5 struktur repo, §5 pipeline, §7.7 rahasia, §8 test).
 > Dua mode: **A** (PostgreSQL biasa + stub, tanpa Supabase) dan **B** (Supabase CLI).
-> Extractor dan matcher AI worker masih **stub berbasis fixture** (extractor sungguhan di 6b M2). Uji OCR D-16 (harness `ocr-eval`, 6b M1) dijalankan pemilik proyek di mesinnya: §2.8; uji live sintetis: §2.9. Tanya (`/api/ask`, 6b M5) memakai Claude jika `ANTHROPIC_API_KEY` web diisi, atau `ASK_ENGINE=stub` tanpa kunci: §4.11. Frontend (`apps/web`, Tahap 5b) butuh mode B: lihat §4.
+> Extractor dan matcher AI worker masih **stub berbasis fixture** (extractor sungguhan di 6b M2). Uji OCR D-16 (harness `ocr-eval`, 6b M1) dijalankan pemilik proyek di mesinnya: §2.8; uji live sintetis (termasuk matcher AI tier 4): §2.9; laporan kalibrasi matching: §2.10. Tanya (`/api/ask`, 6b M5) memakai Claude jika `ANTHROPIC_API_KEY` web diisi, atau `ASK_ENGINE=stub` tanpa kunci: §4.11. Frontend (`apps/web`, Tahap 5b) butuh mode B: lihat §4.
 
 ---
 
@@ -124,6 +124,8 @@ Worker mendengarkan `NOTIFY capture_uploaded` dan polling tiap 5 detik sebagai c
 | `app.enqueue_retention()` | harian 17:35 UTC |
 
 Sapuan unggahan yatim (`app.orphan_storage_objects` → hapus lewat BlobStore) dijalankan worker harian 17:50 UTC di semua mode.
+
+Sebelum setiap claim worker memeriksa anggaran AI harian (docs/08 §12.3): `app.ai_spend_today()` ≥ `AI_DAILY_BUDGET_USD` (atau `app.config.ai_daily_budget_usd`, default 2,00) → capture dibiarkan `uploaded` (tidak memakan percobaan) dan log `ai.budget_exhausted` maks sekali per jam. Dengan stub biayanya 0, kecuali Tanya sungguhan ikut memakai anggaran yang sama. `CAPTURE_LEASE_SECONDS` (default 300) menentukan tenggat AI (lease − 30 dtk); nilai di atas `capture_processing_timeout_seconds` atau ≤ 30 membuat worker menolak start.
 
 ### 2.5 Melihat hasil sebagai user
 
@@ -327,6 +329,19 @@ LIVE_MODEL=claude-haiku-5-5 LIVE_EFFORT=medium LIVE_AI=1 ANTHROPIC_API_KEY=… p
 ```
 
 Set dari `synthetic --out` jika ada (default `.data/ocr-eval-synthetic`), selain itu salinan fixture yang di-commit (keluaran generator yang sama). Ringkasan token, biaya, dan latensi per kasus (tanpa teks) → `.data/live/<waktu>.json`. Tanpa `LIVE_AI=1` atau kunci, semua kasus dilewati.
+
+Perintah yang sama juga menjalankan `test/live/matcher.live.test.ts`: `ClaudeAiMatcher` sungguhan (tier 4, docs/08 §7) dengan katalog kecil sintetis (tanpa database): "MILO ACTIV-GO 1KG" harus memilih Milo 1 kg (bukan 500 g), "INDOMIE GRG 5X85G" paket 5 × 85 g, item tanpa padanan → tanpa saran, confidence ≤ 0,85. ±US$0,03.
+
+### 2.10 Laporan kalibrasi matching (masa kalibrasi, docs/08 §8.2)
+
+Baca saja, hanya angka agregat (tanpa teks struk, nama produk, atau id household), boleh dikirim untuk analisis:
+
+```bash
+psql "$DATABASE_URL" -f db/scripts/calibration_report.sql                    # semua data
+psql "$DATABASE_URL" -v since=2026-11-01 -f db/scripts/calibration_report.sql # sejak awal masa kalibrasi
+```
+
+Isi: presisi per tier dan sumber (saran diterima tanpa diganti, koreksi belakangan dihitung salah), presisi per rentang confidence 0,05, kandidat τ (presisi dan coverage untuk τ 0,50–1,00), distribusi similarity tier 3 (`fuzzy_min_similarity`, §8.3), jumlah baris tanpa saran, dan nilai config matching saat ini. Nilai baru ditulis ke `app.config` (`match_conf_*`, `fuzzy_max_confidence`, `ai_match_max_confidence`, `auto_save_min_confidence`) lewat migration atau SQL editor, lalu dicatat sebagai keputusan (M6).
 
 ---
 

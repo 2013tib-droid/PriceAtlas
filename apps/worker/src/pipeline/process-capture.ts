@@ -2,6 +2,7 @@
 //   claim → unduh gambar + verifikasi sha256 → prepareImages (docs/08 §6) → extract → record_run_output →
 //   lokasi → matching tier 1–3 (SQL) → tier 4 (AiMatcher, hanya tanpa kandidat) →
 //   apply_extraction (satu transaksi). Gagal → fail_run (transient/permanen).
+// Sebelum claim: anggaran AI harian (docs/08 §12.3). Habis → tidak claim, capture tetap `uploaded`.
 import { createHash } from 'node:crypto';
 import {
   ParsedOutputSchema,
@@ -20,6 +21,7 @@ import {
   type BlobStore,
   type CaptureExtractor,
   type CaptureKind,
+  type Extraction,
   type ImageBlob,
   type RunOutput,
   type UnmatchedItem,
@@ -36,6 +38,8 @@ export interface PipelineDeps {
   extractor: CaptureExtractor;
   ai: AiMatcher;
   workerId: string;
+  /** Anggaran AI harian (§12.3). Tanpa gerbang → selalu claim (test). */
+  budget?: { allow(): Promise<boolean> };
   /** Lease run dalam detik (default 300). Tenggat AI = lease − 30 dtk dari claim (F-107). */
   leaseSeconds?: number;
   /** Hanya untuk test crash (L3): dipanggil tepat setelah klaim berhasil. */
@@ -75,6 +79,7 @@ const PERMANENT_MESSAGE: Record<string, string> = {
 
 export async function processNextCapture(deps: PipelineDeps): Promise<ProcessResult | null> {
   const { db, extractor } = deps;
+  if (deps.budget && !(await deps.budget.allow())) return null;
   const started = Date.now();
   const r = await db.query<Claim>('select * from app.claim_next_capture($1, $2, $3, $4)', [
     deps.workerId,
@@ -110,6 +115,76 @@ export async function processNextCapture(deps: PipelineDeps): Promise<ProcessRes
   } finally {
     deadline.clear();
   }
+}
+
+type Usage = NonNullable<Extraction['usage']>;
+
+/** Biaya AI hari ini ≥ anggaran → tidak claim. Log `ai.budget_exhausted` maks sekali per jam. */
+export class BudgetGate {
+  private lastLog = Number.NEGATIVE_INFINITY;
+
+  constructor(
+    private readonly db: Db,
+    /** env AI_DAILY_BUDGET_USD; null → app.config ai_daily_budget_usd. */
+    private readonly overrideUsd: number | null = null,
+    private readonly now: () => number = Date.now,
+  ) {}
+
+  async allow(): Promise<boolean> {
+    const r = await this.db.query<{ spent: string | null; budget: string | null }>(
+      `select app.ai_spend_today() as spent, app.config_numeric('ai_daily_budget_usd') as budget`,
+    );
+    const spent = Number(r.rows[0]?.spent ?? 0);
+    const budget = this.overrideUsd ?? Number(r.rows[0]?.budget ?? 2);
+    if (spent < budget) return true;
+    const t = this.now();
+    if (t - this.lastLog >= 3_600_000) {
+      this.lastLog = t;
+      log('ai.budget_exhausted', { spent_usd: round4(spent), budget_usd: budget });
+    }
+    return false;
+  }
+}
+
+/** Env angka positif opsional (CAPTURE_LEASE_SECONDS, AI_DAILY_BUDGET_USD); kosong → null. */
+export function parsePositiveEnv(name: string, value: string | undefined, opts: { integer?: boolean } = {}): number | null {
+  if (value === undefined || value.trim() === '') return null;
+  const n = Number(value);
+  if (!Number.isFinite(n) || n <= 0 || (opts.integer && !Number.isInteger(n))) {
+    throw new Error(`env ${name} harus angka ${opts.integer ? 'bulat ' : ''}positif: ${value}`);
+  }
+  return n;
+}
+
+/**
+ * Lease worker tidak boleh lebih panjang dari timeout reaper (capture_processing_timeout_seconds),
+ * dan harus lebih panjang dari margin tenggat (F-107). Dicek sekali saat worker mulai.
+ */
+export async function checkLeaseSeconds(db: Db, leaseSeconds: number): Promise<void> {
+  const r = await db.query<{ t: string | null }>(`select app.config_numeric('capture_processing_timeout_seconds') as t`);
+  const timeout = Number(r.rows[0]?.t ?? DEFAULT_LEASE_SECONDS);
+  if (leaseSeconds <= DEADLINE_MARGIN_SECONDS) {
+    throw new Error(`CAPTURE_LEASE_SECONDS=${leaseSeconds} harus lebih dari ${DEADLINE_MARGIN_SECONDS} (margin tenggat AI, F-107)`);
+  }
+  if (leaseSeconds > timeout) {
+    throw new Error(
+      `CAPTURE_LEASE_SECONDS=${leaseSeconds} melebihi capture_processing_timeout_seconds=${timeout}: ` +
+        'reaper akan menandai run yang masih berjalan sebagai macet (docs/08 §5.4).',
+    );
+  }
+}
+
+function round4(n: number): number {
+  return Math.round(n * 10_000) / 10_000;
+}
+
+function addUsage(a: Usage | undefined, b: Usage): Usage {
+  if (!a) return b;
+  return {
+    inputTokens: (a.inputTokens ?? 0) + (b.inputTokens ?? 0),
+    outputTokens: (a.outputTokens ?? 0) + (b.outputTokens ?? 0),
+    costUsd: a.costUsd == null && b.costUsd == null ? null : (a.costUsd ?? 0) + (b.costUsd ?? 0),
+  };
 }
 
 export interface Deadline {
@@ -210,27 +285,55 @@ async function runClaim(deps: PipelineDeps, claim: Claim, deadline: Deadline): P
   const storeId = loc.rows[0]?.store_id ?? null;
 
   // 5. Matching tier 1–3 (SQL, deterministik), lalu tier 4 hanya untuk yang tanpa kandidat.
+  //    Screenshot: nama produk dan judul listing, yang lebih kuat menang (Q-133, F-154, F-161).
   const toMatch: UnmatchedItem[] =
     output.kind === 'receipt'
-      ? output.lines.filter((l) => l.line_type === 'product').map((l) => ({ key: l.line_no, raw_text: l.raw_text, barcode: l.barcode ?? null }))
-      : output.items.map((it, i) => ({ key: i + 1, raw_text: it.listing_title ?? it.raw_text, barcode: it.barcode ?? null }));
+      ? output.lines
+          .filter((l) => l.line_type === 'product')
+          .map((l) => ({ key: l.line_no, raw_text: l.raw_text, barcode: l.barcode ?? null, amount: l.line_amount, quantity: l.quantity ?? null }))
+      : output.items.map((it, i) => ({
+          key: i + 1,
+          raw_text: it.raw_text,
+          barcode: it.barcode ?? null,
+          title: it.listing_title?.trim() ? it.listing_title : null,
+          amount: it.promo_price ?? it.normal_price ?? null,
+          quantity: null,
+        }));
 
   const matched = new Map<number, MatchResult>();
   if (toMatch.length > 0) {
+    // Satu panggilan: key positif = nama produk, key negatif = judul listing (jika berbeda).
+    const query = toMatch.flatMap((x) => {
+      const date = dateOf(output, x.key);
+      const rows = [{ key: x.key, raw_text: x.raw_text, barcode: x.barcode, date }];
+      if (x.title && x.title !== x.raw_text) rows.push({ key: -x.key, raw_text: x.title, barcode: x.barcode, date });
+      return rows;
+    });
     const m = await db.query<{ r: (MatchResult & { key: number })[] }>('select app.match_products($1, $2, $3) as r', [
       claim.household_id,
       storeId,
-      JSON.stringify(toMatch.map((x) => ({ key: x.key, raw_text: x.raw_text, barcode: x.barcode, date: dateOf(output, x.key) }))),
+      JSON.stringify(query),
     ]);
-    for (const row of m.rows[0]?.r ?? []) matched.set(row.key, row);
+    const byKey = new Map<number, MatchResult>();
+    for (const row of m.rows[0]?.r ?? []) byKey.set(row.key, row);
+    for (const x of toMatch) {
+      const best = pickMatch(byKey.get(x.key), byKey.get(-x.key));
+      if (best) matched.set(x.key, best);
+    }
 
     const unmatched = toMatch.filter((x) => (matched.get(x.key)?.candidates.length ?? 0) === 0);
     if (unmatched.length > 0) {
+      let matchUsage: Usage | undefined;
       const suggestions = await ai.match(unmatched, {
         householdId: claim.household_id,
         storeId,
+        storeName: await storeName(db, storeId, output.store_hint?.name ?? null),
         kind: claim.kind,
         imageSha256s: images.map((i) => i.sha256),
+        signal: deadline.signal,
+        onUsage: (u) => {
+          matchUsage = addUsage(matchUsage, u);
+        },
       });
       for (const s of suggestions) {
         matched.set(s.key, {
@@ -239,6 +342,16 @@ async function runClaim(deps: PipelineDeps, claim: Claim, deadline: Deadline): P
           confidence: s.confidence,
           candidates: [{ product_id: s.product_id, tier: 'ai', confidence: s.confidence }],
         });
+      }
+      // Biaya tier 4 masuk biaya run (anggaran harian §12.3 menjumlahkan processing_run.cost_usd).
+      if (matchUsage) {
+        await recordRunOutput(
+          db,
+          claim.run_id,
+          extraction.rawText,
+          extraction.rawOutput ?? extraction.output,
+          addUsage(extraction.usage ?? { inputTokens: 0, outputTokens: 0, costUsd: null }, matchUsage),
+        );
       }
     }
   }
@@ -254,6 +367,32 @@ async function runClaim(deps: PipelineDeps, claim: Claim, deadline: Deadline): P
     JSON.stringify(payload),
   ]);
   return a.rows[0]?.r.status ?? 'stale';
+}
+
+const TIER_RANK: Record<string, number> = { barcode: 1, alias: 2, fuzzy: 3, ai: 4, manual: 5 };
+
+/**
+ * Hasil nama produk vs judul listing (Q-133): tier lebih kuat menang, lalu confidence; seri → nama
+ * produk. Kandidat pihak yang kalah melengkapi daftar (tanpa duplikat, maks 5).
+ */
+export function pickMatch(primary: MatchResult | undefined, fallback: MatchResult | undefined): MatchResult | undefined {
+  const has = (m: MatchResult | undefined): m is MatchResult => !!m && m.candidates.length > 0;
+  if (!has(fallback)) return primary;
+  if (!has(primary)) return fallback;
+  const rank = (m: MatchResult) => TIER_RANK[m.tier ?? 'manual'] ?? 9;
+  const fallbackWins =
+    rank(fallback) < rank(primary) || (rank(fallback) === rank(primary) && (fallback.confidence ?? 0) > (primary.confidence ?? 0));
+  const [win, lose] = fallbackWins ? [fallback, primary] : [primary, fallback];
+  const seen = new Set(win.candidates.map((c) => c.product_id));
+  const extra = lose.candidates.filter((c) => !seen.has(c.product_id));
+  return { ...win, candidates: [...win.candidates, ...extra].slice(0, 5) };
+}
+
+/** Nama toko untuk konteks tier 4: katalog jika toko dikenal, selain itu yang terbaca. */
+async function storeName(db: Db, storeId: string | null, hint: string | null): Promise<string | null> {
+  if (!storeId) return hint;
+  const r = await db.query<{ name: string }>('select name from public.store where id = $1', [storeId]);
+  return r.rows[0]?.name ?? hint;
 }
 
 function dateOf(output: ParsedReceipt | ParsedObservation, key: number): string | null {

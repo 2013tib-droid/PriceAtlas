@@ -1,6 +1,6 @@
 # Tahap 6a — Desain AI Integration (termasuk uji OCR D-16)
 
-> Status: **Disetujui (2026-10-27).** Semua usulan default §16 diterima → **D-92**. Dokumen ini tidak mengubah keputusan D-01 s/d D-91. **6b M0 selesai dan disetujui (2026-10-27):** §18. Q-122, Q-124, Q-125 → **D-93**; Q-120, Q-121, Q-123, Q-126 → **D-94** (semua usulan default). **6b M5 (Tanya) selesai dan disetujui (2026-10-28):** §19 (F-134–F-147); Q-127–Q-131 → **D-95** (semua usulan default). Uji live set emas menunggu pemilik proyek (Q-129). **6b M1-harness + M4 selesai, menunggu review (2026-10-28):** §20 (F-148–F-158, Q-132–Q-138); harness siap dijalankan pemilik proyek, keputusan D-16 menunggu foto + anotasi.
+> Status: **Disetujui (2026-10-27).** Semua usulan default §16 diterima → **D-92**. Dokumen ini tidak mengubah keputusan D-01 s/d D-91. **6b M0 selesai dan disetujui (2026-10-27):** §18. Q-122, Q-124, Q-125 → **D-93**; Q-120, Q-121, Q-123, Q-126 → **D-94** (semua usulan default). **6b M5 (Tanya) selesai dan disetujui (2026-10-28):** §19 (F-134–F-147); Q-127–Q-131 → **D-95** (semua usulan default). Uji live set emas menunggu pemilik proyek (Q-129). **6b M1-harness + M4 selesai dan disetujui (2026-10-30):** §20 (F-148–F-158); Q-132–Q-138 → **D-96** (semua usulan default); harness siap dijalankan pemilik proyek, keputusan D-16 menunggu foto + anotasi. **6b M2/M3 bagian tanpa D-16 selesai, menunggu review (2026-10-30):** §21 (F-159–F-166); Q-139–Q-142.
 > Rujukan: `PROJECT.md` §3, §5.4, §5.9, D-16, D-50, D-57, D-61, D-70, D-74, D-75, D-82, D-86–D-91; `docs/05-backend-design.md` §5–§7, §9; `docs/06-local-dev.md` §2; `docs/07-frontend-design.md` §6, §9, §13.
 
 ## Daftar Isi
@@ -26,7 +26,8 @@
 18. [Tahap 6b M0: hasil dan temuan baru (F-123 dst.)](#18-tahap-6b-m0-hasil-dan-temuan-baru-f-123-dst)
 19. [Tahap 6b M5: hasil dan temuan baru (F-134 dst.)](#19-tahap-6b-m5-hasil-dan-temuan-baru-f-134-dst)
 20. [Tahap 6b M1-harness + M4: hasil dan temuan baru (F-148 dst.)](#20-tahap-6b-m1-harness--m4-hasil-dan-temuan-baru-f-148-dst)
-21. [Lampiran A. Hasil uji OCR](#lampiran-a-hasil-uji-ocr)
+21. [Tahap 6b M2/M3 bagian tanpa D-16: hasil dan temuan baru (F-159 dst.)](#21-tahap-6b-m2m3-bagian-tanpa-d-16-hasil-dan-temuan-baru-f-159-dst)
+22. [Lampiran A. Hasil uji OCR](#lampiran-a-hasil-uji-ocr)
 
 ---
 
@@ -1024,7 +1025,7 @@ Review M5 selesai (D-95). PR ke `master` menjalankan job `supabase-e2e` (e2e S-2
 
 ## 20. Tahap 6b M1-harness + M4: hasil dan temuan baru (F-148 dst.)
 
-> Status: **selesai, menunggu review** (2026-10-28). Basis: `master` setelah PR #22 (M5, D-94, D-95). Dua bagian: (A) harness uji OCR M1 — dibangun dan diuji dengan data sintetis + klien palsu, **dijalankan pemilik proyek** pada foto asli (Q-105 → D-92), sehingga keputusan D-16 dan Lampiran A menunggu foto + anotasi; (B) item tinjauan M4. Satu migration baru (aditif). RLS tidak berubah. Kontrak hanya bertambah field. `EXTRACTOR` produksi tetap `stub`; `VisionExtractor`/`OcrThenParseExtractor` tidak dipasang ke `buildDeps` (M2, D-94). CI tetap tanpa API berbayar dan tanpa kunci. M4 dikerjakan sebelum M2–M3 (F-149).
+> Status: **selesai dan disetujui** (2026-10-30): Q-132 s/d Q-138 → D-96 (semua usulan default). Basis: `master` setelah PR #22 (M5, D-94, D-95). Dua bagian: (A) harness uji OCR M1 — dibangun dan diuji dengan data sintetis + klien palsu, **dijalankan pemilik proyek** pada foto asli (Q-105 → D-92), sehingga keputusan D-16 dan Lampiran A menunggu foto + anotasi; (B) item tinjauan M4. Satu migration baru (aditif). RLS tidak berubah. Kontrak hanya bertambah field. `EXTRACTOR` produksi tetap `stub`; `VisionExtractor`/`OcrThenParseExtractor` tidak dipasang ke `buildDeps` (M2, D-94). CI tetap tanpa API berbayar dan tanpa kunci. M4 dikerjakan sebelum M2–M3 (F-149).
 
 ### 20.1 Yang dibangun
 
@@ -1117,9 +1118,82 @@ Review M5 selesai (D-95). PR ke `master` menjalankan job `supabase-e2e` (e2e S-2
 | Q-137 | Penyimpangan urutan: M4 sebelum M2–M3 (F-149)? | **Ya.** M2 dimulai setelah D-16 (laporan Lampiran A). |
 | Q-138 | Sebelum `ocr-eval run`, pemilik proyek menjalankan `test:live` sekali (±US$0,40) untuk membuktikan kunci, model, dan pola error 400 gambar (F-155, F-131)? | **Ya.** Jika gagal, kirim pesan error tanpa gambar; harness tidak dijalankan sampai lulus. |
 
+**Hasil review (2026-10-30):** pemilik proyek menerima semua usulan default Q-132 s/d Q-138 → **D-96**.
+
 ### 20.6 Berikutnya
 
 Pemilik proyek: §15 no. 1–6 (foto, kunci), lalu `test:live` (Q-138) dan lima perintah docs/06 §2.8; kirim `reports/<waktu>.agg.json`. Sesi berikutnya mengisi Lampiran A dari agregat itu dan mengusulkan keputusan D-16 (model/engine, τ ekstraksi, Q-34/Q-110, Q-122) → D-9x, lalu M2. PR ke `master` menjalankan job `supabase-e2e` (e2e alur 4–6, L4, drift `db-types`).
+
+---
+
+## 21. Tahap 6b M2/M3 bagian tanpa D-16: hasil dan temuan baru (F-159 dst.)
+
+> Status: **selesai, menunggu review** (2026-10-30). Basis: `master` setelah PR #23 + D-96. Hanya bagian M2/M3 yang tidak bergantung pada pilihan engine/model (D-16): kunci tier di config, daftar pendek dan matcher tier 4, anggaran harian, lease, matching screenshot Q-133, laporan kalibrasi, redaksi lapis 2–3, dan teks privasi Q-114. Satu migration baru (aditif). RLS tidak berubah, kontrak dan RPC publik tidak berubah. `EXTRACTOR` produksi tetap `stub`; `ClaudeAiMatcher` dibangun dan diuji dengan klien palsu tetapi **tidak** dipasang ke `buildDeps` (dipasang bersama extractor sungguhan di M2, F-165). CI tetap tanpa API berbayar dan tanpa kunci.
+
+### 21.1 Yang dibangun
+
+| Bagian | File | Isi |
+|---|---|---|
+| Migration | `supabase/migrations/20261030000100_match_config.sql` | **§11.1 #1–#2:** kunci `app.config` tabel §8.2 (`match_conf_barcode` 1,00, `match_conf_alias_household` 0,98, `match_conf_alias_global` 0,95, `match_conf_alias_group` 0,70, `fuzzy_max_confidence` 1,00) + `ai_match_max_confidence` 0,85 + `ai_match_shortlist_min_similarity` 0,2. `app.match_products` (`create or replace`, isi sama) membaca kunci itu; tier 3 = `min(similarity, fuzzy_max_confidence)` (F-111). Dengan default hasilnya identik: test L1 `70_capture_pipeline` tidak diubah dan tetap lulus. **§11.1 #3:** `app.ai_match_shortlist(household, store, items, limit 15)` DEFINER, `EXECUTE` hanya `service_role`: produk `active` global + privat household sendiri, (a) `word_similarity` ≥ 0,2 terhadap nama + varian + brand, atau (b) pernah dibeli household di toko itu (`price_record` aktif) dengan kata pertama sama; urut similarity, `limit` dibatasi 1–50. Keluaran per item: `product_id`, brand, nama, varian, ukuran (`pack_count × content_size unit`), `sale_mode`, kategori, similarity. |
+| Snapshot, inventaris | `db/schema.sql`, `99_privilege_inventory.sql` | Snapshot `pg_dump` 16. Inventaris anon/authenticated **tidak berubah** (fungsi baru hanya `service_role`). `packages/db-types` tidak berubah (schema `public` tetap). |
+| Laporan kalibrasi | `db/scripts/calibration_report.sql` | §8.2 no. 3, dijalankan pemilik proyek (`psql -v since=… -f …`, docs/06 §2.10). Transaksi read only (view sementara dibuat sebelum `set transaction read only`, lalu `rollback`). Saran = baris struk produk / item label-screenshot yang sudah diputuskan, dengan `suggested_product_id`; diterima = produk akhir `price_record` sama dengan saran (mengikuti `merged_into_id`, F-01); koreksi belakangan = tidak diterima. Enam tabel: presisi per tier × sumber, per rentang confidence 0,05, kandidat τ 0,50–1,00 (presisi + coverage), distribusi similarity tier 3 (§8.3), baris tanpa saran, config saat ini. Hanya angka. |
+| Matcher tier 4 | `src/extractors/ai-matcher.ts`, `prompts/match.v1.md`, `prompts/index.ts` | `ClaudeAiMatcher` (§7.3): daftar pendek dari `ai_match_shortlist` (screenshot: nama produk + judul listing digabung, F-161) dan `ai_match_max_confidence` dalam satu query; item tanpa daftar pendek tidak dikirim (tanpa panggilan sama sekali jika semua kosong). Satu panggilan per capture lewat `callStructured` (structured outputs, effort `low`, `max_tokens` 2.000, `fallbacks` sesuai model, tenggat lease yang sama dengan ekstraksi). Pesan = JSON {toko, sumber, item bernomor 1..n dengan teks, judul, nominal, kuantitas, kandidat bernomor 1..m}; **tanpa UUID**. Skema `{matches: [{item, choice \| null, confidence, reason}]}` (objek di akar karena structured outputs, F-108). `mapMatches`: item/pilihan di luar daftar pendek, `null`, duplikat, angka bukan bulat dibuang; confidence dijepit 0–1 lalu `min(·, 0,85)`. Error apa pun → `[]` + log `ai.match_failed` (tanpa teks); biaya respons yang sudah diterima tetap dilaporkan. Log `ai.match` (model, versi prompt, jumlah item, biaya). |
+| Tipe | `src/pipeline/types.ts`, `src/extractors/stub.ts` | F-112: `UnmatchedItem` + `title`, `amount`, `quantity`; `MatchContext` + `storeName`, `signal`, `onUsage`. Antarmuka `AiMatcher.match` tetap. `StubAiMatcher` mencari kunci fixture di judul listing dulu lalu `raw_text` (perilaku lama untuk screenshot, F-161). |
+| Pipeline | `src/pipeline/process-capture.ts` | **Q-133:** matching tier 1–3 satu panggilan `match_products` untuk nama produk (key positif) dan judul listing (key negatif, hanya jika berbeda); `pickMatch` memilih tier lebih kuat lalu confidence, seri → nama produk, kandidat digabung tanpa duplikat (maks 5). Tier 4 hanya jika keduanya tanpa kandidat. Konteks tier 4: nominal (baris struk: `line_amount`; label/screenshot: promo, lalu normal), kuantitas, nama toko (katalog, atau yang terbaca). Biaya tier 4 dijumlahkan ke `processing_run` lewat `record_run_output` kedua dengan output mentah yang sama (F-159). **§12.3:** `BudgetGate` sebelum claim: `ai_spend_today()` ≥ anggaran (`AI_DAILY_BUDGET_USD` atau config) → `processNextCapture` mengembalikan `null` tanpa claim (capture tetap `uploaded`), log `ai.budget_exhausted` maks sekali per jam (F-162). **Lease:** `CAPTURE_LEASE_SECONDS` (bulat positif, default 300) dipakai untuk tenggat AI; `checkLeaseSeconds` saat start menolak nilai > `capture_processing_timeout_seconds` atau ≤ margin 30 dtk. |
+| Worker | `src/main.ts`, `.env.example` | `buildDeps` mengisi `leaseSeconds` dan `budget`; `main` memanggil `checkLeaseSeconds` sebelum start. Env baru di `.env.example`. |
+| Redaksi | `src/jobs/redact.ts` | §9 lapis 2: nilai `receipt.pii` (semua kunci string, termasuk `member_id`, `member_name`, `customer_name`, `card_masked`, `email`) dicocokkan tanpa beda huruf besar/kecil dan spasi; nilai angka hanya utuh (`4321` tidak menghapus `14321`). Lapis 3: nilai setelah label baris (`NAMA [PELANGGAN/PENERIMA/MEMBER/CUSTOMER]`, `NAME`, `CUSTOMER`, `PELANGGAN`, `MEMBER [NAME/ID/NO]`, `NO MEMBER`, `ID MEMBER`, `KARTU`, `NO KARTU`, `CARD [NO]`, `TELP`, `TELEPON`, `PHONE`, `[NO] HP`, `ALAMAT [PENGIRIMAN]`, `PENERIMA`, `EMAIL`, `APPR [CODE]`, `REF NO`) sampai akhir baris. Label wajib di awal baris dan diikuti `:`/`=`/`#`, atau label kode diikuti angka; nilai harga (`Rp…`) tidak disamarkan (F-163). Pola lama (HP, kartu/NIK, email) tetap. |
+| Teks privasi | `features/me/privacy-screen.tsx`, `lib/copy/id.ts` | **Q-114/F-115:** bagian "Pembacaan oleh AI" di `/saya/privasi`: foto dikirim ke Anthropic (Claude) untuk dibaca, pertanyaan Tanya + data harga yang dibutuhkan juga diproses Anthropic, email/data akun tidak dikirim, vendor OCR disebut di sini sebelum dipakai, teks berisi data pribadi disamarkan 7 hari setelah diproses (F-166). |
+| Uji live | `test/live/matcher.live.test.ts` | `ClaudeAiMatcher` sungguhan dengan katalog kecil sintetis (Db palsu): ukuran 1 kg vs 500 g, paket 5 × 85 g, item tanpa padanan → tanpa saran, confidence ≤ 0,85. Ikut `test:live` (manual, ±US$0,03). |
+
+### 21.2 Hasil test
+
+| Lapisan | Hasil | Catatan |
+|---|---|---|
+| L1 `bash db/tests/run.sh` | **650 lulus** (M4: 630) | `88_match_config.sql` 20: default kunci = perilaku lama, `ai_match_max_confidence` < τ; kunci tier diubah → confidence tier 1, 2 (household, global), 2b, 3 ikut berubah, tier 3 dan semua kandidat fuzzy ≤ `fuzzy_max_confidence`; `ai_match_shortlist`: masukan kosong, key dan urutan, produk privat sendiri + ukuran `10 × 25 g`, riwayat beli di toko + kata pertama sama walau similarity rendah, tanpa kandidat → `[]`, brand/kategori, `p_limit`, ambang 0,2, **tidak pernah produk privat household lain** (semua produk privat B dicari dengan namanya sendiri sebagai A, juga setelah B membelinya di toko yang sama), hanya `active`, `authenticated` ditolak (42501); `calibration_report.sql` berjalan di skema terbaru. `70_capture_pipeline` tidak diubah (bukti hasil identik). |
+| `snapshot.sh --check`, inventaris | lulus | Inventaris tidak berubah. |
+| worker | **168 lulus, 1 dilewati** (M4: 152) | `ai-matcher.test.ts` 13: `mapMatches` (pemetaan + batas 0,85; tujuh kasus buangan), pesan tanpa UUID; matcher + DB (daftar pendek, satu panggilan effort low/`max_tokens` 2.000, teks katalog tanpa id, biaya dilaporkan; household lain → tanpa panggilan; error 500 dan JSON tidak valid → `[]` + biaya tetap dilaporkan); pipeline struk-aeon (hanya SNACK XYZ dikirim, nominal + nama toko, tenggat, saran `ai` 0,85, token/biaya tier 4 masuk run); Q-133 alias judul listing menang atas fuzzy nama produk + kandidat digabung; `pickMatch` tiga kasus; anggaran (tidak claim, capture `uploaded`, log sekali per jam lalu lagi setelah 1 jam, config 2,00 → claim); lease + `parsePositiveEnv`. `unit.test.ts` +3: redaksi lapis 2 (huruf/spasi, angka utuh), lapis 3 positif (18 baris) dan negatif (12 baris: "DISC MEMBER", "HARGA MEMBER 21.000", "Member: Rp21.000", "KARTU UCAPAN", "NAMA BAYI SOAP", "KARTU DEBIT BCA", …). Semua test lama lulus tanpa diubah, termasuk e2e worker screenshot (Q-133). |
+| web | **626** | `settings.test.tsx`: bagian "Pembacaan oleh AI" tampil (Anthropic, Tanya). |
+| contracts, ai-tools | 70, 55 | Tidak berubah. |
+| typecheck, lint + format web, `next build`, `check:bundle`, `check-secrets.sh` | lulus | |
+| Uji live | **tidak dijalankan** | Sesi tanpa `ANTHROPIC_API_KEY`; `matcher.live.test.ts` terverifikasi dilewati. |
+
+**Tidak dijalankan di sesi ini:** e2e Playwright dan L4 (job CI `supabase-e2e`), uji live.
+
+### 21.3 Penyimpangan dari desain dan alasannya
+
+| Desain | Dibuat | Alasan |
+|---|---|---|
+| §11 satu migration `…_ai_integration.sql` | `20261030000100_match_config.sql` | Migration per milestone (F-136, D-95). |
+| §7.3 skema output `[{item, choice, confidence, reason}]` | `{matches: [...]}` | Structured outputs butuh objek di akar (F-108). |
+| §7.3 "Model: `EXTRACT_MODEL`" | Model lewat `MatcherConfig`, belum dipasang | Model dipilih di D-16; dipasang bersama extractor (F-165). |
+| §12.3 biaya tier 4 tercatat | Dijumlahkan ke `processing_run` | Tanpa kolom baru (F-159). |
+| Q-133 "judul sebagai cadangan" | Dua teks sekaligus, yang lebih kuat menang | Alias W6 untuk screenshot disimpan dari judul (F-161). |
+
+### 21.4 Temuan baru
+
+| # | Temuan | Dampak | Penanganan | Q |
+|---|---|---|---|---|
+| F-159 | **Biaya tier 4 tidak punya tempat sendiri.** `ai_spend_today()` menjumlahkan `processing_run.cost_usd`; panggilan matcher terjadi setelah `record_run_output`. | Tanpa pencatatan, anggaran harian kurang hitung (±US$0,02 per capture, §12.2). | `MatchContext.onUsage` → pipeline memanggil `record_run_output` lagi dengan output mentah yang sama dan token/biaya dijumlahkan. Rincian per panggilan hanya di log `ai.match`. Pemisahan per tier (mis. kolom `match_cost_usd`) bisa ditambah di M6 jika analisis biaya membutuhkannya. | Q-139 |
+| F-160 | **Aturan daftar pendek (b) "kata pertama sama" memakai kata pertama teks struk vs kata pertama nama produk.** Singkatan kasir ("INDMIE", "SR" untuk Sari Roti) tidak cocok, dan brand tidak dipakai. | Produk yang pernah dibeli bisa tidak masuk daftar pendek jika similarity < 0,2 dan kata pertama berbeda. | Diterima untuk M3; data masa kalibrasi (baris tanpa saran, laporan §2.10 tabel 5) menunjukkan apakah perlu perluasan (mis. alias produk yang sama di toko lain). | — |
+| F-161 | **Q-133 tidak bisa murni "judul sebagai cadangan".** Alias W6 untuk screenshot disimpan dari judul listing (D-96 tetap), jadi alias user hanya cocok lewat judul. Jika judul hanya dipakai saat nama produk tanpa kandidat, alias user kalah oleh fuzzy nama produk. | Koreksi user tidak pernah "belajar" untuk screenshot. | Kedua teks dicocokkan dalam satu panggilan; tier lebih kuat menang (alias > fuzzy), lalu confidence, seri → nama produk; kandidat digabung. Tier 4 juga menerima judul (konteks). Stub mencari judul dulu supaya fixture lama tetap berlaku. | — |
+| F-162 | **Gerbang anggaran berlaku untuk semua extractor, termasuk `stub`.** Anggaran global (worker + Tanya, §12.3). | Di dev dengan Tanya sungguhan, anggaran yang habis karena Tanya juga menghentikan worker stub (biaya stub 0). e2e tidak terpengaruh (`ASK_ENGINE=stub`, biaya 0). | Sesuai desain (satu anggaran global). Override `AI_DAILY_BUDGET_USD` untuk dev. | Q-140 |
+| F-163 | **Redaksi lapis 3 sengaja sempit.** Label harus di awal baris + pemisah (atau label kode + angka). "MEMBER ANI SUSANTI" tanpa titik dua tidak tertangkap lapis 3; hanya lapis 2 jika `pii.member_name` terbaca, atau lapis 1 (transkripsi). | Kebocoran mungkin pada struk dengan format label tanpa pemisah. | Diukur di harness (metrik kebocoran §4.7, target 0) pada foto asli; pola ditambah sesuai temuan. Pola lebar ("MEMBER" di mana saja) ditolak karena menghapus "DISC MEMBER", "HARGA MEMBER". | — |
+| F-164 | **`ai_match_shortlist` menghitung `word_similarity` untuk setiap produk aktif per item tanpa indeks** (sama dengan tier 3). | Linear terhadap ukuran katalog × item tanpa kandidat; cukup untuk katalog pribadi (ribuan). | Indeks trigram/batas kandidat ditinjau di Tahap 7 (SaaS) bersama tier 3. | — |
+| F-165 | **Versi prompt matcher terpisah (`match.v1`, `MATCH_PROMPT_VERSION`)** dari `promptVersion` ekstraksi yang tercatat di `processing_run.prompt_version` (F-119: satu versi gabungan per deployment). `ClaudeAiMatcher` tidak dipasang ke `buildDeps`. | Versi prompt matcher hanya terlihat di log `ai.match`. | Prompt matcher berubah tanpa mengubah ekstraksi (dan sebaliknya), jadi versi terpisah lebih jujur. Dipasang di M2 dengan env yang sama dengan extractor. | Q-141 |
+| F-166 | **Teks privasi Q-114 dibuat sekarang, sebelum extractor sungguhan dipakai**, dan juga menyebut Tanya (sudah memakai Anthropic sejak M5 jika kunci diisi). Vendor OCR tidak disebut (D-16 belum diputuskan). Retensi di sisi Anthropic tidak diklaim. | Teks benar untuk keadaan sekarang dan setelah M2 dengan `vision`. Jika D-16 memilih `ocr+parse`, teks harus diperbarui sebelum dipakai. | Kalimat "Jika nanti dipakai layanan pembaca teks (OCR) lain, namanya dicantumkan di sini lebih dulu." Retensi menyesuaikan pengaturan org (§17). | Q-142 |
+
+### 21.5 Pertanyaan (Q-139 dst.)
+
+| # | Pertanyaan | Usulan default |
+|---|---|---|
+| Q-139 | Biaya tier 4 dijumlahkan ke `processing_run` (token + biaya), rincian hanya di log `ai.match`, tanpa kolom baru (F-159)? | **Ya**; kolom terpisah ditinjau di M6 jika perlu. |
+| Q-140 | Gerbang anggaran harian berlaku untuk semua extractor termasuk `stub` (F-162)? | **Ya** (satu anggaran global, §12.3); dev memakai `AI_DAILY_BUDGET_USD`. |
+| Q-141 | Versi prompt matcher terpisah (`match.v1`), tercatat di log `ai.match`, bukan di `processing_run.prompt_version` (F-165)? | **Ya**. |
+| Q-142 | Teks privasi "Pembacaan oleh AI" dipakai sekarang, menyebut Anthropic untuk foto dan Tanya, tanpa vendor OCR sampai D-16 (F-166)? | **Ya**; diperbarui sebelum `ocr+parse` dipakai. |
+
+### 21.6 Berikutnya
+
+Pemilik proyek: tetap §20.6 (foto, kunci, `test:live`, harness, kirim `*.agg.json`); `test:live` kini juga menguji matcher tier 4. Sesudah D-16: M2 memasang extractor terpilih + `ClaudeAiMatcher` ke `buildDeps` (env model), lalu masa kalibrasi M3 (`auto_save_min_confidence` = 1,01, laporan docs/06 §2.10).
 
 ---
 

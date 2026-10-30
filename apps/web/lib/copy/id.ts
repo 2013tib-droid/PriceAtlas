@@ -1273,6 +1273,14 @@ export const SETTINGS_COPY = {
       'Data harga (tanggal, toko, harga) tetap ada supaya histori tetap berguna.',
       'Data hanya terlihat olehmu, kecuali kamu menyalakan berbagi harga publik.',
     ],
+    // Q-114 / F-115 (docs/08 §16): pemroses AI disebut sebelum extractor sungguhan dipakai.
+    aiTitle: 'Pembacaan oleh AI',
+    ai: [
+      'Foto struk, label harga, dan screenshot belanja dikirim ke layanan AI Anthropic (Claude) untuk dibaca harganya. Foto bisa memuat data pribadi yang tercetak, seperti nama member atau nomor kartu tersamar.',
+      'Pertanyaan di Tanya, beserta data harga yang dibutuhkan untuk menjawabnya, juga diproses oleh Anthropic.',
+      'Email dan data akunmu tidak ikut dikirim. Jika nanti dipakai layanan pembaca teks (OCR) lain, namanya dicantumkan di sini lebih dulu.',
+      'Teks hasil bacaan yang memuat data pribadi (nomor kartu, HP, nama atau nomor member) disamarkan di server kami 7 hari setelah selesai diproses.',
+    ],
     deleteTitle: 'Hapus akun & semua data',
     deleteBody:
       'Akun, struk, foto, dan semua harga milikmu dihapus permanen. Harga yang sudah dibagikan secara anonim tetap ada tanpa identitasmu.',

@@ -6,7 +6,7 @@
 //                     generator yang sama)
 //   LIVE_MODEL=claude-opus-5-5  LIVE_EFFORT=medium (opsional)
 // Biaya ±US$0,40 dengan Opus 5.5 (7 panggilan). Ringkasan (token, biaya, latensi; tanpa teks) →
-// .data/live/<waktu>.json. Tier 4 (matcher AI) belum ada (M3), jadi tidak diuji di sini.
+// .data/live/<waktu>.json. Tier 4 (matcher AI): matcher.live.test.ts.
 import { createHash } from 'node:crypto';
 import { existsSync, mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
