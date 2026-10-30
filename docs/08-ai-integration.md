@@ -1,6 +1,6 @@
 # Tahap 6a — Desain AI Integration (termasuk uji OCR D-16)
 
-> Status: **Disetujui (2026-10-27).** Semua usulan default §16 diterima → **D-92**. Dokumen ini tidak mengubah keputusan D-01 s/d D-91. **6b M0 selesai dan disetujui (2026-10-27):** §18. Q-122, Q-124, Q-125 → **D-93**; Q-120, Q-121, Q-123, Q-126 → **D-94** (semua usulan default). **6b M5 (Tanya) selesai dan disetujui (2026-10-28):** §19 (F-134–F-147); Q-127–Q-131 → **D-95** (semua usulan default). Uji live set emas menunggu pemilik proyek (Q-129). **6b M1-harness + M4 selesai dan disetujui (2026-10-30):** §20 (F-148–F-158); Q-132–Q-138 → **D-96** (semua usulan default); harness siap dijalankan pemilik proyek, keputusan D-16 menunggu foto + anotasi. **6b M2/M3 bagian tanpa D-16 selesai, menunggu review (2026-10-30):** §21 (F-159–F-166); Q-139–Q-142.
+> Status: **Disetujui (2026-10-27).** Semua usulan default §16 diterima → **D-92**. Dokumen ini tidak mengubah keputusan D-01 s/d D-91. **6b M0 selesai dan disetujui (2026-10-27):** §18. Q-122, Q-124, Q-125 → **D-93**; Q-120, Q-121, Q-123, Q-126 → **D-94** (semua usulan default). **6b M5 (Tanya) selesai dan disetujui (2026-10-28):** §19 (F-134–F-147); Q-127–Q-131 → **D-95** (semua usulan default). Uji live set emas menunggu pemilik proyek (Q-129). **6b M1-harness + M4 selesai dan disetujui (2026-10-30):** §20 (F-148–F-158); Q-132–Q-138 → **D-96** (semua usulan default); harness siap dijalankan pemilik proyek, keputusan D-16 menunggu foto + anotasi. **6b M2/M3 bagian tanpa D-16 selesai dan disetujui (2026-10-30):** §21 (F-159–F-166); Q-139–Q-142 → **D-97** (semua usulan default).
 > Rujukan: `PROJECT.md` §3, §5.4, §5.9, D-16, D-50, D-57, D-61, D-70, D-74, D-75, D-82, D-86–D-91; `docs/05-backend-design.md` §5–§7, §9; `docs/06-local-dev.md` §2; `docs/07-frontend-design.md` §6, §9, §13.
 
 ## Daftar Isi
@@ -1128,7 +1128,7 @@ Pemilik proyek: §15 no. 1–6 (foto, kunci), lalu `test:live` (Q-138) dan lima 
 
 ## 21. Tahap 6b M2/M3 bagian tanpa D-16: hasil dan temuan baru (F-159 dst.)
 
-> Status: **selesai, menunggu review** (2026-10-30). Basis: `master` setelah PR #23 + D-96. Hanya bagian M2/M3 yang tidak bergantung pada pilihan engine/model (D-16): kunci tier di config, daftar pendek dan matcher tier 4, anggaran harian, lease, matching screenshot Q-133, laporan kalibrasi, redaksi lapis 2–3, dan teks privasi Q-114. Satu migration baru (aditif). RLS tidak berubah, kontrak dan RPC publik tidak berubah. `EXTRACTOR` produksi tetap `stub`; `ClaudeAiMatcher` dibangun dan diuji dengan klien palsu tetapi **tidak** dipasang ke `buildDeps` (dipasang bersama extractor sungguhan di M2, F-165). CI tetap tanpa API berbayar dan tanpa kunci.
+> Status: **selesai dan disetujui** (2026-10-30; Q-139–Q-142 → **D-97**). Basis: `master` setelah PR #23 + D-96. Hanya bagian M2/M3 yang tidak bergantung pada pilihan engine/model (D-16): kunci tier di config, daftar pendek dan matcher tier 4, anggaran harian, lease, matching screenshot Q-133, laporan kalibrasi, redaksi lapis 2–3, dan teks privasi Q-114. Satu migration baru (aditif). RLS tidak berubah, kontrak dan RPC publik tidak berubah. `EXTRACTOR` produksi tetap `stub`; `ClaudeAiMatcher` dibangun dan diuji dengan klien palsu tetapi **tidak** dipasang ke `buildDeps` (dipasang bersama extractor sungguhan di M2, F-165). CI tetap tanpa API berbayar dan tanpa kunci.
 
 ### 21.1 Yang dibangun
 
@@ -1190,6 +1190,8 @@ Pemilik proyek: §15 no. 1–6 (foto, kunci), lalu `test:live` (Q-138) dan lima 
 | Q-140 | Gerbang anggaran harian berlaku untuk semua extractor termasuk `stub` (F-162)? | **Ya** (satu anggaran global, §12.3); dev memakai `AI_DAILY_BUDGET_USD`. |
 | Q-141 | Versi prompt matcher terpisah (`match.v1`), tercatat di log `ai.match`, bukan di `processing_run.prompt_version` (F-165)? | **Ya**. |
 | Q-142 | Teks privasi "Pembacaan oleh AI" dipakai sekarang, menyebut Anthropic untuk foto dan Tanya, tanpa vendor OCR sampai D-16 (F-166)? | **Ya**; diperbarui sebelum `ocr+parse` dipakai. |
+
+**Hasil review (2026-10-30):** pemilik proyek menerima semua usulan default Q-139 s/d Q-142 → **D-97**.
 
 ### 21.6 Berikutnya
 
