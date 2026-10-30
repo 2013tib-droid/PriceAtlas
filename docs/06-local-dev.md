@@ -2,7 +2,7 @@
 
 > Dasar: `docs/05-backend-design.md` (§1.4 penjadwalan, §1.5 struktur repo, §5 pipeline, §7.7 rahasia, §8 test).
 > Dua mode: **A** (PostgreSQL biasa + stub, tanpa Supabase) dan **B** (Supabase CLI).
-> Extractor dan matcher AI worker masih **stub berbasis fixture** (extractor sungguhan di 6b M2). Uji OCR D-16 (harness `ocr-eval`, 6b M1) dijalankan pemilik proyek di mesinnya: §2.8; uji live sintetis (termasuk matcher AI tier 4): §2.9; laporan kalibrasi matching: §2.10. Tanya (`/api/ask`, 6b M5) memakai Claude jika `ANTHROPIC_API_KEY` web diisi, atau `ASK_ENGINE=stub` tanpa kunci: §4.11. Frontend (`apps/web`, Tahap 5b) butuh mode B: lihat §4.
+> Extractor dan matcher AI worker default **stub berbasis fixture** (CI/e2e). Extractor sungguhan (`EXTRACTOR=vision | ocr+parse`) dan matcher tier 4 (`AI_MATCHER=claude`) dipilih lewat env sejak 6b M2: §2.11. Uji OCR D-16 (harness `ocr-eval`, 6b M1) dijalankan pemilik proyek di mesinnya: §2.8; uji live sintetis (termasuk matcher AI tier 4): §2.9; laporan kalibrasi matching: §2.10. Tanya (`/api/ask`, 6b M5) memakai Claude jika `ANTHROPIC_API_KEY` web diisi, atau `ASK_ENGINE=stub` tanpa kunci: §4.11. Frontend (`apps/web`, Tahap 5b) butuh mode B: lihat §4.
 
 ---
 
@@ -334,14 +334,71 @@ Perintah yang sama juga menjalankan `test/live/matcher.live.test.ts`: `ClaudeAiM
 
 ### 2.10 Laporan kalibrasi matching (masa kalibrasi, docs/08 §8.2)
 
-Baca saja, hanya angka agregat (tanpa teks struk, nama produk, atau id household), boleh dikirim untuk analisis:
+**Masa kalibrasi (6b M2).** Migration `…20261030000200_calibration_period.sql` memasang `auto_save_min_confidence` = **1,01**: tidak ada item yang di-auto-save (confidence maksimum 1,00), semua struk/label/screenshot masuk konfirmasi dengan saran sistem tetap tampil, dan setiap field/saran ditandai "ragu" karena di bawah τ (F-172). `app.config.calibration_started_on` mencatat tanggal mulai (nilai migration: 2026-10-30). Jika worker dengan extractor sungguhan baru dipakai belakangan, ubah ke tanggal itu supaya laporan tidak memuat data auto-save lama:
 
-```bash
-psql "$DATABASE_URL" -f db/scripts/calibration_report.sql                    # semua data
-psql "$DATABASE_URL" -v since=2026-11-01 -f db/scripts/calibration_report.sql # sejak awal masa kalibrasi
+```sql
+update app.config set value = to_jsonb('2026-11-03'::text) where key = 'calibration_started_on';   -- tanggal mulai sebenarnya
 ```
 
-Isi: presisi per tier dan sumber (saran diterima tanpa diganti, koreksi belakangan dihitung salah), presisi per rentang confidence 0,05, kandidat τ (presisi dan coverage untuk τ 0,50–1,00), distribusi similarity tier 3 (`fuzzy_min_similarity`, §8.3), jumlah baris tanpa saran, dan nilai config matching saat ini. Nilai baru ditulis ke `app.config` (`match_conf_*`, `fuzzy_max_confidence`, `ai_match_max_confidence`, `auto_save_min_confidence`) lewat migration atau SQL editor, lalu dicatat sebagai keputusan (M6).
+Masa kalibrasi selesai setelah 2 minggu **dan** ≥ 150 baris produk dikonfirmasi (docs/08 §8.2 no. 1). Selama itu τ jangan diubah; nilai final ditulis di M6 (D-50). Test L1/L3 dan e2e memakai τ 0,90 (`db/tests/lib/seed.sql`, langkah CI `supabase-e2e`), jadi tidak terpengaruh (F-171).
+
+**Menjalankan laporan.** Baca saja, hanya angka agregat (tanpa teks struk, nama produk, atau id household), boleh dikirim untuk analisis:
+
+```bash
+psql "$DATABASE_URL" -f db/scripts/calibration_report.sql                      # sejak calibration_started_on
+psql "$DATABASE_URL" -v since=2026-11-10 -f db/scripts/calibration_report.sql   # sejak tanggal lain
+psql "$DATABASE_URL" -v since=1970-01-01 -f db/scripts/calibration_report.sql   # semua data
+```
+
+Mode B: `DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres`. Baris pertama keluaran menyebut tanggal awal yang dipakai.
+
+**Membaca hasil.**
+
+| Tabel | Isi | Dipakai untuk |
+|---|---|---|
+| 1. Presisi per tier × sumber | `saran`, `diterima`, `presisi_pct` per `barcode`/`alias`/`fuzzy`/`ai` × struk/label/screenshot | `match_conf_*` (§8.2 no. 4): tier dengan presisi < 98 % diberi confidence di bawah τ final |
+| 2. Presisi per rentang confidence 0,05 | presisi tiap rentang | Kurva kalibrasi: confidence tinggi seharusnya presisi tinggi |
+| 3. Kandidat τ 0,50–1,00 | presisi dan coverage (persentase saran yang akan di-auto-save) per τ | τ final = nilai terkecil dengan presisi ≥ 98 % (D-50, M6) |
+| 4. Distribusi similarity tier 3 | saran `benar` vs `salah` per rentang similarity 0,05 | `fuzzy_min_similarity` dan `fuzzy_max_confidence` (§8.3) |
+| 5. Baris tanpa saran | jumlah baris/item yang dikonfirmasi tanpa saran sistem | Cakupan daftar pendek tier 4 (F-160) |
+| 6. Config saat ini | nilai `app.config` matching + `calibration_started_on` | Pembanding |
+
+Angka dengan `saran` < 20 per baris belum bisa dipercaya; tunggu data lebih banyak. Nilai baru ditulis ke `app.config` (`match_conf_*`, `fuzzy_max_confidence`, `ai_match_max_confidence`, `auto_save_min_confidence`) lewat migration di M6, lalu dicatat sebagai keputusan.
+
+### 2.11 Worker dengan extractor sungguhan (6b M2, mode B)
+
+Default `EXTRACTOR=stub` dan `AI_MATCHER=stub` (CI/e2e, tanpa kunci). Untuk memproses foto asli dari HP di Supabase lokal (mode B, §3):
+
+| Env | Isi |
+|---|---|
+| `EXTRACTOR` | `vision` (Claude membaca gambar) atau `ocr+parse` (Google Cloud Vision → Claude teks). Pilihan final = D-16 (docs/08 Lampiran A). |
+| `AI_MATCHER` | `claude`: matcher tier 4 untuk item tanpa kandidat tier 1–3, model sama dengan ekstraksi, effort `low` |
+| `WORKER_ANTHROPIC_API_KEY` | Kunci **worker** (docs/08 §15 no. 5), terpisah dari `ANTHROPIC_API_KEY` web (Tanya). Worker tidak pernah membaca `ANTHROPIC_API_KEY` (F-167). |
+| `EXTRACT_MODEL` | Default `claude-opus-5-5`. Harus ada di tabel harga `packages/ai-tools/src/pricing.ts`, kalau tidak worker menolak start (F-169) |
+| `EXTRACT_EFFORT_RECEIPT`, `EXTRACT_EFFORT_OBSERVATION` | `low`/`medium`/`high`; default `medium` (struk) dan `low` (label + screenshot) |
+| `OCR_ENGINE`, `GOOGLE_VISION_API_KEY` | Hanya `ocr+parse`: `google-vision` (default) + kunci API dibatasi ke Vision API |
+| `AI_DAILY_BUDGET_USD` | Opsional; default `app.config.ai_daily_budget_usd` (2,00). Habis → worker berhenti meng-claim sampai besok (§2.4) |
+| `CAPTURE_LEASE_SECONDS` | Opsional, default 300 (tenggat panggilan AI = lease − 30 dtk) |
+
+```bash
+supabase start
+# apps/web/.env.local seperti §4.1; web dijalankan dengan pnpm --filter @priceatlas/web dev (atau build + start)
+export DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres WORKER_DB_ROLE=service_role \
+       STORAGE_BACKEND=supabase NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 SUPABASE_SERVICE_ROLE_KEY=<SERVICE_ROLE_KEY>
+export EXTRACTOR=vision AI_MATCHER=claude WORKER_ANTHROPIC_API_KEY=sk-ant-…   # kunci worker
+# opsional: EXTRACT_MODEL=… EXTRACT_EFFORT_RECEIPT=… (hasil D-16)
+pnpm --filter @priceatlas/worker start
+```
+
+Saat start worker mencatat `worker.ai` (extractor, engine, model, effort, matcher; tanpa kunci), lalu memeriksa kunci dan model lewat `GET /v1/models/{model}` (gratis). Kunci ditolak (401/403) atau model tidak tersedia (404) → worker berhenti dengan pesan jelas. Jaringan/5xx saat start → log `ai.verify_skipped`, worker tetap jalan (F-170). Konfigurasi lain yang salah (nilai env tidak dikenal, kunci kosong, `GOOGLE_VISION_API_KEY` kosong untuk `ocr+parse`) juga menghentikan start, bukan menggagalkan capture.
+
+Lalu unggah foto asli dari app seperti §4.5 (galeri atau kamera) → tab Unggahan. Selama masa kalibrasi (§2.10) semua hasil berstatus "Perlu dicek".
+
+**Biaya dan log.** Biaya per capture (ekstraksi + tier 4 + OCR vendor) ada di `processing_run.cost_usd`; biaya hari ini: `select app.ai_spend_today()`. Log worker hanya berisi id, status, durasi, token, biaya, model, dan kode error (`ai.config_error`, `ai.refusal`, `ai.max_tokens`, `ai.deadline`, `ai.match`, `ai.match_failed`, `ai.budget_exhausted`), tidak pernah teks struk atau gambar.
+
+**Error (docs/08 §5.4).** 429/5xx/overloaded/koneksi/timeout/tenggat → dicoba lagi otomatis (backoff 30 dtk, 2 mnt; maks 3 percobaan). Gambar ditolak API (400 gambar, 413) atau OCR → Gagal "Format gambar ini belum didukung." Refusal → Gagal "Gambar tidak bisa diproses." Struk terlalu panjang (`max_tokens` dua kali) → Gagal "Struk terlalu panjang untuk dibaca. Coba foto per bagian." Kunci dicabut saat worker berjalan (401/403) → sementara + `ai.config_error`; setelah 3 percobaan capture Gagal dan bisa diulang dari app setelah kunci diganti (F-170).
+
+**Kembali ke stub:** `EXTRACTOR=stub AI_MATCHER=stub` (atau hapus variabelnya). Capture yang sudah diproses tidak berubah.
 
 ---
 
@@ -372,7 +429,7 @@ SUPABASE_SERVICE_ROLE_KEY=<SERVICE_ROLE_KEY>      # server-only
 DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres   # koneksi sesi (LISTEN)
 WORKER_DB_ROLE=service_role                        # F-22: hak worker sama dengan mode A dan produksi
 STORAGE_BACKEND=supabase
-EXTRACTOR=stub
+EXTRACTOR=stub                                     # extractor sungguhan: §2.11
 ```
 
 `WORKER_DB_ROLE=service_role` membuat worker terhubung sebagai `postgres` lalu berganti role lewat parameter startup `-c role=service_role` (`apps/worker/src/db.ts`). Tanpa itu worker berjalan sebagai pemilik objek dan bug hak akses worker bisa lolos (F-22). Test L4 memeriksa bahwa `postgres` bisa memakai `service_role` di database Supabase. Apakah pooler produksi (Supavisor) meneruskan parameter startup itu diperiksa di Tahap 7; jika tidak, ganti ke `SET ROLE` setelah connect.
@@ -471,7 +528,7 @@ pnpm --filter @priceatlas/web test:e2e        # Playwright (butuh Supabase lokal
 LIVE_AI=1 ANTHROPIC_API_KEY=… pnpm --filter @priceatlas/web test:live-ask   # set pertanyaan emas Tanya (manual, berbayar, §4.11)
 ```
 
-e2e memakai `next start` (Playwright menyalakannya, dengan `ASK_ENGINE=stub` kecuali di-set lain), env `NEXT_PUBLIC_SUPABASE_*` dan `SUPABASE_SERVICE_ROLE_KEY` (hanya proses test, untuk `auth.admin.generateLink`), dan `MAILPIT_URL`. Tanpa `SUPABASE_SERVICE_ROLE_KEY`, test yang butuh Supabase dilewati; yang tetap jalan tanpa Supabase: shell offline tanpa sesi, axe di S-00a + `/offline`, dan cek PWA bisa dipasang (`e2e/a11y.spec.ts`, M7). Browser lain: `PW_CHROMIUM_PATH=<path chromium>`.
+e2e mengharapkan τ setelah kalibrasi: setelah `supabase start`, jalankan `psql "$SUPABASE_DB_URL" -c "update app.config set value = '0.90' where key = 'auto_save_min_confidence'"` (sama dengan langkah CI `supabase-e2e`; migration masa kalibrasi memasang 1,01, §2.10). e2e memakai `next start` (Playwright menyalakannya, dengan `ASK_ENGINE=stub` kecuali di-set lain), env `NEXT_PUBLIC_SUPABASE_*` dan `SUPABASE_SERVICE_ROLE_KEY` (hanya proses test, untuk `auth.admin.generateLink`), dan `MAILPIT_URL`. Tanpa `SUPABASE_SERVICE_ROLE_KEY`, test yang butuh Supabase dilewati; yang tetap jalan tanpa Supabase: shell offline tanpa sesi, axe di S-00a + `/offline`, dan cek PWA bisa dipasang (`e2e/a11y.spec.ts`, M7). Browser lain: `PW_CHROMIUM_PATH=<path chromium>`.
 
 Tanpa Supabase sama sekali, `next build`/`next start` tetap butuh nilai `NEXT_PUBLIC_SUPABASE_URL` dan `NEXT_PUBLIC_SUPABASE_ANON_KEY` (boleh tiruan, mis. `http://127.0.0.1:54321` + `dummy`); tanpa itu `proxy.ts` membalas 500.
 

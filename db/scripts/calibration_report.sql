@@ -1,7 +1,9 @@
 -- Laporan kalibrasi matching (docs/08 §8.2–§8.3). BACA SAJA; dijalankan pemilik proyek:
---   psql "$DATABASE_URL" -v since=2026-11-01 -f db/scripts/calibration_report.sql
--- (tanpa -v since → semua data). Hanya angka agregat: tanpa teks struk, nama produk, atau id
--- household, jadi keluarannya boleh dikirim untuk analisis.
+--   psql "$DATABASE_URL" -f db/scripts/calibration_report.sql
+-- Tanpa -v since → sejak app.config calibration_started_on (awal masa kalibrasi; sebelum itu item
+-- bisa auto-save sehingga "diterima" tidak berarti dicek user). -v since=1970-01-01 → semua data.
+-- Hanya angka agregat: tanpa teks struk, nama produk, atau id household, jadi keluarannya boleh
+-- dikirim untuk analisis.
 --
 -- Satu "saran" = baris struk produk (receipt_line) atau item label/screenshot (capture_item) yang
 -- sudah diputuskan user (punya price_record) dan punya saran sistem (suggested_product_id).
@@ -9,8 +11,9 @@
 -- user, termasuk koreksi belakangan (match_outcome = 'corrected'), dihitung tidak diterima.
 \if :{?since}
 \else
-  \set since '1970-01-01'
+  select coalesce((select value #>> '{}' from app.config where key = 'calibration_started_on'), '1970-01-01') as since \gset
 \endif
+\echo 'Data sejak' :'since'
 
 begin;
 
@@ -88,7 +91,7 @@ select 'observasi', count(*)
 select key, value from app.config
  where key in ('auto_save_min_confidence', 'fuzzy_min_similarity', 'fuzzy_max_confidence', 'match_conf_barcode',
                'match_conf_alias_household', 'match_conf_alias_global', 'match_conf_alias_group',
-               'ai_match_max_confidence', 'ai_match_shortlist_min_similarity')
+               'ai_match_max_confidence', 'ai_match_shortlist_min_similarity', 'calibration_started_on')
  order by key;
 
 rollback;

@@ -6,7 +6,7 @@
 //   3. Validasi: item dan pilihan harus ada di daftar pendek; confidence = min(model,
 //      ai_match_max_confidence) < τ, jadi saran AI selalu dikonfirmasi user (D-12).
 // Error apa pun tidak menggagalkan capture: item tetap tanpa saran (log ai.match_failed).
-// Belum dipasang ke buildDeps: dipasang bersama extractor sungguhan (M2, setelah D-16).
+// Dipasang lewat `AI_MATCHER=claude` dengan model `EXTRACT_MODEL` (select.ts, 6b M2).
 import { z } from 'zod';
 import { callStructured, type ClaudeClient, type Effort } from '../ai/claude.ts';
 import type { Db } from '../db.ts';

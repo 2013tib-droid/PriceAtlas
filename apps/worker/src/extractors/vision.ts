@@ -1,6 +1,6 @@
 // VisionExtractor (docs/08 §5.1–§5.3): satu panggilan Claude vision per capture, semua gambar urut
-// posisi, output skema LLM → convert.ts → kontrak. M0: belum dipasang ke buildDeps (EXTRACTOR tetap
-// hanya `stub`); dipakai test L3 dengan klien palsu dan oleh harness/uji live di M1. Dipasang di M2.
+// posisi, output skema LLM → convert.ts → kontrak. Dipasang lewat `EXTRACTOR=vision` (select.ts, 6b M2);
+// juga dipakai harness dan uji live (M1).
 import type { Extraction } from '@priceatlas/contracts';
 import type { BetaContentBlockParam } from '@anthropic-ai/sdk/resources/beta/messages/messages';
 import { callStructured, maxTokensFor, type ClaudeClient, type Effort, type StructuredRequest, type StructuredResult } from '../ai/claude.ts';

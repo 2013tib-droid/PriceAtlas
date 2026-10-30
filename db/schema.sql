@@ -8505,7 +8505,6 @@ INSERT INTO app.config VALUES
 	('trend_flat_threshold_pct', '2', 'Perubahan di bawah persen ini dianggap stabil'),
 	('alias_promotion_threshold', '3', 'Jumlah household berbeda untuk promosi alias (D-35)'),
 	('image_retention_months', '12', 'Retensi gambar capture (D-32)'),
-	('auto_save_min_confidence', '0.90', 'Ambang auto-save D-12. Nilai final setelah uji OCR (D-16, D-50)'),
 	('near_best_threshold_pct', '5', 'Batas "mendekati harga terbaik" di Cek harga rak dan sesi (D-55)'),
 	('capture_max_attempts', '3', 'Percobaan maksimum pemrosesan capture (§5.3)'),
 	('capture_processing_timeout_seconds', '300', 'Lease run: lebih lama dari ini → reaper (§5.3)'),
@@ -8523,7 +8522,9 @@ INSERT INTO app.config VALUES
 	('match_conf_alias_group', '0.70', 'Confidence tier 2b alias dari toko lain dalam store_group (§8.2)'),
 	('fuzzy_max_confidence', '1.00', 'Batas atas confidence tier 3: min(similarity, nilai ini) (F-111)'),
 	('ai_match_max_confidence', '0.85', 'Batas atas confidence saran AI tier 4; < auto_save_min_confidence (§7.3, Q-108)'),
-	('ai_match_shortlist_min_similarity', '0.2', 'Ambang word_similarity daftar pendek tier 4 (§7.2)');
+	('ai_match_shortlist_min_similarity', '0.2', 'Ambang word_similarity daftar pendek tier 4 (§7.2)'),
+	('auto_save_min_confidence', '1.01', 'Ambang auto-save D-12. Masa kalibrasi M3: 1,01 = semua item dikonfirmasi (docs/08 §8.2); nilai final M6 (D-50)'),
+	('calibration_started_on', '"2026-10-30"', 'Tanggal mulai masa kalibrasi matching (auto_save_min_confidence = 1,01); default since di calibration_report.sql (docs/08 §8.2)');
 
 --
 -- Data for Name: unit; Type: TABLE DATA; Schema: public; Owner: -

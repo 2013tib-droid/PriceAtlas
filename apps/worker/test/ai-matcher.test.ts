@@ -1,6 +1,6 @@
 // L2/L3 (docs/08 §7, §12.3, §13.2): matcher AI tier 4 dengan klien Claude palsu dan daftar pendek dari
 // database, matching screenshot nama produk → judul listing (Q-133), anggaran harian sebelum claim,
-// dan batas lease worker. ClaudeAiMatcher belum dipasang ke buildDeps (M2); EXTRACTOR tetap `stub`.
+// dan batas lease worker. Pemasangan lewat env (AI_MATCHER=claude): select.test.ts, m2-pipeline.test.ts.
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { USERS } from '@priceatlas/testkit';
 import type { MatchResult } from '@priceatlas/contracts';

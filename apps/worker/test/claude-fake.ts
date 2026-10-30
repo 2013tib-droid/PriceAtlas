@@ -53,6 +53,17 @@ export class FakeClaude implements ClaudeClient {
     this.steps = steps;
   }
 
+  /** `models.retrieve` (cek kunci/model saat start, select.ts): error yang dilempar, atau null = ok. */
+  modelsError: Error | null = null;
+  readonly retrieved: string[] = [];
+  models = {
+    retrieve: async (model: string) => {
+      this.retrieved.push(model);
+      if (this.modelsError) throw this.modelsError;
+      return { id: model, type: 'model' };
+    },
+  };
+
   push(...steps: Step[]) {
     this.steps.push(...steps);
   }

@@ -181,6 +181,11 @@ jobs:
       - name: Browser Playwright (Chromium + WebKit)
         run: pnpm --filter @priceatlas/web exec playwright install --with-deps chromium webkit
 
+      # 6b M2 (docs/08 §8.2): migration masa kalibrasi membuat τ = 1,01 (tanpa auto-save). e2e menguji
+      # perilaku auto-save setelah kalibrasi (alur 4 sesi, alur 3/5), sama dengan test L1/L3 (lib/seed.sql).
+      - name: τ pasca-kalibrasi untuk e2e (auto_save_min_confidence = 0,90)
+        run: psql "$SUPABASE_DB_URL" -v ON_ERROR_STOP=1 -c "update app.config set value = '0.90' where key = 'auto_save_min_confidence'"
+
       # M2 (docs/07 §11.3 alur 3, O, G): worker stub long-running selama e2e (logika worker tidak diubah).
       - name: Worker stub di latar (EXTRACTOR=stub, WORKER_DB_ROLE=service_role, Storage Supabase)
         run: |

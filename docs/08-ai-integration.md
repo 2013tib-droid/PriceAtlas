@@ -1,6 +1,6 @@
 # Tahap 6a — Desain AI Integration (termasuk uji OCR D-16)
 
-> Status: **Disetujui (2026-10-27).** Semua usulan default §16 diterima → **D-92**. Dokumen ini tidak mengubah keputusan D-01 s/d D-91. **6b M0 selesai dan disetujui (2026-10-27):** §18. Q-122, Q-124, Q-125 → **D-93**; Q-120, Q-121, Q-123, Q-126 → **D-94** (semua usulan default). **6b M5 (Tanya) selesai dan disetujui (2026-10-28):** §19 (F-134–F-147); Q-127–Q-131 → **D-95** (semua usulan default). Uji live set emas menunggu pemilik proyek (Q-129). **6b M1-harness + M4 selesai dan disetujui (2026-10-30):** §20 (F-148–F-158); Q-132–Q-138 → **D-96** (semua usulan default); harness siap dijalankan pemilik proyek, keputusan D-16 menunggu foto + anotasi. **6b M2/M3 bagian tanpa D-16 selesai dan disetujui (2026-10-30):** §21 (F-159–F-166); Q-139–Q-142 → **D-97** (semua usulan default).
+> Status: **Disetujui (2026-10-27).** Semua usulan default §16 diterima → **D-92**. Dokumen ini tidak mengubah keputusan D-01 s/d D-91. **6b M0 selesai dan disetujui (2026-10-27):** §18. Q-122, Q-124, Q-125 → **D-93**; Q-120, Q-121, Q-123, Q-126 → **D-94** (semua usulan default). **6b M5 (Tanya) selesai dan disetujui (2026-10-28):** §19 (F-134–F-147); Q-127–Q-131 → **D-95** (semua usulan default). Uji live set emas menunggu pemilik proyek (Q-129). **6b M1-harness + M4 selesai dan disetujui (2026-10-30):** §20 (F-148–F-158); Q-132–Q-138 → **D-96** (semua usulan default); harness siap dijalankan pemilik proyek, keputusan D-16 menunggu foto + anotasi. **6b M2/M3 bagian tanpa D-16 selesai dan disetujui (2026-10-30):** §21 (F-159–F-166); Q-139–Q-142 → **D-97** (semua usulan default). **6b D-16 + M2 (2026-10-30):** §22 (F-167–F-174). Bagian B1–B3 (pemasangan extractor/matcher lewat env, uji §5.4, masa kalibrasi) selesai, menunggu review (Q-143–Q-146). Bagian A (Lampiran A, usulan D-98) menunggu laporan agregat uji OCR.
 > Rujukan: `PROJECT.md` §3, §5.4, §5.9, D-16, D-50, D-57, D-61, D-70, D-74, D-75, D-82, D-86–D-91; `docs/05-backend-design.md` §5–§7, §9; `docs/06-local-dev.md` §2; `docs/07-frontend-design.md` §6, §9, §13.
 
 ## Daftar Isi
@@ -27,7 +27,8 @@
 19. [Tahap 6b M5: hasil dan temuan baru (F-134 dst.)](#19-tahap-6b-m5-hasil-dan-temuan-baru-f-134-dst)
 20. [Tahap 6b M1-harness + M4: hasil dan temuan baru (F-148 dst.)](#20-tahap-6b-m1-harness--m4-hasil-dan-temuan-baru-f-148-dst)
 21. [Tahap 6b M2/M3 bagian tanpa D-16: hasil dan temuan baru (F-159 dst.)](#21-tahap-6b-m2m3-bagian-tanpa-d-16-hasil-dan-temuan-baru-f-159-dst)
-22. [Lampiran A. Hasil uji OCR](#lampiran-a-hasil-uji-ocr)
+22. [Tahap 6b D-16 + M2: hasil dan temuan baru (F-167 dst.)](#22-tahap-6b-d-16--m2-hasil-dan-temuan-baru-f-167-dst)
+23. [Lampiran A. Hasil uji OCR](#lampiran-a-hasil-uji-ocr)
 
 ---
 
@@ -1199,9 +1200,79 @@ Pemilik proyek: tetap §20.6 (foto, kunci, `test:live`, harness, kirim `*.agg.js
 
 ---
 
+## 22. Tahap 6b D-16 + M2: hasil dan temuan baru (F-167 dst.)
+
+> Status: **Bagian B (M2) B1–B3 selesai, menunggu review** (2026-10-30). **Bagian A (D-16) belum dikerjakan**: laporan agregat `reports/<waktu>.agg.json` (+ `.md`) dan ringkasan `.data/live/*.json` belum diterima di sesi ini. Lampiran A tetap kosong dan D-98 belum diusulkan; tidak ada angka yang dikarang. B4 (teks privasi untuk `ocr+parse`, F-166) menunggu D-16. Basis: `master` setelah D-97 (PR #25). Satu migration baru (hanya data `app.config`). RLS, RPC, dan kontrak tidak berubah. `EXTRACTOR` dan `AI_MATCHER` default tetap `stub`; CI tetap tanpa API berbayar dan tanpa kunci.
+
+### 22.1 Yang dibangun
+
+| Bagian | File | Isi |
+|---|---|---|
+| Pemilihan AI (B1) | `apps/worker/src/extractors/select.ts`, `src/main.ts` | `selectAi(env, db, factories)`: `EXTRACTOR=stub \| vision \| ocr+parse` dan `AI_MATCHER=stub \| claude` (default `stub`, nilai lain → gagal start). Kunci **`WORKER_ANTHROPIC_API_KEY`** (F-167) wajib jika extractor ≠ `stub` atau matcher `claude`; `ANTHROPIC_API_KEY` (web) tidak pernah dibaca worker, pesan error menyebutnya jika hanya kunci web yang terisi. `EXTRACT_MODEL` (default `claude-opus-5-5`) harus ada di tabel harga (F-169). `EXTRACT_EFFORT_RECEIPT`/`_OBSERVATION` (`low`/`medium`/`high`, default `medium`/`low`). `ocr+parse`: `OCR_ENGINE=google-vision` + `GOOGLE_VISION_API_KEY`. Satu klien Claude untuk extractor dan `ClaudeAiMatcher` (model sama, effort `low`, §7.3). Log start `worker.ai` (extractor, engine, model, effort, matcher; tanpa kunci). Cek kunci + model saat start lewat `GET /v1/models/{model}` (gratis): 401/403/404 → worker berhenti; jaringan/5xx → `ai.verify_skipped`, tetap jalan (F-170). Factory klien bisa diganti, jadi semua jalur diuji tanpa jaringan. |
+| Env | `.env.example` | `AI_MATCHER`, `WORKER_ANTHROPIC_API_KEY`, `EXTRACT_MODEL`, `EXTRACT_EFFORT_*`, `OCR_ENGINE`; `GOOGLE_VISION_API_KEY` juga untuk worker `ocr+parse`. |
+| Error/tenggat §5.4 (B2) | `apps/worker/test/m2-pipeline.test.ts`, `test/select.test.ts` | L3: extractor dari `selectAi` (vision **dan** ocr+parse, `describe.each`) + `ClaudeAiMatcher` lewat pipeline penuh dengan klien Claude palsu dan OCR palsu. Lihat §22.2. Kode pipeline/extractor tidak diubah: tabel §5.4 sudah dipenuhi implementasi M0–M3, test ini membuktikannya end-to-end untuk kedua extractor. |
+| Masa kalibrasi (B3) | `supabase/migrations/20261030000200_calibration_period.sql` | `auto_save_min_confidence` = **1,01** (§8.2 no. 1) + kunci baru `calibration_started_on` = `"2026-10-30"` (F-173). Hanya data `app.config`. |
+| Laporan kalibrasi | `db/scripts/calibration_report.sql` | Tanpa `-v since` → sejak `calibration_started_on` (sebelumnya: semua data); tanggal awal dicetak; tabel 6 memuat `calibration_started_on`. |
+| Test τ | `db/tests/lib/seed.sql`, `db/tests/flows/89_calibration_period.sql`, `.github/workflows/ci.yml` | Seed test memasang τ 0,90 (perilaku auto-save setelah kalibrasi) untuk L1 dan L3 (`buildTestDb`); `89` menguji nilai migration dan perilaku masa kalibrasi. Job `supabase-e2e`: langkah `psql` τ 0,90 sebelum worker/e2e (F-171). |
+| Snapshot | `db/schema.sql` | Data `app.config` (urutan baris ikut berubah karena `update`). |
+| Dokumen | `docs/06` §2.10 (masa kalibrasi + membaca laporan), §2.11 (worker mode B dengan extractor sungguhan), §3.2, §4.2 (τ untuk e2e lokal) | |
+| Komentar | `vision.ts`, `ocr-parse.ts`, `ai-matcher.ts`, `types.ts`, header test | "belum dipasang ke buildDeps" diganti cara pemasangan lewat env. |
+
+### 22.2 Hasil test
+
+| Lapisan | Hasil | Catatan |
+|---|---|---|
+| L1 `bash db/tests/run.sh` | **660 lulus** (M2/M3: 650) | `89_calibration_period.sql` 10: migration → τ 1,01 dan `calibration_started_on`, `ai_match_max_confidence` < τ, R2 `get_client_config` memberi 1,01; struk dengan header + baris confidence 1 dan tier barcode → `needs_confirmation`, 0 auto-save, tanpa `price_record`, saran (`suggested_product_id`, tier, confidence) tersimpan; label di sesi aktif confidence 1 → `pending` dengan saran; `calibration_report.sql` tanpa `-v since` memakai `calibration_started_on`. Flow lain tidak diubah (τ 0,90 dari seed). |
+| `snapshot.sh --check`, inventaris | lulus | Inventaris tidak berubah. |
+| worker | **206 lulus, 1 dilewati** (M2/M3: 168) | `select.test.ts` 12: default stub tanpa klien; nilai tidak dikenal; kunci worker wajib, kunci web tidak dipakai, kunci tidak ada di log; model di luar tabel harga; vision model/effort dari env + matcher klien/model sama; ocr+parse engine `gcv+claude`; factory asli tanpa `GOOGLE_VISION_API_KEY`/engine lain → gagal; matcher claude + extractor stub; cek start 200/401/403/404/koneksi/503. `m2-pipeline.test.ts` 26 (11 × vision dan ocr+parse, ditambah 4 khusus): berhasil (model + effort `high` dari env, tier 4 klien/model/tenggat sama, ocr+parse: gambar hanya ke OCR, biaya run = ekstraksi + tier 4 (+ US$0,0015 OCR)); 429/500/529/koneksi/timeout → `uploaded`; 401/403/400 parameter → sementara + `ai.config_error`, percobaan 3 → `failed` `other` (F-170), 404 → sementara; refusal → `other`; `max_tokens` → diulang 32.000 lalu sukses; tenggat sudah lewat (vision: Claude menerima signal aborted; ocr+parse: OCR berhenti, Claude tidak dipanggil); tenggat habis di tengah panggilan → abort ±1 dtk; tenggat habis sebelum tier 4 → item tanpa saran AI, capture tetap diterapkan, `ai.match_failed`; vision 400 gambar / 413 → `unsupported`; OCR sementara → `uploaded` tanpa Claude; OCR menolak gambar → `unsupported`. |
+| web, contracts, ai-tools | **626**, 70, 55 | Tidak berubah. Test L3 web memakai `buildTestDb` (τ 0,90 dari seed). |
+| typecheck, lint + format web, `next build`, `check:bundle`, `check-secrets.sh` | lulus | JS `/` 337 KiB modul (tidak berubah). |
+| Uji live | **tidak dijalankan** | Sesi tanpa kunci; `test:live` tidak berubah. |
+
+**Tidak dijalankan di sesi ini:** e2e Playwright dan L4 (job CI `supabase-e2e`, termasuk langkah τ 0,90 yang baru), uji live, worker mode B dengan foto asli (kriteria selesai §14 M2, butuh pemilik proyek).
+
+### 22.3 Penyimpangan dari desain dan alasannya
+
+| Desain | Dibuat | Alasan |
+|---|---|---|
+| §5.1 worker memakai `ANTHROPIC_API_KEY` | `WORKER_ANTHROPIC_API_KEY` | Nama sama dengan kunci web di `.env` yang di-`source` ke shell (F-167). |
+| §5.1 hanya cek "kunci kosong" saat start | + cek kunci/model `GET /v1/models` | Kunci salah membuat capture gagal setelah 3 percobaan (F-170). |
+| §8.2 masa kalibrasi tanpa catatan | `calibration_started_on` + default `since` laporan | Data auto-save sebelum masa kalibrasi mengacaukan presisi (F-173). |
+| §13.1 "test L1 tidak diubah" (M2/M3) | Seed test τ 0,90 + flow `89` | Migration masa kalibrasi mengubah τ semua database (F-171). |
+
+### 22.4 Temuan baru
+
+| # | Temuan | Dampak | Penanganan | Q |
+|---|---|---|---|---|
+| F-167 | **Kunci worker dan web memakai nama env yang sama** (`ANTHROPIC_API_KEY`, §5.1 dan §10). `.env.example` root berisi `ANTHROPIC_API_KEY` = kunci web, dan docs/06 §2.2 me-`source` `.env` ke shell sebelum menjalankan worker. | Worker diam-diam memakai kunci web: pemakaian tidak bisa dibedakan atau dicabut terpisah (§3.1, §15 no. 5). | Worker hanya membaca `WORKER_ANTHROPIC_API_KEY`; pesan error menyebut jika hanya kunci web yang ada. Harness `ocr-eval` dan `test:live` (alat dev di shell) tetap membaca `ANTHROPIC_API_KEY` dan didokumentasikan sebagai kunci worker (docs/06 §2.8–§2.9). | Q-143 |
+| F-168 | **Satu extractor + model per deployment.** `claim_next_capture` mencatat `ocr_engine`/`ai_model`/`prompt_version` sebelum jenis capture diketahui (F-119). | Jika D-98 memilih engine/model berbeda per jenis (struk vs label vs screenshot), `selectAi` butuh extractor perute dan pencatatan engine/model setelah claim (RPC aditif). | Tidak dibangun sebelum D-16; diperkirakan kecil (perute + satu RPC atau parameter tambahan) jika D-98 memerlukannya. | — |
+| F-169 | **Model di luar tabel harga** membuat `cost_usd` null, sehingga `ai_spend_today()` dan anggaran harian (§12.3) kurang hitung. | Anggaran tidak menahan pengeluaran. | Worker menolak start jika `EXTRACT_MODEL` tidak ada di `packages/ai-tools/src/pricing.ts`. Model cadangan server-side fallback sudah ada di tabel. | — |
+| F-170 | **Kunci salah/dicabut → capture gagal setelah 3 percobaan.** §5.4 memetakan 401/403/400 parameter ke sementara supaya capture tidak gagal karena kunci, tetapi `fail_run` (D-70) menggagalkan capture pada percobaan maksimum apa pun kelasnya (`failed` `other`, ±2,5 menit backoff). | Kunci yang dicabut saat worker berjalan menggagalkan semua capture yang masuk sampai kunci diganti; user bisa "Ulangi" (D-59). | Cek saat start (`GET /v1/models/{model}`, gratis) menangkap kunci/model salah sebelum ada capture yang di-claim. Kunci dicabut di tengah jalan tidak ditangani (jeda claim otomatis setelah `ai.config_error` belum dibuat). | Q-144 |
+| F-171 | **Migration masa kalibrasi mengubah τ di semua database**, termasuk test L1/L3 dan e2e yang menguji auto-save (D-12, alur 4 sesi). | Tanpa penanganan: 4 flow L1 (`10`, `70`, `80`, `87`) gagal, dan e2e alur 4 (auto-accept label sesi) akan gagal. | Seed test (`db/tests/lib/seed.sql`, dipakai flow L1 dan `buildTestDb`) dan langkah CI `supabase-e2e` memasang τ 0,90; perilaku masa kalibrasi diuji di `89`. Asersi flow lama tidak diubah. | — |
+| F-172 | **Selama masa kalibrasi semua field dan saran ditandai "ragu".** UI menandai field/saran dengan confidence < τ (U-15, `doubtfulFields`, `isDoubtfulMatch`); τ 1,01 > semua confidence. | Tanda "ragu" kehilangan arti selama ±2 minggu; user tetap cukup menekan "Benar" untuk saran yang tepat. | Diterima untuk masa kalibrasi (tanpa perubahan UI). Alternatif: kunci R2 terpisah untuk tanda ragu (kontrak + RPC aditif). | Q-145 |
+| F-173 | **Tanggal mulai masa kalibrasi.** Migration hanya bisa memuat tanggal tetap (snapshot `db/schema.sql` memuat data config); worker sungguhan baru dipakai setelah D-16. | Tanpa koreksi, laporan memuat periode sebelum foto asli diproses (tanpa data, jadi tidak salah, tetapi "2 minggu" dihitung dari tanggal yang keliru). | `calibration_started_on` = 2026-10-30; pemilik proyek mengubahnya lewat SQL ke tanggal worker sungguhan pertama kali dipakai (docs/06 §2.10). | Q-146 |
+| F-174 | **`AI_MATCHER` default `stub` juga saat extractor sungguhan dipakai.** Matcher stub mencari fixture per sha256 gambar, jadi untuk foto asli tidak pernah memberi saran. | Lupa mengisi `AI_MATCHER=claude` = tier 4 mati diam-diam (tanpa biaya, tanpa error). | Sesuai permintaan (stub default untuk CI/e2e); `worker.ai` mencatat matcher saat start dan docs/06 §2.11 menyebut keduanya. | — |
+
+### 22.5 Pertanyaan (Q-143 dst.)
+
+| # | Pertanyaan | Usulan default |
+|---|---|---|
+| Q-143 | Kunci worker lewat `WORKER_ANTHROPIC_API_KEY` (bukan `ANTHROPIC_API_KEY`), harness/`test:live` tetap `ANTHROPIC_API_KEY` di shell (F-167)? | **Ya**; harness ikut diganti di Tahap 7 jika kunci per lingkungan dibuat. |
+| Q-144 | Kunci/model dicek saat start; kunci dicabut saat berjalan tetap membuat capture gagal setelah 3 percobaan (F-170)? | **Ya** untuk MVP; jeda claim otomatis setelah `ai.config_error` ditinjau di Tahap 7 (hosting). |
+| Q-145 | Selama masa kalibrasi semua field/saran tampil "ragu", tanpa perubahan UI (F-172)? | **Ya** (±2 minggu). |
+| Q-146 | `calibration_started_on` diubah pemilik proyek lewat SQL ke tanggal worker sungguhan pertama kali memproses foto asli (F-173)? | **Ya**. |
+
+D-98 (keputusan D-16: engine/model per jenis, effort, τ ekstraksi, Q-34/Q-110, Q-122) diusulkan setelah agregat diterima, sebagai pertanyaan berikutnya (Q-147 dst.).
+
+### 22.6 Berikutnya
+
+Pemilik proyek: kirim `reports/<waktu>.agg.json` + `.md` dan ringkasan `.data/live/*.json` (agregat saja). Lalu Bagian A: Lampiran A, usulan D-98 sebagai pertanyaan, F-168 jika D-98 memilih per jenis, dan B4 (teks privasi) jika `ocr+parse` dipilih. Sesudah D-98 disetujui: worker mode B dengan foto asli (docs/06 §2.11) sebagai kriteria selesai M2, ubah `calibration_started_on`, mulai masa kalibrasi M3.
+
+---
+
 ## Lampiran A. Hasil uji OCR
 
-*Diisi setelah pemilik proyek menjalankan harness pada split test (§4.2, docs/06 §2.8). Sumber: `reports/<waktu>.agg.json` (agregat, tanpa teks struk, nama toko, PII, atau id). Contoh bentuk dari set sintetis + klien palsu: `apps/worker/eval/examples/report-synthetic.md` — **bukan** hasil model.*
+*Belum diisi: agregat belum diterima (§22). Diisi setelah pemilik proyek menjalankan harness pada split test (§4.2, docs/06 §2.8). Sumber: `reports/<waktu>.agg.json` (agregat, tanpa teks struk, nama toko, PII, atau id). Contoh bentuk dari set sintetis + klien palsu: `apps/worker/eval/examples/report-synthetic.md` — **bukan** hasil model.*
 
 ### A.1 Data
 

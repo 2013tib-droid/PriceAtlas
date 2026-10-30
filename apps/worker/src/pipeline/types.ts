@@ -37,9 +37,9 @@ export interface ExtractContext {
 }
 
 /**
- * D-16 belum diputuskan. Dua implementasi Tahap 6 sama-sama memenuhi antarmuka ini:
- * VisionExtractor (Claude vision langsung) atau OcrThenParseExtractor (OCR khusus + Claude).
- * Tahap 4: StubExtractor (fixture per hash gambar).
+ * Dipilih lewat env EXTRACTOR (select.ts): VisionExtractor (Claude vision langsung),
+ * OcrThenParseExtractor (OCR khusus + Claude), atau StubExtractor (fixture per hash gambar, CI/e2e).
+ * Satu extractor per deployment (F-119); pilihan per jenis menunggu D-16.
  */
 export interface CaptureExtractor {
   readonly engine: string;

@@ -1,7 +1,7 @@
 // L3 (docs/08 §13.2): VisionExtractor dengan klien Claude palsu (respons rekaman sintetis) melewati
 // pipeline penuh: prepareImages → Claude → convert → kontrak → record_run_output → matching → apply.
 // Termasuk refusal, max_tokens, output tidak valid, bukan struk, gambar rusak, dan tenggat lease.
-// VisionExtractor belum dipasang ke buildDeps (M2); EXTRACTOR produksi tetap `stub`.
+// Pemasangan lewat env (EXTRACTOR=vision | ocr+parse) dan sisa tabel §5.4: m2-pipeline.test.ts.
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { USERS } from '@priceatlas/testkit';
 import { VisionExtractor } from '../src/extractors/vision.ts';
