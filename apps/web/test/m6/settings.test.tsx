@@ -318,6 +318,10 @@ describe('Privasi & hapus akun (D-76)', () => {
     await renderWithProviders(<PrivacyScreen />);
     const user = userEvent.setup();
     expect(screen.getByText('Foto struk dihapus otomatis setelah 12 bulan.')).toBeTruthy();
+    // Q-114: pemroses AI disebut (Anthropic), juga untuk Tanya.
+    expect(screen.getByRole('heading', { name: 'Pembacaan oleh AI' })).toBeTruthy();
+    expect(screen.getByText(/dikirim ke layanan AI Anthropic \(Claude\)/)).toBeTruthy();
+    expect(screen.getByText(/Pertanyaan di Tanya/)).toBeTruthy();
     await reauthAndType(user);
     const del = screen.getByTestId('delete-account');
     await user.click(del);

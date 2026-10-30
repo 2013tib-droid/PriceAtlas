@@ -74,7 +74,7 @@ describe('klasifikasi error (§5.3)', () => {
   });
 });
 
-describe('redaksi PII stub (§7.4)', () => {
+describe('redaksi PII lapis 2–3 (docs/08 §9)', () => {
   it('kartu, HP, email, nilai pii', () => {
     const t = redactText('DEBIT 4111 1111 1111 1111 / ****4321 HP 0812-9876-5432 ani@mail.com MEMBER ANI SUSANTI', ['ANI SUSANTI']);
     expect(t).not.toMatch(/4111|4321|0812|ani@mail|SUSANTI/);
@@ -85,6 +85,52 @@ describe('redaksi PII stub (§7.4)', () => {
   });
   it('harga dan tanggal tidak tersentuh', () => {
     expect(redactText('MILO 2 x 19.500 = 39.000 15/10/2026')).toBe('MILO 2 x 19.500 = 39.000 15/10/2026');
+  });
+  it('lapis 2: nilai pii tanpa beda huruf besar/kecil dan spasi; angka pendek hanya utuh', () => {
+    const t = redactText('Member: ani  susanti\nPTS 4321 HARGA 14321 / 43210\nKODE A12B', ['ANI SUSANTI', '4321', 'a12b']);
+    expect(t).toBe(`Member: ${REDACTED}\nPTS ${REDACTED} HARGA 14321 / 43210\nKODE ${REDACTED}`);
+  });
+  it('lapis 3: nilai setelah label baris (positif)', () => {
+    const cases: [string, string][] = [
+      ['NAMA : BUDI SANTOSO', 'NAMA : '],
+      ['Nama Pelanggan: Citra Lestari', 'Nama Pelanggan: '],
+      ['MEMBER : ANI S', 'MEMBER : '],
+      ['NO. MEMBER 9988776655', 'NO. MEMBER '],
+      ['No Member: AB-77812', 'No Member: '],
+      ['ID MEMBER 12345678', 'ID MEMBER '],
+      ['Member ID: 55X-0912', 'Member ID: '],
+      ['KARTU: BCA DEBIT 1234', 'KARTU: '],
+      ['CARD NO: 5521', 'CARD NO: '],
+      ['TELP: (021) 555 1234', 'TELP: '],
+      ['Phone = 021-555-1234', 'Phone = '],
+      ['ALAMAT: Jl. Melati No. 5 RT 01/02', 'ALAMAT: '],
+      ['Alamat Pengiriman: Perum Griya Blok C2', 'Alamat Pengiriman: '],
+      ['Penerima: Dewi | 0812', 'Penerima: '],
+      ['APPR CODE 123456', 'APPR CODE '],
+      ['APPR: 0A12BC', 'APPR: '],
+      ['REF NO 000123456789', 'REF NO '],
+      ['  Ref. No: 77812', '  Ref. No: '],
+    ];
+    for (const [line, kept] of cases) {
+      expect(redactText(`MILO 500G 45.000\n${line}\nTOTAL 45.000`), line).toBe(`MILO 500G 45.000\n${kept}${REDACTED}\nTOTAL 45.000`);
+    }
+  });
+  it('lapis 3: nama produk, diskon, dan harga member tidak terhapus (negatif)', () => {
+    const keep = [
+      'DISC MEMBER -5.000',
+      'HARGA MEMBER 21.000',
+      'MEMBER DAY PROMO',
+      'Member: Rp21.000',
+      'MEMBER : RP 21.000',
+      'KARTU UCAPAN ULTAH 12.500',
+      'NAMA BAYI SOAP 3X75G',
+      'TISU PASEO REFILL NO 2',
+      'SUSU HILO PHONE BOOTH',
+      'HPP 5.000',
+      'KARTU DEBIT BCA',
+      'TOTAL BELANJA 145.000',
+    ].join('\n');
+    expect(redactText(keep)).toBe(keep);
   });
   it('JSON: string disamarkan, objek pii dikosongkan', () => {
     expect(redactJson({ pii: { phone: '081234567890' }, lines: [{ raw_text: 'HP 081234567890' }], total: 5 })).toEqual({

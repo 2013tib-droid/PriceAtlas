@@ -6,7 +6,7 @@
 | | |
 |---|---|
 | Nama sementara | Price Intelligence (repo: PriceAtlas) |
-| Status | Tahap 6b M1-harness + M4 selesai dan disetujui (D-96): [`docs/08-ai-integration.md` §20](docs/08-ai-integration.md#20-tahap-6b-m1-harness--m4-hasil-dan-temuan-baru-f-148-dst). Uji OCR D-16 menunggu foto + anotasi pemilik proyek (docs/06 §2.8; `test:live` dulu, Q-138). Sementara itu dikerjakan bagian M2/M3 yang tidak bergantung pada D-16. M5 dan M0 selesai dan disetujui (D-93–D-95); set pertanyaan emas menunggu pemilik proyek (Q-129). Cek manual pembaca layar (F-105, Q-101) belum dilakukan; tidak memblokir Tahap 6 |
+| Status | Tahap 6b M1-harness + M4 selesai dan disetujui (D-96): [`docs/08-ai-integration.md` §20](docs/08-ai-integration.md#20-tahap-6b-m1-harness--m4-hasil-dan-temuan-baru-f-148-dst). Uji OCR D-16 menunggu foto + anotasi pemilik proyek (docs/06 §2.8; `test:live` dulu, Q-138). Bagian M2/M3 yang tidak bergantung pada D-16 (kunci tier di config, daftar pendek + matcher tier 4, anggaran harian, lease, matching screenshot Q-133, laporan kalibrasi, redaksi lapis 2–3, teks privasi Q-114) selesai, menunggu review: [`docs/08` §21](docs/08-ai-integration.md#21-tahap-6b-m2m3-bagian-tanpa-d-16-hasil-dan-temuan-baru-f-159-dst) (Q-139–Q-142). M5 dan M0 selesai dan disetujui (D-93–D-95); set pertanyaan emas menunggu pemilik proyek (Q-129). Cek manual pembaca layar (F-105, Q-101) belum dilakukan; tidak memblokir Tahap 6 |
 | Terakhir diperbarui | 2026-10-28 |
 
 ---

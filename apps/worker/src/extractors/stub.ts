@@ -120,7 +120,8 @@ export class StubAiMatcher implements AiMatcher {
     const fx = this.fixtures.resolve(ctx.imageSha256s[0], ctx.kind, this.fallback);
     const table = fx?.ai_matches ?? {};
     return items.flatMap((it) => {
-      const hit = table[it.raw_text];
+      // Kunci fixture = teks yang dulu dikirim: judul listing untuk screenshot (Q-133), selain itu raw_text.
+      const hit = (it.title ? table[it.title] : undefined) ?? table[it.raw_text];
       return hit ? [{ key: it.key, product_id: hit.product_id, confidence: hit.confidence }] : [];
     });
   }

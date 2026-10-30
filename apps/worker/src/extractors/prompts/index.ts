@@ -34,3 +34,16 @@ export function ocrNote(version = PROMPT_VERSION): string {
   }
   return text;
 }
+
+/** Instruksi matcher AI tier 4 (docs/08 §7.3). Versi sendiri: berubah tanpa mengubah prompt ekstraksi. */
+export const MATCH_PROMPT_VERSION = 'v1';
+
+export function matchPrompt(version = MATCH_PROMPT_VERSION): string {
+  const file = `match.${version}.md`;
+  let text = cache.get(file);
+  if (text === undefined) {
+    text = readFileSync(join(import.meta.dirname, file), 'utf8');
+    cache.set(file, text);
+  }
+  return text;
+}
