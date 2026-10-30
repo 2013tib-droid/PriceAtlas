@@ -1,7 +1,7 @@
 // OcrThenParseExtractor (docs/08 §5.6, D-16 arm `ocr-gcv+opus-low`): OCR khusus → teks + kotak baris
 // → Claude (teks saja, gambar tidak dikirim) dengan prompt + skema LLM yang SAMA dengan vision, lalu
-// convert.ts yang sama. Cukup untuk harness M1; dibangun penuh hanya jika D-16 memilihnya (§5.6). Tidak
-// dipasang ke buildDeps (M2, D-94).
+// convert.ts yang sama. Dipasang lewat `EXTRACTOR=ocr+parse` (select.ts, 6b M2); diuji L3 dengan OCR
+// palsu. Penyempurnaan §5.6 ("dibangun penuh") dan teks privasi F-166 hanya jika D-16 memilihnya.
 import type { Extraction } from '@priceatlas/contracts';
 import type { BetaContentBlockParam } from '@anthropic-ai/sdk/resources/beta/messages/messages';
 import { callStructured, maxTokensFor, type ClaudeClient, type StructuredRequest, type StructuredResult } from '../ai/claude.ts';

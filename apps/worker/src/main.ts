@@ -2,7 +2,9 @@
 //   tsx src/main.ts [--dev-scheduler] [--once] [--worker-id <id>]
 // Env: DATABASE_URL, WORKER_DB_ROLE, STORAGE_BACKEND (supabase|local), LOCAL_STORAGE_DIR,
 //      NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (backend supabase),
-//      EXTRACTOR (Tahap 4: hanya "stub"), STUB_FIXTURES_DIR,
+//      EXTRACTOR (stub | vision | ocr+parse), AI_MATCHER (stub | claude), WORKER_ANTHROPIC_API_KEY,
+//      EXTRACT_MODEL, EXTRACT_EFFORT_RECEIPT, EXTRACT_EFFORT_OBSERVATION, OCR_ENGINE, GOOGLE_VISION_API_KEY
+//      (docs/08 §5.1; lihat src/extractors/select.ts), STUB_FIXTURES_DIR,
 //      STUB_FALLBACK_FIXTURE (khusus worker e2e: nama fixture untuk gambar tak dikenal, Q-82/Q-118),
 //      CAPTURE_LEASE_SECONDS (default 300, ≤ capture_processing_timeout_seconds; docs/08 §5.4),
 //      AI_DAILY_BUDGET_USD (override app.config ai_daily_budget_usd; docs/08 §12.3).
@@ -13,7 +15,7 @@ import { createClient } from '@supabase/supabase-js';
 import { LocalBlobStore } from './adapters/local-blob-store.ts';
 import { SupabaseBlobStore } from './adapters/supabase-blob-store.ts';
 import { createPool } from './db.ts';
-import { FixtureRegistry, StubAiMatcher, StubExtractor, fallbackFixture } from './extractors/stub.ts';
+import { defaultFactories, selectAi } from './extractors/select.ts';
 import { log } from './log.ts';
 import { BudgetGate, DEFAULT_LEASE_SECONDS, checkLeaseSeconds, parsePositiveEnv } from './pipeline/process-capture.ts';
 import type { BlobStore } from './pipeline/types.ts';
@@ -44,24 +46,27 @@ export function buildDeps(args: { workerId: string }) {
     throw new Error(`STORAGE_BACKEND tidak dikenal: ${backend}`);
   }
 
-  const extractorKind = process.env.EXTRACTOR ?? 'stub';
-  if (extractorKind !== 'stub') {
-    // VisionExtractor sudah ada (src/extractors/vision.ts) tetapi baru dipasang di 6b M2 (docs/08 §14).
-    throw new Error(`EXTRACTOR=${extractorKind} belum dipasang (D-16, docs/08 §14 M2). Pakai EXTRACTOR=stub.`);
-  }
-  const fixtures = new FixtureRegistry(resolve(process.env.STUB_FIXTURES_DIR ?? DEFAULT_FIXTURES_DIR));
-  const fallback = fallbackFixture(fixtures, process.env.STUB_FALLBACK_FIXTURE || undefined);
-  if (fallback) log('worker.stub_fallback', { fixture: fallback.name, kind: fallback.output.kind });
+  const factories = defaultFactories(resolve(process.env.STUB_FIXTURES_DIR ?? DEFAULT_FIXTURES_DIR), process.env.STUB_FALLBACK_FIXTURE || undefined);
+  const { extractor, ai, verify, info } = selectAi(process.env, db, {
+    ...factories,
+    stub: () => {
+      const s = factories.stub();
+      if (s.fallback) log('worker.stub_fallback', { fixture: s.fallback.name, kind: s.fallback.output.kind });
+      return s;
+    },
+  });
+  log('worker.ai', info);
   const leaseSeconds = parsePositiveEnv('CAPTURE_LEASE_SECONDS', process.env.CAPTURE_LEASE_SECONDS, { integer: true }) ?? DEFAULT_LEASE_SECONDS;
   const budgetUsd = parsePositiveEnv('AI_DAILY_BUDGET_USD', process.env.AI_DAILY_BUDGET_USD);
   return {
     db,
     blob,
-    extractor: new StubExtractor(fixtures, fallback),
-    ai: new StubAiMatcher(fixtures, fallback),
+    extractor,
+    ai,
     workerId: args.workerId,
     leaseSeconds,
     budget: new BudgetGate(db, budgetUsd),
+    verifyAi: verify,
   };
 }
 
@@ -72,6 +77,7 @@ async function main(): Promise<void> {
   const workerId = idIdx >= 0 ? argv[idIdx + 1]! : `${hostname()}-${process.pid}`;
   const deps = buildDeps({ workerId });
   await checkLeaseSeconds(deps.db, deps.leaseSeconds);
+  await deps.verifyAi();
   const worker = new Worker({ ...deps, devScheduler: flag('--dev-scheduler') });
 
   if (flag('--once')) {
