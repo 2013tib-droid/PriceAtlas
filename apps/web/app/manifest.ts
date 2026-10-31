@@ -1,4 +1,5 @@
 import type { MetadataRoute } from 'next';
+import { PASTE_HREF, photoCaptureEnabled } from '@/lib/features';
 
 // docs/07 §5.1. start_url/scope "/" (S-01). Pintasan: Foto struk (S-07, M2), Mulai belanja (S-13).
 export default function manifest(): MetadataRoute.Manifest {
@@ -23,9 +24,10 @@ export default function manifest(): MetadataRoute.Manifest {
     prefer_related_applications: false,
     shortcuts: [
       {
-        name: 'Foto struk',
+        // D-100: foto mati → pintasan ke S-21 Tempel struk.
+        name: photoCaptureEnabled() ? 'Foto struk' : 'Tempel struk',
         short_name: 'Struk',
-        url: '/kamera?jenis=struk',
+        url: photoCaptureEnabled() ? '/kamera?jenis=struk' : PASTE_HREF,
         icons: [{ src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' }],
       },
       {

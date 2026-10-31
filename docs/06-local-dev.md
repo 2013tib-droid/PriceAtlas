@@ -85,7 +85,8 @@ DATABASE_URL=postgres://postgres:postgres@localhost:5432/priceatlas_dev
 WORKER_DB_ROLE=service_role          # worker berjalan dengan hak yang sama seperti di Supabase
 STORAGE_BACKEND=local
 LOCAL_STORAGE_DIR=/tmp/priceatlas-storage   # pakai path absolut: skrip dan worker berjalan dari apps/worker
-EXTRACTOR=stub
+EXTRACTOR=stub                       # fixture; .env.example memakai `off` (mode pribadi D-100, §2.12)
+AI_MATCHER=stub
 ```
 
 Muat ke shell sebelum menjalankan perintah di bawah:
@@ -399,6 +400,29 @@ Lalu unggah foto asli dari app seperti §4.5 (galeri atau kamera) → tab Unggah
 **Error (docs/08 §5.4).** 429/5xx/overloaded/koneksi/timeout/tenggat → dicoba lagi otomatis (backoff 30 dtk, 2 mnt; maks 3 percobaan). Gambar ditolak API (400 gambar, 413) atau OCR → Gagal "Format gambar ini belum didukung." Refusal → Gagal "Gambar tidak bisa diproses." Struk terlalu panjang (`max_tokens` dua kali) → Gagal "Struk terlalu panjang untuk dibaca. Coba foto per bagian." Kunci dicabut saat worker berjalan (401/403) → sementara + `ai.config_error`; setelah 3 percobaan capture Gagal dan bisa diulang dari app setelah kunci diganti (F-170).
 
 **Kembali ke stub:** `EXTRACTOR=stub AI_MATCHER=stub` (atau hapus variabelnya). Capture yang sudah diproses tidak berubah.
+
+### 2.12 Mode pribadi tanpa anggaran AI: struk tempelan dari Gemini (D-100)
+
+Selama pemakainya hanya pemilik proyek dan belum ada anggaran, foto di app dimatikan dan struk dimasukkan sebagai JSON dari Gemini (docs/08 §23). Tidak ada panggilan API berbayar dan tidak perlu kunci AI.
+
+| Tempat | Env | Nilai |
+|---|---|---|
+| `apps/web/.env.local` (build-time) | `NEXT_PUBLIC_PHOTO_CAPTURE` | kosong/`off` (default) = foto mati; `on` = foto aktif |
+| `apps/web/.env.local` (server) | `ASK_ENGINE` | `off` (Tanya "Segera hadir") |
+| Worker | `EXTRACTOR` | `off`: hanya capture teks yang diambil, foto tidak diproses |
+| Worker | `AI_MATCHER` | `off`: tanpa matcher tier 4 |
+
+```bash
+export DATABASE_URL=… WORKER_DB_ROLE=service_role STORAGE_BACKEND=supabase NEXT_PUBLIC_SUPABASE_URL=… SUPABASE_SERVICE_ROLE_KEY=…
+export EXTRACTOR=off AI_MATCHER=off
+pnpm --filter @priceatlas/worker start         # log worker.ai: extractor off, sources text
+```
+
+Di app: tombol tengah tab bar ("Tambah struk") → **Tempel struk dari Gemini** (`/tempel`) → "Salin prompt" → buka Gemini, lampirkan foto struk, tempel prompt → salin seluruh jawaban → tempel di kolom → periksa pratinjau → **Kirim struk**. Struk lalu muncul di Unggahan dengan label "dari Gemini" dan masuk konfirmasi S-10 seperti foto. Jawaban yang bukan JSON sesuai format ditolak di layar.
+
+`NEXT_PUBLIC_PHOTO_CAPTURE` dibaca saat `next build`/`next dev`, jadi setelah mengubahnya web perlu dibangun atau dijalankan ulang. Test komponen (`vitest.config.ts`) dan build e2e CI memakai `on` karena alur foto tetap diuji.
+
+**Menyalakan foto lagi** (saat ada anggaran): `NEXT_PUBLIC_PHOTO_CAPTURE=on` + build ulang, `EXTRACTOR=vision` (atau hasil D-16), `AI_MATCHER=claude`, `WORKER_ANTHROPIC_API_KEY` (§2.11), dan `ASK_ENGINE=claude` + `ANTHROPIC_API_KEY` untuk Tanya. Struk tempelan tetap bisa dipakai sesudahnya.
 
 ---
 

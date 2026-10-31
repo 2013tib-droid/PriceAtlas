@@ -4,12 +4,14 @@
 // "Pilih dari galeri"; sesi aktif (R18): Label paling atas dan terpilih + "Label harga akan masuk ke
 // AEON BSD". Struk/galeri/screenshot langsung membuka kamera bawaan atau galeri (satu ketukan); file
 // diserahkan ke S-07 lewat handoff di memori. Label → kamera label (sesi) atau S-12 mode manual (F-53).
-import { Images, ReceiptText, Smartphone, Tag } from 'lucide-react';
+// Foto mati (D-100, NEXT_PUBLIC_PHOTO_CAPTURE ≠ on): satu pilihan "Tempel struk dari Gemini" → S-21.
+import { ClipboardPaste, Images, ReceiptText, Smartphone, Tag } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useId, type ChangeEvent, type ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerClose, DrawerContent, DrawerDescription, DrawerTitle } from '@/components/ui/drawer';
-import { APP_COPY, fill } from '@/lib/copy/id';
+import { APP_COPY, fill, PASTE_COPY } from '@/lib/copy/id';
+import { PASTE_HREF, photoCaptureEnabled } from '@/lib/features';
 import { useActiveSession } from '@/lib/data/session';
 import { useNow } from '@/lib/hooks/use-now';
 import { setPendingFiles, type PendingFiles } from '@/lib/media/handoff';
@@ -160,6 +162,40 @@ export function PhotoSheet() {
       />
     ),
   };
+
+  if (!photoCaptureEnabled()) {
+    return (
+      <Drawer
+        open={isOpen}
+        onOpenChange={(v) => {
+          if (!v) close();
+        }}
+      >
+        <DrawerContent>
+          <div className="flex flex-col gap-3 p-4">
+            <DrawerTitle>{PASTE_COPY.cameraLabel}</DrawerTitle>
+            <DrawerDescription>{PASTE_COPY.sheetDescription}</DrawerDescription>
+            <button
+              type="button"
+              className={optionClass}
+              onClick={() => {
+                pushed = false;
+                router.replace(PASTE_HREF);
+              }}
+            >
+              <ClipboardPaste aria-hidden className="size-6 shrink-0" />
+              <OptionText title={PASTE_COPY.sheetOption} hint={PASTE_COPY.sheetOptionHint} />
+            </button>
+            <DrawerClose asChild>
+              <Button variant="ghost" size="action">
+                {APP_COPY.close}
+              </Button>
+            </DrawerClose>
+          </div>
+        </DrawerContent>
+      </Drawer>
+    );
+  }
 
   return (
     <Drawer

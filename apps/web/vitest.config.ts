@@ -13,6 +13,9 @@ export default defineConfig({
     include: ['test/**/*.test.{ts,tsx}'],
     exclude: ['test/browser/**', 'test/live/**', '**/node_modules/**'],
     setupFiles: ['test/setup.ts'],
+    // Test komponen yang ada memakai alur foto; mode foto mati (D-100, default build) diuji eksplisit
+    // dengan vi.stubEnv di test/paste.
+    env: { NEXT_PUBLIC_PHOTO_CAPTURE: 'on' },
     testTimeout: 30_000,
     hookTimeout: 120_000,
   },

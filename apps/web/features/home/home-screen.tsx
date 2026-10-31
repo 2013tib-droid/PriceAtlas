@@ -3,7 +3,7 @@
 // IndexedDB, R4), harga baru masuk (REST price_record_view + R4), badge perlu dicek, keadaan kosong
 // U-19. Kolom search ada di SearchLayout. Offline tanpa R4 tersimpan: "Baru dicek" dari kartu R5
 // (`offline_cards`, D-60, §5.6).
-import { Camera, Clock, Search, ShoppingBasket } from 'lucide-react';
+import { Camera, ClipboardPaste, Clock, Search, ShoppingBasket } from 'lucide-react';
 import Link from 'next/link';
 import { usePhotoSheet } from '@/components/app/photo-sheet';
 import { ErrorState, LoadingState, OfflineState } from '@/components/app/screen-state';
@@ -11,7 +11,8 @@ import { BasisLabel, PriceText } from '@/components/price/price';
 import { productHref } from '@/components/product/product-card';
 import { ProductRow } from '@/components/product/product-row';
 import { Skeleton } from '@/components/ui/skeleton';
-import { fill, HOME_COPY } from '@/lib/copy/id';
+import { fill, HOME_COPY, PASTE_COPY } from '@/lib/copy/id';
+import { photoCaptureEnabled } from '@/lib/features';
 import { useOfflineCardsByIds } from '@/lib/data/offline-cache';
 import { useNeedsCheckCount, useProductCards, useRecentPrices } from '@/lib/data/queries';
 import { formatTransactionDate } from '@/lib/format';
@@ -37,9 +38,15 @@ function EmptyHome({ onPhoto }: { onPhoto: () => void }) {
       <ul className="flex flex-col gap-2">
         <li>
           <button type="button" onClick={onPhoto} className={cardClass}>
-            <Camera aria-hidden className="mt-0.5 size-6 shrink-0" />
+            {photoCaptureEnabled() ? (
+              <Camera aria-hidden className="mt-0.5 size-6 shrink-0" />
+            ) : (
+              <ClipboardPaste aria-hidden className="mt-0.5 size-6 shrink-0" />
+            )}
             <span className="flex flex-col">
-              <span className="font-semibold">{c.receipt.title}</span>
+              <span className="font-semibold">
+                {photoCaptureEnabled() ? c.receipt.title : PASTE_COPY.homeCardTitle}
+              </span>
               <span className="text-sm text-muted-foreground">{c.receipt.body}</span>
             </span>
           </button>

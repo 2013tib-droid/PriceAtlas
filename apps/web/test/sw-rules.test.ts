@@ -30,7 +30,7 @@ describe('service worker', () => {
     expect(shellCacheKey('https://app.example/produk?id=1')).toBe('https://app.example/produk');
   });
 
-  it('shell offline mencakup tab utama, cari + detail produk (§7.1), /masuk, dan /offline', () => {
+  it('shell offline mencakup tab utama, cari + detail produk (§7.1), /tempel (D-100), /masuk, dan /offline', () => {
     expect(SHELL_ROUTES).toEqual([
       '/',
       '/cari',
@@ -38,6 +38,7 @@ describe('service worker', () => {
       '/unggahan',
       '/unggahan/detail',
       '/kamera',
+      '/tempel',
       '/belanja',
       '/saya',
       '/selamat-datang',

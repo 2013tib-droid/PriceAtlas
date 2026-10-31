@@ -4286,7 +4286,8 @@
         "uploaded_at": "2026-10-23T15:01:49.613628+07:00",
         "error_message": null,
         "date_is_upload": true,
-        "needs_check_count": 0
+        "needs_check_count": 0,
+        "source": "image"
       },
       {
         "id": "27be46bc-f03f-41bd-956e-42e3796b21fa",
@@ -4302,7 +4303,8 @@
         "uploaded_at": "2026-10-23T15:01:49.602259+07:00",
         "error_message": null,
         "date_is_upload": true,
-        "needs_check_count": 0
+        "needs_check_count": 0,
+        "source": "image"
       },
       {
         "id": "a9652c6a-7e71-4634-91ec-8df3a3718022",
@@ -4318,7 +4320,8 @@
         "uploaded_at": "2026-10-23T15:01:49.561852+07:00",
         "error_message": null,
         "date_is_upload": false,
-        "needs_check_count": 0
+        "needs_check_count": 0,
+        "source": "image"
       },
       {
         "id": "358e6715-3d16-460a-9af6-d982b2b502dc",
@@ -4334,7 +4337,8 @@
         "uploaded_at": "2026-10-23T15:01:49.546978+07:00",
         "error_message": "Gambar buram atau tidak terbaca. Coba foto ulang.",
         "date_is_upload": true,
-        "needs_check_count": 0
+        "needs_check_count": 0,
+        "source": "image"
       },
       {
         "id": "b35ab7f6-c466-43f1-8228-f3502a9ee690",
@@ -4350,7 +4354,8 @@
         "uploaded_at": "2026-10-23T15:01:49.481574+07:00",
         "error_message": null,
         "date_is_upload": false,
-        "needs_check_count": 2
+        "needs_check_count": 2,
+        "source": "image"
       }
     ],
     "captures_receipt": [
@@ -4368,7 +4373,8 @@
         "uploaded_at": "2026-10-23T15:01:49.561852+07:00",
         "error_message": null,
         "date_is_upload": false,
-        "needs_check_count": 0
+        "needs_check_count": 0,
+        "source": "image"
       },
       {
         "id": "358e6715-3d16-460a-9af6-d982b2b502dc",
@@ -4384,7 +4390,8 @@
         "uploaded_at": "2026-10-23T15:01:49.546978+07:00",
         "error_message": "Gambar buram atau tidak terbaca. Coba foto ulang.",
         "date_is_upload": true,
-        "needs_check_count": 0
+        "needs_check_count": 0,
+        "source": "image"
       },
       {
         "id": "b35ab7f6-c466-43f1-8228-f3502a9ee690",
@@ -4400,7 +4407,8 @@
         "uploaded_at": "2026-10-23T15:01:49.481574+07:00",
         "error_message": null,
         "date_is_upload": false,
-        "needs_check_count": 2
+        "needs_check_count": 2,
+        "source": "image"
       }
     ],
     "captures_empty": [],
@@ -4435,7 +4443,9 @@
         "household_id": "6f1b8230-4de7-48c2-b154-dd995268eed6",
         "processed_at": "2026-10-23T15:01:49.52448+07:00",
         "error_message": null,
-        "shopping_session_id": null
+        "shopping_session_id": null,
+        "source": "image",
+        "pasted_text": null
       },
       "receipt_id": "37e111fa-b75e-4d0e-a728-6e4fc74a3596",
       "saved_records": [
@@ -4519,7 +4529,9 @@
         "household_id": "6f1b8230-4de7-48c2-b154-dd995268eed6",
         "processed_at": "2026-10-23T15:01:49.554489+07:00",
         "error_message": "Gambar buram atau tidak terbaca. Coba foto ulang.",
-        "shopping_session_id": null
+        "shopping_session_id": null,
+        "source": "image",
+        "pasted_text": null
       },
       "receipt_id": null,
       "saved_records": []
@@ -4569,7 +4581,9 @@
         "household_id": "6f1b8230-4de7-48c2-b154-dd995268eed6",
         "processed_at": "2026-10-23T15:01:49.588379+07:00",
         "error_message": null,
-        "shopping_session_id": null
+        "shopping_session_id": null,
+        "source": "image",
+        "pasted_text": null
       },
       "receipt_id": "f57dd339-ce97-4afc-b6b1-8d13aff30ebb",
       "saved_records": [
@@ -4648,7 +4662,9 @@
         "household_id": "6f1b8230-4de7-48c2-b154-dd995268eed6",
         "processed_at": null,
         "error_message": null,
-        "shopping_session_id": null
+        "shopping_session_id": null,
+        "source": "image",
+        "pasted_text": null
       },
       "receipt_id": null,
       "saved_records": []
@@ -4676,7 +4692,9 @@
         "household_id": "6f1b8230-4de7-48c2-b154-dd995268eed6",
         "processed_at": null,
         "error_message": null,
-        "shopping_session_id": null
+        "shopping_session_id": null,
+        "source": "image",
+        "pasted_text": null
       },
       "receipt_id": null,
       "saved_records": []
@@ -4726,7 +4744,9 @@
         "household_id": "6f1b8230-4de7-48c2-b154-dd995268eed6",
         "processed_at": "2026-10-23T15:01:49.588379+07:00",
         "error_message": null,
-        "shopping_session_id": null
+        "shopping_session_id": null,
+        "source": "image",
+        "pasted_text": null
       },
       "receipt_id": "f57dd339-ce97-4afc-b6b1-8d13aff30ebb",
       "saved_records": [
@@ -6027,7 +6047,9 @@
         "household_id": "6f1b8230-4de7-48c2-b154-dd995268eed6",
         "processed_at": "2026-10-23T15:01:50.013557+07:00",
         "error_message": null,
-        "shopping_session_id": null
+        "shopping_session_id": null,
+        "source": "image",
+        "pasted_text": null
       },
       "receipt_id": null,
       "saved_records": []
@@ -6751,7 +6773,9 @@
         "household_id": "6f1b8230-4de7-48c2-b154-dd995268eed6",
         "processed_at": "2026-10-23T15:01:50.07775+07:00",
         "error_message": null,
-        "shopping_session_id": null
+        "shopping_session_id": null,
+        "source": "image",
+        "pasted_text": null
       },
       "receipt_id": null,
       "saved_records": []

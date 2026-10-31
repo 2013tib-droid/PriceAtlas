@@ -1281,6 +1281,15 @@ export const SETTINGS_COPY = {
       'Email dan data akunmu tidak ikut dikirim. Jika nanti dipakai layanan pembaca teks (OCR) lain, namanya dicantumkan di sini lebih dulu.',
       'Teks hasil bacaan yang memuat data pribadi (nomor kartu, HP, nama atau nomor member) disamarkan di server kami 7 hari setelah selesai diproses.',
     ],
+    /** D-100: foto mati → kalimat pertama `ai` diganti ini. */
+    aiPhotoOff:
+      'Pembacaan foto di PriceAtlas sedang dimatikan: foto tidak dikirim ke layanan AI mana pun dari app ini.',
+    pasteTitle: 'Struk dari Gemini',
+    paste: [
+      'Saat memakai Tempel struk, foto struk dibaca oleh Gemini (Google) di luar PriceAtlas, dengan akun Google-mu dan sesuai kebijakan privasi Google. PriceAtlas tidak menerima fotonya.',
+      'Yang masuk ke PriceAtlas hanya teks yang kamu tempel. Prompt dari PriceAtlas meminta Gemini tidak menulis nomor kartu, nomor member, nama, HP, atau email.',
+      'Teks tempelan dihapus otomatis setelah 12 bulan.',
+    ],
     deleteTitle: 'Hapus akun & semua data',
     deleteBody:
       'Akun, struk, foto, dan semua harga milikmu dihapus permanen. Harga yang sudah dibagikan secara anonim tetap ada tanpa identitasmu.',
@@ -1375,3 +1384,59 @@ export const ASK_COPY = {
 export function fill(template: string, vars: Record<string, string | number>): string {
   return template.replace(/\{(\w+)\}/g, (m, k: string) => (k in vars ? String(vars[k]) : m));
 }
+
+/** S-21 Tempel struk dari Gemini (D-100, docs/08 §23). Foto mati → pintu masuk struk satu-satunya. */
+export const PASTE_COPY = {
+  title: 'Tempel struk dari Gemini',
+  intro: 'Pembacaan foto di app sedang dimatikan. Baca strukmu di Gemini, lalu tempel hasilnya di sini.',
+  steps: [
+    'Salin prompt di bawah.',
+    'Buka Gemini, lampirkan foto struk, tempel prompt, lalu kirim.',
+    'Salin seluruh jawaban Gemini dan tempel di kolom di bawah.',
+  ],
+  copyPrompt: 'Salin prompt',
+  copied: 'Prompt disalin',
+  copyFailed: 'Gagal menyalin. Salin manual dari teks prompt.',
+  showPrompt: 'Lihat teks prompt',
+  inputLabel: 'Jawaban Gemini',
+  inputHelp: 'Tempel apa adanya, termasuk tanda ```json jika ada.',
+  preview: 'Pratinjau',
+  previewStore: 'Toko',
+  previewDate: 'Tanggal',
+  previewItems: 'Baris',
+  previewTotal: 'Total',
+  unknown: 'tidak terbaca',
+  itemsCount: '{n} barang, {m} baris lain',
+  totalMismatch: 'Jumlah baris tidak sama dengan total. Tetap bisa dikirim; cek lagi di layar konfirmasi.',
+  errors: {
+    empty: 'Tempel jawaban Gemini dulu.',
+    too_long: 'Teks terlalu panjang (maksimal 50.000 karakter).',
+    not_json:
+      'Teks ini bukan JSON. Pastikan Gemini menjawab dengan prompt dari PriceAtlas, lalu salin seluruh jawabannya.',
+    invalid: 'Format JSON tidak sesuai ({detail}). Minta Gemini mengulang dengan prompt yang sama.',
+  },
+  submit: 'Kirim struk',
+  submitting: 'Mengirim…',
+  offline: 'Kirim struk butuh sinyal. Teksmu tetap di kolom ini.',
+  submitFailed: 'Struk belum terkirim. Coba lagi.',
+  sent: 'Struk dikirim. Kami kabari kalau sudah siap dicek.',
+  /** S-06 saat foto mati. */
+  sheetDescription: 'Pembacaan foto sedang dimatikan. Struk dimasukkan lewat Gemini.',
+  sheetOption: 'Tempel struk dari Gemini',
+  sheetOptionHint: 'salin jawaban Gemini ke sini',
+  cameraLabel: 'Tambah struk',
+  /** /kamera?jenis=struk|label|screenshot saat foto mati. */
+  photoOffTitle: 'Foto sedang dimatikan',
+  photoOffBody:
+    'Untuk sementara struk dimasukkan dengan menempel jawaban Gemini. Label harga dan screenshot belum bisa dipakai.',
+  goPaste: 'Tempel struk',
+  /** S-01 kosong dan S-08 kosong saat foto mati. */
+  homeCardTitle: 'Tempel struk belanja terakhirmu',
+  /** S-09 capture teks. */
+  sourceTitle: 'Teks tempelan',
+  sourceBody: 'Struk ini dimasukkan dari jawaban Gemini, bukan foto.',
+  sourcePurged: 'Teks tempelan dihapus setelah 12 bulan. Data harga tetap ada.',
+  retake: 'Tempel ulang',
+  /** S-08 baris capture teks. */
+  sourceBadge: 'dari Gemini',
+} as const;

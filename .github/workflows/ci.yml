@@ -68,7 +68,7 @@ jobs:
       - name: Test TypeScript (L2 + L3 + L5a/L5b web)
         run: pnpm -r --workspace-concurrency=1 test
 
-      - name: Build apps/web (next build, service worker Serwist)
+      - name: Build apps/web (next build, service worker Serwist; default foto mati, D-100)
         run: pnpm --filter @priceatlas/web build
 
       - name: Bundle klien tanpa service role + anggaran JS (docs/07 §11.6)
@@ -166,8 +166,12 @@ jobs:
         if: always() && steps.start.outcome == 'success' && steps.images.outputs.cache-hit != 'true'
         run: docker save $(docker images --format '{{.Repository}}:{{.Tag}}' | grep -v '<none>') -o /tmp/supabase-images.tar
 
-      - name: Build apps/web terhadap Supabase lokal
+      # D-100: build default mematikan foto (mode pribadi). e2e tetap menguji alur foto (kodenya dijaga
+      # untuk dinyalakan lagi); S-21 Tempel struk diuji di L5b + L3 worker. Job `test` membangun default.
+      - name: Build apps/web terhadap Supabase lokal (foto aktif untuk e2e)
         run: pnpm --filter @priceatlas/web build
+        env:
+          NEXT_PUBLIC_PHOTO_CAPTURE: 'on'
 
       - name: Bundle klien tidak memuat nilai service role key
         run: pnpm --filter @priceatlas/web check:bundle

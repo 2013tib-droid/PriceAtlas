@@ -1,5 +1,6 @@
 // Langkah worker untuk satu capture (docs/05 §5.4):
 //   claim → unduh gambar + verifikasi sha256 → prepareImages (docs/08 §6) → extract → record_run_output →
+//   (capture teks D-100: tanpa gambar, TextExtractor menggantikan unduh + extract) →
 //   lokasi → matching tier 1–3 (SQL) → tier 4 (AiMatcher, hanya tanpa kandidat) →
 //   apply_extraction (satu transaksi). Gagal → fail_run (transient/permanen).
 // Sebelum claim: anggaran AI harian (docs/08 §12.3). Habis → tidak claim, capture tetap `uploaded`.
@@ -12,6 +13,7 @@ import {
   type ParsedReceipt,
 } from '@priceatlas/contracts';
 import type { Db } from '../db.ts';
+import { TextExtractor } from '../extractors/text.ts';
 import { prepareImages } from '../images/prepare.ts';
 import { log } from '../log.ts';
 import {
@@ -21,6 +23,7 @@ import {
   type BlobStore,
   type CaptureExtractor,
   type CaptureKind,
+  type ExtractContext,
   type Extraction,
   type ImageBlob,
   type RunOutput,
@@ -38,6 +41,10 @@ export interface PipelineDeps {
   extractor: CaptureExtractor;
   ai: AiMatcher;
   workerId: string;
+  /** Capture tempelan (D-100). Default: TextExtractor. */
+  text?: TextExtractor;
+  /** Sumber yang diklaim; null/kosong = semua. EXTRACTOR=off → ['text'] (select.ts). */
+  sources?: CaptureSource[] | null;
   /** Anggaran AI harian (§12.3). Tanpa gerbang → selalu claim (test). */
   budget?: { allow(): Promise<boolean> };
   /** Lease run dalam detik (default 300). Tenggat AI = lease − 30 dtk dari claim (F-107). */
@@ -58,7 +65,12 @@ export interface Claim {
   uploaded_at: Date;
   captured_at: Date | null;
   images: { position: number; storage_path: string; sha256: string }[];
+  source: CaptureSource;
+  pasted_text: string | null;
 }
+
+export type CaptureSource = 'image' | 'text';
+const DEFAULT_TEXT = new TextExtractor();
 
 export interface ProcessResult {
   captureId: string;
@@ -81,16 +93,20 @@ export async function processNextCapture(deps: PipelineDeps): Promise<ProcessRes
   const { db, extractor } = deps;
   if (deps.budget && !(await deps.budget.allow())) return null;
   const started = Date.now();
-  const r = await db.query<Claim>('select * from app.claim_next_capture($1, $2, $3, $4)', [
+  const text = deps.text ?? DEFAULT_TEXT;
+  const r = await db.query<Claim>('select * from app.claim_next_capture($1, $2, $3, $4, $5, $6, $7)', [
     deps.workerId,
     extractor.engine,
     extractor.model,
     extractor.promptVersion,
+    deps.sources?.length ? deps.sources : null,
+    text.engine,
+    text.promptVersion,
   ]);
   const claim = r.rows[0];
   if (!claim) return null;
   const deadline = createDeadline(started, deps.leaseSeconds ?? DEFAULT_LEASE_SECONDS);
-  log('capture.claimed', { capture: claim.capture_id, run: claim.run_id, attempt: claim.attempt, kind: claim.kind });
+  log('capture.claimed', { capture: claim.capture_id, run: claim.run_id, attempt: claim.attempt, kind: claim.kind, source: claim.source });
   await deps.hooks?.afterClaim?.(claim);
 
   try {
@@ -230,42 +246,22 @@ export function classify(e: unknown): { code: string; message: string; transient
 }
 
 async function runClaim(deps: PipelineDeps, claim: Claim, deadline: Deadline): Promise<string> {
-  const { db, blob, extractor, ai } = deps;
+  const { db, ai } = deps;
+  const ctx = {
+    captureId: claim.capture_id,
+    householdId: claim.household_id,
+    attempt: claim.attempt,
+    uploadedAt: claim.uploaded_at,
+    capturedAt: claim.captured_at,
+    signal: deadline.signal,
+    deadlineAt: deadline.deadlineAt,
+  };
 
-  // 1. Unduh gambar + verifikasi sha256.
-  const images: ImageBlob[] = [];
-  for (const img of claim.images) {
-    let data: Buffer;
-    try {
-      data = await blob.get(img.storage_path);
-    } catch {
-      throw new TransientError('gambar belum bisa diunduh');
-    }
-    const sha = createHash('sha256').update(data).digest('hex');
-    if (sha !== img.sha256) {
-      throw new PermanentError('other', 'Gambar berbeda dengan yang didaftarkan.');
-    }
-    images.push({ position: img.position, storagePath: img.storage_path, sha256: sha, data });
-  }
-
-  // 1b. Dekode + bersihkan untuk model (§6). Gagal → `unsupported`, berlaku juga untuk stub.
-  const prepared = await prepareImages(images);
-  for (const img of images) img.prepared = prepared.find((p) => p.position === img.position);
-
-  // 2. Extract (stub di Tahap 4) + validasi kontrak.
-  const extraction = await extractor.extract({
-    kind: claim.kind,
-    images,
-    ctx: {
-      captureId: claim.capture_id,
-      householdId: claim.household_id,
-      attempt: claim.attempt,
-      uploadedAt: claim.uploaded_at,
-      capturedAt: claim.captured_at,
-      signal: deadline.signal,
-      deadlineAt: deadline.deadlineAt,
-    },
-  });
+  // 1–2. Gambar → extractor, atau teks tempelan → TextExtractor (D-100, tanpa AI).
+  const { images, extraction } =
+    claim.source === 'text'
+      ? { images: [] as ImageBlob[], extraction: (deps.text ?? DEFAULT_TEXT).extractText({ kind: claim.kind, text: claim.pasted_text, ctx }) }
+      : await extractImages(deps, claim, ctx);
   const parsed = ParsedOutputSchema.safeParse(extraction.output);
 
   // 3. Data mentah selalu disimpan, juga jika output tidak valid (audit, proses ulang).
@@ -367,6 +363,31 @@ async function runClaim(deps: PipelineDeps, claim: Claim, deadline: Deadline): P
     JSON.stringify(payload),
   ]);
   return a.rows[0]?.r.status ?? 'stale';
+}
+
+/** Capture foto: unduh + verifikasi sha256 → prepareImages (§6) → extractor (stub/vision/ocr+parse). */
+async function extractImages(deps: PipelineDeps, claim: Claim, ctx: ExtractContext): Promise<{ images: ImageBlob[]; extraction: Extraction }> {
+  const images: ImageBlob[] = [];
+  for (const img of claim.images) {
+    let data: Buffer;
+    try {
+      data = await deps.blob.get(img.storage_path);
+    } catch {
+      throw new TransientError('gambar belum bisa diunduh');
+    }
+    const sha = createHash('sha256').update(data).digest('hex');
+    if (sha !== img.sha256) {
+      throw new PermanentError('other', 'Gambar berbeda dengan yang didaftarkan.');
+    }
+    images.push({ position: img.position, storagePath: img.storage_path, sha256: sha, data });
+  }
+
+  // Dekode + bersihkan untuk model (§6). Gagal → `unsupported`, berlaku juga untuk stub.
+  const prepared = await prepareImages(images);
+  for (const img of images) img.prepared = prepared.find((p) => p.position === img.position);
+
+  const extraction = await deps.extractor.extract({ kind: claim.kind, images, ctx });
+  return { images, extraction };
 }
 
 const TIER_RANK: Record<string, number> = { barcode: 1, alias: 2, fuzzy: 3, ai: 4, manual: 5 };
