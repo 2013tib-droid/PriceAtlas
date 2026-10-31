@@ -1,6 +1,6 @@
 # Tahap 7a — Desain Production (pemakaian pribadi tanpa anggaran, D-100)
 
-> Status: **Desain, menunggu persetujuan.** Belum ada implementasi. Pertanyaan §14 (Q-151 dst.) dijawab pemilik proyek, lalu dicatat sebagai **D-101**; implementasi Tahap 7b (§12) baru dimulai setelah itu. Dokumen ini tidak mengubah keputusan D-01 s/d D-100.
+> Status: **Desain disetujui (D-101, 2026-10-31).** Pemilik proyek menerima semua usulan default Q-151 s/d Q-163 (§14). Belum ada implementasi; berikutnya Tahap 7b (§12), lalu checklist go-live (§13). Dokumen ini tidak mengubah keputusan D-01 s/d D-100.
 > Rujukan: `PROJECT.md` §8 (D-61, D-68, D-78, D-81, D-86, D-90, D-91, D-95, D-98, D-100), §11 "Cara Kerja Tim"; `docs/05-backend-design.md` §1.2–§1.4, §7; `docs/06-local-dev.md` §2.4, §2.10–§2.12, §3; `docs/07-frontend-design.md` §11.6, F-44, F-86, F-94, F-103; `docs/08-ai-integration.md` §12.3, §19.4 (F-138), §22.4 (F-167, F-170, F-173), §23.
 
 ## Daftar Isi
@@ -483,7 +483,7 @@ Dijalankan pemilik proyek setelah PR 7b di-merge ke `master` dan CI hijau. ⚑ =
 | Q-162 | Pembagian item Tahap 7 di §4 (wajib sekarang: F-86/F-187/F-188, role pooler; tunda: CSP D-86, F-138, F-170, F-167, F-103, F-94, dengan pemicu)? | **Ya.** |
 | Q-163 | Hapus akun diuji dengan akun kedua saat go-live; jika SMTP bawaan menolak email non-anggota tim, uji ini dilewati dan diganti uji di Supabase lokal (sudah di e2e alur 7)? | **Ya.** |
 
-**Setelah dijawab:** Q-151 s/d Q-163 → **D-101**, lalu Tahap 7b (§12).
+**Hasil review (2026-10-31):** pemilik proyek menerima semua usulan default Q-151 s/d Q-163 → **D-101**. Berikutnya Tahap 7b (§12); tanggal go-live (awal hitungan masa kalibrasi, §10 langkah 4) dicatat di D-101 saat go-live.
 
 ---
 
