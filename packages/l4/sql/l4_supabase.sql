@@ -27,10 +27,20 @@ select test.ok(not exists (select 1 from pg_policies where schemaname = 'storage
                              and policyname like 'captures%' and cmd in ('UPDATE', 'DELETE', 'ALL')),
                'D-69: tidak ada policy UPDATE/DELETE captures untuk user');
 
--- 0900: pg_cron tersedia di Supabase, jadwal dibuat.
+-- 0900 + 20261031000200 (F-184): pg_cron tersedia di Supabase, 7 jadwal dibuat.
 select test.ok((select count(*) from cron.job
-                 where jobname in ('summary-queue', 'summary-time', 'alias-promote', 'sql-jobs', 'reap-stale-runs', 'retention')) = 6,
-               '0900: 6 jadwal pg_cron terdaftar');
+                 where jobname in ('summary-queue', 'summary-time', 'alias-promote', 'sql-jobs', 'reap-stale-runs', 'retention',
+                                   'cron-cleanup')) = 7,
+               '0900 + cron-cleanup: 7 jadwal pg_cron terdaftar');
+select test.ok((select schedule from cron.job where jobname = 'cron-cleanup') = '45 17 * * *',
+               'F-184: cron-cleanup harian 17:45 UTC');
+-- Perintah pembersih bisa dijalankan role pemilik jadwal (postgres) tanpa error hak akses.
+do $$
+begin
+  execute (select command from cron.job where jobname = 'cron-cleanup');
+end
+$$;
+select test.ok(true, 'F-184: perintah cron-cleanup jalan sebagai pemilik jadwal');
 
 -- Baseline: trigger signup → profile + household.
 select test.ok(exists (select 1 from pg_trigger where tgname = 'on_auth_user_created'

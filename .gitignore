@@ -4,6 +4,11 @@ dist/
 .data/
 .env
 .env.local
+# Tahap 7b (docs/06 §5): env produksi di PC dan berkas backup tidak pernah di-commit.
+.env.*.local
+.env.production*
+*.tar.age
+*.dump
 *.tsbuildinfo
 supabase/.branches/
 supabase/.temp/

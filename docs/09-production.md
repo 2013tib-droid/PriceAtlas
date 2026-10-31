@@ -1,6 +1,6 @@
 # Tahap 7a — Desain Production (pemakaian pribadi tanpa anggaran, D-100)
 
-> Status: **Desain disetujui (D-101, 2026-10-31).** Pemilik proyek menerima semua usulan default Q-151 s/d Q-163 (§14). Belum ada implementasi; berikutnya Tahap 7b (§12), lalu checklist go-live (§13). Dokumen ini tidak mengubah keputusan D-01 s/d D-100.
+> Status: **Desain disetujui (D-101, 2026-10-31). Tahap 7b (§12, B1–B7) selesai dan disetujui (D-102, 2026-10-31)** (hasil, penyimpangan, temuan F-198–F-206, pertanyaan Q-164–Q-170: §16). Berikutnya go-live (§13), dijalankan pemilik proyek setelah PR 7b di-merge dan CI hijau. Dokumen ini tidak mengubah keputusan D-01 s/d D-100.
 > Rujukan: `PROJECT.md` §8 (D-61, D-68, D-78, D-81, D-86, D-90, D-91, D-95, D-98, D-100), §11 "Cara Kerja Tim"; `docs/05-backend-design.md` §1.2–§1.4, §7; `docs/06-local-dev.md` §2.4, §2.10–§2.12, §3; `docs/07-frontend-design.md` §11.6, F-44, F-86, F-94, F-103; `docs/08-ai-integration.md` §12.3, §19.4 (F-138), §22.4 (F-167, F-170, F-173), §23.
 
 ## Daftar Isi
@@ -21,6 +21,7 @@
 13. [Checklist go-live](#13-checklist-go-live)
 14. [Pertanyaan (Q-151 dst.)](#14-pertanyaan-q-151-dst)
 15. [Bagian yang belum bisa dirancang penuh](#15-bagian-yang-belum-bisa-dirancang-penuh)
+16. [Tahap 7b: hasil dan temuan baru (F-198 dst.)](#16-tahap-7b-hasil-dan-temuan-baru-f-198-dst)
 
 ---
 
@@ -46,7 +47,7 @@
 
 | Komponen | Isi | Kebutuhan runtime |
 |---|---|---|
-| Supabase | PostgreSQL 17 (D-78), Auth OTP email (D-83), Storage bucket `captures` (D-69; hampir kosong selama foto mati), pg_cron 6 jadwal (`…0900_cron.sql`), PostgREST | Selalu hidup; pg_cron berjalan di dalam database |
+| Supabase | PostgreSQL 17 (D-78), Auth OTP email (D-83), Storage bucket `captures` (D-69; hampir kosong selama foto mati), pg_cron 7 jadwal (`…0900_cron.sql` + `cron-cleanup`, 7b), PostgREST | Selalu hidup; pg_cron berjalan di dalam database |
 | `apps/web` | Next.js 16 PWA: shell statis + data di klien (D-79), `proxy.ts`, `/auth/callback`, `POST /api/account/delete` (service role), `POST /api/ask` (`ASK_ENGINE=off` → "Segera hadir") | Fungsi serverless Node untuk 2 route + proxy; sisanya statis |
 | `apps/worker` | Capture teks (`TextExtractor`, biaya 0), job `purge_images` / `redact_ocr` / `delete_household` / `purge_storage_paths`, sapuan unggahan yatim | Node ≥ 22, koneksi Postgres sesi; tidak butuh jalan terus (§3.3) |
 
@@ -223,8 +224,9 @@ Environment dibatasi ke branch `master` (*Deployment branches*), sehingga workfl
 | `SUPABASE_SERVICE_ROLE_KEY` | secret | kunci service role/secret | worker: hapus objek Storage (retensi, hapus akun, sapuan) |
 | `BACKUP_DATABASE_URL` | secret | `postgresql://postgres.<ref>:<sandi>@<host-pooler>:5432/postgres` | `backup.yml` (`pg_dump` butuh baca semua schema) |
 | `BACKUP_AGE_RECIPIENT` | variable | kunci publik `age1…` | Enkripsi dump; kunci privat hanya di PC |
+| `WORKER_DB_ROLE`, `WORKER_DB_ROLE_MODE` | variable | **kosong**; cadangan F-186: `service_role` + `set` (docs/06 §5.2) | worker |
 
-Env worker yang ditulis langsung di `worker.yml` (bukan rahasia): `STORAGE_BACKEND=supabase`, `EXTRACTOR=off`, `AI_MATCHER=off`, `WORKER_DB_ROLE=` (kosong; role dipasang lewat `ALTER ROLE`, F-186). Tidak diisi: `WORKER_ANTHROPIC_API_KEY`, `EXTRACT_*`, `OCR_ENGINE`, `GOOGLE_VISION_API_KEY`, `STUB_FIXTURES_DIR`, `STUB_FALLBACK_FIXTURE` (khusus e2e, jangan pernah di produksi), `CAPTURE_LEASE_SECONDS` (default 300), `AI_DAILY_BUDGET_USD`, `LOCAL_STORAGE_DIR`.
+Env worker yang ditulis langsung di `worker.yml` (bukan rahasia): `STORAGE_BACKEND=supabase`, `EXTRACTOR=off`, `AI_MATCHER=off`, `WORKER_EXPECT_ROLE=service_role` (worker berhenti jika role efektif lain, F-201). Role dipasang lewat `ALTER ROLE` (F-186). Tidak diisi: `WORKER_ANTHROPIC_API_KEY`, `EXTRACT_*`, `OCR_ENGINE`, `GOOGLE_VISION_API_KEY`, `STUB_FIXTURES_DIR`, `STUB_FALLBACK_FIXTURE` (khusus e2e, jangan pernah di produksi), `CAPTURE_LEASE_SECONDS` (default 300), `AI_DAILY_BUDGET_USD`, `LOCAL_STORAGE_DIR`.
 
 ### 5.3 Supabase (dashboard, bukan env)
 
@@ -276,7 +278,7 @@ SQL Editor (sebagai `postgres`):
 
 ```sql
 show timezone;                                                         -- Asia/Jakarta (F-197)
-select jobname, schedule from cron.job order by 1;                     -- 6 jadwal (7 setelah migration F-184)
+select jobname, schedule from cron.job order by 1;                     -- 7 jadwal (termasuk cron-cleanup 45 17 * * *, F-184)
 select id, public, file_size_limit from storage.buckets;                -- captures, false, 10485760
 select extname, extnamespace::regnamespace from pg_extension
  where extname in ('pg_trgm','btree_gist','pg_cron');                  -- pg_trgm/btree_gist di extensions
@@ -300,7 +302,7 @@ psql "$WORKER_DATABASE_URL" -c "select current_user, session_user"   # service_r
 psql "$WORKER_DATABASE_URL" -c "select app.ai_spend_today()"          # 0 (hak eksekusi service_role)
 ```
 
-Jika `current_user` bukan `service_role`: jangan memakai role ini; worker memakai cadangan `SET ROLE` setelah connect (7b B2) dan langkah ini diulang.
+Jika `current_user` bukan `service_role`: pakai cadangan `SET ROLE` setelah connect (7b B2): variable Environment `WORKER_DB_ROLE=service_role` + `WORKER_DB_ROLE_MODE=set` (docs/06 §5.2), lalu jalankan workflow `worker` manual dan pastikan log `worker.db` = `service_role`. Tanpa salah satu dari keduanya worker menolak berjalan (`WORKER_EXPECT_ROLE`, F-201).
 
 Opsional: `pnpm --filter @priceatlas/db-types exec supabase gen types typescript --project-id <ref> --schema public` dibandingkan dengan `packages/db-types` (harus sama).
 
@@ -332,15 +334,17 @@ Konsekuensi yang perlu diingat: login hanya bisa ke email pemilik; hapus akun (D
 **Jalur (usulan, Q-159):** workflow `backup.yml`, jadwal mingguan (Minggu 19:23 UTC) + manual:
 
 ```
-pg_dump (postgresql-client-17, BACKUP_DATABASE_URL) → age -r $BACKUP_AGE_RECIPIENT
-  → upload-artifact priceatlas-<tanggal>.dump.age (retensi 30 hari)
+db/scripts/backup_dump.sh (pg_dump 17, BACKUP_DATABASE_URL) → public_app.dump + auth.dump
+  → tar | age -r $BACKUP_AGE_RECIPIENT → upload-artifact priceatlas-<waktu>.tar.age (retensi 30 hari)
 ```
+
+(7b: dua berkas dalam satu tar karena `pg_dump` mengabaikan `--schema` jika ada `--table`; `auth.dump` juga memuat `supabase_migrations.schema_migrations` untuk cek versi saat restore, F-198.)
 
 Isi dump tidak pernah tersimpan tanpa enkripsi di luar runner, dan log hanya mencetak ukuran file. Bulanan: unduh artifact terbaru ke PC (atau drive pribadi) supaya ada salinan di luar GitHub.
 
 **Alternatif:** `pg_dump` manual dari PC tiap minggu (tanpa rahasia DB di GitHub, tetapi mudah terlupa).
 
-**Restore:** ke Supabase lokal (latihan) atau proyek baru: `supabase db push` (skema dari migration) → `pg_restore --data-only` dengan urutan `auth` → `public` → `app`, dengan trigger turunan (D-63) dan jadwal pg_cron dikendalikan selama restore. Perintah persisnya dirumuskan dan **diuji sekali** di 7b terhadap Supabase lokal, lalu ditulis di docs/06 (§15).
+**Restore:** ke Supabase lokal (latihan) atau proyek baru: skema dari migration pada versi yang sama → `db/scripts/backup_restore.sh` (satu transaksi: cek versi, `session_replication_role = replica`, `TRUNCATE … CASCADE`, data `auth` → `public` + `app`). Perintah lengkap: docs/06 §5.5; hasil uji 7b: §16.2 (F-199).
 
 ---
 
@@ -391,6 +395,7 @@ Jangan mengubah τ di produksi selama masa kalibrasi. Struk percobaan saat go-li
 | Bulanan | Pemakaian Supabase (DB, egress), menit GitHub Actions, run worker/backup gagal | Dashboard Supabase *Usage*; GitHub *Settings → Billing* |
 | Bulanan | Kesehatan database | `select status, count(*) from public.capture group by 1;` · `select kind, status, count(*) from app.job group by 1,2;` · `select count(*) from cron.job_run_details where status = 'failed' and start_time > now() - interval '30 days';` |
 | Bulanan | Unduh backup ke PC | §8 |
+| Bulanan | Workflow terjadwal `worker`/`backup` masih aktif dan run terakhir ≤ 1 hari/≤ 7 hari (F-205 ⚑) | GitHub → Actions → workflow → status + run terakhir; jika dinonaktifkan: *Enable workflow* |
 | Tahunan | Rotasi token (§5.5) | Pengingat kalender |
 | Jika app tidak bisa memuat data | Proyek ter-*pause* (F-183) | Dashboard Supabase → *Restore project*; tunggu sampai aktif; worker berikutnya memproses antrean |
 
@@ -440,8 +445,9 @@ Dijalankan pemilik proyek setelah PR 7b di-merge ke `master` dan CI hijau. ⚑ =
 
 **3. GitHub Actions**
 - [ ] *Settings → Environments → production*: batasi ke `master`; isi secret/variable §5.2.
-- [ ] *Actions → worker → Run workflow*: log `worker.ai` menyebut extractor `off`, sources `text`; `worker.once processed: 0`.
-- [ ] *Actions → backup → Run workflow*: artifact `.dump.age` ada.
+- [ ] *Actions → worker → Run workflow*: log `worker.ai` menyebut extractor `off`, sources `text`; `worker.db` role `service_role`; `worker.once processed: 0` (docs/06 §5.2).
+- [ ] *Actions → backup → Run workflow*: artifact `priceatlas-<waktu>.tar.age` ada; log `public_app.dump` dan `auth.dump` dengan jumlah tabel > 0.
+- [ ] *Actions*: workflow `worker` dan `backup` berstatus aktif (jadwal tidak dinonaktifkan, F-205 ⚑).
 
 **4. HP dan akun**
 - [ ] Buka URL di HP, pasang PWA (§9), login dengan kode OTP dari email (cek template berisi kode, bukan tautan).
@@ -457,7 +463,7 @@ Dijalankan pemilik proyek setelah PR 7b di-merge ke `master` dan CI hijau. ⚑ =
 - [ ] `calibration_started_on` (§10 langkah 2); catat tanggal go-live.
 
 **6. Latihan restore**
-- [ ] Unduh artifact backup → `age -d` di PC → restore ke Supabase lokal (perintah docs/06 §5 dari B5) → login lokal tidak perlu; cek jumlah `receipt`/`price_record` sama.
+- [ ] Unduh artifact backup → `age -d` di PC → `supabase start` pada commit dengan migration terakhir yang sama → `db/scripts/backup_restore.sh` (docs/06 §5.5) → login lokal tidak perlu; jumlah `auth.users`/`household`/`receipt`/`price_record`/`capture` yang dicetak sama dengan produksi. Jika gagal karena hak `session_replication_role` atau `TRUNCATE auth.users` (F-199 ⚑), catat pesan errornya.
 
 **7. Pengingat**
 - [ ] Kalender: bulanan (§11), tahunan rotasi PAT, "buka app minimal sekali seminggu" (F-183).
@@ -492,8 +498,8 @@ Dijalankan pemilik proyek setelah PR 7b di-merge ke `master` dan CI hijau. ⚑ =
 | Bagian | Alasan | Kapan |
 |---|---|---|
 | Angka batas layanan ⚑ | Sumber pihak ketiga, sebagian bertentangan | §13 langkah 0 |
-| `ALTER ROLE … SET role` lewat Supavisor (F-186) | Belum bisa diuji tanpa proyek hosted | §6.3 saat go-live; cadangan B2 |
-| Perintah restore persis (urutan schema, trigger D-63, `auth`) | Butuh percobaan terhadap dump sungguhan | 7b B5 + §13 langkah 6 |
+| `ALTER ROLE … SET role` lewat Supavisor (F-186) | Belum bisa diuji tanpa proyek hosted (lewat koneksi langsung PostgreSQL 17 lokal: berhasil, §16.2) | §6.3 saat go-live; cadangan B2 siap (`WORKER_DB_ROLE_MODE=set`) |
+| Restore ke Supabase (hak `postgres` untuk `session_replication_role` dan `TRUNCATE auth.*`, F-199) | Perintah dirumuskan dan diuji di 7b terhadap PostgreSQL lokal mode A (§16.2); Supabase CLI tidak bisa dijalankan di lingkungan pembuatan 7b | §13 langkah 6 |
 | Apakah query worker harian dihitung "aktivitas" oleh Supabase (F-183) | Definisi aktivitas tidak terdokumentasi jelas | Diamati setelah 2–3 minggu pemakaian |
 | Kunci API Supabase generasi baru vs lama (F-196) | Tergantung proyek baru | §13 langkah 4 |
 | Hosting saat foto/AI dinyalakan | Menunggu anggaran dan D-16/D-99; F-138/F-167/F-170 ditinjau saat itu | Setelah ada anggaran |
@@ -501,3 +507,82 @@ Dijalankan pemilik proyek setelah PR 7b di-merge ke `master` dan CI hijau. ⚑ =
 ---
 
 **Sumber batas layanan (dicek 2026-10-31):** [Supabase Production Checklist](https://supabase.com/docs/guides/deployment/going-into-prod.md), [Vercel Hobby plan](https://vercel.com/docs/plans/hobby), [Vercel limits](https://vercel.com/docs/concepts/limits/overview), [GitHub Actions billing](https://docs.github.com/en/actions/reference/usage-limits-billing-and-administration), ringkasan harga Supabase pihak ketiga ([makerkit](https://makerkit.dev/blog/md/saas/supabase-pricing), [toolradar](https://toolradar.com/blog/supabase-pricing-2026), [metacto](https://www.metacto.com/blogs/the-true-cost-of-supabase-a-comprehensive-guide-to-pricing-integration-and-maintenance)).
+
+---
+
+## 16. Tahap 7b: hasil dan temuan baru (F-198 dst.)
+
+> Status: **selesai dan disetujui (D-102).** Implementasi §12 (B1–B7) sesuai D-101. Tidak mengubah skema data, RLS, RPC, atau kontrak; CI tetap tanpa API berbayar dan tanpa rahasia produksi (workflow produksi hanya membaca Environment `production`, yang tidak dipakai `ci.yml`). Go-live (§13) belum dijalankan.
+
+### 16.1 Yang dibangun
+
+| # | Bagian | Isi |
+|---|---|---|
+| B1 | `supabase/migrations/20261031000200_cron_cleanup.sql` | Jadwal pg_cron `cron-cleanup` `'45 17 * * *'`: hapus `cron.job_run_details` dengan `end_time` > 7 hari. Dilewati jika extension `pg_cron` tidak terpasang (mode A); `cron.schedule` dengan nama sama memperbarui jadwal (idempoten). L4 `l4_supabase.sql`: 7 jadwal terdaftar, jadwal `cron-cleanup` = `45 17 * * *`, dan perintahnya dijalankan sebagai `postgres` tanpa error hak akses. docs/05 §1.4 dan docs/06 §2.4/§3.6/§5.6 diperbarui. |
+| B2 | `apps/worker` | `src/cli.ts`: parser argumen (`--once`, `--sweep` hanya bersama `--once`, `--dev-scheduler` tidak bersama `--once`, `--worker-id <id>`; argumen tidak dikenal/ganda ditolak) dijalankan sebelum koneksi apa pun. `Worker.runOnce({ sweep })`: kuras antrean lalu `sweepOrphans`; log `worker.once { processed, swept }` (+ `orphans.swept` jika ada). `src/db.ts`: `WORKER_DB_ROLE_MODE` = `startup` (default, perilaku lama) \| `set` (cadangan F-186: `SET ROLE` lewat hook `onConnect` pg-pool; gagal → koneksi ditutup) dan `checkDbRole`: worker mencatat `worker.db { role }` saat start dan berhenti jika role efektif ≠ `WORKER_EXPECT_ROLE` (atau `WORKER_DB_ROLE`) (F-201, F-202). |
+| B3 | `.github/workflows/worker.yml` | `workflow_dispatch` + `schedule '10 18 * * *'`; `environment: production`; `concurrency: { group: worker, cancel-in-progress: false }`; `timeout-minutes: 10`; `permissions: contents: read`; Node 22 + cache pnpm; `pnpm install --frozen-lockfile --filter @priceatlas/worker...`; `start --once --worker-id gh-<run>-<attempt>` (+ `--sweep` pada `schedule`). Env: `DATABASE_URL` ← secret `WORKER_DATABASE_URL`, `NEXT_PUBLIC_SUPABASE_URL` ← variable `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `STORAGE_BACKEND=supabase`, `EXTRACTOR=off`, `AI_MATCHER=off`, `WORKER_EXPECT_ROLE=service_role`, `WORKER_DB_ROLE`/`_MODE` dari variable (kosong = jalur `ALTER ROLE`). |
+| B4 | `POST /api/worker/kick` | Route `app/api/worker/kick/route.ts` (`server-only`, `runtime nodejs`, `force-dynamic`, `Cache-Control: no-store`) + logika `lib/worker/kick-server.ts`: `getUser()` wajib (401) → `GITHUB_DISPATCH_TOKEN`/`GITHUB_DISPATCH_REPO` kosong atau repo tidak berpola `owner/nama` → 204 tanpa aksi → `POST api.github.com/repos/<repo>/actions/workflows/worker.yml/dispatches` `{ref: "master"}` dengan `AbortSignal.timeout(5000)` → 2xx = 202 `{status: "queued"}`, selain itu/timeout/jaringan → 502 `KICK_FAILED` tanpa detail GitHub. Isi respons GitHub tidak dibaca; log `worker.kick { status, ms }`. Klien `lib/worker/kick.ts` (`fetch` `keepalive`, error diabaikan): S-21 setelah W1b berhasil (sebelum pindah ke S-09), dan `useRetryCapture` `onSuccess` (tombol "Ulangi" S-09 dan S-08, F-200). `check:bundle`: nama `GITHUB_DISPATCH_TOKEN`/`_REPO`, `github_pat_`, `api.github.com`, `/dispatches` dan nilai token (jika ada di env) tidak boleh ada di `.next/static`. |
+| B5 | Backup + restore | `.github/workflows/backup.yml` (Minggu 19:23 UTC + manual, `environment: production`, `concurrency: backup`, `timeout-minutes: 15`): klien PostgreSQL 17 + `age` → cek pola `BACKUP_AGE_RECIPIENT` → `db/scripts/backup_dump.sh` → `tar` → `age -r` → artifact `priceatlas-<waktu>.tar.age` (retensi 30 hari, `compression-level: 0`, `if-no-files-found: error`); berkas tanpa enkripsi dihapus `trap`, `umask 077`. `db/scripts/backup_dump.sh`: `public_app.dump` (`-Fc --schema=public --schema=app`) + `auth.dump` (`-Fc --data-only` `auth.users`, `auth.identities`, `supabase_migrations.schema_migrations`), log jumlah tabel + ukuran saja (F-198). `db/scripts/backup_restore.sh` (F-199): satu transaksi — cek versi migration, `SET LOCAL session_replication_role = replica`, `TRUNCATE … CASCADE` tabel yang ada di backup, data `auth` → `public` + `app`, cetak jumlah baris; target `*.supabase.co/.com` ditolak kecuali `ALLOW_REMOTE_RESTORE=1`. Perintah di docs/06 §5.4–§5.5. |
+| B6 | `apps/web/vercel.json` | `{"regions": ["sin1"]}` (+ `$schema`). |
+| B7 | Dokumen dan pengaman | docs/06 §5 "Produksi" (komponen, worker produksi + cadangan PC, pemicu, backup, restore, pembersih pg_cron), §1/§2.4/§3.2/§3.6; docs/05 §1.4; `.env.example` (komentar produksi, `WORKER_DB_ROLE_MODE`, `WORKER_EXPECT_ROLE`, `GITHUB_DISPATCH_*`, `BACKUP_DATABASE_URL`); docs/09 §1.1, §5.2, §6.3, §8, §11, §13, §15, §16; PROJECT.md, README. `.gitignore` + `scripts/check-secrets.sh` diperluas (F-203). |
+
+### 16.2 Hasil test
+
+| Lapisan | Hasil | Catatan |
+|---|---|---|
+| L1 `bash db/tests/run.sh` | **682 lulus** (smoke 43 + flows 639; tidak berubah) | Tidak ada flow baru: migration B1 dilewati tanpa pg_cron, jadi skema mode A tidak berubah. Dijalankan per file di PostgreSQL 17.10; `00_baseline_equivalence` (butuh `pg_dump` 17) dijalankan di PostgreSQL 16 lokal (F-206). |
+| `snapshot.sh --check`, `smoke.sha256` | lulus | `--check` di PostgreSQL 16 (F-206); `db/schema.sql` tidak berubah. |
+| B1 dengan `pg_cron` tiruan | lulus | Ekstensi tiruan sementara (`cron.job`, `cron.job_run_details`, `cron.schedule`) di PostgreSQL 17 lokal: build penuh → 7 jadwal, `cron-cleanup` `45 17 * * *`; perintahnya menghapus baris 9 hari dan menyisakan 6 hari; migration dijalankan ulang → tetap 7. Ekstensi tiruan dihapus lagi. L4 sungguhan berjalan di CI `supabase-e2e`. |
+| worker | **237 lulus, 1 dilewati** (D-100: 215) | `once.test.ts` 22: parser (5 diterima, 8 ditolak), `parseRoleMode`; mode `set` → dua koneksi paralel sama-sama `service_role` (session_user `postgres`); role tak bisa dipakai → query gagal, tidak berjalan sebagai role login; `checkDbRole` beda → error; `runOnce` tanpa sweep membiarkan objek yatim, dengan sweep menghapus yang > 24 jam dan membiarkan yang baru; `main.ts` sebagai proses: `--sweep` saja → exit 1 sebelum menyentuh DB (tanpa `DATABASE_URL`), argumen salah → exit 1, `WORKER_EXPECT_ROLE` ≠ role → exit 1 tanpa `worker.once`, `--once --sweep` + `set` + `EXTRACTOR=off` → exit 0, `worker.db` `service_role`, `sources: text`, `swept: 1`. Dilewati: HEIC asli (sampel pemilik proyek, sudah ada). |
+| web, contracts, ai-tools | **650**, 76, 55 (D-100: 635, 76, 55) | `worker-kick.test.ts` 12 (L5a): config env (kosong, spasi, pola repo); tanpa sesi → 401 tanpa panggilan (juga saat env kosong); env kosong → 204 tanpa panggilan/log; sukses → 202, URL/metode/body `ref: master`/header token/signal; GitHub 200 → 202; 401/403/404/422/500 → 502 tanpa isi GitHub, log tanpa token; jaringan gagal dan timeout → 502. L5b: S-21 memanggil kick tepat sekali setelah W1b dan pindah ke S-09 tanpa menunggu respons; W1b gagal → tanpa kick (`paste.test.tsx` +2); S-09 "Ulangi" berhasil → kick, ditolak → tanpa kick (`uploads.test.tsx` +1). |
+| typecheck, lint + format web, `next build`, `check:bundle`, `check-secrets.sh` | lulus | `next build` mendaftarkan `ƒ /api/worker/kick`. `check:bundle` dengan `GITHUB_DISPATCH_TOKEN` palsu di env: lulus; uji negatif (berkas berisi token di `.next/static`) → GAGAL dua kali, sesuai harapan. JS `/` 340 KiB modul. `check-secrets.sh` diuji negatif di repo sementara: token GitHub, kunci age, URL Supabase bersandi, nilai env produksi, `.env.production.local` dan `.dump` yang dilacak → GAGAL. |
+| Perintah `worker.yml` (simulasi) | lulus | Salinan bersih repo: `pnpm install --frozen-lockfile --filter @priceatlas/worker...` (141 paket, tanpa `apps/web`), lalu skrip langkah "Worker --once" dengan `GITHUB_EVENT_NAME` `workflow_dispatch` (`swept: null`) dan `schedule` (`swept: 0`), keduanya exit 0. |
+| Role `priceatlas_worker` (F-186) | lulus (koneksi langsung) | PostgreSQL 17 lokal: `create role … noinherit; grant service_role; alter role … set role service_role` → `select current_user, session_user` = `service_role \| priceatlas_worker`; worker `--once --sweep` tanpa `WORKER_DB_ROLE` + `WORKER_EXPECT_ROLE=service_role` → exit 0. Lewat Supavisor belum bisa diuji (§15). |
+| Backup → `age` → restore (B5) | lulus (PostgreSQL 16 lokal) | Sumber: mode A + seed + `30_confirm_receipt` (3 user, 5 struk, 5 `price_record`) + `supabase_migrations` tiruan. `backup_dump.sh` → 32 + 2 tabel data → `tar` \| `age -r` → `age -d` → `backup_restore.sh` ke DB target berisi seed: **33 tabel identik** (md5 seluruh baris per tabel, termasuk `auth.users`, ringkasan, audit), sequence identity sama, insert baru setelah restore jalan. Negatif: versi migration berbeda → berhenti; host `*.pooler.supabase.com` → ditolak; `public_app.dump` terpotong → exit 1 dan target tidak berubah (rollback). |
+| Workflow di GitHub, L4, e2e | **tidak dijalankan** | `worker.yml`/`backup.yml` hanya bisa jalan di GitHub dengan Environment `production` (go-live §13 langkah 3). L4 dan e2e berjalan di CI `supabase-e2e`; lingkungan sesi tanpa Docker/Supabase CLI (F-206). YAML diperiksa dengan parser. |
+
+### 16.3 Penyimpangan dari §12 dan alasannya
+
+| # | §12 | Yang dibuat | Alasan |
+|---|---|---|---|
+| 1 | B5: artifact `priceatlas-<tanggal>.dump.age` (satu dump) | `priceatlas-<waktu>.tar.age` berisi `public_app.dump` + `auth.dump` | F-198. |
+| 2 | B5: restore `pg_restore --data-only` urutan `auth` → `public` → `app` | Skrip satu transaksi dengan `session_replication_role = replica`, `TRUNCATE`, dan cek versi | F-199: target hasil migration sudah berisi data referensi; trigger turunan harus mati. |
+| 3 | B4: kick setelah W2 "Ulangi" di S-09 | Di hook `useRetryCapture` (S-09 dan S-08) | F-200. |
+| 4 | B2: cadangan `SET ROLE` "jika diperlukan" | Disiapkan sekarang + `WORKER_EXPECT_ROLE` | F-201, F-202. |
+| 5 | B2: argumen tidak valid ditolak | Juga `--dev-scheduler` + `--once` dan argumen ganda | Kombinasi itu tidak punya arti; lebih baik gagal jelas. |
+| 6 | — | `.gitignore` + `check-secrets.sh` diperluas | F-203. |
+
+### 16.4 Temuan baru
+
+| # | Temuan | Dampak | Penanganan | Pertanyaan |
+|---|---|---|---|---|
+| F-198 | **`pg_dump` mengabaikan `--schema` jika ada `--table`** (perilaku terdokumentasi: tabel `-t` dipilih tanpa memedulikan `-n`, dan objek non-tabel tidak ikut). | Satu perintah `-n public -n app -t auth.users` hanya akan membackup `auth.users`. | Dua dump dalam satu tar terenkripsi; `auth.dump` juga memuat `supabase_migrations.schema_migrations` (versi). | Q-164 |
+| F-199 | **Restore ke database hasil migration butuh lebih dari `pg_restore --data-only`.** Target sudah berisi data referensi (satuan, kategori, `app.config`) dan seed → bentrok kunci; trigger turunan (D-63), audit, dan penjaga status akan menghitung ulang/menolak data; migration target harus sama versinya dengan backup. Supabase memakai `SET session_replication_role = replica` sebagai `postgres` di panduan restore-nya ⚑, tetapi hak itu dan `TRUNCATE auth.users … CASCADE` belum dibuktikan di Supabase di sesi ini. | Tanpa ini restore gagal atau data turunan ganda. | `backup_restore.sh` (§16.1 B5); diuji di PostgreSQL lokal (§16.2). Latihan ke Supabase lokal di §13 langkah 6; jika hak ditolak, catat error dan diskusikan (mis. latihan sebagai `supabase_admin` lokal). | Q-165 |
+| F-200 | **"Ulangi" juga ada di S-08 (daftar unggahan)** dengan hook yang sama (`useRetryCapture`). | Memicu dari komponen S-09 saja membuat "Ulangi" di S-08 menunggu run harian. | Kick di `onSuccess` hook: satu tempat untuk S-08 dan S-09; tidak dipanggil jika W2 ditolak. | Q-166 |
+| F-201 | **Tidak ada pengaman jika `WORKER_DATABASE_URL` diisi dengan user `postgres`** (mis. salah salin string koneksi dari dashboard). Worker akan berjalan dengan hak penuh tanpa tanda apa pun (F-22). | Bug hak akses tersembunyi di produksi; rahasia GitHub yang bocor memberi akses penuh. | `WORKER_EXPECT_ROLE=service_role` di `worker.yml`: worker mencatat `worker.db { role }` dan berhenti jika berbeda. Opsional di dev. | Q-167 |
+| F-202 | **Cadangan `SET ROLE` sebaiknya siap sebelum go-live.** Verifikasi §6.3 baru bisa dilakukan saat go-live; jika `ALTER ROLE … SET role` tidak berlaku lewat Supavisor, worker produksi tertahan sampai ada PR baru. Pola event `connect` + `client.query` memicu peringatan *deprecated* pg (antrean query akan dihapus di pg@9). | Go-live bisa terhenti di tengah. | `WORKER_DB_ROLE_MODE=set` memakai hook `onConnect` pg-pool (ditunggu; gagal → koneksi ditutup dan error diteruskan), diaktifkan cukup lewat variable Environment. Diuji L3 (dua koneksi paralel, role gagal). | Q-168 |
+| F-203 | **`.env.production.local` tidak di-gitignore**, padahal docs/09 §5.4 memakainya untuk cadangan worker di PC (`.gitignore` hanya `.env` dan `.env.local`). `check-secrets.sh` juga belum mengenali token GitHub, kunci age, atau URL database bersandi. | Rahasia produksi bisa ikut commit. | `.gitignore`: `.env.*.local`, `.env.production*`, `*.tar.age`, `*.dump`. `check-secrets.sh`: token GitHub (`github_pat_`, `gh[pousr]_`), `AGE-SECRET-KEY-1…`, URL `postgres://…:<sandi>@…supabase.co/.com`, nilai `GITHUB_DISPATCH_TOKEN`/`BACKUP_DATABASE_URL`/`WORKER_DATABASE_URL` terisi, serta `.env*` dan berkas backup yang dilacak. | — |
+| F-204 | **Kick tanpa batas laju.** Setiap user yang login bisa memicu `workflow_dispatch` berulang; `concurrency` membatasi menjadi satu run berjalan + satu menunggu, tetapi setiap run tetap memakai ±1–2 menit kuota (F-195). | Untuk pemakai tunggal dengan pendaftaran ditutup (F-188) risikonya hanya dari akun pemilik sendiri. | Diterima untuk sekarang. Sebelum pendaftaran dibuka: kick hanya jika household pemanggil punya capture `uploaded`, atau batas per user (mis. 1 per 30 dtk). | Q-169 |
+| F-205 | **GitHub menonaktifkan workflow terjadwal setelah 60 hari tanpa aktivitas repo ⚑** (terdokumentasi untuk repo publik; perlu dicek untuk repo privat). | Run harian (F-183 pencegah pause, retensi, sapuan) dan backup mingguan diam-diam berhenti jika repo lama tidak di-commit. | Cek bulanan di §11 + checklist §13 langkah 3. Pemicu dari app (`workflow_dispatch`) tidak terpengaruh. | Q-170 |
+| F-206 | **Lingkungan pembuatan 7b:** tanpa Docker/Supabase CLI, `apt.postgresql.org` diblokir, hanya PostgreSQL 16 terpasang; membangun `pg_dump` 17 dari source ditolak oleh pemeriksa izin sesi. | `00_baseline_equivalence`, `snapshot.sh --check`, dan siklus backup/restore tidak bisa dijalankan dengan versi 17; L4, e2e, dan workflow tidak dijalankan. | Server PostgreSQL 17.10 dari paket npm `@embedded-postgres/linux-x64` untuk L1/L3/L5; tiga pemeriksaan berbasis `pg_dump` di PostgreSQL 16 lokal. CI menjalankan semuanya di 17 (`test`, `supabase-e2e`). Hal yang belum terbukti dicatat di §15 dan diverifikasi di go-live. | — |
+
+### 16.5 Pertanyaan (Q-164 dst.)
+
+| # | Pertanyaan | Usulan default |
+|---|---|---|
+| Q-164 | Backup sebagai `priceatlas-<waktu>.tar.age` berisi `public_app.dump` + `auth.dump` (dengan versi migration) (F-198)? | **Ya.** |
+| Q-165 | Restore lewat `backup_restore.sh` (satu transaksi, `session_replication_role = replica`, `TRUNCATE`, cek versi, target hosted ditolak tanpa `ALLOW_REMOTE_RESTORE=1`); hak di Supabase dibuktikan di latihan §13 langkah 6 (F-199)? | **Ya.** Jika latihan ditolak karena hak, error dicatat dan alternatif dibahas sebelum backup dianggap andal. |
+| Q-166 | Kick setelah "Ulangi" berhasil, baik dari S-09 maupun S-08 (F-200)? | **Ya.** |
+| Q-167 | `WORKER_EXPECT_ROLE=service_role` tetap di `worker.yml` (worker berhenti jika role lain) (F-201)? | **Ya.** |
+| Q-168 | Cadangan `WORKER_DB_ROLE_MODE=set` disiapkan sekarang (bukan setelah verifikasi §6.3 gagal) (F-202)? | **Ya.** Jalur utama tetap `ALTER ROLE … SET role`. |
+| Q-169 | Kick tanpa batas laju selama pemakai tunggal; batas ditinjau sebelum pendaftaran dibuka (F-204)? | **Ya.** |
+| Q-170 | Cek bulanan "workflow terjadwal masih aktif" ditambahkan ke §11 dan §13 (F-205)? | **Ya.** |
+
+**Hasil review (2026-10-31):** pemilik proyek menerima semua usulan default Q-164 s/d Q-170 → **D-102**. Berikutnya go-live (§13) oleh pemilik proyek; hasilnya (centang + catatan, tanggal go-live untuk §10 langkah 4) dicatat di §17 dan Decision Log.
+
+### 16.6 Berikutnya
+
+1. ~~Pemilik proyek menjawab Q-164 s/d Q-170~~ → D-102 (selesai). PR 7b di-merge ke `master` setelah CI (termasuk `supabase-e2e`: L4 7 jadwal pg_cron) hijau.
+2. Go-live sesuai §13, termasuk langkah baru: `worker.db` = `service_role`, workflow terjadwal aktif, dan latihan restore dengan `backup_restore.sh`.
+3. Hasil go-live dicatat (§17, D-101 tanggal go-live, temuan baru F-207 dst.).
+

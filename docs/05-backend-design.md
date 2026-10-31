@@ -136,8 +136,9 @@ Catatan Supabase: `LISTEN` butuh koneksi sesi (port 5432 langsung atau *session 
 | `app.run_sql_jobs(50)`: `recompute_unit_price`, `share_existing_prices` | SQL | pg_cron | tiap 1 menit |
 | `app.reap_stale_runs()`: lease capture yang macet | SQL | pg_cron | tiap 1 menit |
 | `app.enqueue_retention()`: gambar jatuh tempo, OCR yang perlu disamarkan, household tanpa anggota | SQL (enqueue saja) | pg_cron | harian 17:35 UTC |
+| Pembersih `cron.job_run_details` > 7 hari (`cron-cleanup`, Tahap 7b, F-184) | SQL | pg_cron | harian 17:45 UTC |
 | Pemrosesan capture | Storage + AI | worker | event (`NOTIFY`) + polling |
-| `purge_images`, `redact_ocr`, `delete_household`, sapuan unggahan yatim | Storage / AI | worker | mengambil dari `app.job` |
+| `purge_images`, `redact_ocr`, `delete_household`, sapuan unggahan yatim | Storage / AI | worker | mengambil dari `app.job`; sapuan harian 17:50 UTC (long-running) atau `--once --sweep` (produksi 18:10 UTC, docs/09 §3.3) |
 
 **Kenapa dibagi dua:** pg_cron tetap berjalan walaupun worker mati, sehingga ringkasan harga (inti search) tidak ikut basi. Job yang butuh Storage atau AI tidak bisa dijalankan dari SQL tanpa `pg_net` dan rahasia di database, jadi job itu dikerjakan worker.
 

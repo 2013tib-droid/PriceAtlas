@@ -1,6 +1,8 @@
 // Titik masuk worker.
-//   tsx src/main.ts [--dev-scheduler] [--once] [--worker-id <id>]
-// Env: DATABASE_URL, WORKER_DB_ROLE, STORAGE_BACKEND (supabase|local), LOCAL_STORAGE_DIR,
+//   tsx src/main.ts [--dev-scheduler] [--once [--sweep]] [--worker-id <id>]   (src/cli.ts)
+// Env: DATABASE_URL, WORKER_DB_ROLE, WORKER_DB_ROLE_MODE (startup | set; src/db.ts),
+//      WORKER_EXPECT_ROLE (opsional: role efektif wajib, mis. service_role di produksi; docs/09 §6.3),
+//      STORAGE_BACKEND (supabase|local), LOCAL_STORAGE_DIR,
 //      NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (backend supabase),
 //      EXTRACTOR (stub | vision | ocr+parse | off), AI_MATCHER (stub | claude | off), WORKER_ANTHROPIC_API_KEY,
 //      EXTRACT_MODEL, EXTRACT_EFFORT_RECEIPT, EXTRACT_EFFORT_OBSERVATION, OCR_ENGINE, GOOGLE_VISION_API_KEY
@@ -14,7 +16,8 @@ import { fileURLToPath } from 'node:url';
 import { createClient } from '@supabase/supabase-js';
 import { LocalBlobStore } from './adapters/local-blob-store.ts';
 import { SupabaseBlobStore } from './adapters/supabase-blob-store.ts';
-import { createPool } from './db.ts';
+import { parseWorkerArgs } from './cli.ts';
+import { checkDbRole, createPool, parseRoleMode } from './db.ts';
 import { defaultFactories, selectAi } from './extractors/select.ts';
 import { log } from './log.ts';
 import { BudgetGate, DEFAULT_LEASE_SECONDS, checkLeaseSeconds, parsePositiveEnv } from './pipeline/process-capture.ts';
@@ -31,7 +34,10 @@ function required(name: string): string {
 }
 
 export function buildDeps(args: { workerId: string }) {
-  const db = createPool(required('DATABASE_URL'), { role: process.env.WORKER_DB_ROLE || null });
+  const db = createPool(required('DATABASE_URL'), {
+    role: process.env.WORKER_DB_ROLE || null,
+    roleMode: parseRoleMode(process.env.WORKER_DB_ROLE_MODE),
+  });
 
   let blob: BlobStore;
   const backend = process.env.STORAGE_BACKEND ?? 'supabase';
@@ -72,18 +78,19 @@ export function buildDeps(args: { workerId: string }) {
 }
 
 async function main(): Promise<void> {
-  const argv = process.argv.slice(2);
-  const flag = (f: string) => argv.includes(f);
-  const idIdx = argv.indexOf('--worker-id');
-  const workerId = idIdx >= 0 ? argv[idIdx + 1]! : `${hostname()}-${process.pid}`;
+  // Argumen diperiksa sebelum koneksi apa pun (argumen salah → keluar 1 tanpa menyentuh database).
+  const args = parseWorkerArgs(process.argv.slice(2));
+  const workerId = args.workerId ?? `${hostname()}-${process.pid}`;
   const deps = buildDeps({ workerId });
+  const role = await checkDbRole(deps.db, process.env.WORKER_EXPECT_ROLE || process.env.WORKER_DB_ROLE || null);
+  log('worker.db', { role });
   await checkLeaseSeconds(deps.db, deps.leaseSeconds);
   await deps.verifyAi();
-  const worker = new Worker({ ...deps, devScheduler: flag('--dev-scheduler') });
+  const worker = new Worker({ ...deps, devScheduler: args.devScheduler });
 
-  if (flag('--once')) {
-    const n = await worker.drainOnce();
-    log('worker.once', { processed: n });
+  if (args.once) {
+    const { processed, swept } = await worker.runOnce({ sweep: args.sweep });
+    log('worker.once', { processed, swept });
     await deps.db.end();
     return;
   }

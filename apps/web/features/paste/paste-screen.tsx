@@ -2,8 +2,9 @@
 // S-21 Tempel struk dari Gemini (D-100, docs/08 §23). Langkah: salin prompt tetap → foto struk di Gemini
 // → tempel jawaban. Jawaban diperiksa di klien dengan parser yang sama dengan worker (Q-149: format
 // salah ditolak di sini, tidak dikirim); pratinjau toko/tanggal/baris/total + peringatan total.
-// Kirim = W1b submit_text_capture (butuh online, tanpa antrean), lalu S-09 detail unggahan; worker
-// memproses tanpa AI dan struk masuk konfirmasi S-10 seperti foto.
+// Kirim = W1b submit_text_capture (butuh online, tanpa antrean), picu worker produksi tanpa menunggu
+// (POST /api/worker/kick, docs/09 §3.3), lalu S-09 detail unggahan; worker memproses tanpa AI dan
+// struk masuk konfirmasi S-10 seperti foto.
 import {
   GEMINI_RECEIPT_PROMPT,
   parsePastedReceipt,
@@ -25,6 +26,7 @@ import { formatRupiah } from '@/lib/format/money';
 import { useOnline } from '@/lib/hooks/use-online';
 import { useTimeZone } from '@/lib/hooks/use-time-zone';
 import { newCaptureId } from '@/lib/media/capture-id';
+import { kickWorker } from '@/lib/worker/kick';
 
 /** Pesan UI untuk hasil parser (tanpa isi struk). */
 export function pasteErrorText(r: PasteParseResult): string | null {
@@ -105,6 +107,7 @@ export function PasteScreen() {
     const id = newCaptureId();
     try {
       await rpcCall('submit_text_capture', { p_capture_id: id, p_kind: 'receipt', p_text: text });
+      kickWorker();
       await invalidateCaptures(qc);
       toast.success(PASTE_COPY.sent);
       router.push(`/unggahan/detail?id=${id}`);

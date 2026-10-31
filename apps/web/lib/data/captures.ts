@@ -1,7 +1,7 @@
 'use client';
 // Data S-08/S-09 (docs/07 §4.3, §5.5, D-61): R13 list_captures dan R14 get_capture dengan
 // staleTime 0 + polling 5 dtk hanya jika ada capture uploaded/processing dan tab terlihat (P-15);
-// W2 retry_capture, W3 delete_capture; signed URL 300 dtk (tidak di-persist, tidak di-cache SW, P-14).
+// W2 retry_capture (+ picu worker produksi, docs/09 §3.3), W3 delete_capture; signed URL 300 dtk (tidak di-persist, tidak di-cache SW, P-14).
 import {
   CaptureDetailSchema,
   CaptureListItemSchema,
@@ -14,6 +14,7 @@ import { z } from 'zod';
 import { useAuth } from '@/lib/auth/session';
 import { getSupabaseBrowserClient } from '@/lib/supabase/browser';
 import { qk } from './query-keys';
+import { kickWorker } from '@/lib/worker/kick';
 import { rpcCall } from './rpc';
 
 export const POLL_MS = 5_000;
@@ -92,6 +93,7 @@ export function useRetryCapture() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => rpcCall('retry_capture', { p_capture_id: id }),
+    onSuccess: () => kickWorker(),
     onSettled: () => invalidateCaptures(qc),
   });
 }
