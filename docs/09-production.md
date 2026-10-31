@@ -1,6 +1,6 @@
 # Tahap 7a — Desain Production (pemakaian pribadi tanpa anggaran, D-100)
 
-> Status: **Desain disetujui (D-101, 2026-10-31). Tahap 7b (§12, B1–B7) selesai, menunggu persetujuan** (hasil, penyimpangan, temuan F-198–F-206, pertanyaan Q-164–Q-170: §16). Go-live (§13) dijalankan pemilik proyek setelah 7b disetujui dan di-merge. Dokumen ini tidak mengubah keputusan D-01 s/d D-100.
+> Status: **Desain disetujui (D-101, 2026-10-31). Tahap 7b (§12, B1–B7) selesai dan disetujui (D-102, 2026-10-31)** (hasil, penyimpangan, temuan F-198–F-206, pertanyaan Q-164–Q-170: §16). Berikutnya go-live (§13), dijalankan pemilik proyek setelah PR 7b di-merge dan CI hijau. Dokumen ini tidak mengubah keputusan D-01 s/d D-100.
 > Rujukan: `PROJECT.md` §8 (D-61, D-68, D-78, D-81, D-86, D-90, D-91, D-95, D-98, D-100), §11 "Cara Kerja Tim"; `docs/05-backend-design.md` §1.2–§1.4, §7; `docs/06-local-dev.md` §2.4, §2.10–§2.12, §3; `docs/07-frontend-design.md` §11.6, F-44, F-86, F-94, F-103; `docs/08-ai-integration.md` §12.3, §19.4 (F-138), §22.4 (F-167, F-170, F-173), §23.
 
 ## Daftar Isi
@@ -512,7 +512,7 @@ Dijalankan pemilik proyek setelah PR 7b di-merge ke `master` dan CI hijau. ⚑ =
 
 ## 16. Tahap 7b: hasil dan temuan baru (F-198 dst.)
 
-> Status: **selesai, menunggu persetujuan.** Implementasi §12 (B1–B7) sesuai D-101. Tidak mengubah skema data, RLS, RPC, atau kontrak; CI tetap tanpa API berbayar dan tanpa rahasia produksi (workflow produksi hanya membaca Environment `production`, yang tidak dipakai `ci.yml`). Go-live (§13) belum dijalankan.
+> Status: **selesai dan disetujui (D-102).** Implementasi §12 (B1–B7) sesuai D-101. Tidak mengubah skema data, RLS, RPC, atau kontrak; CI tetap tanpa API berbayar dan tanpa rahasia produksi (workflow produksi hanya membaca Environment `production`, yang tidak dipakai `ci.yml`). Go-live (§13) belum dijalankan.
 
 ### 16.1 Yang dibangun
 
@@ -578,11 +578,11 @@ Dijalankan pemilik proyek setelah PR 7b di-merge ke `master` dan CI hijau. ⚑ =
 | Q-169 | Kick tanpa batas laju selama pemakai tunggal; batas ditinjau sebelum pendaftaran dibuka (F-204)? | **Ya.** |
 | Q-170 | Cek bulanan "workflow terjadwal masih aktif" ditambahkan ke §11 dan §13 (F-205)? | **Ya.** |
 
-**Setelah dijawab:** Q-164 s/d Q-170 → **D-102**, lalu go-live (§13) oleh pemilik proyek. Hasil go-live (centang + catatan, tanggal go-live untuk §10 langkah 4) dicatat di §17 dan Decision Log.
+**Hasil review (2026-10-31):** pemilik proyek menerima semua usulan default Q-164 s/d Q-170 → **D-102**. Berikutnya go-live (§13) oleh pemilik proyek; hasilnya (centang + catatan, tanggal go-live untuk §10 langkah 4) dicatat di §17 dan Decision Log.
 
 ### 16.6 Berikutnya
 
-1. Pemilik proyek meninjau §16 dan menjawab Q-164 s/d Q-170 (→ D-102); PR 7b di-merge ke `master` setelah CI (termasuk `supabase-e2e`: L4 7 jadwal pg_cron) hijau.
+1. ~~Pemilik proyek menjawab Q-164 s/d Q-170~~ → D-102 (selesai). PR 7b di-merge ke `master` setelah CI (termasuk `supabase-e2e`: L4 7 jadwal pg_cron) hijau.
 2. Go-live sesuai §13, termasuk langkah baru: `worker.db` = `service_role`, workflow terjadwal aktif, dan latihan restore dengan `backup_restore.sh`.
 3. Hasil go-live dicatat (§17, D-101 tanggal go-live, temuan baru F-207 dst.).
 
