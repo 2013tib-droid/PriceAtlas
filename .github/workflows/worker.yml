@@ -1,0 +1,59 @@
+# Worker produksi (Tahap 7b B3, docs/09 §3.3, D-101 Q-151): `start --once` di GitHub Actions.
+#   - workflow_dispatch: dipicu app lewat POST /api/worker/kick setelah struk ditempel (W1b) atau
+#     "Ulangi" (W2), dan bisa dijalankan manual dari tab Actions.
+#   - schedule harian 18:10 UTC (01:10 WIB, setelah retention 17:35 dan cron-cleanup 17:45):
+#     job retensi/hapus akun + sapuan unggahan yatim (--sweep, F-185), sekaligus aktivitas harian
+#     database supaya proyek Supabase Free tidak di-pause (F-183).
+# Rahasia hanya di GitHub Environment `production` (dibatasi ke branch master, docs/09 §5.2), sehingga
+# run dari branch lain/PR tidak bisa membacanya. Mode D-100: tanpa AI, tanpa kunci AI.
+name: worker
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '10 18 * * *'
+
+permissions:
+  contents: read
+
+# Pemicu beruntun digabung: maks satu run berjalan + satu menunggu; run yang berjalan tidak dibatalkan.
+concurrency:
+  group: worker
+  cancel-in-progress: false
+
+jobs:
+  once:
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 10
+    env:
+      DATABASE_URL: ${{ secrets.WORKER_DATABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      STORAGE_BACKEND: supabase
+      EXTRACTOR: 'off'
+      AI_MATCHER: 'off'
+      # Role dipasang lewat `ALTER ROLE priceatlas_worker SET role service_role` (F-186, §6.3).
+      # Cadangan jika itu tidak berlaku lewat pooler: isi variable WORKER_DB_ROLE=service_role dan
+      # WORKER_DB_ROLE_MODE=set di Environment `production` (SET ROLE setelah connect).
+      WORKER_DB_ROLE: ${{ vars.WORKER_DB_ROLE }}
+      WORKER_DB_ROLE_MODE: ${{ vars.WORKER_DB_ROLE_MODE }}
+      # Worker menolak berjalan jika role efektif bukan service_role (mis. URL berisi user postgres).
+      WORKER_EXPECT_ROLE: service_role
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install (worker + dependensi workspace)
+        run: pnpm install --frozen-lockfile --filter @priceatlas/worker...
+
+      - name: Worker --once
+        run: |
+          args=(--once --worker-id "gh-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}")
+          if [[ "${GITHUB_EVENT_NAME}" == "schedule" ]]; then args+=(--sweep); fi
+          pnpm --filter @priceatlas/worker start "${args[@]}"

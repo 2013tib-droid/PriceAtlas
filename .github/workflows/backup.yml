@@ -1,0 +1,68 @@
+# Backup database produksi (Tahap 7b B5, docs/09 §8, D-101 Q-159): mingguan + manual.
+# pg_dump 17 (public + app + data auth.users/identities + versi migration) → tar → `age` (kunci publik
+# BACKUP_AGE_RECIPIENT; kunci privat hanya di PC pemilik) → artifact 30 hari. Isi dump tidak pernah
+# disimpan tanpa enkripsi di luar runner, dan log hanya mencetak jumlah tabel + ukuran.
+# Rahasia hanya di GitHub Environment `production` (dibatasi ke branch master, docs/09 §5.2).
+# Restore: docs/06 §5.5 (db/scripts/backup_restore.sh).
+name: backup
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 19 * * 0' # Minggu 19:23 UTC (Senin 02:23 WIB)
+
+permissions:
+  contents: read
+
+concurrency:
+  group: backup
+  cancel-in-progress: false
+
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Klien PostgreSQL 17 + age
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          sudo curl -fsSL -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update -q
+          sudo apt-get install -y -q postgresql-client-17 age
+          echo "/usr/lib/postgresql/17/bin" >> "$GITHUB_PATH"
+
+      - name: Kunci publik age tersedia
+        env:
+          BACKUP_AGE_RECIPIENT: ${{ vars.BACKUP_AGE_RECIPIENT }}
+        run: |
+          if [[ ! "$BACKUP_AGE_RECIPIENT" =~ ^age1[0-9a-z]{58}$ ]]; then
+            echo "::error::Variable BACKUP_AGE_RECIPIENT (age1…) belum diisi di Environment production"; exit 1
+          fi
+
+      - name: pg_dump → tar → age
+        env:
+          BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+          BACKUP_AGE_RECIPIENT: ${{ vars.BACKUP_AGE_RECIPIENT }}
+        run: |
+          set -euo pipefail
+          umask 077
+          plain="$RUNNER_TEMP/backup-plain"
+          name="priceatlas-$(date -u +%Y-%m-%dT%H%MZ).tar.age"
+          trap 'rm -rf "$plain"' EXIT
+          bash db/scripts/backup_dump.sh "$plain"
+          mkdir -p "$RUNNER_TEMP/out"
+          tar -C "$plain" -cf - public_app.dump auth.dump | age -r "$BACKUP_AGE_RECIPIENT" -o "$RUNNER_TEMP/out/$name"
+          echo "ok  : $name $(wc -c < "$RUNNER_TEMP/out/$name") byte (terenkripsi)"
+          echo "NAME=$name" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.NAME }}
+          path: ${{ runner.temp }}/out/${{ env.NAME }}
+          retention-days: 30
+          compression-level: 0
+          if-no-files-found: error

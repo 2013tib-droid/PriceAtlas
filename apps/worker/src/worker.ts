@@ -74,6 +74,16 @@ export class Worker {
       });
   }
 
+  /**
+   * Mode `--once` (docs/09 §3.3): kuras antrean sampai kosong, lalu (opsional, `--sweep`) sapuan
+   * unggahan yatim yang di mode long-running dijadwalkan harian 17:50 UTC (F-185).
+   */
+  async runOnce(opts: { sweep?: boolean } = {}): Promise<{ processed: number; swept: number | null }> {
+    const processed = await this.drainOnce();
+    const swept = opts.sweep ? await sweepOrphans({ db: this.db, blob: this.opts.blob }) : null;
+    return { processed, swept };
+  }
+
   /** Proses semua capture yang siap, lalu semua job worker. Hasil: jumlah yang dikerjakan. */
   async drainOnce(): Promise<number> {
     let n = 0;

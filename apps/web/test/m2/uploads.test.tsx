@@ -306,6 +306,27 @@ describe('S-09 Detail unggahan', () => {
     expect(actions[0]!.compareDocumentPosition(actions[1]!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
+  it('failed: Ulangi (W2) berhasil → picu worker (POST /api/worker/kick); ditolak → tidak dipicu', async () => {
+    const fetchMock = vi.fn<typeof fetch>(async () => new Response(null, { status: 202 }));
+    vi.stubGlobal('fetch', fetchMock);
+    const kicks = () => fetchMock.mock.calls.filter(([u]) => u === '/api/worker/kick');
+    try {
+      await open('failed');
+      const u = userEvent.setup();
+      await u.click(await screen.findByRole('button', { name: 'Ulangi' }));
+      await waitFor(() => expect(sb.rpc).toHaveBeenCalledWith('retry_capture', { p_capture_id: expect.any(String) }));
+      await waitFor(() => expect(kicks()).toHaveLength(1));
+      expect(kicks()[0]![1]).toMatchObject({ method: 'POST', keepalive: true });
+
+      state.rpcOverride = (fn) => (fn === 'retry_capture' ? err('retry_not_failed') : undefined);
+      await u.click(await screen.findByRole('button', { name: 'Ulangi' }));
+      await screen.findByRole('alert');
+      expect(kicks()).toHaveLength(1);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it('failed: Ulangi ditolak INVALID_TRANSITION → pesan + muat ulang status', async () => {
     state.rpcOverride = (fn) => (fn === 'retry_capture' ? err('retry_not_failed') : undefined);
     await open('failed');

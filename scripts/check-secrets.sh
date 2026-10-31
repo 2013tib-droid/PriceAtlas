@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Pemeriksaan rahasia sederhana untuk CI (docs/05 §7.7). Memindai file yang dilacak git.
 # Gagal jika menemukan: JWT/kunci Supabase, kunci API Anthropic, kunci privat, nilai env rahasia
-# yang terisi, kunci service role yang diberi prefix NEXT_PUBLIC_, atau file gambar di luar folder
+# yang terisi, kunci service role yang diberi prefix NEXT_PUBLIC_, token GitHub / kunci age / URL database
+# produksi bersandi (Tahap 7b), berkas .env/backup yang dilacak, atau file gambar di luar folder
 # fixture/aset yang diizinkan (F-117: foto struk asli berisi PII tidak boleh masuk riwayat git).
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -17,7 +18,13 @@ check 'kunci API Anthropic'            'sk-ant-[A-Za-z0-9_-]{20,}'
 check 'kunci privat'                   '-----BEGIN [A-Z ]*PRIVATE KEY-----'
 check 'nilai env rahasia terisi'       '^(SUPABASE_SERVICE_ROLE_KEY|GOOGLE_OAUTH_SECRET|ANTHROPIC_API_KEY)=[^ #<]+'
 check 'service role diberi NEXT_PUBLIC' 'NEXT_PUBLIC_[A-Z_]*SERVICE_ROLE'
-if git ls-files | grep -E '(^|/)\.env($|\.local$|\.production$)' ; then echo "GAGAL: file .env dilacak git"; fail=1; fi
+# Tahap 7b (docs/09 §5): token GitHub, kunci privat age, URL database produksi dengan sandi.
+check 'token GitHub'                   'github_pat_[A-Za-z0-9_]{40,}|gh[pousr]_[A-Za-z0-9]{36,}'
+check 'kunci privat age'               'AGE-SECRET-KEY-1[0-9A-Z]{50,}'
+check 'URL database Supabase bersandi' 'postgres(ql)?://[^:/ ]+:[^@ <…]+@[^ ]*supabase\.(co|com)'
+check 'nilai env produksi terisi'      '^(GITHUB_DISPATCH_TOKEN|BACKUP_DATABASE_URL|WORKER_DATABASE_URL)=[^ #<]+'
+if git ls-files | grep -E '(^|/)\.env($|\.local$|\.production|\..*\.local$)' ; then echo "GAGAL: file .env dilacak git"; fail=1; fi
+if git ls-files | grep -E '\.(tar\.age|dump)$' ; then echo "GAGAL: berkas backup dilacak git"; fail=1; fi
 # F-117 (docs/08 §4.2): gambar hanya boleh di folder fixture sintetis dan aset aplikasi.
 IMAGE_ALLOWED='^(apps/worker/test/fixtures/|apps/web/test/fixtures/|apps/web/e2e/fixtures/|apps/web/public/icons/|docs/wireframes/)'
 images=$(git ls-files | grep -i -E '\.(jpe?g|png|heic|heif|webp|gif|avif)$' | grep -v -E "$IMAGE_ALLOWED" || true)

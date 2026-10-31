@@ -37,12 +37,15 @@ supabase/migrations/   sumber kebenaran skema (baseline = db/schema.sql Tahap 2b
 supabase/seed.sql      katalog contoh (AEON, Alfamart, Alfamidi, Shopee, Milo, Indomie, …)
 db/schema.sql          snapshot hasil generate dari migration (D-72) — jangan diedit
 db/tests/              harness SQL (L1): run.sh, build_db.sh, smoke.sql (43 test lama), flows/*
-db/scripts/            dev-db.sh, snapshot.sh, privileges.sh, gen_inventory_test.sh
+db/scripts/            dev-db.sh, snapshot.sh, privileges.sh, gen_inventory_test.sh, calibration_report.sql,
+                       backup_dump.sh + backup_restore.sh (produksi, §5.4–§5.5)
+.github/workflows/     ci.yml; worker.yml + backup.yml (produksi, §5.2, §5.4)
 apps/worker/           worker Node.js: pipeline capture + job (stub extractor, fixture di test/fixtures)
   src/images/          prepareImages: dekode + EXIF + resize sebelum extractor (docs/08 §6)
   src/ai/, extractors/ klien Claude, harga, skema LLM, prompt v1, konverter, VisionExtractor (belum dipasang, M2)
   eval/synthetic/      generator gambar sintetis (HTML → JPEG lewat Playwright)
-apps/web/              PWA Next.js 16 (Tahap 5b): /masuk, layout (app), service worker; POST /api/account/delete, POST /api/ask
+apps/web/              PWA Next.js 16 (Tahap 5b): /masuk, layout (app), service worker; POST /api/account/delete, POST /api/ask,
+                       POST /api/worker/kick (§5.3); vercel.json (region sin1)
 packages/contracts/    zod: input/output RPC, kode error, kontrak extra, unitPrice()
 packages/ai-tools/     6 tool AI (skema + handler ke RPC), loop Tanya `src/ask.ts` (server), tabel harga `src/pricing.ts`
 packages/testkit/      utilitas test: DB uji + klien RPC ala PostgREST dengan JWT simulasi
@@ -109,8 +112,11 @@ pnpm --filter @priceatlas/worker dev:submit label-milo --session <shopping_sessi
 
 ```bash
 pnpm --filter @priceatlas/worker start --once             # proses antrean sampai kosong lalu keluar
+pnpm --filter @priceatlas/worker start --once --sweep     # + sapuan unggahan yatim (seperti run harian produksi, §5.2)
 pnpm --filter @priceatlas/worker dev                      # long-running + --dev-scheduler (pengganti pg_cron)
 ```
+
+Argumen yang tidak dikenal atau kombinasi salah (`--sweep` tanpa `--once`, `--dev-scheduler` dengan `--once`) ditolak sebelum koneksi dibuat (`apps/worker/src/cli.ts`). Saat start worker mencatat role efektif (`worker.db`); `WORKER_EXPECT_ROLE` (opsional) membuatnya berhenti jika role berbeda.
 
 Worker mendengarkan `NOTIFY capture_uploaded` dan polling tiap 5 detik sebagai cadangan. Log hanya berisi id, status, dan durasi (tidak pernah teks OCR, pii, atau gambar).
 
@@ -124,7 +130,7 @@ Worker mendengarkan `NOTIFY capture_uploaded` dan polling tiap 5 detik sebagai c
 | `app.promote_aliases()` | harian 17:20 UTC |
 | `app.enqueue_retention()` | harian 17:35 UTC |
 
-Sapuan unggahan yatim (`app.orphan_storage_objects` → hapus lewat BlobStore) dijalankan worker harian 17:50 UTC di semua mode.
+Sapuan unggahan yatim (`app.orphan_storage_objects` → hapus lewat BlobStore) dijalankan worker long-running harian 17:50 UTC di semua mode, atau oleh `--once --sweep` (produksi, §5.2). Jadwal pg_cron `cron-cleanup` (F-184) tidak punya padanan `--dev-scheduler` karena tanpa pg_cron tidak ada riwayat run.
 
 Sebelum setiap claim worker memeriksa anggaran AI harian (docs/08 §12.3): `app.ai_spend_today()` ≥ `AI_DAILY_BUDGET_USD` (atau `app.config.ai_daily_budget_usd`, default 2,00) → capture dibiarkan `uploaded` (tidak memakan percobaan) dan log `ai.budget_exhausted` maks sekali per jam. Dengan stub biayanya 0, kecuali Tanya sungguhan ikut memakai anggaran yang sama. `CAPTURE_LEASE_SECONDS` (default 300) menentukan tenggat AI (lease − 30 dtk); nilai di atas `capture_processing_timeout_seconds` atau ≤ 30 membuat worker menolak start.
 
@@ -456,7 +462,7 @@ STORAGE_BACKEND=supabase
 EXTRACTOR=stub                                     # extractor sungguhan: §2.11
 ```
 
-`WORKER_DB_ROLE=service_role` membuat worker terhubung sebagai `postgres` lalu berganti role lewat parameter startup `-c role=service_role` (`apps/worker/src/db.ts`). Tanpa itu worker berjalan sebagai pemilik objek dan bug hak akses worker bisa lolos (F-22). Test L4 memeriksa bahwa `postgres` bisa memakai `service_role` di database Supabase. Apakah pooler produksi (Supavisor) meneruskan parameter startup itu diperiksa di Tahap 7; jika tidak, ganti ke `SET ROLE` setelah connect.
+`WORKER_DB_ROLE=service_role` membuat worker terhubung sebagai `postgres` lalu berganti role lewat parameter startup `-c role=service_role` (`apps/worker/src/db.ts`). Tanpa itu worker berjalan sebagai pemilik objek dan bug hak akses worker bisa lolos (F-22). Test L4 memeriksa bahwa `postgres` bisa memakai `service_role` di database Supabase. Produksi memakai role login `priceatlas_worker` + `ALTER ROLE … SET role` lewat session pooler; cadangan `WORKER_DB_ROLE_MODE=set` (`SET ROLE` setelah connect) ada sejak Tahap 7b (§5.2).
 
 ### 3.3 Alur manual
 
@@ -507,7 +513,7 @@ pnpm --filter @priceatlas/l4 test:l4
 
 | Bagian | Isi |
 |---|---|
-| SQL | `db/tests/flows/99_privilege_inventory.sql` terhadap DB Supabase asli (default privileges asli); `packages/l4/sql/l4_supabase.sql`: `postgres` bisa memakai `service_role` (F-22), zona waktu `Asia/Jakarta`, bucket + policy `captures`, 6 jadwal pg_cron, trigger signup, extension di schema `extensions` |
+| SQL | `db/tests/flows/99_privilege_inventory.sql` terhadap DB Supabase asli (default privileges asli); `packages/l4/sql/l4_supabase.sql`: `postgres` bisa memakai `service_role` (F-22), zona waktu `Asia/Jakarta`, bucket + policy `captures`, 7 jadwal pg_cron (termasuk `cron-cleanup` 17:45 UTC dan perintahnya bisa dijalankan pemilik jadwal), trigger signup, extension di schema `extensions` |
 | HTTP | OTP lewat Mailpit (subjek + isi template, kode salah ditolak, R1 setelah login); `PT404/409/422` → HTTP + `parseRpcError`; anon tidak bisa RPC; policy Storage (folder sendiri/lain, kedalaman path, upsert, baca user lain, signed URL, hapus oleh user, tipe file); worker `--once` dengan `WORKER_DB_ROLE=service_role` sampai `needs_confirmation` |
 
 ---
@@ -748,3 +754,110 @@ ASK_MODEL=claude-sonnet-5-5 LIVE_AI=1 ANTHROPIC_API_KEY=… pnpm --filter @price
 Database uji `priceatlas_live_ask` dibangun dari migration + katalog contoh + histori sintetis (`apps/web/test/live/ask-golden.ts`). Setiap pertanyaan dicetak satu baris (kind, tool, tanda ✗); ringkasan + laporan agregat tanpa teks jawaban di `.data/ask-golden/<waktu>.json` (di-gitignore). Target: 100 % menolak di luar kemampuan, ≥ 90 % tool benar; test juga memastikan Tanya tidak menulis data.
 
 **Test:** `packages/ai-tools/test/ask.test.ts` (loop, pemetaan, error, fallback, F-122, stub), `apps/web/test/ask/` (route L3 dengan DB uji + klien Claude palsu, S-20 L5b, logika, set emas offline), `db/tests/flows/86_ask_quota.sql` (L1), `packages/l4` (429 lewat PostgREST), `apps/web/e2e/ask.spec.ts` (e2e dengan `ASK_ENGINE=stub`).
+
+---
+
+## 5. Produksi (Tahap 7b, D-101)
+
+Desain dan alasan: [`docs/09-production.md`](09-production.md). Bagian ini berisi perintah yang dipakai setelah go-live; langkah pertama kali ada di checklist docs/09 §13. Nilai rahasia tidak pernah ditulis di repo, issue, atau log (docs/09 §5).
+
+### 5.1 Komponen dan tempatnya
+
+| Komponen | Tempat | Berkas |
+|---|---|---|
+| Database, Auth, Storage, pg_cron (7 jadwal) | Supabase Free, region Singapura | `supabase/migrations/*` (`supabase db push` dari PC, docs/09 §6.2) |
+| Web | Vercel Hobby, fungsi `sin1` | `apps/web/vercel.json`; env docs/09 §5.1 |
+| Worker | GitHub Actions `worker` (`start --once`) | `.github/workflows/worker.yml`; env docs/09 §5.2 |
+| Pemicu worker dari app | `POST /api/worker/kick` (Vercel) | `apps/web/app/api/worker/kick/route.ts`, `lib/worker/kick-server.ts` |
+| Backup | GitHub Actions `backup` (mingguan) | `.github/workflows/backup.yml`, `db/scripts/backup_dump.sh` |
+| Restore | PC pemilik proyek | `db/scripts/backup_restore.sh` (§5.5) |
+
+### 5.2 Worker produksi
+
+`worker.yml` berjalan di GitHub Environment `production` (dibatasi ke `master`), dengan `concurrency: worker` (maks satu run berjalan + satu menunggu) dan `timeout-minutes: 10`:
+
+| Pemicu | Perintah | Kapan |
+|---|---|---|
+| `workflow_dispatch` | `start --once --worker-id gh-<run>-<attempt>` | Dari app setelah struk ditempel (W1b) atau "Ulangi" (W2), atau manual: *Actions → worker → Run workflow* |
+| `schedule` `'10 18 * * *'` | `start --once --sweep …` | Harian 18:10 UTC (01:10 WIB): job retensi/hapus akun + sapuan unggahan yatim, sekaligus aktivitas harian database (F-183) |
+
+Argumen worker (`apps/worker/src/cli.ts`): `--once`, `--sweep` (hanya bersama `--once`), `--dev-scheduler` (tidak bersama `--once`), `--worker-id <id>`. Argumen lain atau kombinasi salah → worker keluar 1 sebelum terhubung ke database (`worker.fatal`).
+
+Log yang diharapkan pada run yang sehat (tab Actions → run → langkah "Worker --once"):
+
+```
+{"event":"worker.ai","extractor":"off","matcher":"off","sources":"text",…}
+{"event":"worker.db","role":"service_role"}
+{"event":"worker.once","processed":<n>,"swept":null}        # dispatch
+{"event":"worker.once","processed":<n>,"swept":<m>}         # jadwal harian (--sweep)
+```
+
+**Role database (F-186).** Jalur utama: role login `priceatlas_worker` dengan `ALTER ROLE … SET role service_role` (docs/09 §6.3); variable `WORKER_DB_ROLE` dan `WORKER_DB_ROLE_MODE` di Environment kosong. `worker.yml` selalu mengisi `WORKER_EXPECT_ROLE=service_role`, sehingga worker menolak berjalan jika role efektifnya lain (mis. `WORKER_DATABASE_URL` berisi user `postgres`): log `worker.fatal` "role database worker postgres, seharusnya service_role".
+
+Cadangan jika `ALTER ROLE … SET role` tidak berlaku lewat session pooler (`select current_user` = `priceatlas_worker`): isi **variable** Environment `WORKER_DB_ROLE=service_role` dan `WORKER_DB_ROLE_MODE=set`. Worker lalu menjalankan `SET ROLE service_role` sebagai query pertama setiap koneksi (hook `onConnect` pg-pool); jika gagal, koneksi ditutup dan worker berhenti, tidak pernah berjalan sebagai role login. Mode `startup` (default, parameter `-c role=…`) tetap dipakai mode A/B lokal.
+
+**Cadangan di PC (opsi G).** Jika GitHub Actions bermasalah atau kuota menit habis:
+
+```bash
+set -a; source .env.production.local; set +a      # DATABASE_URL (session pooler, priceatlas_worker), NEXT_PUBLIC_SUPABASE_URL,
+                                                  # SUPABASE_SERVICE_ROLE_KEY, STORAGE_BACKEND=supabase, EXTRACTOR=off, AI_MATCHER=off
+WORKER_EXPECT_ROLE=service_role pnpm --filter @priceatlas/worker start --once --sweep   # sekali
+WORKER_EXPECT_ROLE=service_role pnpm --filter @priceatlas/worker start                  # long-running (LISTEN)
+```
+
+`.env.production.local` tidak pernah di-commit (`.env*` di-gitignore) dan tidak boleh dipakai bersama `.env` dev.
+
+### 5.3 Pemicu worker dari app
+
+`POST /api/worker/kick` (server-only, `runtime nodejs`): tanpa sesi → 401; `GITHUB_DISPATCH_TOKEN` atau `GITHUB_DISPATCH_REPO` kosong → 204 tanpa aksi (dev, CI, Preview); selain itu `workflow_dispatch` `worker.yml` pada `master` dengan timeout 5 dtk → 202, gagal → 502 tanpa detail. Log server: `worker.kick` dengan status HTTP GitHub dan durasi saja.
+
+Klien memanggilnya tanpa menunggu (`fetch` `keepalive`, kegagalan diabaikan) setelah W1b `submit_text_capture` di S-21 dan setelah W2 `retry_capture` berhasil (tombol "Ulangi" di S-09 dan S-08). Jika pemicu gagal, struk tetap diproses run harian.
+
+Token: fine-grained PAT, hanya repo ini, izin *Actions: read and write*, kedaluwarsa 1 tahun (docs/09 §5.1, §5.5). `check:bundle` memastikan nama/nilai token dan endpoint dispatch tidak ada di `.next/static`.
+
+Mencoba lokal: tanpa env GitHub route mengembalikan 204 (`pnpm --filter @priceatlas/web dev`, login, tempel struk → Network tab: `POST /api/worker/kick` 204).
+
+### 5.4 Backup
+
+`backup.yml`: Minggu 19:23 UTC + manual. Langkah: `db/scripts/backup_dump.sh` (pg_dump 17) → `tar` → `age -r $BACKUP_AGE_RECIPIENT` → artifact `priceatlas-<waktu>.tar.age`, retensi 30 hari. Isi tar:
+
+| File | Isi |
+|---|---|
+| `public_app.dump` | `pg_dump -Fc --schema=public --schema=app` (skema + data) |
+| `auth.dump` | `pg_dump -Fc --data-only` `auth.users`, `auth.identities`, `supabase_migrations.schema_migrations` |
+
+Dua file karena `pg_dump` mengabaikan `--schema` jika ada `--table`. Log hanya jumlah tabel dan ukuran.
+
+Bulanan, unduh artifact terbaru ke PC (*Actions → backup → run → Artifacts*). Backup manual dari PC (tanpa GitHub):
+
+```bash
+umask 077; d=$(mktemp -d)
+read -rs -p 'BACKUP_DATABASE_URL: ' BACKUP_DATABASE_URL; export BACKUP_DATABASE_URL   # postgresql://postgres.<ref>:<sandi>@<host-pooler>:5432/postgres
+db/scripts/backup_dump.sh "$d"
+tar -C "$d" -cf - public_app.dump auth.dump | age -r age1… -o priceatlas-$(date -u +%Y-%m-%dT%H%MZ).tar.age
+rm -rf "$d"
+```
+
+### 5.5 Restore
+
+Target: database yang skemanya dibangun dari `supabase/migrations` pada **versi yang sama** dengan backup: Supabase lokal (`supabase start`, untuk latihan), proyek Supabase baru (`supabase db push`), atau mode A (`db/tests/build_db.sh`). Jangan pernah restore ke produksi yang sedang dipakai.
+
+```bash
+umask 077; d=$(mktemp -d)
+age -d -i ~/.config/priceatlas/backup.age priceatlas-<waktu>.tar.age | tar -C "$d" -xf -
+
+# Latihan ke Supabase lokal (checkout commit dengan migration terakhir yang sama dengan backup):
+supabase start
+db/scripts/backup_restore.sh "$d" postgresql://postgres:postgres@127.0.0.1:54322/postgres
+rm -rf "$d"
+```
+
+`backup_restore.sh` dalam **satu transaksi**: cek versi migration terakhir backup = target (`supabase_migrations.schema_migrations`; gagal → berhenti dan menyebut versi yang harus di-checkout) → `SET LOCAL session_replication_role = replica` (trigger turunan D-63, audit, penjaga status, dan FK tidak berjalan, sehingga ringkasan/audit dipulihkan apa adanya) → `TRUNCATE … CASCADE` semua tabel yang ada di backup (termasuk data referensi migration dan `seed.sql`) → data `auth` lalu `public` + `app` → commit. Gagal di tengah = tidak ada yang berubah. Akhirnya mencetak jumlah baris `auth.users`, `household`, `receipt`, `price_record`, `capture` untuk dibandingkan dengan produksi. Target `*.supabase.co`/`*.supabase.com` ditolak kecuali `ALLOW_REMOTE_RESTORE=1` (hanya untuk proyek baru yang kosong).
+
+Setelah restore ke proyek baru: buat ulang role `priceatlas_worker` (docs/09 §6.3; role tidak ada di backup), cek `select count(*) from cron.job` = 7, lalu arahkan env Vercel/GitHub ke proyek baru. Storage tidak ikut backup (foto mati, D-100); `capture_image` yang merujuk objek lama tampil sebagai "gambar tidak tersedia".
+
+Diuji di Tahap 7b terhadap PostgreSQL lokal mode A (docs/09 §16.2): data 33 tabel identik setelah restore, sequence identity sama, versi berbeda ditolak, target hosted ditolak, berkas rusak → rollback. Latihan terhadap Supabase lokal dijalankan pemilik proyek di go-live (docs/09 §13 langkah 6).
+
+### 5.6 Pembersih riwayat pg_cron
+
+Migration `20261031000200_cron_cleanup.sql` (F-184): jadwal `cron-cleanup` `'45 17 * * *'` menghapus `cron.job_run_details` yang `end_time` > 7 hari. Dilewati tanpa pg_cron (mode A); `--dev-scheduler` tidak perlu karena tanpa pg_cron tidak ada riwayat. Cek: `select count(*), min(start_time) from cron.job_run_details;` (min ≈ 7 hari lalu).

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Pengaman bundle klien (docs/07 §11.4, §11.6). Dijalankan setelah `next build`.
-#   1. .next/static tidak memuat nama/nilai kunci service role (D-61), kunci Anthropic, atau SDK
-#      Anthropic (Tanya, docs/08 §3.1). GAGAL jika ada.
+#   1. .next/static tidak memuat nama/nilai kunci service role (D-61), kunci Anthropic, SDK
+#      Anthropic (Tanya, docs/08 §3.1), atau token/endpoint dispatch GitHub (Tahap 7b B4,
+#      /api/worker/kick). GAGAL jika ada.
 #   2. Anggaran JS halaman utama (gzip, modul saja; polyfill noModule ditampilkan terpisah, D-91):
 #      PERINGATAN jika > 350 KiB; 200 KiB tetap target. Tidak pernah gagal.
 set -euo pipefail
@@ -27,6 +28,17 @@ if [[ -n "${ANTHROPIC_API_KEY:-}" ]] && grep -rIlF -- "$ANTHROPIC_API_KEY" .next
 fi
 [[ $afail -eq 0 ]] && echo "ok  : bundle klien tanpa kunci/SDK Anthropic"
 fail=$((fail | afail))
+
+# Pemicu worker (docs/09 §3.3, §5.1): token GitHub dan panggilan dispatch hanya di route server.
+gfail=0
+if grep -rIl -E 'GITHUB_DISPATCH_TOKEN|GITHUB_DISPATCH_REPO|github_pat_|api\.github\.com|/dispatches' .next/static; then
+  echo "GAGAL: bundle klien memuat nama token/endpoint dispatch GitHub"; gfail=1
+fi
+if [[ -n "${GITHUB_DISPATCH_TOKEN:-}" ]] && grep -rIlF -- "$GITHUB_DISPATCH_TOKEN" .next/static; then
+  echo "GAGAL: bundle klien memuat NILAI GITHUB_DISPATCH_TOKEN"; gfail=1
+fi
+[[ $gfail -eq 0 ]] && echo "ok  : bundle klien tanpa token/endpoint dispatch GitHub"
+fail=$((fail | gfail))
 
 limit=$((350 * 1024))
 target=$((200 * 1024))

@@ -114,6 +114,42 @@ describe('S-21 Tempel struk dari Gemini', () => {
     await waitFor(() => expect(nav.push).toHaveBeenCalledWith(`/unggahan/detail?id=${a.p_capture_id}`));
   });
 
+  it('setelah W1b berhasil: picu worker (POST /api/worker/kick) tanpa menunggu; gagal diabaikan', async () => {
+    let resolveKick: (r: Response) => void = () => undefined;
+    const fetchMock = vi.fn<typeof fetch>(() => new Promise<Response>((r) => (resolveKick = r)));
+    vi.stubGlobal('fetch', fetchMock);
+    state.rpcOverride = (fn, a) =>
+      fn === 'submit_text_capture'
+        ? { data: { capture_id: a.p_capture_id, status: 'uploaded', created: true }, error: null }
+        : undefined;
+    await renderWithProviders(<PasteScreen />);
+    paste(VALID);
+    await screen.findByTestId('paste-preview');
+    await userEvent.click(screen.getByRole('button', { name: /Kirim struk/ }));
+    // Navigasi ke S-09 tidak menunggu respons kick (fetch masih tertunda).
+    await waitFor(() => expect(nav.push).toHaveBeenCalledTimes(1));
+    const kicks = fetchMock.mock.calls.filter(([u]) => u === '/api/worker/kick');
+    expect(kicks).toHaveLength(1);
+    expect(kicks[0]![1]).toMatchObject({ method: 'POST', keepalive: true });
+    resolveKick(new Response(null, { status: 502 }));
+    vi.unstubAllGlobals();
+  });
+
+  it('W1b gagal → worker tidak dipicu', async () => {
+    const fetchMock = vi.fn<typeof fetch>(async () => new Response(null, { status: 204 }));
+    vi.stubGlobal('fetch', fetchMock);
+    state.rpcOverride = (fn) =>
+      fn === 'submit_text_capture' ? { data: null, error: { code: 'PT422', message: 'invalid_text' } } : undefined;
+    await renderWithProviders(<PasteScreen />);
+    paste(VALID);
+    await screen.findByTestId('paste-preview');
+    await userEvent.click(screen.getByRole('button', { name: /Kirim struk/ }));
+    await screen.findByRole('alert');
+    expect(fetchMock.mock.calls.filter(([u]) => u === '/api/worker/kick')).toHaveLength(0);
+    expect(nav.push).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
+  });
+
   it('total tidak cocok → peringatan, tetap bisa dikirim', async () => {
     await renderWithProviders(<PasteScreen />);
     paste(VALID.replace('88000', '99000'));
