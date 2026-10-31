@@ -5,9 +5,10 @@
 // "Cek sekarang" → S-10 (struk) / S-11 (label, screenshot); done → daftar ringkas + "Lihat struk"
 // (S-10 mode tersimpan) / "Lihat harga" (S-11);
 // failed → Ulangi (W2) / Foto ulang / Hapus. Gambar dihapus retensi (purged_at, D-32).
+// Capture teks (D-100): kartu "Teks tempelan" menggantikan foto; "Tempel ulang" → S-21.
 import type { CaptureDetail } from '@priceatlas/contracts';
 import { useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Camera, RefreshCw, Trash2 } from 'lucide-react';
+import { ArrowLeft, Camera, ClipboardPaste, RefreshCw, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
@@ -18,10 +19,11 @@ import { productHref } from '@/components/product/product-card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ERROR_COPY, fill, UPLOAD_DETAIL_COPY, UPLOADS_COPY } from '@/lib/copy/id';
+import { ERROR_COPY, fill, PASTE_COPY, UPLOAD_DETAIL_COPY, UPLOADS_COPY } from '@/lib/copy/id';
 import { findListedCapture, useCapture, useDeleteCapture, useRetryCapture, useSignedUrl } from '@/lib/data/captures';
 import { errorCopy, toAppError } from '@/lib/data/errors';
 import { useProductCards } from '@/lib/data/queries';
+import { PASTE_HREF, photoCaptureEnabled } from '@/lib/features';
 import { formatTime, formatTransactionDate, todayInZone } from '@/lib/format';
 import { productTitle } from '@/lib/format/product';
 import { useTimeZone } from '@/lib/hooks/use-time-zone';
@@ -114,6 +116,17 @@ function StatusTimeline({ d, tz }: { d: Detail; tz: string }) {
   );
 }
 
+function PastedSource({ purged }: { purged: boolean }) {
+  return (
+    <section aria-labelledby="judul-sumber" className="flex flex-col gap-2" data-testid="pasted-source">
+      <h2 id="judul-sumber" className="text-lg font-semibold">
+        {PASTE_COPY.sourceTitle}
+      </h2>
+      <p className="rounded-lg bg-muted p-4 text-base">{purged ? PASTE_COPY.sourcePurged : PASTE_COPY.sourceBody}</p>
+    </section>
+  );
+}
+
 function SavedList({ records, tz }: { records: Detail['saved_records']; tz: string }) {
   const cards = useProductCards([...new Set(records.map((r) => r.product_id))]);
   const byId = new Map((cards.data ?? []).map((c) => [c.product.id, c.product]));
@@ -151,12 +164,15 @@ function SavedList({ records, tz }: { records: Detail['saved_records']; tz: stri
   );
 }
 
-const retakeHref = (kind: Detail['capture']['kind']) =>
-  kind === 'receipt'
-    ? '/kamera?jenis=struk'
-    : kind === 'marketplace'
-      ? '/kamera?jenis=screenshot'
-      : '/kamera?jenis=label';
+/** Foto ulang, atau S-21 untuk capture teks / saat foto mati (D-100). */
+const retakeHref = (kind: Detail['capture']['kind'], text: boolean) =>
+  text || !photoCaptureEnabled()
+    ? PASTE_HREF
+    : kind === 'receipt'
+      ? '/kamera?jenis=struk'
+      : kind === 'marketplace'
+        ? '/kamera?jenis=screenshot'
+        : '/kamera?jenis=label';
 
 export function UploadDetailScreen() {
   const router = useRouter();
@@ -240,6 +256,7 @@ export function UploadDetailScreen() {
     </Button>
   );
 
+  const isText = c.source === 'text';
   let status: ReactNode;
   let actions: ReactNode = null;
   switch (c.status) {
@@ -292,6 +309,7 @@ export function UploadDetailScreen() {
       break;
     case 'failed': {
       const retake = captureErrorAction(c.error_code) === 'retake';
+      const pasteRetake = isText || !photoCaptureEnabled();
       status = (
         <div className="flex flex-col gap-1">
           <p className="text-lg font-semibold text-danger">{captureErrorText(c.error_code, c.error_message)}</p>
@@ -308,9 +326,9 @@ export function UploadDetailScreen() {
       );
       const retakeBtn = (
         <Button size="action" variant={retake ? 'primary' : 'secondary'} asChild>
-          <Link href={retakeHref(c.kind)}>
-            <Camera aria-hidden />
-            {UPLOAD_DETAIL_COPY.retake}
+          <Link href={retakeHref(c.kind, isText)}>
+            {pasteRetake ? <ClipboardPaste aria-hidden /> : <Camera aria-hidden />}
+            {pasteRetake ? PASTE_COPY.retake : UPLOAD_DETAIL_COPY.retake}
           </Link>
         </Button>
       );
@@ -344,7 +362,7 @@ export function UploadDetailScreen() {
           {actionError}
         </p>
       ) : null}
-      <ImageCarousel images={d.images} />
+      {isText ? <PastedSource purged={!c.pasted_text} /> : <ImageCarousel images={d.images} />}
       {c.status === 'done' && d.saved_records.length ? <SavedList records={d.saved_records} tz={tz} /> : null}
       <StatusTimeline d={d} tz={tz} />
       <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">

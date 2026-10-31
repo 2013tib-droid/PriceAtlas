@@ -13,6 +13,7 @@ import { fill, PRICE_COPY, SHELF_COPY } from '@/lib/copy/id';
 import { formatPercent, formatRupiah, formatSize, formatTransactionDate, formatUnitPrice } from '@/lib/format';
 import { displayUnitPrice } from '@/lib/format/unit';
 import { useTimeZone } from '@/lib/hooks/use-time-zone';
+import { photoCaptureEnabled } from '@/lib/features';
 import { checkShelfPrice, keypadInput } from '@/lib/shelf';
 import { cn } from '@/lib/utils';
 
@@ -159,12 +160,15 @@ export function ShelfCheckSheet({
             <Button variant="ghost" onClick={() => press('clear')} disabled={!digits}>
               {SHELF_COPY.clear}
             </Button>
-            <Button asChild variant="secondary" size="action">
-              <Link href="/kamera?jenis=label">
-                <Camera aria-hidden />
-                {SHELF_COPY.saveLabel}
-              </Link>
-            </Button>
+            {/* Foto label butuh pembacaan foto (D-100). */}
+            {photoCaptureEnabled() ? (
+              <Button asChild variant="secondary" size="action">
+                <Link href="/kamera?jenis=label">
+                  <Camera aria-hidden />
+                  {SHELF_COPY.saveLabel}
+                </Link>
+              </Button>
+            ) : null}
           </div>
         </div>
       </DrawerContent>

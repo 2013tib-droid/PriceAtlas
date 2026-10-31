@@ -245,8 +245,10 @@ export type Database = {
           household_id: string;
           id: string;
           kind: string;
+          pasted_text: string | null;
           processed_at: string | null;
           shopping_session_id: string | null;
+          source: string;
           status: string;
           store_id: string | null;
           uploaded_at: string;
@@ -261,8 +263,10 @@ export type Database = {
           household_id: string;
           id?: string;
           kind: string;
+          pasted_text?: string | null;
           processed_at?: string | null;
           shopping_session_id?: string | null;
+          source?: string;
           status?: string;
           store_id?: string | null;
           uploaded_at?: string;
@@ -276,8 +280,10 @@ export type Database = {
           household_id?: string;
           id?: string;
           kind?: string;
+          pasted_text?: string | null;
           processed_at?: string | null;
           shopping_session_id?: string | null;
+          source?: string;
           status?: string;
           store_id?: string | null;
           uploaded_at?: string;
@@ -1987,6 +1993,17 @@ export type Database = {
           p_kind: string;
           p_shopping_session_id?: string;
           p_store_id?: string;
+        };
+        Returns: Json;
+      };
+      submit_text_capture: {
+        Args: {
+          p_branch_id?: string;
+          p_capture_id: string;
+          p_kind: string;
+          p_shopping_session_id?: string;
+          p_store_id?: string;
+          p_text: string;
         };
         Returns: Json;
       };

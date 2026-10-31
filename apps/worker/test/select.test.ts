@@ -7,6 +7,7 @@ import { ClaudeAiMatcher } from '../src/extractors/ai-matcher.ts';
 import { OcrThenParseExtractor, type OcrEngine } from '../src/extractors/ocr-parse.ts';
 import { selectAi, verifyClaude, type AiEnv, type AiFactories } from '../src/extractors/select.ts';
 import { StubAiMatcher, StubExtractor } from '../src/extractors/stub.ts';
+import { NoAiMatcher, OffExtractor } from '../src/extractors/text.ts';
 import { VisionExtractor } from '../src/extractors/vision.ts';
 import { FakeClaude, apiError } from './claude-fake.ts';
 import { fixtures, logs } from './helpers.ts';
@@ -54,6 +55,24 @@ describe('default (CI/e2e)', () => {
     expect(() => pick({ EXTRACTOR: 'tesseract' })).toThrow(/EXTRACTOR tidak dikenal: tesseract/);
     expect(() => pick({ AI_MATCHER: 'gpt' })).toThrow(/AI_MATCHER tidak dikenal/);
     expect(() => pick({ EXTRACTOR: 'vision', WORKER_ANTHROPIC_API_KEY: KEY, EXTRACT_EFFORT_RECEIPT: 'max' })).toThrow(/EXTRACT_EFFORT_RECEIPT/);
+  });
+});
+
+describe('mode pribadi tanpa anggaran (D-100)', () => {
+  it('EXTRACTOR=off + AI_MATCHER=off → tanpa Claude, tanpa fixture, hanya mengklaim teks', async () => {
+    const { sel, made } = pick({ EXTRACTOR: 'off', AI_MATCHER: 'off' });
+    expect(sel.extractor).toBeInstanceOf(OffExtractor);
+    expect(sel.ai).toBeInstanceOf(NoAiMatcher);
+    expect(sel.sources).toEqual(['text']);
+    expect(made).toEqual({ claude: [], ocr: [], stub: 0 });
+    expect(sel.info).toMatchObject({ extractor: 'off', engine: 'off', model: null, matcher: 'off' });
+    await expect(sel.verify()).resolves.toBeUndefined();
+    await expect(sel.ai.match([{ key: 1, raw_text: 'MILO' }], { householdId: 'h', storeId: null, kind: 'receipt', imageSha256s: [] })).resolves.toEqual([]);
+  });
+
+  it('extractor lain tetap mengklaim semua sumber (teks selalu lewat TextExtractor)', () => {
+    expect(pick({}).sel.sources).toBeNull();
+    expect(pick({ EXTRACTOR: 'vision', WORKER_ANTHROPIC_API_KEY: KEY }).sel.sources).toBeNull();
   });
 });
 

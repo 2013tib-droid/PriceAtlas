@@ -2,7 +2,7 @@
 //   tsx src/main.ts [--dev-scheduler] [--once] [--worker-id <id>]
 // Env: DATABASE_URL, WORKER_DB_ROLE, STORAGE_BACKEND (supabase|local), LOCAL_STORAGE_DIR,
 //      NEXT_PUBLIC_SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (backend supabase),
-//      EXTRACTOR (stub | vision | ocr+parse), AI_MATCHER (stub | claude), WORKER_ANTHROPIC_API_KEY,
+//      EXTRACTOR (stub | vision | ocr+parse | off), AI_MATCHER (stub | claude | off), WORKER_ANTHROPIC_API_KEY,
 //      EXTRACT_MODEL, EXTRACT_EFFORT_RECEIPT, EXTRACT_EFFORT_OBSERVATION, OCR_ENGINE, GOOGLE_VISION_API_KEY
 //      (docs/08 §5.1; lihat src/extractors/select.ts), STUB_FIXTURES_DIR,
 //      STUB_FALLBACK_FIXTURE (khusus worker e2e: nama fixture untuk gambar tak dikenal, Q-82/Q-118),
@@ -47,7 +47,7 @@ export function buildDeps(args: { workerId: string }) {
   }
 
   const factories = defaultFactories(resolve(process.env.STUB_FIXTURES_DIR ?? DEFAULT_FIXTURES_DIR), process.env.STUB_FALLBACK_FIXTURE || undefined);
-  const { extractor, ai, verify, info } = selectAi(process.env, db, {
+  const { extractor, ai, sources, verify, info } = selectAi(process.env, db, {
     ...factories,
     stub: () => {
       const s = factories.stub();
@@ -55,7 +55,7 @@ export function buildDeps(args: { workerId: string }) {
       return s;
     },
   });
-  log('worker.ai', info);
+  log('worker.ai', { ...info, sources: sources?.join(',') ?? 'all' });
   const leaseSeconds = parsePositiveEnv('CAPTURE_LEASE_SECONDS', process.env.CAPTURE_LEASE_SECONDS, { integer: true }) ?? DEFAULT_LEASE_SECONDS;
   const budgetUsd = parsePositiveEnv('AI_DAILY_BUDGET_USD', process.env.AI_DAILY_BUDGET_USD);
   return {
@@ -63,6 +63,7 @@ export function buildDeps(args: { workerId: string }) {
     blob,
     extractor,
     ai,
+    sources,
     workerId: args.workerId,
     leaseSeconds,
     budget: new BudgetGate(db, budgetUsd),

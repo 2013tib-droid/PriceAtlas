@@ -1,6 +1,6 @@
 # Tahap 6a — Desain AI Integration (termasuk uji OCR D-16)
 
-> Status: **Disetujui (2026-10-27).** Semua usulan default §16 diterima → **D-92**. Dokumen ini tidak mengubah keputusan D-01 s/d D-91. **6b M0 selesai dan disetujui (2026-10-27):** §18. Q-122, Q-124, Q-125 → **D-93**; Q-120, Q-121, Q-123, Q-126 → **D-94** (semua usulan default). **6b M5 (Tanya) selesai dan disetujui (2026-10-28):** §19 (F-134–F-147); Q-127–Q-131 → **D-95** (semua usulan default). Uji live set emas menunggu pemilik proyek (Q-129). **6b M1-harness + M4 selesai dan disetujui (2026-10-30):** §20 (F-148–F-158); Q-132–Q-138 → **D-96** (semua usulan default); harness siap dijalankan pemilik proyek, keputusan D-16 menunggu foto + anotasi. **6b M2/M3 bagian tanpa D-16 selesai dan disetujui (2026-10-30):** §21 (F-159–F-166); Q-139–Q-142 → **D-97** (semua usulan default). **6b D-16 + M2 (2026-10-30):** §22 (F-167–F-174). Bagian B1–B3 (pemasangan extractor/matcher lewat env, uji §5.4, masa kalibrasi) selesai dan disetujui; Q-143–Q-146 → **D-98** (semua usulan default). Bagian A (Lampiran A, usulan keputusan D-16 → D-99) menunggu laporan agregat uji OCR.
+> Status: **Disetujui (2026-10-27).** Semua usulan default §16 diterima → **D-92**. Dokumen ini tidak mengubah keputusan D-01 s/d D-91. **6b M0 selesai dan disetujui (2026-10-27):** §18. Q-122, Q-124, Q-125 → **D-93**; Q-120, Q-121, Q-123, Q-126 → **D-94** (semua usulan default). **6b M5 (Tanya) selesai dan disetujui (2026-10-28):** §19 (F-134–F-147); Q-127–Q-131 → **D-95** (semua usulan default). Uji live set emas menunggu pemilik proyek (Q-129). **6b M1-harness + M4 selesai dan disetujui (2026-10-30):** §20 (F-148–F-158); Q-132–Q-138 → **D-96** (semua usulan default); harness siap dijalankan pemilik proyek, keputusan D-16 menunggu foto + anotasi. **6b M2/M3 bagian tanpa D-16 selesai dan disetujui (2026-10-30):** §21 (F-159–F-166); Q-139–Q-142 → **D-97** (semua usulan default). **6b D-16 + M2 (2026-10-30):** §22 (F-167–F-174). Bagian B1–B3 (pemasangan extractor/matcher lewat env, uji §5.4, masa kalibrasi) selesai dan disetujui; Q-143–Q-146 → **D-98** (semua usulan default). Bagian A (Lampiran A, usulan keputusan D-16 → D-99) menunggu laporan agregat uji OCR. **Mode pribadi tanpa anggaran AI (2026-10-31):** §23 (F-175–F-182); Q-147–Q-150 → **D-100** (semua usulan default): foto dimatikan lewat saklar, struk masuk sebagai JSON tempelan dari Gemini, diproses tanpa AI.
 > Rujukan: `PROJECT.md` §3, §5.4, §5.9, D-16, D-50, D-57, D-61, D-70, D-74, D-75, D-82, D-86–D-91; `docs/05-backend-design.md` §5–§7, §9; `docs/06-local-dev.md` §2; `docs/07-frontend-design.md` §6, §9, §13.
 
 ## Daftar Isi
@@ -28,7 +28,8 @@
 20. [Tahap 6b M1-harness + M4: hasil dan temuan baru (F-148 dst.)](#20-tahap-6b-m1-harness--m4-hasil-dan-temuan-baru-f-148-dst)
 21. [Tahap 6b M2/M3 bagian tanpa D-16: hasil dan temuan baru (F-159 dst.)](#21-tahap-6b-m2m3-bagian-tanpa-d-16-hasil-dan-temuan-baru-f-159-dst)
 22. [Tahap 6b D-16 + M2: hasil dan temuan baru (F-167 dst.)](#22-tahap-6b-d-16--m2-hasil-dan-temuan-baru-f-167-dst)
-23. [Lampiran A. Hasil uji OCR](#lampiran-a-hasil-uji-ocr)
+23. [Struk tempelan dari Gemini: mode pribadi tanpa anggaran AI (D-100)](#23-struk-tempelan-dari-gemini-mode-pribadi-tanpa-anggaran-ai-d-100)
+24. [Lampiran A. Hasil uji OCR](#lampiran-a-hasil-uji-ocr)
 
 ---
 
@@ -1269,6 +1270,67 @@ Keputusan D-16 (engine/model per jenis, effort, τ ekstraksi, Q-34/Q-110, Q-122)
 ### 22.6 Berikutnya
 
 Pemilik proyek: kirim `reports/<waktu>.agg.json` + `.md` dan ringkasan `.data/live/*.json` (agregat saja). Lalu Bagian A: Lampiran A, usulan keputusan D-16 sebagai pertanyaan (→ D-99), F-168 jika D-99 memilih per jenis, dan B4 (teks privasi) jika `ocr+parse` dipilih. Sesudah D-99 disetujui: worker mode B dengan foto asli (docs/06 §2.11) sebagai kriteria selesai M2, ubah `calibration_started_on`, mulai masa kalibrasi M3.
+
+---
+
+## 23. Struk tempelan dari Gemini: mode pribadi tanpa anggaran AI (D-100)
+
+> Status: **Selesai dan disetujui (2026-10-31; Q-147–Q-150 → D-100, semua usulan default).** Pemakai hanya pemilik proyek sampai ada anggaran. Foto struk/label/screenshot di app **dimatikan lewat saklar** (kode tetap ada dan diuji di CI), struk dibaca di Gemini di luar app, lalu JSON jawabannya ditempel di S-21. Uji OCR D-16 (Lampiran A) dan pemasangan extractor sungguhan ditunda; tidak ada keputusan lama yang dibatalkan.
+
+### 23.1 Alur
+
+```
+S-21 /tempel: "Salin prompt" (GEMINI_RECEIPT_PROMPT)
+  → user: Gemini + foto struk + prompt → salin jawaban → tempel
+  → parsePastedReceipt di klien (format salah ditolak, Q-149) + pratinjau
+  → W1b submit_text_capture (capture.source = 'text', pasted_text)
+  → worker claim → TextExtractor (tanpa AI, biaya 0)
+       parsePastedReceipt → pastedToLlm → convert.ts (cek §5.3) → ParsedReceipt
+  → matching tier 1–3 (SQL); tier 4 mati (AI_MATCHER=off)
+  → apply_extraction → S-10 konfirmasi struk (sama dengan foto)
+```
+
+Format tempelan = satu objek JSON `priceatlas-struk-v1` (`packages/contracts/src/paste.ts`): `store`, `date`, `time`, `total`, `subtotal`, `payment_method`, `lines[]` (`type`, `text`, `quantity`, `unit_price`, `amount`, `applies_to`, `barcode`, `member_discount`), `adjustments[]`, `member`. Tidak ada field PII. Parser toleran: pembungkus ```` ```json ````, kalimat di sekitar JSON, angka sebagai teks rupiah (`"Rp 15.900"`, `"12.345,00"`), kuantitas berkoma (`"0,512"`), field opsional tidak ditulis.
+
+### 23.2 Saklar dan env
+
+| Tempat | Env | Mode pribadi | Menyalakan lagi |
+|---|---|---|---|
+| Web (build-time) | `NEXT_PUBLIC_PHOTO_CAPTURE` | kosong/`off` (default) | `on` |
+| Worker | `EXTRACTOR` | `off`: hanya capture teks yang diklaim | `vision` / `ocr+parse` (D-16) |
+| Worker | `AI_MATCHER` | `off`: tanpa tier 4 | `claude` |
+| Web (server) | `ASK_ENGINE` | `off` ("Segera hadir") | `claude` + `ANTHROPIC_API_KEY` |
+
+Foto mati: S-06 hanya berisi "Tempel struk dari Gemini"; tombol tengah tab bar menjadi "Tambah struk"; `/kamera?jenis=struk|label|screenshot` menampilkan "Foto sedang dimatikan" + tautan ke S-21; scan barcode tetap ada (gratis, Q-148); tombol foto label di cek harga rak disembunyikan; pintasan manifest menuju `/tempel`; S-09 "Tempel ulang" untuk capture teks; privasi menyebut Gemini dan menyatakan foto tidak dikirim ke AI dari app. Capture teks diproses TextExtractor **apa pun** nilai `EXTRACTOR`, jadi worker stub di CI/e2e juga memprosesnya.
+
+### 23.3 Temuan (F-175 dst.)
+
+| ID | Temuan | Penanganan |
+|---|---|---|
+| F-175 | Teks bebas dari Gemini butuh AI lagi untuk dibaca (berbayar). | Format JSON tetap + parser deterministik; prompt ditulis di kontrak dan diuji bahwa contohnya lolos parser. |
+| F-176 | Gemini tidak memberi confidence. | Confidence tetap `PASTE_CONFIDENCE` = 0,90 per field/baris, lalu dibatasi cek konverter (total, aritmetika, diskon lepas, tanggal). Selama masa kalibrasi (τ = 1,01) semua tetap dikonfirmasi. |
+| F-177 | Tabel `capture` punya UPDATE untuk authenticated (RLS): `source`/`pasted_text` bisa diubah lewat REST. | Trigger `capture_source_guard`: `source` tetap, `pasted_text` hanya boleh dikosongkan (retensi). |
+| F-178 | `claim_next_capture` menulis engine/model extractor foto ke `processing_run`. | Parameter baru `p_text_engine`, `p_text_prompt_version` (run teks: `paste`, `paste-v1`, model null) dan `p_sources` (EXTRACTOR=off → `{text}`); pemanggil lama 1–4 argumen tetap jalan. |
+| F-179 | Teks tempelan bisa memuat PII jika Gemini tidak patuh. | Prompt melarang PII, format tidak punya field PII, `raw_ocr_text` ikut redaksi berkala (§9), `pasted_text` dikosongkan 12 bulan setelah unggah (Q-150, sama dengan gambar). Isi teks tidak pernah dicatat di log. |
+| F-180 | Kirim tempelan tanpa antrean offline. | S-21 butuh online (teks tetap di kolom); antrean offline untuk teks tidak dibuat (pemakai tunggal). |
+| F-181 | Duplikat: tidak ada hash gambar (U-10/D-71). | Sidik jari D-20 (toko + tanggal + total) di S-10 tetap berlaku. |
+| F-182 | e2e Playwright tidak menguji S-21 (CI membangun web dengan foto aktif untuk alur foto). | S-21 diuji di L5b (komponen + axe), W1b/claim/retensi di L1 (`72_text_capture.sql`), pipeline di L3 worker (`text-capture.test.ts`). e2e S-21 ditambahkan jika mode ini dipakai lama. |
+
+### 23.4 Perubahan
+
+* Migration `20261031000100_text_capture.sql`: `capture.source`, `capture.pasted_text` (≤ 50.000 karakter), trigger penjaga, W1b `submit_text_capture` (hanya struk, Q-147), `claim_next_capture` versi baru, R13 `list_captures` + `source`, `enqueue_retention` + `purge_text`. Snapshot, inventaris hak akses, `db-types` diperbarui.
+* Kontrak: `paste.ts` (skema, parser, `pastedTotalMatches`, `GEMINI_RECEIPT_PROMPT`), `SubmitTextCaptureInput`, `CaptureSourceSchema`; R13/R14 `source`/`pasted_text` opsional (cache lama, F-150).
+* Worker: `src/extractors/text.ts` (`TextExtractor`, `OffExtractor`, `NoAiMatcher`), `EXTRACTOR=off`, `AI_MATCHER=off`, cabang teks di `process-capture.ts`.
+* Web: `lib/features.ts`, S-21 `/tempel` (`features/paste/`), saklar di S-06, tab bar, `/kamera`, S-01/S-08 kosong, S-09, cek harga rak, manifest, privasi; `/tempel` di shell SW.
+
+### 23.5 Pertanyaan (dijawab → D-100)
+
+| ID | Pertanyaan | Keputusan |
+|---|---|---|
+| Q-147 | Cakupan tempel: struk saja, atau label dan screenshot juga? | **Struk dulu.** Label di toko lewat input manual yang sudah ada. |
+| Q-148 | Scan barcode (tanpa AI) tetap aktif? | **Ya.** |
+| Q-149 | Tempelan yang bukan JSON valid: tolak di layar atau kirim lalu gagal? | **Tolak di layar**; worker tetap memeriksa ulang (gagal `unsupported`). |
+| Q-150 | Teks tempelan dihapus otomatis seperti foto (12 bulan)? | **Ya.** |
 
 ---
 

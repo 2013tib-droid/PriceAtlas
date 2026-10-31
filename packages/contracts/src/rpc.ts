@@ -171,10 +171,15 @@ export const CaptureStatusSchema = z.enum(['uploaded', 'processing', 'needs_conf
 /** capture.error_code (D-71). */
 export const CaptureErrorCodeSchema = z.enum(['blurry', 'not_a_receipt', 'unsupported', 'timeout', 'other']);
 
+export const CaptureSourceSchema = z.enum(['image', 'text']);
+export type CaptureSource = z.infer<typeof CaptureSourceSchema>;
+
 export const CaptureListItemSchema = z.looseObject({
   id: Uuid,
   kind: CaptureKindSchema,
   status: CaptureStatusSchema,
+  /** D-100: `text` = struk tempelan. Opsional untuk cache lama (F-150). */
+  source: CaptureSourceSchema.nullish(),
   store_name: z.string().nullable(),
   branch_name: z.string().nullable(),
   date: IsoDate,
@@ -202,6 +207,8 @@ export const CaptureDetailSchema = z.looseObject({
     captured_at: Timestamp.nullable(),
     error_message: z.string().nullable(),
     error_code: CaptureErrorCodeSchema.nullable(),
+    source: CaptureSourceSchema.nullish(),
+    pasted_text: z.string().nullish(),
   }),
   images: z.array(z.looseObject({
     position: Num, storage_path: z.string(), purged_at: Timestamp.nullable(), sha256: z.string(),
@@ -552,6 +559,16 @@ export const SubmitCaptureInput = z.object({
   p_captured_at: Timestamp.nullish(),
 });
 
+/** W1b struk tempelan dari Gemini (D-100): teks apa adanya, isi divalidasi parsePastedReceipt. Hanya struk (Q-147). */
+export const SubmitTextCaptureInput = z.object({
+  p_capture_id: Uuid,
+  p_kind: z.literal('receipt'),
+  p_text: z.string().min(1).max(50_000),
+  p_shopping_session_id: Uuid.nullish(),
+  p_store_id: Uuid.nullish(),
+  p_branch_id: Uuid.nullish(),
+});
+
 export const ConfirmReceiptInput = z.object({
   p_receipt_id: Uuid,
   p_lines: z.array(z.object({
@@ -664,7 +681,7 @@ export const RPC_NAMES = {
     'get_active_session', 'merge_product_preview', 'price_record_detail', 'get_my_programs',
   ],
   write: [
-    'submit_capture', 'retry_capture', 'delete_capture', 'confirm_receipt', 'confirm_capture_items',
+    'submit_capture', 'submit_text_capture', 'retry_capture', 'delete_capture', 'confirm_receipt', 'confirm_capture_items',
     'correct_price_record', 'correct_receipt_line', 'create_private_product', 'move_price_records', 'merge_product',
     'start_shopping_session', 'extend_shopping_session', 'end_shopping_session', 'set_share_prices_public',
     'share_existing_prices', 'set_program_membership', 'create_private_store', 'create_private_branch',
@@ -723,6 +740,7 @@ export const RPC_INPUTS = {
   price_record_detail: z.object({ p_id: Uuid }),
   get_my_programs: NoArgs,
   submit_capture: SubmitCaptureInput,
+  submit_text_capture: SubmitTextCaptureInput,
   retry_capture: CaptureIdInput,
   delete_capture: CaptureIdInput,
   confirm_receipt: ConfirmReceiptInput,

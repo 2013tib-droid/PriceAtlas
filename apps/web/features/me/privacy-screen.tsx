@@ -18,6 +18,7 @@ import { authErrorMessage, RESEND_COOLDOWN_SECONDS } from '@/lib/auth/otp-errors
 import { signOutAndClear, useAuth } from '@/lib/auth/session';
 import { AUTH_COPY, fill, GENERIC_COPY, SETTINGS_COPY } from '@/lib/copy/id';
 import { requestAccountDeletion } from '@/lib/data/settings';
+import { photoCaptureEnabled } from '@/lib/features';
 import { flashToast } from '@/lib/flash';
 import { useOnline } from '@/lib/hooks/use-online';
 import { useOutboxItems } from '@/lib/offline/outbox-context';
@@ -45,7 +46,17 @@ export function PrivacyScreen() {
           {C.aiTitle}
         </h2>
         <ul className="list-disc pl-5 text-base">
-          {C.ai.map((t) => (
+          {(photoCaptureEnabled() ? C.ai : [C.aiPhotoOff, ...C.ai.slice(1)]).map((t) => (
+            <li key={t}>{t}</li>
+          ))}
+        </ul>
+      </section>
+      <section aria-labelledby="struk-gemini" className="flex flex-col gap-1">
+        <h2 id="struk-gemini" className="text-base font-semibold">
+          {C.pasteTitle}
+        </h2>
+        <ul className="list-disc pl-5 text-base">
+          {C.paste.map((t) => (
             <li key={t}>{t}</li>
           ))}
         </ul>

@@ -1,10 +1,11 @@
 'use client';
 // Tab bar: 4 tab + tombol kamera di tengah (U-01, D-47), banner sesi di atasnya (U-13). Slug Indonesia
 // (D-79).
-import { Camera, Search, ShoppingBasket, Upload, User } from 'lucide-react';
+import { Camera, ClipboardPaste, Search, ShoppingBasket, Upload, User } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { APP_COPY } from '@/lib/copy/id';
+import { APP_COPY, PASTE_COPY } from '@/lib/copy/id';
+import { photoCaptureEnabled } from '@/lib/features';
 import { cn } from '@/lib/utils';
 import { useNeedsCheckCount } from '@/lib/data/queries';
 import { fill } from '@/lib/copy/id';
@@ -74,10 +75,14 @@ export function TabBar() {
             <button
               type="button"
               onClick={photo.open}
-              aria-label={APP_COPY.cameraLabel}
+              aria-label={photoCaptureEnabled() ? APP_COPY.cameraLabel : PASTE_COPY.cameraLabel}
               className="flex size-14 -translate-y-3 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md group-has-[[data-session-banner]]:translate-y-0"
             >
-              <Camera aria-hidden className="size-7" />
+              {photoCaptureEnabled() ? (
+                <Camera aria-hidden className="size-7" />
+              ) : (
+                <ClipboardPaste aria-hidden className="size-7" />
+              )}
             </button>
           </li>
           {right.map((t) => (

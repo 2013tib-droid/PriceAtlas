@@ -59,6 +59,7 @@ const { PrivacyScreen } = await import('@/features/me/privacy-screen');
 const { WelcomeScreen } = await import('@/features/onboarding/welcome-screen');
 const { MemberStepScreen } = await import('@/features/onboarding/member-step-screen');
 const { AskScreen } = await import('@/features/ask/ask-screen');
+const { PasteScreen } = await import('@/features/paste/paste-screen');
 const { SignInScreen } = await import('@/features/auth/sign-in-screen');
 
 installDomPolyfills();
@@ -168,6 +169,9 @@ describe('axe: tanpa pelanggaran serious/critical (§10.1)', () => {
   it('S-20 Tanya', async () => {
     // Tanpa ?q= (dengan q, S-20 langsung mengirim; keadaan berisi jawaban diaudit di test/m8).
     await audit('/tanya', '', <AskScreen />);
+  });
+  it('S-21 Tempel struk (D-100)', async () => {
+    await audit('/tempel', '', <PasteScreen />);
   });
 
   it('dialog terbuka (Keluar dengan konfirmasi) tetap lolos', async () => {

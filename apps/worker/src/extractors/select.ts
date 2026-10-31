@@ -1,7 +1,8 @@
 // Pemilihan extractor dan matcher tier 4 dari env (docs/08 §5.1, 6b M2). Dipisah dari main.ts supaya
 // bisa diuji tanpa database/jaringan: klien Claude dan OCR dibuat lewat factory yang bisa diganti.
-//   EXTRACTOR=stub | vision | ocr+parse        default stub (CI/e2e)
-//   AI_MATCHER=stub | claude                   default stub (CI/e2e)
+//   EXTRACTOR=stub | vision | ocr+parse | off  default stub (CI/e2e). off (D-100): foto tidak diklaim,
+//                                              hanya struk tempelan (TextExtractor, selalu aktif, tanpa AI)
+//   AI_MATCHER=stub | claude | off             default stub (CI/e2e). off: tanpa tier 4 (D-100)
 //   WORKER_ANTHROPIC_API_KEY                   kunci worker, wajib jika extractor ≠ stub atau matcher claude.
 //                                              ANTHROPIC_API_KEY (kunci web) sengaja tidak dibaca (F-167).
 //   EXTRACT_MODEL                              default claude-opus-5-5; harus ada di tabel harga (F-169)
@@ -15,16 +16,18 @@ import { log } from '../log.ts';
 import { createClaudeClient, type ClaudeClient, type Effort } from '../ai/claude.ts';
 import { priceOf } from '../ai/pricing.ts';
 import type { Db } from '../db.ts';
+import type { CaptureSource } from '../pipeline/process-capture.ts';
 import type { AiMatcher, CaptureExtractor } from '../pipeline/types.ts';
 import { ClaudeAiMatcher } from './ai-matcher.ts';
 import { GoogleVisionOcr } from './ocr/google-vision.ts';
 import { OcrThenParseExtractor, type OcrEngine } from './ocr-parse.ts';
 import { FixtureRegistry, StubAiMatcher, StubExtractor, fallbackFixture, type StubFixture } from './stub.ts';
+import { NoAiMatcher, OffExtractor } from './text.ts';
 import { VisionExtractor } from './vision.ts';
 
 export const DEFAULT_EXTRACT_MODEL = 'claude-opus-5-5';
-export const EXTRACTOR_KINDS = ['stub', 'vision', 'ocr+parse'] as const;
-export const MATCHER_KINDS = ['stub', 'claude'] as const;
+export const EXTRACTOR_KINDS = ['stub', 'vision', 'ocr+parse', 'off'] as const;
+export const MATCHER_KINDS = ['stub', 'claude', 'off'] as const;
 const EFFORTS: readonly Effort[] = ['low', 'medium', 'high'];
 
 export type AiEnv = Record<string, string | undefined>;
@@ -42,6 +45,8 @@ export interface AiFactories {
 export interface AiSelection {
   extractor: CaptureExtractor;
   ai: AiMatcher;
+  /** Sumber capture yang diklaim; null = semua. EXTRACTOR=off → hanya teks (D-100). */
+  sources: CaptureSource[] | null;
   /** Cek kunci + model saat start (hanya jika Claude dipakai). Kunci/model salah → throw. */
   verify(): Promise<void>;
   /** Untuk log start (tanpa kunci). */
@@ -73,7 +78,7 @@ function oneOf<T extends string>(name: string, value: string | undefined, allowe
 export function selectAi(env: AiEnv, db: Db, f: AiFactories): AiSelection {
   const kind = oneOf('EXTRACTOR', env.EXTRACTOR, EXTRACTOR_KINDS, 'stub');
   const matcherKind = oneOf('AI_MATCHER', env.AI_MATCHER, MATCHER_KINDS, 'stub');
-  const needsClaude = kind !== 'stub' || matcherKind === 'claude';
+  const needsClaude = kind === 'vision' || kind === 'ocr+parse' || matcherKind === 'claude';
 
   const model = env.EXTRACT_MODEL?.trim() || DEFAULT_EXTRACT_MODEL;
   const effortReceipt = oneOf('EXTRACT_EFFORT_RECEIPT', env.EXTRACT_EFFORT_RECEIPT, EFFORTS, 'medium');
@@ -96,15 +101,22 @@ export function selectAi(env: AiEnv, db: Db, f: AiFactories): AiSelection {
   let extractor: CaptureExtractor;
   if (kind === 'vision') extractor = new VisionExtractor(client!, cfg);
   else if (kind === 'ocr+parse') extractor = new OcrThenParseExtractor(client!, f.ocr(env.OCR_ENGINE?.trim() || 'google-vision', env), cfg);
+  else if (kind === 'off') extractor = new OffExtractor();
   else extractor = new StubExtractor(stub!.fixtures, stub!.fallback);
 
   // Matcher tier 4 memakai model ekstraksi (§7.3), effort low.
-  const ai: AiMatcher = matcherKind === 'claude' ? new ClaudeAiMatcher(db, client!, { model }) : new StubAiMatcher(stub!.fixtures, stub!.fallback);
+  const ai: AiMatcher =
+    matcherKind === 'claude'
+      ? new ClaudeAiMatcher(db, client!, { model })
+      : matcherKind === 'off'
+        ? new NoAiMatcher()
+        : new StubAiMatcher(stub!.fixtures, stub!.fallback);
 
-  const real = kind !== 'stub';
+  const real = kind === 'vision' || kind === 'ocr+parse';
   return {
     extractor,
     ai,
+    sources: kind === 'off' ? ['text'] : null,
     verify: () => (client ? verifyClaude(client, model) : Promise.resolve()),
     info: {
       extractor: kind,

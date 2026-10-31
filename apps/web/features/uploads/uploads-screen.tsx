@@ -4,7 +4,7 @@
 // 5 dtk hanya jika ada uploaded/processing dan tab terlihat (D-61, P-15). Antrean > 1 jam → teks
 // "buka app untuk mengunggah" (§5.8); antrean > 50 MB → peringatan (D-81).
 import type { CaptureListItem } from '@priceatlas/contracts';
-import { Camera } from 'lucide-react';
+import { Camera, ClipboardPaste } from 'lucide-react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { usePhotoSheet } from '@/components/app/photo-sheet';
@@ -12,7 +12,8 @@ import { EmptyState, QueryState } from '@/components/app/screen-state';
 import { Button } from '@/components/ui/button';
 import { Segmented } from '@/components/ui/segmented';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CAMERA_COPY, fill, UPLOADS_COPY } from '@/lib/copy/id';
+import { CAMERA_COPY, fill, PASTE_COPY, UPLOADS_COPY } from '@/lib/copy/id';
+import { photoCaptureEnabled } from '@/lib/features';
 import { useCaptures, type CaptureKind } from '@/lib/data/captures';
 import { formatBytes } from '@/lib/format';
 import { useNow } from '@/lib/hooks/use-now';
@@ -83,8 +84,8 @@ export function UploadsScreen() {
       action={
         kind ? undefined : (
           <Button onClick={photo.open}>
-            <Camera aria-hidden />
-            {UPLOADS_COPY.emptyAction}
+            {photoCaptureEnabled() ? <Camera aria-hidden /> : <ClipboardPaste aria-hidden />}
+            {photoCaptureEnabled() ? UPLOADS_COPY.emptyAction : PASTE_COPY.goPaste}
           </Button>
         )
       }

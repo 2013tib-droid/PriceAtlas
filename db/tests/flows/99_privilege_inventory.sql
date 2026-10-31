@@ -131,6 +131,7 @@ insert into test.privilege_whitelist values
   ('authenticated', 'function', 'public.share_existing_prices()', 'EXECUTE'),
   ('authenticated', 'function', 'public.start_shopping_session(p_session_id uuid, p_branch_id uuid)', 'EXECUTE'),
   ('authenticated', 'function', 'public.submit_capture(p_capture_id uuid, p_kind text, p_images jsonb, p_shopping_session_id uuid, p_store_id uuid, p_branch_id uuid, p_captured_at timestamp with time zone)', 'EXECUTE'),
+  ('authenticated', 'function', 'public.submit_text_capture(p_capture_id uuid, p_kind text, p_text text, p_shopping_session_id uuid, p_store_id uuid, p_branch_id uuid)', 'EXECUTE'),
   ('authenticated', 'function', 'public.update_capture_item(p_item_id uuid, p_patch jsonb, p_expected_updated_at timestamp with time zone)', 'EXECUTE'),
   ('authenticated', 'function', 'public.where_cheaper(p_product_id uuid, p_group_id uuid, p_window_days integer)', 'EXECUTE'),
   ('authenticated', 'table', 'public.audit_log', 'SELECT'),

@@ -9,7 +9,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
-import { DUPLICATE_COPY, fill, UPLOADS_COPY } from '@/lib/copy/id';
+import { DUPLICATE_COPY, fill, PASTE_COPY, UPLOADS_COPY } from '@/lib/copy/id';
 import { useRetryCapture } from '@/lib/data/captures';
 import { errorCopy } from '@/lib/data/errors';
 import type { Outbox } from '@/lib/offline/outbox';
@@ -42,7 +42,10 @@ export function CaptureRow({ c, timeZone }: { c: CaptureListItem; timeZone: stri
       >
         <KindChip kind={c.kind} />
         <span className="flex min-w-0 flex-1 flex-col">
-          <span className="truncate text-sm">{title}</span>
+          <span className="truncate text-sm">
+            {title}
+            {c.source === 'text' ? <span className="text-muted-foreground"> · {PASTE_COPY.sourceBadge}</span> : null}
+          </span>
           <span className={c.status === 'failed' ? 'text-sm text-danger' : 'text-sm font-medium'}>{status}</span>
         </span>
         {c.status !== 'failed' ? <ChevronRight aria-hidden className="size-5 shrink-0" /> : null}

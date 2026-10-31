@@ -8,6 +8,7 @@ export const SHELL_ROUTES = [
   '/unggahan',
   '/unggahan/detail',
   '/kamera',
+  '/tempel',
   '/belanja',
   '/saya',
   '/selamat-datang',

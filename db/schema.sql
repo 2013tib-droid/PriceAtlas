@@ -664,6 +664,24 @@ CREATE FUNCTION app.capture_round_runs(p_capture_id uuid) RETURNS TABLE(n intege
 $$;
 
 --
+-- Name: capture_source_guard(); Type: FUNCTION; Schema: app; Owner: -
+--
+
+CREATE FUNCTION app.capture_source_guard() RETURNS trigger
+    LANGUAGE plpgsql
+    SET search_path TO ''
+    AS $$
+begin
+  if new.source is distinct from old.source then
+    perform app.err('INVALID_INPUT', jsonb_build_object('reason', 'source_immutable'));
+  end if;
+  if new.pasted_text is distinct from old.pasted_text and new.pasted_text is not null then
+    perform app.err('INVALID_INPUT', jsonb_build_object('reason', 'pasted_text_immutable'));
+  end if;
+  return new;
+end $$;
+
+--
 -- Name: capture_status_guard(); Type: FUNCTION; Schema: app; Owner: -
 --
 
@@ -773,10 +791,10 @@ begin
 end $$;
 
 --
--- Name: claim_next_capture(text, text, text, text); Type: FUNCTION; Schema: app; Owner: -
+-- Name: claim_next_capture(text, text, text, text, text[], text, text); Type: FUNCTION; Schema: app; Owner: -
 --
 
-CREATE FUNCTION app.claim_next_capture(p_worker text, p_engine text DEFAULT NULL::text, p_model text DEFAULT NULL::text, p_prompt_version text DEFAULT NULL::text) RETURNS TABLE(capture_id uuid, run_id uuid, kind text, household_id uuid, attempt integer, store_id uuid, branch_id uuid, shopping_session_id uuid, uploaded_at timestamp with time zone, captured_at timestamp with time zone, images jsonb)
+CREATE FUNCTION app.claim_next_capture(p_worker text, p_engine text DEFAULT NULL::text, p_model text DEFAULT NULL::text, p_prompt_version text DEFAULT NULL::text, p_sources text[] DEFAULT NULL::text[], p_text_engine text DEFAULT NULL::text, p_text_prompt_version text DEFAULT NULL::text) RETURNS TABLE(capture_id uuid, run_id uuid, kind text, household_id uuid, attempt integer, store_id uuid, branch_id uuid, shopping_session_id uuid, uploaded_at timestamp with time zone, captured_at timestamp with time zone, images jsonb, source text, pasted_text text)
     LANGUAGE plpgsql SECURITY DEFINER
     SET search_path TO ''
     AS $$
@@ -785,11 +803,13 @@ declare
   v_c       public.capture;
   v_round   record;
   v_run     uuid;
+  v_text    boolean;
 begin
   select c.* into v_c
     from public.capture c
     cross join lateral app.capture_round_runs(c.id) rr
    where c.status = 'uploaded'
+     and (p_sources is null or c.source = any (p_sources))
      and (rr.n = 0
           or rr.last_finished <= now() - make_interval(secs =>
                (v_backoff ->> (least(rr.n, jsonb_array_length(v_backoff)) - 1))::integer))
@@ -800,15 +820,21 @@ begin
     return;
   end if;
   select * into v_round from app.capture_round_runs(v_c.id);
+  v_text := v_c.source = 'text';
 
   update public.capture set status = 'processing', error_message = null, error_code = null where id = v_c.id;
   insert into public.processing_run (capture_id, household_id, status, ocr_engine, ai_model, prompt_version)
-  values (v_c.id, v_c.household_id, 'running', p_engine, p_model, coalesce(p_prompt_version, p_worker))
+  values (v_c.id, v_c.household_id, 'running',
+          case when v_text then coalesce(p_text_engine, p_engine) else p_engine end,
+          case when v_text and p_text_engine is not null then null else p_model end,
+          case when v_text then coalesce(p_text_prompt_version, p_prompt_version, p_worker)
+               else coalesce(p_prompt_version, p_worker) end)
   returning id into v_run;
 
   capture_id := v_c.id; run_id := v_run; kind := v_c.kind; household_id := v_c.household_id;
   attempt := v_round.n + 1; store_id := v_c.store_id; branch_id := v_c.branch_id;
   shopping_session_id := v_c.shopping_session_id; uploaded_at := v_c.uploaded_at; captured_at := v_c.captured_at;
+  source := v_c.source; pasted_text := v_c.pasted_text;
   select coalesce(jsonb_agg(jsonb_build_object('position', i.position, 'storage_path', i.storage_path,
                                                'sha256', i.sha256, 'byte_size', i.byte_size) order by i.position), '[]')
     into images from public.capture_image i where i.capture_id = v_c.id;
@@ -1042,6 +1068,7 @@ declare
   v_img  integer := 0;
   v_ocr  integer := 0;
   v_hh   integer := 0;
+  v_txt  integer := 0;
   v_ids  jsonb;
 begin
   -- Gambar jatuh tempo (batch 500 per job), belum ada di job aktif.
@@ -1056,6 +1083,12 @@ begin
     insert into app.job (kind, payload) values ('purge_images', jsonb_build_object('image_ids', v_ids));
     v_img := v_img + jsonb_array_length(v_ids);
   end loop;
+
+  -- Teks tempelan jatuh tempo (D-100, Q-150): sama dengan umur gambar (D-32).
+  update public.capture c set pasted_text = null
+   where c.source = 'text' and c.pasted_text is not null
+     and c.uploaded_at < now() - interval '12 months';
+  get diagnostics v_txt = row_count;
 
   -- Teks OCR mentah: N hari setelah capture final (done/failed).
   loop
@@ -1086,7 +1119,7 @@ begin
     returning 1)
   select count(*) into v_hh from ins;
 
-  return jsonb_build_object('purge_images', v_img, 'redact_ocr', v_ocr, 'delete_household', v_hh);
+  return jsonb_build_object('purge_images', v_img, 'redact_ocr', v_ocr, 'delete_household', v_hh, 'purge_text', v_txt);
 end $$;
 
 --
@@ -3572,7 +3605,7 @@ CREATE FUNCTION public.list_captures(p_limit integer DEFAULT 30, p_before timest
     SET search_path TO ''
     AS $$
   select jsonb_build_object(
-           'id', c.id, 'kind', c.kind, 'status', c.status,
+           'id', c.id, 'kind', c.kind, 'status', c.status, 'source', c.source,
            'store_name', (select s.name from public.store s where s.id = coalesce(r.store_id, c.store_id, ci.store_id)),
            'branch_name', (select b.name from public.branch b where b.id = coalesce(r.branch_id, c.branch_id, ci.branch_id)),
            'date', coalesce(r.transaction_date, ci.transaction_date,
@@ -4445,6 +4478,60 @@ begin
 end $_$;
 
 --
+-- Name: submit_text_capture(uuid, text, text, uuid, uuid, uuid); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.submit_text_capture(p_capture_id uuid, p_kind text, p_text text, p_shopping_session_id uuid DEFAULT NULL::uuid, p_store_id uuid DEFAULT NULL::uuid, p_branch_id uuid DEFAULT NULL::uuid) RETURNS jsonb
+    LANGUAGE plpgsql
+    SET search_path TO ''
+    AS $$
+declare
+  v_h      public.household;
+  v_c      public.capture;
+  v_store  uuid := p_store_id;
+  v_branch uuid := p_branch_id;
+begin
+  -- 1. Idempoten (D-59).
+  select * into v_c from public.capture where id = p_capture_id;
+  if v_c.id is not null then
+    return jsonb_build_object('capture_id', v_c.id, 'status', v_c.status, 'created', false);
+  end if;
+
+  v_h := app.require_household();
+  if p_kind is distinct from 'receipt' then                         -- Q-147: struk dulu
+    perform app.err('INVALID_INPUT', jsonb_build_object('reason', 'kind'));
+  end if;
+  if p_text is null or btrim(p_text) = '' then
+    perform app.err('INVALID_INPUT', jsonb_build_object('reason', 'text_required'));
+  end if;
+  if char_length(p_text) > 50000 then
+    perform app.err('INVALID_INPUT', jsonb_build_object('reason', 'text_too_long'));
+  end if;
+
+  -- 2. Sesi (sama dengan W1).
+  if p_shopping_session_id is not null then
+    select b.store_id, b.id into v_store, v_branch
+      from public.shopping_session s join public.branch b on b.id = s.branch_id
+     where s.id = p_shopping_session_id;
+    if not found then
+      perform app.err('NOT_FOUND', jsonb_build_object('shopping_session_id', p_shopping_session_id));
+    end if;
+    if p_store_id is not null then
+      v_store := p_store_id; v_branch := p_branch_id;
+    end if;
+  end if;
+
+  insert into public.capture (id, household_id, kind, status, shopping_session_id, store_id, branch_id,
+                              uploaded_by, source, pasted_text)
+  values (p_capture_id, v_h.id, p_kind, 'uploaded', p_shopping_session_id, v_store, v_branch,
+          (select auth.uid()), 'text', p_text)
+  returning * into v_c;
+
+  perform pg_notify('capture_uploaded', p_capture_id::text);
+  return jsonb_build_object('capture_id', v_c.id, 'status', v_c.status, 'created', true);
+end $$;
+
+--
 -- Name: update_capture_item(uuid, jsonb, timestamp with time zone); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -4737,11 +4824,28 @@ CREATE TABLE public.capture (
     error_message text,
     error_code text,
     captured_at timestamp with time zone,
+    source text DEFAULT 'image'::text NOT NULL,
+    pasted_text text,
     CONSTRAINT capture_branch_needs_store CHECK (((store_id IS NOT NULL) OR (branch_id IS NULL))),
     CONSTRAINT capture_error_code_check CHECK ((error_code = ANY (ARRAY['blurry'::text, 'not_a_receipt'::text, 'unsupported'::text, 'timeout'::text, 'other'::text]))),
     CONSTRAINT capture_kind_check CHECK ((kind = ANY (ARRAY['receipt'::text, 'price_label'::text, 'marketplace'::text]))),
+    CONSTRAINT capture_pasted_text_check CHECK ((char_length(pasted_text) <= 50000)),
+    CONSTRAINT capture_pasted_text_only_text CHECK (((source = 'text'::text) OR (pasted_text IS NULL))),
+    CONSTRAINT capture_source_check CHECK ((source = ANY (ARRAY['image'::text, 'text'::text]))),
     CONSTRAINT capture_status_check CHECK ((status = ANY (ARRAY['uploaded'::text, 'processing'::text, 'needs_confirmation'::text, 'done'::text, 'failed'::text])))
 );
+
+--
+-- Name: COLUMN capture.source; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.capture.source IS 'Asal capture (D-100): image = foto di bucket captures (capture_image), text = JSON tempelan dari Gemini (pasted_text).';
+
+--
+-- Name: COLUMN capture.pasted_text; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.capture.pasted_text IS 'Teks tempelan apa adanya (D-100). Dikosongkan 12 bulan setelah unggah (Q-150); tidak pernah dicatat di log.';
 
 --
 -- Name: capture_image; Type: TABLE; Schema: public; Owner: -
@@ -5703,6 +5807,12 @@ CREATE TRIGGER capture_item_touch BEFORE UPDATE ON public.capture_item FOR EACH 
 --
 
 CREATE TRIGGER capture_ref_visibility BEFORE INSERT OR UPDATE ON public.capture FOR EACH ROW EXECUTE FUNCTION app.enforce_ref_visibility('household_id', 'store_id:store', 'branch_id:branch');
+
+--
+-- Name: capture capture_source_guard; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER capture_source_guard BEFORE UPDATE OF source, pasted_text ON public.capture FOR EACH ROW EXECUTE FUNCTION app.capture_source_guard();
 
 --
 -- Name: capture capture_status_guard; Type: TRIGGER; Schema: public; Owner: -
@@ -7073,6 +7183,13 @@ REVOKE ALL ON FUNCTION app.capture_round_runs(p_capture_id uuid) FROM PUBLIC;
 GRANT ALL ON FUNCTION app.capture_round_runs(p_capture_id uuid) TO service_role;
 
 --
+-- Name: FUNCTION capture_source_guard(); Type: ACL; Schema: app; Owner: -
+--
+
+REVOKE ALL ON FUNCTION app.capture_source_guard() FROM PUBLIC;
+GRANT ALL ON FUNCTION app.capture_source_guard() TO service_role;
+
+--
 -- Name: FUNCTION capture_status_guard(); Type: ACL; Schema: app; Owner: -
 --
 
@@ -7108,11 +7225,11 @@ REVOKE ALL ON FUNCTION app.claim_job(p_kinds text[], p_lease_seconds integer) FR
 GRANT ALL ON FUNCTION app.claim_job(p_kinds text[], p_lease_seconds integer) TO service_role;
 
 --
--- Name: FUNCTION claim_next_capture(p_worker text, p_engine text, p_model text, p_prompt_version text); Type: ACL; Schema: app; Owner: -
+-- Name: FUNCTION claim_next_capture(p_worker text, p_engine text, p_model text, p_prompt_version text, p_sources text[], p_text_engine text, p_text_prompt_version text); Type: ACL; Schema: app; Owner: -
 --
 
-REVOKE ALL ON FUNCTION app.claim_next_capture(p_worker text, p_engine text, p_model text, p_prompt_version text) FROM PUBLIC;
-GRANT ALL ON FUNCTION app.claim_next_capture(p_worker text, p_engine text, p_model text, p_prompt_version text) TO service_role;
+REVOKE ALL ON FUNCTION app.claim_next_capture(p_worker text, p_engine text, p_model text, p_prompt_version text, p_sources text[], p_text_engine text, p_text_prompt_version text) FROM PUBLIC;
+GRANT ALL ON FUNCTION app.claim_next_capture(p_worker text, p_engine text, p_model text, p_prompt_version text, p_sources text[], p_text_engine text, p_text_prompt_version text) TO service_role;
 
 --
 -- Name: FUNCTION complete_job(p_job_id bigint, p_note text); Type: ACL; Schema: app; Owner: -
@@ -7999,6 +8116,14 @@ GRANT ALL ON FUNCTION public.start_shopping_session(p_session_id uuid, p_branch_
 REVOKE ALL ON FUNCTION public.submit_capture(p_capture_id uuid, p_kind text, p_images jsonb, p_shopping_session_id uuid, p_store_id uuid, p_branch_id uuid, p_captured_at timestamp with time zone) FROM PUBLIC;
 GRANT ALL ON FUNCTION public.submit_capture(p_capture_id uuid, p_kind text, p_images jsonb, p_shopping_session_id uuid, p_store_id uuid, p_branch_id uuid, p_captured_at timestamp with time zone) TO service_role;
 GRANT ALL ON FUNCTION public.submit_capture(p_capture_id uuid, p_kind text, p_images jsonb, p_shopping_session_id uuid, p_store_id uuid, p_branch_id uuid, p_captured_at timestamp with time zone) TO authenticated;
+
+--
+-- Name: FUNCTION submit_text_capture(p_capture_id uuid, p_kind text, p_text text, p_shopping_session_id uuid, p_store_id uuid, p_branch_id uuid); Type: ACL; Schema: public; Owner: -
+--
+
+REVOKE ALL ON FUNCTION public.submit_text_capture(p_capture_id uuid, p_kind text, p_text text, p_shopping_session_id uuid, p_store_id uuid, p_branch_id uuid) FROM PUBLIC;
+GRANT ALL ON FUNCTION public.submit_text_capture(p_capture_id uuid, p_kind text, p_text text, p_shopping_session_id uuid, p_store_id uuid, p_branch_id uuid) TO service_role;
+GRANT ALL ON FUNCTION public.submit_text_capture(p_capture_id uuid, p_kind text, p_text text, p_shopping_session_id uuid, p_store_id uuid, p_branch_id uuid) TO authenticated;
 
 --
 -- Name: FUNCTION update_capture_item(p_item_id uuid, p_patch jsonb, p_expected_updated_at timestamp with time zone); Type: ACL; Schema: public; Owner: -
